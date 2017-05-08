@@ -26,95 +26,22 @@ char ** getlefargv(char * argv[]);
 
 int main(int argc,  char * argv[])
 {
-//    for (int i = 0 ; i < argc ; i++) {
-//        cout << argv[i] << endl;
-//    }
-//
-//    lefrw lef ;
-//    lef.run(3, getlefargv(argv));
-    
-    
     lefrw lef ;
-    lef.run(3, getlefargv(argv));
-//
-//    cout << argc << endl;
-    
-    
-    
-    
-//    lefrw lef;
-//    a = new std::map<std::string,Via>;
-//    lef.run(argc, argv );
-//    Debugger db ;
-//    db.printAllLayerMsg(LayerMaps);
-//    db.printAllViaMsg(ViaMaps);
-//    
-//    db.printAllMacroMsg(MacroMaps);
-//    db.printAllLayerMsg(LayerMaps);
-//    db.printAllViaMsg(ViaMaps);
-        
+    char ** lefargv = getlefargv(argv) ;
+    lef.run(3, lefargv);
     
     
     
     
     
-//	string filepath = argv[1];
-//    Debugger db ;
-//    
-//    string FilePath = "/Users/Jeff/Desktop/tech.lef";
-////    string FilePath = "/Users/Jeff/Desktop/blocks.lef";
-//    TechlefParser Techlef(FilePath);
-//    
-//    Techlef.run();
-//    db.printLayerMsg("METAL1", Techlef.LayerMaps);
     
     
-//
-    
-//    BlocklefParser Blocklef("/Users/Jeff/Desktop/blocks.lef");
-//    Blocklef.run();
-//    db.printAllViaMsg(Techlef.ViaMaps);
-//    db.printAllMacroMsg(Blocklef.MacroMaps);
-    
-    
-    
-    
-    
-//    TechlefParser lef(FilePath);
-//    lef.run();
-    
-    
-//    printAllViaMsg(Techlef.VM);
-    
-    
-    //    unordered_multimap<string,string> mymm;
-    //    mymm.insert(std::make_pair("B1_02", "VDD_C"));
-    //    mymm.insert(std::make_pair("B1_02", "VDD_B"));
-    //    mymm.insert(std::make_pair("B1_01", "VDD_B"));
-    //    mymm.insert(std::make_pair("B1_01", "VDD_A"));
-    //
-    //
-    //
-    //    mymm.insert(std::make_pair("B1_01", "VDD_C"));
-    //    pair<unordered_multimap<string,string>::iterator, unordered_multimap<string,string>::iterator> ret ;
-    //    unordered_multimap<string,string>::iterator begin = mymm.begin() ;
-    //    unordered_multimap<string,string>::iterator end = mymm.end() ;
-    //    for (unordered_multimap<string,string>::iterator it = begin; it != end ; it++) {
-    //        cout << it->first << " " << it->second << endl;
-    //    }
-    
-    
-    
-    
-    
-    //    for (multimap<string,string>::iterator it = ret.first; it != ret.second; it++) {
-    //        cout << it->second << endl;
-    //    }
-    
-    
-    //system("~/Desktop/test.sh");
-    
-//    delete a;
+    //deletes an inner array
+    for(int i = 0; i < 3; ++i){
+        delete[] lefargv[i];
+    }
+    //delete pointer holding array of pointers;
+    delete[] lefargv;
     return 0;
 }
 string exec(const char* cmd)
