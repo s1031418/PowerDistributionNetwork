@@ -10,6 +10,7 @@
 #include <string>
 #include "lefrw.h"
 #include <stdlib.h>
+#include "defrw.h"
 #include <unordered_map>
 #include <map>
 #include <cstdio>
@@ -26,22 +27,23 @@ char ** getlefargv(char * argv[]);
 
 int main(int argc,  char * argv[])
 {
-    lefrw lef ;
-    char ** lefargv = getlefargv(argv) ;
-    lef.run(3, lefargv);
+//    lefrw lef ;
+//    char ** lefargv = getlefargv(argv) ;
+//    lef.run(3, lefargv);
+    defrw def ;
+    def.run(argc, argv);
     
     
     
     
     
     
-    
-    //deletes an inner array
-    for(int i = 0; i < 3; ++i){
-        delete[] lefargv[i];
-    }
-    //delete pointer holding array of pointers;
-    delete[] lefargv;
+//    //deletes an inner array
+//    for(int i = 0; i < 3; ++i){
+//        delete[] lefargv[i];
+//    }
+//    //delete pointer holding array of pointers;
+//    delete[] lefargv;
     return 0;
 }
 string exec(const char* cmd)

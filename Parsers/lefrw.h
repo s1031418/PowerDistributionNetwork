@@ -44,7 +44,7 @@ class lefrw {
 public:
     lefrw();
     ~lefrw();
-    int run(int , char ** );
+    int run(int argc, char ** argv);
     
     
     
