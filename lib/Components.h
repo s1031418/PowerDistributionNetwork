@@ -27,28 +27,28 @@ public:
     
     //Specifies the default routing width to use for all regular wiring on the layer.
     //    Type: Float
-    std::string WIDTH ;
+    double WIDTH ;
     
     
     //Specifies the maximum wire width, in microns, allowed on the layer.
     //Maximum wire width is defined as the smaller value of the width and height of the maximum enclosed rectangle.
     //For example, MAXWIDTH 10.0 specifies that the width of every wire on the layer must be less than or equal to 10.0 μm.
     //Type: Float
-    std::string MAXWIDTH;
+    double MAXWIDTH;
     
     
     
     
     // Specifies the default minimum spacing, in microns, allowed between two geometries on different nets.
     // Type: Float
-    std::string SPACING  ;
+    double SPACING  ;
     // Routing TYPE DEF:
     
     // PITCH DEF:Specifies the required routing pitch for the layer
     // Pitch is used to generate the routing grid (the DEF TRACKS).
     
     // PITCH_DISTANCE DEF:Specifies one pitch value that is used for both the x and y pitch.
-    std::string PITCH_DISTANCE  ;
+    double PITCH_DISTANCE  ;
     // Routing TYPE DEF:
     // OFF SET DEF:Specifies the offset for the routing grid from the design origin for the layer.
     // This value is used to align routing tracks with standard cell boundaries, which helps routers get good on-grid access to the cell pin shapes.
@@ -60,7 +60,7 @@ public:
     // Type: Float, specified in microns
     
     // OFFSET_DISTANCE DEF: Specifies the offset value that is used for the preferred direction routing tracks.
-    std::string OFFSET_DISTANCE  ;
+    double OFFSET_DISTANCE  ;
     //Specifies the preferred routing direction.
     //Automatic routing tools attempt to route in the preferred direction on a layer.
     //A typical case is to route horizontally on layers metal1 and metal3, and vertically on layer metal2.
@@ -69,14 +69,14 @@ public:
     // Routing TYPE DEF:
     // Specifies the resistance for a square of wire, in ohms per square.
     // The resistance of a wire can be defined as RPERSQU * wire length/wire width
-    std::string RESISTANCE_RPERSQ;
+    double RESISTANCE_RPERSQ;
 };
 
 class Point
 {
 public:
-    std::string x;
-    std::string y;
+    float x;
+    float y;
 };
 
 class InnerLayer {
@@ -91,7 +91,7 @@ public:
 class Via {
 public:
     std::string NAME ;
-    std::string RESISTANCE ;
+    double RESISTANCE ;
     std::map<std::string , InnerLayer> InnerMaps ; // Layer of Via Map
 };
 
@@ -109,6 +109,8 @@ class Pin
     
 public:
     std::string Name ;
+    std::string DIRECTION ;
+    std::string USE ; 
     std::map<std::string , InnerLayer> InnerMaps ;// Layer of Pin Map
 };
 class OBS // obstruction
@@ -121,11 +123,36 @@ public:
 class Macro {
     
 public:
+    double ORIGINX ;
+    double ORIGINY ;
     std::string Name ;
-    std::string Width ;
-    std::string Length ;
+    std::string CLASS ; 
+    double WIDTH ;
+    double LENGTH ;
     std::map<std::string,Pin> PinMaps ; // Pin Map
     OBS obs ;// Layer of obstruction Map
+};
+
+
+// the components of def is below
+class Nets {
+    
+public:
+    std::string NAME ;
+    std::string MACROTYPE ; // define in blocks.lef
+    
+    Point pt ;
+    std::string orient ;
+};
+
+
+// the components of initial_files
+class PowerPin {
+    
+    
+public:
+    
+    
 };
 
 

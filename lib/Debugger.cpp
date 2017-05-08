@@ -17,9 +17,12 @@ void Debugger::printAllMacroMsg( map<string,Macro> & MM )
 }
 void Debugger::printMacroMsg(string MacroName , map<string,Macro> & MM )
 {
+    cout << "Class:" << MM[MacroName].CLASS << endl; 
     cout << "Name:" << MM[MacroName].Name << endl;
-    cout << "Width:" << MM[MacroName].Width << endl;
-    cout << "Length:" << MM[MacroName].Length << endl;
+    cout << "OriginX:" << MM[MacroName].ORIGINX << endl;
+    cout << "OriginY:" << MM[MacroName].ORIGINY << endl;
+    cout << "Width:" << MM[MacroName].WIDTH << endl;
+    cout << "Length:" << MM[MacroName].LENGTH << endl;
     cout << "Pins:" << endl;
     printAllPinMsg(MM[MacroName].PinMaps);
     cout << "OBS" << endl;
@@ -58,6 +61,7 @@ void Debugger::printLayerMsg(string LayerName , map<string,Layer> & LM )
 {
     cout << "Name:"<< LM[LayerName].NAME << endl;
     cout << "TYPE:"<< LM[LayerName].TYPE << endl;
+    if(LM[LayerName].TYPE == "CUT") return ;
     cout << "WIDTH:"<< LM[LayerName].WIDTH << endl;
     cout << "MAXWIDTH:"<< LM[LayerName].MAXWIDTH << endl;
     cout << "SPACING:"<< LM[LayerName].SPACING << endl;

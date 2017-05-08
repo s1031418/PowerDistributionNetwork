@@ -1,25 +1,26 @@
 
 
 CXX = g++ 
-CXXFLAGS = -std=c++11
-OBJS = main.o Parsers/TechlefParser.o Parsers/Parsers.o lib/Debugger.o Parsers/BlocklefParser.o Parsers/DefParser.o
-
+CXXFLAGS = -std=c++11  -I Parsers -I include -I lib
+OBJS = main.o Parsers/Parsers.o lib/Debugger.o Parsers/lefrw.o
+STATICLIB = lib/liblef.a
 
 
 all:cadXX
 
 cadXX: $(OBJS)
-	$(CXX) $(CXXFLAGS) -o cadXX $(OBJS)
+	$(CXX) $(CXXFLAGS) -o cadXX.out $(OBJS) $(STATICLIB)
 
-main.o: main.cpp 
+main.o: main.cpp Parsers/lefrw.o
+#	$(CXX) -c $(PARSERPATH) $(INCLUDEPATH) main.cpp Parsers/lefrw.o
+lefrw.o:lefrw.cpp
+#	$(CXX) -c $(PARSERPATH) $(INCLUDEPATH) lefrw.cpp 
 Parser.o: Parsers/Parsers.cpp
-TechlefParser.o: Parsers/TechlefParser.cpp 
-BlocklefParser.o:Parsers/BlocklefParser.cpp
 Debugger.o:lib/Debugger.cpp
-DefParser.o:Parsers/DefParser.cpp
+
 .PHONY : clean
 clean:
-	-rm cadXX $(OBJS)
+	-rm cadXX.out $(OBJS)
 
 
 
