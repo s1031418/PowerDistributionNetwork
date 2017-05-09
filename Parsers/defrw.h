@@ -19,6 +19,15 @@
 #endif /* not WIN32 */
 #include "defrReader.hpp"
 #include "defiAlias.hpp"
+#include "Components.h"
+extern double UNITS_DISTANCE ;
+extern Diearea DIEAREA ;
+// key:BlockName , value: Components
+extern std::map<std::string,Components> ComponentMaps ;
+// key:PinName , value:Pin
+extern std::map<std::string,Pin> PinMaps;
+// key:SourceName , value SpectialNet
+extern std::map<std::string,SpecialNets> SpecialNetsMaps ;
 
 
 class defrw {

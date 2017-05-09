@@ -25,7 +25,8 @@ string exec(const char* cmd);
 char ** getlefargv(char * argv[]);
 char ** getdefargv(char * argv[]);
 void freeargv(char * lefargv[] , char * defargv[]);
-
+void runlef(char * argv[]);
+void rundef(char * argv[]);
 // Ex. Team1.exe case1.v case1_input.def tech.lef blocks.lef initial_files
 
 int main(int argc,  char * argv[])
@@ -37,15 +38,33 @@ int main(int argc,  char * argv[])
     // get lef、def argument value
     char ** lefargv = getlefargv(argv) ;
     char ** defargv = getdefargv(argv) ;
-    // acivate parser
+//    // acivate parser
     lef.run(3, lefargv);
     def.run(2, defargv);
     initialfile.run();
-    // free memory
-    freeargv(lefargv,defargv);
     
     Debugger db ;
+    cout << "tech lef file" << endl;
+    db.printAllLayerMsg(LayerMaps);
+    db.printAllViaMsg(ViaMaps);
+    cout << endl;
+    cout << "Block lef file" << endl;
+    db.printAllMacroMsg(MacroMaps);
+    cout << endl ;
+    cout << "Def file" << endl;
+    db.printDieArea(DIEAREA);
+    db.printAllComponentMsg(ComponentMaps);
+    db.printAllPinMsg(PinMaps);
+    db.printAllSpecialNetMsg(SpecialNetsMaps);
     
+    cout << "initial File" << endl ;
+    db.printAllCurrentMsg(CurrnetMaps);
+    db.printAllVoltageMsg(VoltageMaps);
+    db.printAllConstraintMsg(ConstraintMaps);
+    db.printAllWeightMsg(WeightsMaps);
+    
+    delete[] lefargv;
+    delete[] defargv ;
     return 0;
 }
 string exec(const char* cmd)
@@ -69,15 +88,9 @@ char ** getlefargv(char * argv[])
     LefInput[1] = new char [1000];
     LefInput[2] = new char [1000];
     // initialize Lef argument value
-    for (int j = 0; j < strlen(argv[0]); j++) {
-        LefInput[0][j] = argv[0][j];
-    }
-    for (int j = 0; j < strlen(argv[3]); j++) {
-        LefInput[1][j] = argv[3][j];
-    }
-    for (int j = 0; j < strlen(argv[4]); j++) {
-        LefInput[2][j] = argv[4][j];
-    }
+    LefInput[0] = argv[0];
+    LefInput[1] = argv[3];
+    LefInput[2] = argv[4];
     return LefInput ;
 }
 char ** getdefargv(char * argv[])
@@ -87,28 +100,8 @@ char ** getdefargv(char * argv[])
     DefInput[0] = new char [1000];
     DefInput[1] = new char [1000];
     // initialize Lef argument value
-    for (int j = 0; j < strlen(argv[0]); j++) {
-        DefInput[0][j] = argv[0][j];
-    }
-    for (int j = 0; j < strlen(argv[2]); j++) {
-        DefInput[1][j] = argv[2][j];
-    }
+    DefInput[0] = argv[0];
+    DefInput[1] = argv[2];
     return DefInput ;
-}
-void freeargv(char * lefargv[] , char * defargv[])
-{
-    //deletes an inner array
-    for(int i = 0; i < 3; ++i){
-        delete[] lefargv[i];
-    }
-    for(int i = 0; i < 2; ++i){
-        delete[] defargv[i];
-    }
-    
-    //delete pointer holding array of pointers;
-    delete[] lefargv;
-    delete [] defargv ;
-    
-    
 }
 

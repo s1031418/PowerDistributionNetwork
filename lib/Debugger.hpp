@@ -36,6 +36,23 @@ public:
     void printAllCurrentMsg(multimap<string,PowerPin> & CurrnetMaps);
     void printConstraintMsg(string BlockName , multimap<string,Constraint> & ConstraintMaps);
     void printAllConstraintMsg(multimap<string,Constraint> & ConstraintMaps);
+    void printComponentMsg(string BlockName ,  std::map<std::string,Components> & ComponentMaps);
+    void printAllComponentMsg(std::map<std::string,Components> & ComponentMaps);
+    void printPinMsg(string PinName ,  std::map<std::string,Pin> & PinMaps);
+    void printAllPinMsg(std::map<std::string,Pin> & PinMaps);
+    void printPortMsg(string MetalName ,std::multimap< std::string, Port > & PortMaps);
+    void printAllPortMsg(std::multimap< std::string, Port > & PortMaps);
+    
+    // for print special nets
+    void printSpecialNetMsg(string SourceName , std::map<std::string,SpecialNets> & SpecialNetsMaps);
+    void printDestinationMsg(string BlockName , std::multimap<std::string,std::string> & DESTINATIONMAPS);
+    void printAllDestinationMsg(std::multimap<std::string,std::string> & DESTINATIONMAPS);
+    void printNetsMsg(string MetalName ,std::multimap<std::string,Nets> & NETSMULTIMAPS );
+    void printAllNetsMsg(std::multimap<std::string,Nets> & NETSMULTIMAPS );
+    void printAllSpecialNetMsg(std::map<std::string,SpecialNets> & SpecialNetsMaps);
+    
+    // print DIE AREA
+    void printDieArea(Diearea & diearea);
 };
 
 #endif /* Debugger_hpp */

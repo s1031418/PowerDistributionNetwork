@@ -72,19 +72,20 @@ public:
     double RESISTANCE_RPERSQ;
 };
 
+template <class T>
 class Point
 {
 public:
-    float x;
-    float y;
+    T x = -1;
+    T y = -1;
 };
 
 class InnerLayer {
 public:
     std::string NAME;
     std::string SHAPE = "RECT"; // contant
-    Point pt1 ;
-    Point pt2 ;
+    Point<float> pt1 ;
+    Point<float> pt2 ;
     
     
 };
@@ -140,10 +141,20 @@ class Components {
 public:
     std::string NAME ;
     std::string MACROTYPE ; // define in blocks.lef
-    Point STARTPOINT ;
+    Point<int> STARTPOINT ;
     std::string ORIENT ;
+    std::string STATE; // fixed or placed
 };
 
+class Port
+{
+public:
+    std::string NAME ; 
+    Point<int> RELATIVE_POINT1 ;
+    Point<int> RELATIVE_POINT2 ;
+    Point<int> STARTPOINT ;
+    std::string ORIENT ;
+};
 class Pin
 {
 public:
@@ -151,23 +162,33 @@ public:
     std::string DIRECTION;
     std::string USE ;
     std::string METALNAME ;
-    Point STARTPOINT ;
-    Point RELATIVE_POINT1;
-    Point RELATIVE_POINT2;
+    Point<int> STARTPOINT ;
+    Point<int> RELATIVE_POINT1;
+    Point<int> RELATIVE_POINT2;
     std::string ORIENT ;
+    // key:MetalName , value: Port
+    std::multimap< std::string, Port > PortMaps;
+    
 };
-
+class Diearea{
+    
+public:
+    Point<int> pt1 ;
+    Point<int> pt2 ;
+};
 // sub components
 class Nets {
     
 public:
     std::string METALNAME ;
     int ROUNTWIDTH ;
-    Point ABSOLUTE_POINT1 ;
-    Point ABSOLUTE_POINT2 ;
+    Point<int> ABSOLUTE_POINT1 ;
+    Point<int> ABSOLUTE_POINT2 ;
     std::string VIANAME ;
+    std::string SHAPE ;
+    std::string STATE ; 
 };
-class SPECIALNETS {
+class SpecialNets {
     
 public:
     std::string SOURCENAME;
@@ -175,6 +196,9 @@ public:
     std::multimap<std::string,std::string> DESTINATIONMAPS;
     // key: MetalName , value:Nets object
     std::multimap<std::string,Nets> NETSMULTIMAPS ;
+    
+    
+    std::string USE ; 
     
 };
 
