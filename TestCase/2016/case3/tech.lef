@@ -1,0 +1,243 @@
+
+VERSION 5.4 ;
+NAMESCASESENSITIVE ON ;
+
+UNITS
+    DATABASE MICRONS 1000 ;
+END UNITS
+
+MANUFACTURINGGRID 0.1 ;
+
+USEMINSPACING OBS OFF ;
+
+
+LAYER METAL1
+    TYPE ROUTING ;
+    WIDTH 1 ;
+    MAXWIDTH 10 ;
+    SPACING 1 ;
+    PITCH 2 ;
+    OFFSET 1 ;
+    DIRECTION HORIZONTAL ;
+    RESISTANCE RPERSQ      8.0000e-02 ;
+END METAL1
+
+LAYER VIA12
+    TYPE CUT ;
+END VIA12
+
+LAYER METAL2
+    TYPE ROUTING ;
+    WIDTH 1 ;
+    MAXWIDTH 10 ;
+    SPACING 1 ;
+    PITCH 2 ;
+    OFFSET 1 ;
+    DIRECTION VERTICAL ;
+    RESISTANCE RPERSQ      8.0000e-02 ;
+END METAL2
+
+LAYER VIA23
+    TYPE CUT ;
+END VIA23
+
+LAYER METAL3
+    TYPE ROUTING ;
+    WIDTH 1 ;
+    MAXWIDTH 10 ;
+    SPACING 1 ;
+    PITCH 2 ;
+    OFFSET 1 ;
+    DIRECTION HORIZONTAL ;
+    RESISTANCE RPERSQ      8.0000e-02 ;
+END METAL3
+
+LAYER VIA34
+    TYPE CUT ;
+END VIA34
+
+LAYER METAL4
+    TYPE ROUTING ;
+    WIDTH 1 ;
+    MAXWIDTH 10 ;
+    SPACING 1 ;
+    PITCH 2 ;
+    OFFSET 1 ;
+    DIRECTION VERTICAL ;
+    RESISTANCE RPERSQ      8.0000e-02 ;
+END METAL4
+
+LAYER VIA45
+    TYPE CUT ;
+END VIA45
+
+LAYER METAL5
+    TYPE ROUTING ;
+    WIDTH 1 ;
+    MAXWIDTH 10 ;
+    SPACING 1 ;
+    PITCH 2 ;
+    OFFSET 1 ;
+    DIRECTION HORIZONTAL ;
+    RESISTANCE RPERSQ      4.0000e-02 ;
+END METAL5
+
+LAYER VIA56
+    TYPE CUT ;
+END VIA56
+
+LAYER METAL6
+    TYPE ROUTING ;
+    WIDTH 1 ;
+    MAXWIDTH 20 ;
+    SPACING 2 ;
+    PITCH 2 ;
+    OFFSET 1 ;
+    DIRECTION VERTICAL ;
+    RESISTANCE RPERSQ      2.0000e-02 ;
+END METAL6
+
+
+VIA via1_A DEFAULT
+    RESISTANCE 10.0000e+00 ;
+    LAYER METAL1 ;
+        RECT -0.5 -0.5 0.5 0.5 ;
+    LAYER VIA12 ;
+        RECT -0.3 -0.3 0.3 0.3 ;
+    LAYER METAL2 ;
+        RECT -0.5 -0.5 0.5 0.5 ;
+END via1_A
+VIA via1_B DEFAULT
+    RESISTANCE 5.0000e+00 ;
+    LAYER METAL1 ;
+        RECT -2.5 -2.5 2.5 2.5 ;
+    LAYER VIA12 ;
+        RECT -1.5 -1.5 1.5 1.5 ;
+    LAYER METAL2 ;
+        RECT -2.5 -2.5 2.5 2.5 ;
+END via1_B
+VIA via1_C DEFAULT
+    RESISTANCE 1.0000e+00 ;
+    LAYER METAL1 ;
+        RECT -5 -5 5 5 ;
+    LAYER VIA12 ;
+        RECT -3 -3 3 3 ;
+    LAYER METAL2 ;
+        RECT -5 -5 5 5 ;
+END via1_C
+
+VIA via2_A DEFAULT
+    RESISTANCE 10.0000e+00 ;
+    LAYER METAL2 ;
+        RECT -0.5 -0.5 0.5 0.5 ;
+    LAYER VIA23 ;
+        RECT -0.3 -0.3 0.3 0.3 ;
+    LAYER METAL3 ;
+        RECT -0.5 -0.5 0.5 0.5 ;
+END via2_A
+VIA via2_B DEFAULT
+    RESISTANCE 5.0000e+00 ;
+    LAYER METAL2 ;
+        RECT -2.5 -2.5 2.5 2.5 ;
+    LAYER VIA23 ; 
+        RECT -1.5 -1.5 1.5 1.5 ;
+    LAYER METAL3 ;
+        RECT -2.5 -2.5 2.5 2.5 ;
+END via2_B
+VIA via2_C DEFAULT
+    RESISTANCE 1.0000e+00 ;
+    LAYER METAL2 ;
+        RECT -5 -5 5 5 ;
+    LAYER VIA23 ; 
+        RECT -3 -3 3 3 ;
+    LAYER METAL3 ;
+        RECT -5 -5 5 5 ;
+END via2_C
+
+
+VIA via3_A DEFAULT
+    RESISTANCE 10.0000e+00 ;
+    LAYER METAL3 ;
+        RECT -0.5 -0.5 0.5 0.5 ;
+    LAYER VIA34 ;
+        RECT -0.3 -0.3 0.3 0.3 ;
+    LAYER METAL4 ;
+        RECT -0.5 -0.5 0.5 0.5 ;
+END via3_A
+VIA via3_B DEFAULT
+    RESISTANCE 5.0000e+00 ;
+    LAYER METAL3 ;
+        RECT -2.5 -2.5 2.5 2.5 ;
+    LAYER VIA34 ;
+        RECT -1.5 -1.5 1.5 1.5 ;
+    LAYER METAL4 ;
+        RECT -2.5 -2.5 2.5 2.5 ;
+END via3_B
+VIA via3_C DEFAULT
+    RESISTANCE 1.0000e+00 ;
+    LAYER METAL3 ;
+        RECT -5 -5 5 5 ;
+    LAYER VIA34 ;
+        RECT -3 -3 3 3 ;
+    LAYER METAL4 ;
+        RECT -5 -5 5 5 ;
+END via3_C
+
+VIA via4_A DEFAULT
+    RESISTANCE 10.0000e+00 ;
+    LAYER METAL4 ;
+        RECT -0.5 -0.5 0.5 0.5 ;
+    LAYER VIA45 ;
+        RECT -0.3 -0.3 0.3 0.3 ;
+   LAYER METAL5 ;
+        RECT -0.5 -0.5 0.5 0.5 ;
+END via4_A
+VIA via4_B DEFAULT
+    RESISTANCE 5.0000e+00 ;
+    LAYER METAL4 ;
+        RECT -2.5 -2.5 2.5 2.5 ;
+    LAYER VIA45 ;
+        RECT -1.5 -1.5 1.5 1.5 ;
+   LAYER METAL5 ;
+        RECT -2.5 -2.5 2.5 2.5 ;
+END via4_B
+VIA via4_C DEFAULT
+    RESISTANCE 1.0000e+00 ;
+    LAYER METAL4 ;
+        RECT -5 -5 5 5 ;
+    LAYER VIA45 ;
+        RECT -3 -3 3 3 ;
+   LAYER METAL5 ;
+        RECT -5 -5 5 5 ;
+END via4_C
+
+VIA via5_A DEFAULT
+    RESISTANCE 10.0000e+00 ;
+    LAYER METAL5 ;
+        RECT -0.5 -0.5 0.5 0.5 ;
+    LAYER VIA56 ;
+        RECT -0.3 -0.3 0.3 0.3 ;
+   LAYER METAL6 ;
+        RECT -0.5 -0.5 0.5 0.5 ;
+END via5_A
+VIA via5_B DEFAULT
+    RESISTANCE 5.0000e+00 ;
+    LAYER METAL5 ;
+        RECT -2.5 -2.5 2.5 2.5 ;
+    LAYER VIA56 ;
+        RECT -1.5 -1.5 1.5 1.5 ;
+   LAYER METAL6 ;
+        RECT -2.5 -2.5 2.5 2.5 ;
+END via5_B
+VIA via5_C DEFAULT
+    RESISTANCE 1.0000e+00 ;
+    LAYER METAL5 ;
+        RECT -5 -5 5 5 ;
+    LAYER VIA56 ;
+        RECT -3 -3 3 3 ;
+   LAYER METAL6 ;
+        RECT -5 -5 5 5 ;
+END via5_C
+
+
+END LIBRARY 

@@ -93,3 +93,56 @@ void Debugger::printAllViaMsg(map<string,Via> & VM)
         printViaMsg(x.first , VM);
     }
 }
+void Debugger::printWeightMsg(string MetalName , map<string,string> & WM)
+{
+    cout << "Name:" << MetalName << endl ;
+    cout << "Weights:" << WM[MetalName] << endl; 
+}
+void Debugger::printAllWeightMsg(map<string,string> & WM)
+{
+    for(auto i : WM)
+        printWeightMsg(i.first, WM);
+}
+void Debugger::printVoltageMsg(string PowerSourceName , map<string,string> & VoltageMaps )
+{
+    cout << "PowerSourceName:"  << PowerSourceName << endl;
+    cout << "Voltage:" << VoltageMaps[PowerSourceName] << endl; 
+}
+void Debugger::printAllVoltageMsg(map<string,string> & VM)
+{
+    for(auto i : VM)
+        printVoltageMsg(i.first, VM);
+}
+void Debugger::printCurrentMsg(string BlockName ,multimap<string,PowerPin> & CurrnetMaps  )
+{
+    cout << "BlockName:" << BlockName << endl ;
+    auto begin = CurrnetMaps.lower_bound(BlockName);
+    auto end = CurrnetMaps.upper_bound(BlockName);
+    while (begin != end) {
+        cout << "BlockPinName:"<< begin->second.NAME  << "  Current:" << begin->second.CURRENTDRAWN << endl;
+        begin++;
+    }
+    
+    
+}
+void Debugger::printAllCurrentMsg(multimap<string,PowerPin> & CurrentMaps)
+{
+    for(auto i : CurrentMaps)
+        printCurrentMsg(i.first, CurrentMaps);
+}
+
+void Debugger::printConstraintMsg(string BlockName , multimap<string,Constraint> & ConstraintMaps)
+{
+    cout << "BlockName:" << BlockName << endl ;
+    auto begin = ConstraintMaps.lower_bound(BlockName);
+    auto end = ConstraintMaps.upper_bound(BlockName);
+    while (begin != end) {
+        cout << "BlockPinName:"<< begin->second.NAME  << "  Constraint:" << begin->second.CONSTRAINT << "(%)" << endl;
+        begin++;
+    }
+}
+void Debugger::printAllConstraintMsg(multimap<string,Constraint> & ConstraintMaps)
+{
+    for(auto i : ConstraintMaps)
+        printConstraintMsg(i.first, ConstraintMaps);
+}

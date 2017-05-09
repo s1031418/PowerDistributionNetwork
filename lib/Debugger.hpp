@@ -28,6 +28,14 @@ public:
     void printObsMsg(OBS);
     void printPinMsg(string PinName , map<string,Pin> & PM);
     void printAllPinMsg(std::map<std::string,Pin> & PM);
+    void printWeightMsg(string MetalName , map<string,string> & WM);
+    void printAllWeightMsg(map<string,string> & WM);
+    void printVoltageMsg(string PowerSourceName , map<string,string> & VoltageMaps );
+    void printAllVoltageMsg(map<string,string> & VoltageMaps);
+    void printCurrentMsg(string BlockName ,multimap<string,PowerPin> & CurrnetMaps  );
+    void printAllCurrentMsg(multimap<string,PowerPin> & CurrnetMaps);
+    void printConstraintMsg(string BlockName , multimap<string,Constraint> & ConstraintMaps);
+    void printAllConstraintMsg(multimap<string,Constraint> & ConstraintMaps);
 };
 
 #endif /* Debugger_hpp */

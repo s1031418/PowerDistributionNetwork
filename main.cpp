@@ -13,6 +13,7 @@
 #include "defrw.h"
 #include <unordered_map>
 #include <map>
+#include "InitialFileParser.hpp"
 #include <cstdio>
 #include "lib/Debugger.hpp"
 #include <memory>
@@ -29,20 +30,23 @@ void freeargv(char * lefargv[] , char * defargv[]);
 int main(int argc,  char * argv[])
 {
     Debugger db ;
-    lefrw lef ;
-    char ** lefargv = getlefargv(argv) ;
-    char ** defargv = getdefargv(argv) ;
-    lef.run(3, lefargv);
-    db.printAllLayerMsg(LayerMaps);
-    defrw def ;
-    def.run(2, defargv);
+    InitialFileParser ifp(argv[5]) ;
+    ifp.run();
+    
+//    lefrw lef ;
+//    char ** lefargv = getlefargv(argv) ;
+//    char ** defargv = getdefargv(argv) ;
+//    lef.run(3, lefargv);
+//    db.printAllLayerMsg(LayerMaps);
+//    defrw def ;
+//    def.run(2, defargv);
     
     
     
     
     
     
-    freeargv(lefargv,defargv);
+//    freeargv(lefargv,defargv);
     return 0;
 }
 string exec(const char* cmd)
@@ -106,9 +110,6 @@ void freeargv(char * lefargv[] , char * defargv[])
     //delete pointer holding array of pointers;
     delete[] lefargv;
     delete [] defargv ;
-    
-    
-    
     
     
 }

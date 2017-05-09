@@ -151,7 +151,16 @@ class PowerPin {
     
     
 public:
+    std::string NAME ;
+    std::string CURRENTDRAWN ;
     
+};
+class Constraint {
+    
+    
+public:
+    std::string NAME ;
+    std::string CONSTRAINT ;
     
 };
 
