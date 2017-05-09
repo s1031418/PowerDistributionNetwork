@@ -9,7 +9,10 @@
 #include "InitialFileParser.hpp"
 
 
-
+multimap<string,PowerPin> CurrnetMaps ;
+map<string,string> VoltageMaps;
+multimap<string,Constraint> ConstraintMaps ;
+map<string,string> WeightsMaps;
 InitialFileParser::InitialFileParser(string FilePath)
 {
     Load(FilePath);

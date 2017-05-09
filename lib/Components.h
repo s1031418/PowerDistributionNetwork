@@ -103,7 +103,7 @@ public:
 // the components of block.lef is below
 
 
-class Pin
+class BlockPin
 {
     
     
@@ -129,20 +129,53 @@ public:
     std::string CLASS ; 
     double WIDTH ;
     double LENGTH ;
-    std::map<std::string,Pin> PinMaps ; // Pin Map
+    std::map<std::string,BlockPin> BlockPinMaps ;
     OBS obs ;// Layer of obstruction Map
 };
 
 
 // the components of def is below
-class Nets {
+class Components {
     
 public:
     std::string NAME ;
     std::string MACROTYPE ; // define in blocks.lef
+    Point STARTPOINT ;
+    std::string ORIENT ;
+};
+
+class Pin
+{
+public:
+    std::string NAME ;
+    std::string DIRECTION;
+    std::string USE ;
+    std::string METALNAME ;
+    Point STARTPOINT ;
+    Point RELATIVE_POINT1;
+    Point RELATIVE_POINT2;
+    std::string ORIENT ;
+};
+
+// sub components
+class Nets {
     
-    Point pt ;
-    std::string orient ;
+public:
+    std::string METALNAME ;
+    int ROUNTWIDTH ;
+    Point ABSOLUTE_POINT1 ;
+    Point ABSOLUTE_POINT2 ;
+    std::string VIANAME ;
+};
+class SPECIALNETS {
+    
+public:
+    std::string SOURCENAME;
+    // key: BlockName , value:Block Pin
+    std::multimap<std::string,std::string> DESTINATIONMAPS;
+    // key: MetalName , value:Nets object
+    std::multimap<std::string,Nets> NETSMULTIMAPS ;
+    
 };
 
 

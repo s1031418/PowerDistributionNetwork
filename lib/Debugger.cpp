@@ -24,25 +24,25 @@ void Debugger::printMacroMsg(string MacroName , map<string,Macro> & MM )
     cout << "Width:" << MM[MacroName].WIDTH << endl;
     cout << "Length:" << MM[MacroName].LENGTH << endl;
     cout << "Pins:" << endl;
-    printAllPinMsg(MM[MacroName].PinMaps);
+    printAllBlockPinMsg(MM[MacroName].BlockPinMaps);
     cout << "OBS" << endl;
     printObsMsg(MM[MacroName].obs);
 }
-void Debugger::printAllPinMsg(std::map<std::string,Pin> & PM)
+void Debugger::printAllBlockPinMsg(std::map<std::string,BlockPin> & BPM)
 {
-    for(auto x : PM)
+    for(auto x : BPM)
     {
-        printPinMsg(x.first , PM);
+        printBlockPinMsg(x.first , BPM);
     }
 }
 void Debugger::printObsMsg(OBS obs)
 {
     printAllInnerLayerMsg(obs.InnerMaps);
 }
-void Debugger::printPinMsg(string PinName , std::map<std::string,Pin> & PM)
+void Debugger::printBlockPinMsg(string PinName , std::map<std::string,BlockPin> & BPM)
 {
-    cout << "Name:" << PM[PinName].Name << endl;
-    printAllInnerLayerMsg(PM[PinName].InnerMaps);
+    cout << "Name:" << BPM[PinName].Name << endl;
+    printAllInnerLayerMsg(BPM[PinName].InnerMaps);
 }
 void Debugger::printAllInnerLayerMsg(map<string , InnerLayer> & IM)
 {
@@ -106,7 +106,7 @@ void Debugger::printAllWeightMsg(map<string,string> & WM)
 void Debugger::printVoltageMsg(string PowerSourceName , map<string,string> & VoltageMaps )
 {
     cout << "PowerSourceName:"  << PowerSourceName << endl;
-    cout << "Voltage:" << VoltageMaps[PowerSourceName] << endl; 
+    cout << "Voltage:" << VoltageMaps[PowerSourceName] << "(V)"<< endl;
 }
 void Debugger::printAllVoltageMsg(map<string,string> & VM)
 {
@@ -119,7 +119,7 @@ void Debugger::printCurrentMsg(string BlockName ,multimap<string,PowerPin> & Cur
     auto begin = CurrnetMaps.lower_bound(BlockName);
     auto end = CurrnetMaps.upper_bound(BlockName);
     while (begin != end) {
-        cout << "BlockPinName:"<< begin->second.NAME  << "  Current:" << begin->second.CURRENTDRAWN << endl;
+        cout << "BlockPinName:"<< begin->second.NAME  << "  Current:" << begin->second.CURRENTDRAWN << "(mA)"<< endl;
         begin++;
     }
     
@@ -127,8 +127,10 @@ void Debugger::printCurrentMsg(string BlockName ,multimap<string,PowerPin> & Cur
 }
 void Debugger::printAllCurrentMsg(multimap<string,PowerPin> & CurrentMaps)
 {
-    for(auto i : CurrentMaps)
-        printCurrentMsg(i.first, CurrentMaps);
+    for( auto it = CurrentMaps.begin(), end = CurrentMaps.end(); it != end;it = CurrentMaps.upper_bound(it->first))
+    {
+        printCurrentMsg(it->first, CurrentMaps);
+    }
 }
 
 void Debugger::printConstraintMsg(string BlockName , multimap<string,Constraint> & ConstraintMaps)
@@ -143,6 +145,8 @@ void Debugger::printConstraintMsg(string BlockName , multimap<string,Constraint>
 }
 void Debugger::printAllConstraintMsg(multimap<string,Constraint> & ConstraintMaps)
 {
-    for(auto i : ConstraintMaps)
-        printConstraintMsg(i.first, ConstraintMaps);
+    for( auto it = ConstraintMaps.begin(), end = ConstraintMaps.end(); it != end;it = ConstraintMaps.upper_bound(it->first))
+    {
+        printConstraintMsg(it->first , ConstraintMaps);
+    }
 }

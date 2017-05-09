@@ -26,8 +26,8 @@ public:
     void printAllMacroMsg( map<string,Macro> & MM );
     void printInnerLayerMsg(string LayerName , map<string , InnerLayer> & IM);
     void printObsMsg(OBS);
-    void printPinMsg(string PinName , map<string,Pin> & PM);
-    void printAllPinMsg(std::map<std::string,Pin> & PM);
+    void printBlockPinMsg(string PinName , map<string,BlockPin> & BPM);
+    void printAllBlockPinMsg(std::map<std::string,BlockPin> & BPM);
     void printWeightMsg(string MetalName , map<string,string> & WM);
     void printAllWeightMsg(map<string,string> & WM);
     void printVoltageMsg(string PowerSourceName , map<string,string> & VoltageMaps );

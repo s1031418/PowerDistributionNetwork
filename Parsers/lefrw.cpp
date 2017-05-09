@@ -1485,7 +1485,7 @@ int macroEndCB(lefrCallbackType_e c, const char* macroName, lefiUserData ud) {
     checkType(c);
     // if ((long)ud != userData) dataError();
     MacroMaps.insert(std::make_pair(mymacro.Name, mymacro));
-    mymacro.PinMaps.clear();
+    mymacro.BlockPinMaps.clear();
     
 //    fprintf(fout, "END %s\n", macroName);
     
@@ -1634,7 +1634,7 @@ int pinCB(lefrCallbackType_e c, lefiPin* pin, lefiUserData ud) {
     
     checkType(c);
     // if ((long)ud != userData) dataError();
-    Pin mypin;
+    BlockPin mypin;
     mypin.Name = pin->lefiPin::name() ;
 //    fprintf(fout, "  PIN %s\n", pin->lefiPin::name());
     if (pin->lefiPin::hasForeign()) {
@@ -1889,7 +1889,7 @@ int pinCB(lefrCallbackType_e c, lefiPin* pin, lefiUserData ud) {
 //        fprintf(fout, "    END\n");
     }
 //    fprintf(fout, "  END %s\n", pin->lefiPin::name());
-    mymacro.PinMaps.insert(std::make_pair(mypin.Name, mypin));
+    mymacro.BlockPinMaps.insert(std::make_pair(mypin.Name, mypin));
     return 0;
 }
 

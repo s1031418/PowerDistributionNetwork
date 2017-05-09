@@ -25,28 +25,27 @@ string exec(const char* cmd);
 char ** getlefargv(char * argv[]);
 char ** getdefargv(char * argv[]);
 void freeargv(char * lefargv[] , char * defargv[]);
+
 // Ex. Team1.exe case1.v case1_input.def tech.lef blocks.lef initial_files
 
 int main(int argc,  char * argv[])
 {
+    // declare objects
+    InitialFileParser initialfile(argv[5]) ;
+    defrw def ;
+    lefrw lef ;
+    // get lef、def argument value
+    char ** lefargv = getlefargv(argv) ;
+    char ** defargv = getdefargv(argv) ;
+    // acivate parser
+    lef.run(3, lefargv);
+    def.run(2, defargv);
+    initialfile.run();
+    // free memory
+    freeargv(lefargv,defargv);
+    
     Debugger db ;
-    InitialFileParser ifp(argv[5]) ;
-    ifp.run();
     
-//    lefrw lef ;
-//    char ** lefargv = getlefargv(argv) ;
-//    char ** defargv = getdefargv(argv) ;
-//    lef.run(3, lefargv);
-//    db.printAllLayerMsg(LayerMaps);
-//    defrw def ;
-//    def.run(2, defargv);
-    
-    
-    
-    
-    
-    
-//    freeargv(lefargv,defargv);
     return 0;
 }
 string exec(const char* cmd)
@@ -66,9 +65,9 @@ char ** getlefargv(char * argv[])
     // new memory allocation
     char ** LefInput ;
     LefInput = new char *[3];
-    LefInput[0] = new char [strlen(argv[0])];
-    LefInput[1] = new char [strlen(argv[3])];
-    LefInput[2] = new char [strlen(argv[4])];
+    LefInput[0] = new char [1000];
+    LefInput[1] = new char [1000];
+    LefInput[2] = new char [1000];
     // initialize Lef argument value
     for (int j = 0; j < strlen(argv[0]); j++) {
         LefInput[0][j] = argv[0][j];
@@ -85,8 +84,8 @@ char ** getdefargv(char * argv[])
 {
     char ** DefInput ;
     DefInput = new char *[2];
-    DefInput[0] = new char [strlen(argv[0])];
-    DefInput[1] = new char [strlen(argv[2])];
+    DefInput[0] = new char [1000];
+    DefInput[1] = new char [1000];
     // initialize Lef argument value
     for (int j = 0; j < strlen(argv[0]); j++) {
         DefInput[0][j] = argv[0][j];
@@ -94,7 +93,6 @@ char ** getdefargv(char * argv[])
     for (int j = 0; j < strlen(argv[2]); j++) {
         DefInput[1][j] = argv[2][j];
     }
-    
     return DefInput ;
 }
 void freeargv(char * lefargv[] , char * defargv[])
@@ -113,3 +111,4 @@ void freeargv(char * lefargv[] , char * defargv[])
     
     
 }
+

@@ -16,16 +16,18 @@
 #include "Components.h"
 #include <string>
 #include "Parsers.hpp"
+
+extern multimap<string,PowerPin> CurrnetMaps ;
+extern map<string,string> VoltageMaps;
+extern multimap<string,Constraint> ConstraintMaps ;
+extern map<string,string> WeightsMaps;
 class InitialFileParser : public Parsers
 {
     
 public:
     InitialFileParser(string FilePath);
     ~InitialFileParser();
-    multimap<string,PowerPin> CurrnetMaps ;
-    map<string,string> VoltageMaps;
-    multimap<string,Constraint> ConstraintMaps ;
-    map<string,string> WeightsMaps;
+    
     void run();
 private:
     vector<string> Data ;
