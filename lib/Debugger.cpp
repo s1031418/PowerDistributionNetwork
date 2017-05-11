@@ -23,6 +23,7 @@ void Debugger::printMacroMsg(string MacroName , map<string,Macro> & MM )
     cout << "OriginY:" << MM[MacroName].ORIGINY << endl;
     cout << "Width:" << MM[MacroName].WIDTH << endl;
     cout << "Length:" << MM[MacroName].LENGTH << endl;
+    cout << "Symmetry:" << MM[MacroName].SYMMETRY << endl;
     cout << endl;
     cout << "Pins:" << endl;
     printAllBlockPinMsg(MM[MacroName].BlockPinMaps);

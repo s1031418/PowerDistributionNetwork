@@ -26,7 +26,7 @@ extern Diearea DIEAREA ;
 extern std::map<std::string,Components> ComponentMaps ;
 // key:PinName , value:Pin
 extern std::map<std::string,Pin> PinMaps;
-// key:SourceName , value SpectialNet
+// key:PinName , value SpectialNet
 extern std::map<std::string,SpecialNets> SpecialNetsMaps ;
 
 

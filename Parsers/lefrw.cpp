@@ -2291,7 +2291,7 @@ int lefrw::run(int argc, char** argv )
     int test1 = 0;
     int test2 = 0;
     int ccr749853 = 0;
-    int verbose = 0;
+//    int verbose = 0;
     
     // start_mem = (long)sbrk(0);
     
@@ -2548,7 +2548,7 @@ int lefrw::run(int argc, char** argv )
         // 2nd will enable 2007 by calling lefrEnableParserMsgs
         // 3rd enable all msgs by call lefrEnableAllMsgs
         
-        int nMsgs = 3;
+//        int nMsgs = 3;
         int dMsgs[3];
         if (numInFile != 1) {
             fprintf(stderr,"Test 2 mode needs only 1 file\n");

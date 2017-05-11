@@ -251,7 +251,7 @@ int compf(defrCallbackType_e c, defiComponent* co, defiUserData ud) {
 //        //fprintf(fout1, ";\n");
         ComponentMaps.insert(std::make_pair(components.NAME, components));
         --numObjs;
-        if (numObjs <= 0);
+//        if (numObjs <= 0)
 //            fprintf(fout1, "END COMPONENTS\n");
     }
     
@@ -1510,7 +1510,7 @@ int snetf(defrCallbackType_e c, defiNet* net, defiUserData ud) {
     SpecialNetsMaps.insert(std::make_pair(myspecialnets.SOURCENAME, myspecialnets));
 //    fprintf (fout1, ";\n");
     --numObjs;
-    if (numObjs <= 0);
+//    if (numObjs <= 0)
 //        fprintf(fout1, "END SPECIALNETS\n");
     return 0;
 }
@@ -2258,7 +2258,7 @@ int cls(defrCallbackType_e c, void* cl, defiUserData ud) {
                 --numObjs;
                 
                 PinMaps.insert(std::make_pair(mypin.NAME, mypin));
-                if (numObjs <= 0);
+//                if (numObjs <= 0)
 //                    fprintf(fout1, "END PINS\n");
             }
             break;
@@ -3017,7 +3017,7 @@ int defrw::run(int argc, char** argv)
     char* inFile[1000];
     char* outFile;
     FILE* f;
-    int res;
+    int res = 0;
     int noCalls = 0;
     //  long start_mem;
     int retStr = 0;
@@ -3324,7 +3324,7 @@ int defrw::run(int argc, char** argv)
         // 2nd will enable 7016 by calling defrEnableParserMsgs
         // 3rd enable all msgs by call defrEnableAllMsgs
         
-        int nMsgs = 2;
+//        int nMsgs = 2;
         int dMsgs[2];
         
         for (fileCt = 0; fileCt < numInFile; fileCt++) {

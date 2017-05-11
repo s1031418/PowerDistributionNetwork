@@ -17,6 +17,7 @@
 #include <cstdio>
 #include "lib/Debugger.hpp"
 #include <memory>
+#include "Converter.hpp"
 #include <stdexcept>
 #include <array>
 using namespace std ;
@@ -38,31 +39,35 @@ int main(int argc,  char * argv[])
     // get lef、def argument value
     char ** lefargv = getlefargv(argv) ;
     char ** defargv = getdefargv(argv) ;
-//    // acivate parser
+    // acivate parser
     lef.run(3, lefargv);
     def.run(2, defargv);
     initialfile.run();
     
-    Debugger db ;
-    cout << "tech lef file" << endl;
-    db.printAllLayerMsg(LayerMaps);
-    db.printAllViaMsg(ViaMaps);
-    cout << endl;
-    cout << "Block lef file" << endl;
-    db.printAllMacroMsg(MacroMaps);
-    cout << endl ;
-    cout << "Def file" << endl;
-    db.printDieArea(DIEAREA);
-    db.printAllComponentMsg(ComponentMaps);
-    db.printAllPinMsg(PinMaps);
-    db.printAllSpecialNetMsg(SpecialNetsMaps);
+//    Debugger db ;
+//    cout << "tech lef file" << endl;
+//    db.printAllLayerMsg(LayerMaps);
+//    db.printAllViaMsg(ViaMaps);
+//    cout << endl;
+//    cout << "Block lef file" << endl;
+//    db.printAllMacroMsg(MacroMaps);
+//    cout << endl ;
+//    cout << "Def file" << endl;
+//    db.printDieArea(DIEAREA);
+//    db.printAllComponentMsg(ComponentMaps);
+//    db.printAllPinMsg(PinMaps);
+//    db.printAllSpecialNetMsg(SpecialNetsMaps);
     
-    cout << "initial File" << endl ;
-    db.printAllCurrentMsg(CurrnetMaps);
-    db.printAllVoltageMsg(VoltageMaps);
-    db.printAllConstraintMsg(ConstraintMaps);
-    db.printAllWeightMsg(WeightsMaps);
+//    cout << "initial File" << endl ;
+//    db.printAllCurrentMsg(CurrnetMaps);
+//    db.printAllVoltageMsg(VoltageMaps);
+//    db.printAllConstraintMsg(ConstraintMaps);
+//    db.printAllWeightMsg(WeightsMaps);
     
+    Converter converter ;
+    converter.toDebugMsg();
+    
+//    converter.toSpice();
     delete[] lefargv;
     delete[] defargv ;
     return 0;

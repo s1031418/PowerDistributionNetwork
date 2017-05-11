@@ -35,6 +35,7 @@
 
 extern std::map<std::string,Via> ViaMaps ;
 extern std::map<std::string,Layer> LayerMaps ;
+// key: macroName , value : Macro
 extern std::map<std::string,Macro> MacroMaps ;
 extern Macro mymacro ;
 extern double MANUFACTURINGGRID ;

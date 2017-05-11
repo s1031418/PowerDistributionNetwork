@@ -126,6 +126,7 @@ class Macro {
 public:
     double ORIGINX ;
     double ORIGINY ;
+    std::string SYMMETRY ; // 還沒寫
     std::string Name ;
     std::string CLASS ; 
     double WIDTH ;
