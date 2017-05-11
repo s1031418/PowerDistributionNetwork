@@ -105,13 +105,6 @@ void Converter::toDebugMsg()
                     }
                     
                     cout << "R" << PinNames[i] << "_" << R_cnt << " ";
-//                    cout << begin->second.ABSOLUTE_POINT1.x << " ";
-//                    cout << begin->second.ABSOLUTE_POINT1.y << " ";
-//                    cout << begin->second.ABSOLUTE_POINT2.x << " ";
-//                    cout << begin->second.ABSOLUTE_POINT2.y ;
-                    // x1 , y1
-                    
-                    // x2 , y2
                     
                     cout << endl;
                     R_cnt++ ;
@@ -127,101 +120,22 @@ pair<Point<int>, Point<int>> Converter::getBlockCoordinate(int x , int y , int w
 {
     Point<int> pt1 ;
     Point<int> pt2 ;
-    pair<int,int> direction = getDirection(orient , width , length );
     pt1.x = x ;
     pt1.y = y ;
-    pt2.x = x + get<0>(direction) ;
-    pt2.y = y + get<1>(direction) ;
-    // decide left_down_corner and right_up_corner ;
-    if( orient == "N" || orient == "S" || orient == "FW" || orient == "FE" )
+    if( orient == "N" || orient == "S" || orient == "FN" || orient == "FS" )
     {
-        if( pt1.x < pt2.x && pt1.y < pt2.y )
-        {
-            // pt1 is left_down_corner , pt2 is right_up_corner
-            return make_pair(pt1, pt2);
-        }
-        else
-        {
-            // pt2 is left_down_corner , pt1 is right_up_corner
-            return make_pair(pt2, pt1);
-        }
+        pt2.x = x + width ;
+        pt2.y = y + length ;
     }
-    else if( orient == "W" || orient == "E" || orient == "FN" || orient == "FS"  )
+    else if( orient == "W" || orient == "E" || orient == "FW" || orient == "FE"  )
     {
-        // pt3 is left_down_corner , pt4 is right_up corner
-        Point<int> pt3 ;
-        Point<int> pt4 ;
-        if( pt1.x < pt2.x && pt1.y > pt2.y )
-        {
-            // pt1 is left_up_corner , pt2 is right_down_corner
-            pt3.x = pt1.x ;
-            pt3.y = pt2.y ;
-            pt4.x = pt2.x ;
-            pt4.y = pt1.y ;
-        }
-        else
-        {
-            // pt1 is right_down_corner , pt2 is left_up_corner
-            pt3.x = pt2.x ;
-            pt3.y = pt1.y ;
-            pt4.x = pt1.x ;
-            pt4.y = pt2.y ;
-        }
-        return make_pair(pt3, pt4);
+        pt2.x = x + length ;
+        pt2.y = y + width ;
     }
-   
-    assert(0);
     return make_pair(pt1, pt2);
 }
-pair<int,int> Converter::getDirection(string orient , int  width , int  length )
-{
-    int x = 0 , y = 0 ;
-    
-    
-    if(orient == "N")
-    {
-        x = width ;
-        y = length ;
-    }
-    else if(orient == "S")
-    {
-        x = -1 * width ;
-        y = -1 * length ;
-        
-    }
-    else if(orient == "W")
-    {
-        x = -1 * length ;
-        y = width ;
-        
-    }
-    else if(orient == "E")
-    {
-        x = length ;
-        y = -1 * width ;
-    }
-    else if(orient == "FN")
-    {
-        x = -1 * width ;
-        y = length ;
-    }
-    else if(orient == "FS")
-    {
-        x = width ;
-        y = -1 * length ;
-    }
-    else if(orient == "FW")
-    {
-        x = length ;
-        y = width ;
-    }
-    else if(orient == "FE")
-    {
-        x = -1 * length ;
-        y = -1 * width ;
-    }
-    return make_pair(x, y);
-}
+
+
 bool Converter::isHorizontal(Point<int> pt1 , Point<int> pt2)
 {
     if( pt1.y == pt2.y)

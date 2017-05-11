@@ -27,5 +27,6 @@ private:
     pair<int,int> getDirection(string orient , int  width, int  length );
     bool isHorizontal(Point<int> pt1 , Point<int> pt2);
     
+    
 };
 #endif /* Converter_hpp */
