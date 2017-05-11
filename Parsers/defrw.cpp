@@ -2053,11 +2053,11 @@ int cls(defrCallbackType_e c, void* cl, defiUserData ud) {
                     for (j = 0; j < pin->numPorts(); j++) {
                         Port myport ;
                         port = pin->pinPort(j);
-                        fprintf(fout1, "\n  + PORT");
+//                        fprintf(fout1, "\n  + PORT");
                         for (i = 0; i < port->numLayer(); i++) {
                             myport.NAME = port->layer(i) ;
-                            fprintf(fout1, "\n     + LAYER %s ",
-                                    port->layer(i));
+//                            fprintf(fout1, "\n     + LAYER %s ",
+//                                    port->layer(i));
                             if (port->layerMask(i))
                                 fprintf(fout1, "MASK %d ",
                                         port->layerMask(i));
@@ -2072,7 +2072,7 @@ int cls(defrCallbackType_e c, void* cl, defiUserData ud) {
                             myport.RELATIVE_POINT1.y = yl;
                             myport.RELATIVE_POINT2.x = xh;
                             myport.RELATIVE_POINT2.y = yh;
-                            fprintf(fout1, "%d %d %d %d ", xl, yl, xh, yh);
+//                            fprintf(fout1, "%d %d %d %d ", xl, yl, xh, yh);
                         }
                         for (i = 0; i < port->numPolygons(); i++) {
                             fprintf(fout1, "\n     + POLYGON %s ",
@@ -2123,14 +2123,14 @@ int cls(defrCallbackType_e c, void* cl, defiUserData ud) {
                                         orientStr1(port->orient()));
                             }
                             if (port->isFixed()) {
-                                fprintf(fout1, "\n     + FIXED ");
+//                                fprintf(fout1, "\n     + FIXED ");
                                 myport.STARTPOINT.x = port->placementX();
                                 myport.STARTPOINT.y = port->placementY();
                                 myport.ORIENT = orientStr1(port->orient());
-                                fprintf(fout1, "( %d %d ) %s ",
-                                        port->placementX(),
-                                        port->placementY(),
-                                        orientStr1(port->orient()));
+//                                fprintf(fout1, "( %d %d ) %s ",
+//                                        port->placementX(),
+//                                        port->placementY(),
+//                                        orientStr1(port->orient()));
                             }
                         }
                         PortMaps.insert(std::make_pair(myport.NAME, myport));
