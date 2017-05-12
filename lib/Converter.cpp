@@ -8,12 +8,15 @@
 
 #include "Converter.hpp"
 #include "lefrw.h"
-#include "Debugger.hpp"
 #include "defrw.h"
 #include "InitialFileParser.hpp"
 #include <iostream>
+#include <vector>
 #include <assert.h>
-
+#include <fstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <memory>
 Converter::Converter()
 {
     
@@ -25,20 +28,21 @@ Converter::~Converter()
 void Converter::toSpice()
 {
     
-    
-    
-    
-    
 }
-void Converter::toDebugMsg()
+void Converter::toLocationFile()
 {
     // print Block location
-    //cout << "Blocks:" << endl;
-    vector<string> BlockNames;
+    FILE * pFile ;
+    pFile = fopen("output.txt", "w");
+    if( NULL == pFile ) printf("Failed to open file\n");
+    
+    
+    vector<string> BlockNames ;
     for( auto it = ComponentMaps.begin(), end = ComponentMaps.end(); it != end;it = ComponentMaps.upper_bound(it->first))
     {
         BlockNames.push_back(it->first);
     }
+    vector<string> BlockMessage ;
     for(int i = 0 ; i < BlockNames.size() ; i++)
     {
         
@@ -50,16 +54,20 @@ void Converter::toDebugMsg()
                                                                ComponentMaps[BlockNames[i]].ORIENT );
         auto begin = MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps.begin();
         auto end = MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps.end();
-        end-- ; 
-        cout << MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[begin->first].NAME << " ";
-        cout << get<0>(coordinate).x << " " << get<0>(coordinate).y << " ";
-        cout << MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[(end)->first].NAME << " ";
-        cout << get<1>(coordinate).x << " " << get<1>(coordinate).y << " ";
-        cout << BlockNames[i] << "_" << MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[begin->first].NAME << "to"  << MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[(end)->first].NAME ;
-        cout << endl;
+        end-- ;
+        fprintf(pFile, "%s ", MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[begin->first].NAME.c_str());
+        fprintf(pFile, "%d %d ", get<0>(coordinate).x , get<0>(coordinate).y);
+        fprintf(pFile, "%s ", MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[(end)->first].NAME.c_str());
+        fprintf(pFile, "%d %d ", get<1>(coordinate).x , get<1>(coordinate).y);
+        fprintf(pFile, "%s_%s_%s\n", BlockNames[i].c_str() , MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[begin->first].NAME.c_str() , MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[(end)->first].NAME.c_str());
+//        cout << MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[begin->first].NAME << " ";
+//        cout << get<0>(coordinate).x << " " << get<0>(coordinate).y << " ";
+//        cout << MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[(end)->first].NAME << " ";
+//        cout << get<1>(coordinate).x << " " << get<1>(coordinate).y << " ";
+//        cout << BlockNames[i] << "_" << MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[begin->first].NAME << "to"  << MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[(end)->first].NAME ;
+//        cout << endl;
     }
     // print nets location
-    //cout << "Nets:" << endl;
     vector<string> PinNames;
     for( auto it = PinMaps.begin(), end = PinMaps.end(); it != end;it = PinMaps.upper_bound(it->first))
     {
@@ -80,41 +88,51 @@ void Converter::toDebugMsg()
                     if(isHorizontal(begin->second.ABSOLUTE_POINT1, begin->second.ABSOLUTE_POINT2))
                     {
                         // MetalName
-                        cout << begin->first << " ";
+                        fprintf(pFile, "%s " ,begin->first.c_str());
+//                        cout << begin->first << " ";
                         Point<int> right = (begin->second.ABSOLUTE_POINT1.x > begin->second.ABSOLUTE_POINT2.x) ? begin->second.ABSOLUTE_POINT1 : begin->second.ABSOLUTE_POINT2 ;
                         Point<int> left = (begin->second.ABSOLUTE_POINT1.x < begin->second.ABSOLUTE_POINT2.x) ? begin->second.ABSOLUTE_POINT1 : begin->second.ABSOLUTE_POINT2 ;
                         // print left_down_corner
-                        cout << left.x << " " << left.y - (begin->second.ROUNTWIDTH / 2) << " ";
+                        fprintf(pFile, "%d %d " ,left.x , left.y - (begin->second.ROUNTWIDTH / 2) );
+//                        cout << left.x << " " << left.y - (begin->second.ROUNTWIDTH / 2) << " ";
                         // MetalName
-                        cout << begin->first << " ";
+                        fprintf(pFile, "%s " ,begin->first.c_str());
+//                        cout << begin->first << " ";
                         // print right_up_corner
-                        cout << right.x << " " << right.y + (begin->second.ROUNTWIDTH / 2) << " " ;
+                        fprintf(pFile, "%d %d " ,right.x , right.y + (begin->second.ROUNTWIDTH / 2) );
+//                        cout << right.x << " " << right.y + (begin->second.ROUNTWIDTH / 2) << " " ;
                     }
                     else
                     {
                         // MetalName
-                        cout << begin->first << " ";
+//                        cout << begin->first << " ";
+                        fprintf(pFile, "%s " ,begin->first.c_str());
                         Point<int> top = (begin->second.ABSOLUTE_POINT1.y > begin->second.ABSOLUTE_POINT2.y) ? begin->second.ABSOLUTE_POINT1 : begin->second.ABSOLUTE_POINT2 ;
                         Point<int> bottom = (begin->second.ABSOLUTE_POINT1.y < begin->second.ABSOLUTE_POINT2.y) ? begin->second.ABSOLUTE_POINT1 : begin->second.ABSOLUTE_POINT2 ;
                         // print left_down_corne
-                        cout << bottom.x - (begin->second.ROUNTWIDTH / 2) << " " << bottom.y << " ";
+                        fprintf(pFile, "%d %d " , bottom.x - (begin->second.ROUNTWIDTH / 2) , bottom.y);
+//                        cout << bottom.x - (begin->second.ROUNTWIDTH / 2) << " " << bottom.y << " ";
                         // MetalName
-                        cout << begin->first << " ";
+                        fprintf(pFile, "%s " ,begin->first.c_str());
+//                        cout << begin->first << " ";
                         // print right_up_corner
-                        cout << top.x + (begin->second.ROUNTWIDTH / 2) << " " << top.y << " " ;
+                        fprintf(pFile, "%d %d " , top.x + (begin->second.ROUNTWIDTH / 2) , top.y);
+//                        cout << top.x + (begin->second.ROUNTWIDTH / 2) << " " << top.y << " " ;
                     }
+                    fprintf(pFile, "R%s_%d \n" , PinNames[i].c_str() , R_cnt);
+//                    cout << "R" << PinNames[i] << "_" << R_cnt << " ";
                     
-                    cout << "R" << PinNames[i] << "_" << R_cnt << " ";
-                    
-                    cout << endl;
+//                    cout << endl;
                     R_cnt++ ;
                 }
                 begin++;
             }
         }
-        cout << endl ;
+        fprintf(pFile, "\n");
+//        cout << endl ;
         
     }
+    fclose(pFile);
 }
 pair<Point<int>, Point<int>> Converter::getBlockCoordinate(int x , int y , int width , int length  , string orient  )
 {
@@ -142,4 +160,15 @@ bool Converter::isHorizontal(Point<int> pt1 , Point<int> pt2)
         return true ;
     else
         return false ;
+}
+void Converter::putFile(string FileName , vector<string> Data)
+{
+    fstream fs(FileName , ios::out);
+    if(!fs) cerr << "Failed to open file";
+    for(int i = 0 ; i < Data.size() ; i++)
+    {
+        fs << Data[i] ;
+    }
+    fs.close();
+    
 }

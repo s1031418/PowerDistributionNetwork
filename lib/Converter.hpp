@@ -18,7 +18,7 @@ class Converter {
 public:
     Converter();
     ~Converter();
-    void toDebugMsg();
+    void toLocationFile();
     void toSpice();
 private:
     // return 左下角座標及右上角座標
@@ -27,6 +27,6 @@ private:
     pair<int,int> getDirection(string orient , int  width, int  length );
     bool isHorizontal(Point<int> pt1 , Point<int> pt2);
     
-    
+    void putFile(string FileName , vector<string> Data );
 };
 #endif /* Converter_hpp */

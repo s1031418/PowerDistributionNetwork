@@ -280,3 +280,14 @@ void Debugger::printDieArea(Diearea & diearea)
     cout << "DIEAREA" << " ( " << diearea.pt1.x << " " << diearea.pt1.y << " )";
     cout << " ( " << diearea.pt2.x << " " << diearea.pt2.y << " )" << endl;
 }
+
+template<typename T >
+vector<string> Debugger::getUniqueKeys(T & Maps)
+{
+    vector<string> temp ;
+    for( auto it = Maps.begin(), end = Maps.end(); it != end;it = Maps.upper_bound(it->first))
+    {
+        temp.push_back(it->first);
+    }
+    return temp ;
+}

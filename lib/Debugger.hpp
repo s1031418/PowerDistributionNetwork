@@ -13,10 +13,14 @@
 #include "Components.h"
 #include <map>
 #include <iostream>
+#include <vector>
+#include <string>
 using namespace std ;
+
 class Debugger{
     
 public:
+    // Print function
     void printLayerMsg(string LayerName , map<string,Layer> & LM );
     void printViaMsg(string ViaName , map<string,Via> & VM );
     void printMacroMsg(string MacroName , map<string,Macro> & MM );
@@ -53,6 +57,9 @@ public:
     
     // print DIE AREA
     void printDieArea(Diearea & diearea);
+    
+    template<typename T>
+    vector<string> getUniqueKeys(T & Map);
 };
 
 #endif /* Debugger_hpp */

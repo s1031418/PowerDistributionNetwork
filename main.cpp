@@ -65,7 +65,7 @@ int main(int argc,  char * argv[])
 //    db.printAllWeightMsg(WeightsMaps);
     
     Converter converter ;
-    converter.toDebugMsg();
+    converter.toLocationFile();
     
 //    converter.toSpice();
     delete[] lefargv;
