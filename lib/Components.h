@@ -8,7 +8,7 @@
 
 #ifndef Components_h
 #define Components_h
-
+#include <iostream>
 #include <string>
 #include <map>
 // A technology LEF file contains all of the LEF technology information for a design,
@@ -75,10 +75,52 @@ public:
 template <class T>
 class Point
 {
+    template <class U>
+    friend std::ostream &operator<<( std::ostream &, Point< U > & );
+    
 public:
     T x = -1;
     T y = -1;
+    Point(){};
+    Point(T X , T Y);
+//    Point() (T X , T Y )
+//    {
+//        this->x = X ;
+//        this->y = Y ; 
+//    }
+    ~Point<T>()
+    {
+    }
+    const Point<T> & operator=(const Point<T> & right)
+    {
+        if( this != &right )
+        {
+            this->x = right.x;
+            this->y = right.y;
+        }
+        return *this ;
+    }
+    bool operator==(const Point<T> & right)
+    {
+        return (this->x == right.x && this->y == right.y);
+    }
+    
+    
 };
+// Point function
+
+template <class T>
+Point<T>::Point (T X , T Y)
+{
+    this->x = X ;
+    this->y = Y ;
+}
+template <class T>
+std::ostream & operator<<( std::ostream & output , Point< T > & point )
+{
+    output << "( " << point.x << " " << point.y << " )";
+    return output ; 
+}
 
 class InnerLayer {
 public:
@@ -174,7 +216,8 @@ public:
 class Diearea{
     
 public:
-    Point<int> pt1 ;
+    Point<int>
+    pt1 ;
     Point<int> pt2 ;
 };
 // sub components

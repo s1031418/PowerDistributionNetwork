@@ -17,6 +17,7 @@
 #include <cstdio>
 #include "lib/Debugger.hpp"
 #include <memory>
+#include "PDN.hpp"
 #include "Converter.hpp"
 #include <stdexcept>
 #include <array>
@@ -32,6 +33,7 @@ void rundef(char * argv[]);
 
 int main(int argc,  char * argv[])
 {
+    
     // declare objects
     InitialFileParser initialfile(argv[5]) ;
     defrw def ;
@@ -43,6 +45,13 @@ int main(int argc,  char * argv[])
     lef.run(3, lefargv);
     def.run(2, defargv);
     initialfile.run();
+   
+//    PDN pdn ;
+    
+    
+    
+    
+    
     
 //    Debugger db ;
 //    cout << "tech lef file" << endl;
@@ -65,7 +74,8 @@ int main(int argc,  char * argv[])
 //    db.printAllWeightMsg(WeightsMaps);
     
     Converter converter ;
-    converter.toLocationFile();
+    converter.toSpice();
+//    converter.toLocationFile();
     
 //    converter.toSpice();
     delete[] lefargv;
