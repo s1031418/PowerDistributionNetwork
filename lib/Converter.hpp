@@ -15,7 +15,8 @@
 #include "PDNHelper.hpp"
 using namespace std;
 
-enum class orient
+
+enum orient
 {
     TOP,
     DOWN,

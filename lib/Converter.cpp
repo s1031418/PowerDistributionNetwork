@@ -170,7 +170,7 @@ int Converter::getDistance(Point<int> pt1, Point<int> pt2)
 Point<int> Converter::FlipY(float x_axis , Point<int> pt , orient orientation)
 {
     int x = 0 , y = 0;
-    if( orientation == orient::RIGHT)
+    if( orientation == RIGHT)
     {
         float distance = x_axis - pt.x ;
         x = pt.x + 2 * distance;
@@ -187,7 +187,7 @@ Point<int> Converter::FlipX(float y_axis , Point<int> pt , orient orientation)
 {
     
     int x = 0 , y = 0;
-    if( orientation == orient::TOP)
+    if( orientation == TOP)
     {
         float distance = y_axis - pt.y ;
         y = pt.y + 2 * distance ;
@@ -215,8 +215,8 @@ pair<Point<int>, Point<int>> Converter::getRotatePoint(Point<int> BlcokLeftDown 
     }
     else if (orient == "FN")
     {
-        Point<int> RightDown= FlipY(x_axis, BlockPinLeftDown , orient::RIGHT); //變成右下角
-        Point<int> LeftUp = FlipY(x_axis, BlockPinRightUp , orient::RIGHT); //變成左上角
+        Point<int> RightDown= FlipY(x_axis, BlockPinLeftDown , RIGHT); //變成右下角
+        Point<int> LeftUp = FlipY(x_axis, BlockPinRightUp , RIGHT); //變成左上角
         return make_pair(Point<int>( LeftUp.x, RightDown.y), Point<int>( RightDown.x , LeftUp.y ));
     }
     else if (orient == "W")
@@ -232,20 +232,20 @@ pair<Point<int>, Point<int>> Converter::getRotatePoint(Point<int> BlcokLeftDown 
         pair<Point<int>, Point<int>> W = getRotatePoint(BlcokLeftDown, BlcokRightUp, BlockPinLeftDown, BlockPinRightUp, "W");
         pair<Point<int>, Point<int>> BlockCoordinate = getBlockCoordinate(BlcokLeftDown.x, BlcokLeftDown.y,BlockWidth , BlockLength, "W");
         x_axis = get<0>(BlockCoordinate).x + BlockLength / 2 ;
-        Point<int> RightDown = FlipY(x_axis, get<0>(W) , orient::LEFT);
-        Point<int> LeftUp = FlipY(x_axis, get<1>(W), orient::LEFT);
+        Point<int> RightDown = FlipY(x_axis, get<0>(W) , LEFT);
+        Point<int> LeftUp = FlipY(x_axis, get<1>(W), LEFT);
         return make_pair(Point<int>( LeftUp.x, RightDown.y), Point<int>( RightDown.x , LeftUp.y ));
     }
     else if (orient == "S")
     {
         
-        return make_pair( FlipY(x_axis, FlipX(y_axis, BlockPinRightUp, orient::TOP), orient::RIGHT), FlipY(x_axis, FlipX(y_axis, BlockPinLeftDown, orient::TOP), orient::RIGHT));
+        return make_pair( FlipY(x_axis, FlipX(y_axis, BlockPinRightUp, TOP), RIGHT), FlipY(x_axis, FlipX(y_axis, BlockPinLeftDown, TOP), RIGHT));
     }
     else if (orient == "FS")
     {
         pair<Point<int>, Point<int>> S = getRotatePoint(BlcokLeftDown, BlcokRightUp, BlockPinLeftDown, BlockPinRightUp, "S");
-        Point<int> RightDown = FlipY(x_axis, get<0>(S), orient::LEFT);
-        Point<int> LeftUp = FlipY(x_axis, get<1>(S), orient::LEFT);
+        Point<int> RightDown = FlipY(x_axis, get<0>(S), LEFT);
+        Point<int> LeftUp = FlipY(x_axis, get<1>(S), LEFT);
         return make_pair(Point<int>( LeftUp.x, RightDown.y), Point<int>( RightDown.x , LeftUp.y ));
     }
     else if (orient == "E")
@@ -258,8 +258,8 @@ pair<Point<int>, Point<int>> Converter::getRotatePoint(Point<int> BlcokLeftDown 
     {
         pair<Point<int>, Point<int>> E = getRotatePoint(BlcokLeftDown, BlcokRightUp, BlockPinLeftDown, BlockPinRightUp, "E");
         x_axis = BlcokLeftDown.x + BlockLength / 2 ;
-        Point<int> LeftUp = FlipY(x_axis, get<1>(E), orient::RIGHT);
-        Point<int> RightDown = FlipY(x_axis, get<0>(E), orient::RIGHT);
+        Point<int> LeftUp = FlipY(x_axis, get<1>(E), RIGHT);
+        Point<int> RightDown = FlipY(x_axis, get<0>(E), RIGHT);
         return make_pair(Point<int>( LeftUp.x, RightDown.y), Point<int>( RightDown.x , LeftUp.y ));
     }
     return make_pair(Point<int>(0,0), Point<int>(0,0));

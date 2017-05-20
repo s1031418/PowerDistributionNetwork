@@ -1,6 +1,6 @@
 
 
-CXX = g++ 
+CXX = g++
 CXXFLAGS = -std=c++11  -I Parsers -I include -I lib
 OBJS = main.o Parsers/Parsers.o lib/Debugger.o Parsers/lefrw.o Parsers/defrw.o Parsers/InitialFileParser.o lib/Converter.o lib/PDN.o lib/PDNHelper.o
 STATICLIB = lib/liblef.a lib/libdef.a
