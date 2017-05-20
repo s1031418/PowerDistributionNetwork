@@ -167,7 +167,7 @@ int Converter::getDistance(Point<int> pt1, Point<int> pt2)
     else
         return abs(pt1.y - pt2.y);
 }
-Point<int> Converter::FlipY(float x_axis , Point<int> pt , orient orientation)
+Point<int> Converter::FlipY(float x_axis , Point<int> pt , FlipOrient orientation)
 {
     int x = 0 , y = 0;
     if( orientation == RIGHT)
@@ -183,7 +183,7 @@ Point<int> Converter::FlipY(float x_axis , Point<int> pt , orient orientation)
     y = pt.y;
     return Point<int>(x,y);
 }
-Point<int> Converter::FlipX(float y_axis , Point<int> pt , orient orientation)
+Point<int> Converter::FlipX(float y_axis , Point<int> pt , FlipOrient orientation)
 {
     
     int x = 0 , y = 0;

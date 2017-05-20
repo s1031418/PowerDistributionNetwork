@@ -16,7 +16,7 @@
 using namespace std;
 
 
-enum orient
+enum FlipOrient
 {
     TOP,
     DOWN,
@@ -65,8 +65,8 @@ private:
     void BuildBlockMaps();
     void BuildCrossPointMap();
     void initConverterState();
-    Point<int> FlipX(float y_axis , Point<int> pt , orient orientation);
-    Point<int> FlipY(float x_axis , Point<int> pt , orient orientation);
+    Point<int> FlipX(float y_axis , Point<int> pt , FlipOrient orientation);
+    Point<int> FlipY(float x_axis , Point<int> pt , FlipOrient orientation);
     void initLineMap(std::multimap<std::string,Nets> NetsMM , map<string , vector<Line>> & lineMap);
     bool isCross(Line line1 , Line line2);
     Point<int> getCrossPoint(Line line1 , Line line2);
