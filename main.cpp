@@ -16,9 +16,9 @@
 #include "InitialFileParser.hpp"
 #include <cstdio>
 #include "lib/Debugger.hpp"
+#include "Converter.hpp"
 #include <memory>
 #include "PDN.hpp"
-#include "Converter.hpp"
 #include <stdexcept>
 #include <array>
 using namespace std ;
@@ -49,10 +49,17 @@ int main(int argc,  char * argv[])
 //    PDN pdn ;
     
     
+    Point<int>a(8,4);
+    Point<int>b(8,0);
     
     
     
     
+//    Line line(Point<int>(0,0) , Point<int>(1,1));
+//    cout << line << endl;
+//    map<Line,int> amap ;
+//    amap.insert(make_pair(line, 0));
+//    cout << amap[line] << endl;
 //    Debugger db ;
 //    cout << "tech lef file" << endl;
 //    db.printAllLayerMsg(LayerMaps);
@@ -74,7 +81,7 @@ int main(int argc,  char * argv[])
 //    db.printAllWeightMsg(WeightsMaps);
     
     Converter converter ;
-    converter.toSpice();
+//    converter.toSpice2();
 //    converter.toLocationFile();
     
 //    converter.toSpice();

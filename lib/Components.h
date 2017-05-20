@@ -8,6 +8,7 @@
 
 #ifndef Components_h
 #define Components_h
+#include <assert.h>
 #include <iostream>
 #include <string>
 #include <map>
@@ -91,6 +92,7 @@ public:
     ~Point<T>()
     {
     }
+    
     const Point<T> & operator=(const Point<T> & right)
     {
         if( this != &right )
@@ -98,6 +100,27 @@ public:
             this->x = right.x;
             this->y = right.y;
         }
+        return *this ;
+    }
+    Point<T> operator*(double number)
+    {
+        Point<T> temp = *this ;
+        temp.x *= number ;
+        temp.y *= number ;
+        return temp ;
+    }
+    Point<T> operator+( Point<T> & right)
+    {
+        Point<T> temp = *this ;
+        temp.x += right.x ;
+        temp.y += right.y ;
+        return temp ;
+    }
+    
+    Point<T> operator+=( Point<T> & right)
+    {
+        this->x += right.x ;
+        this->y += right.y ;
         return *this ;
     }
     bool operator==(const Point<T> & right)
@@ -121,6 +144,72 @@ std::ostream & operator<<( std::ostream & output , Point< T > & point )
     output << "( " << point.x << " " << point.y << " )";
     return output ; 
 }
+
+
+
+class Line
+{
+    friend std::ostream &operator<<(  std::ostream & output,  Line & line)
+    {
+        output << line.pt1 << " " << line.pt2 ;
+        return output ;
+    };
+public:
+    //假如水平線，pt1為左邊，pt2為右邊 垂直線pt1為下面，pt2為上面
+    Line(){};
+    Line(Point<int> X , Point<int> Y)
+    {
+        pt1 = X ;
+        pt2 = Y ;
+    };
+    ~Line(){};
+    
+    Point<int> pt1;
+    Point<int> pt2;
+    std::string MetalName ;
+    int layer ; 
+    int Width = -1;
+    bool isHorizontal ;
+    
+    inline bool operator< (const Line& right) const
+    {
+        // 目前還沒寫
+        return true ;
+//        if( this->pt1.x ==  right.pt1.x &&  this->pt1.y ==  right.pt1.y && this->pt2.x ==  right.pt2.x &&  this->pt2.y ==  right.pt2.y) return  false;
+//        if(this->pt1.x == this->pt2.x && right.pt1.x == right.pt2.x) // vertical
+//        {
+//            return (this->pt1.y <   right.pt2.y);
+//        }
+//        else if (this->pt1.y == this->pt2.y && right.pt1.y == right.pt2.y) // horizontal
+//        {
+//            return (this->pt1.x <   right.pt2.x) ;
+//        }
+//        return true ;
+
+        
+    }
+    const Line & operator=(const Line & right  )
+    {
+        if( this != &right )
+        {
+            this->pt1 = right.pt1 ;
+            this->pt2 = right.pt2 ;
+            this->MetalName = right.MetalName ;
+            this->Width = right.Width ;
+            this->isHorizontal = right.isHorizontal ;
+        }
+        return *this ;
+    }
+    bool operator==(const Line & right)
+    {
+        return (this->pt1== right.pt1 && this->pt2 == right.pt2
+                && this->MetalName == right.MetalName && this->Width == right.Width && this->isHorizontal == right.isHorizontal);
+    }
+    
+};
+
+
+
 
 class InnerLayer {
 public:
@@ -216,8 +305,7 @@ public:
 class Diearea{
     
 public:
-    Point<int>
-    pt1 ;
+    Point<int> pt1 ;
     Point<int> pt2 ;
 };
 // sub components
