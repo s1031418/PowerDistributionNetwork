@@ -46,7 +46,7 @@ int main(int argc,  char * argv[])
     def.run(2, defargv);
     initialfile.run();
    
-//    PDN pdn ;
+    PDN pdn ;
     
     
     Point<int>a(8,4);

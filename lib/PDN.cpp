@@ -32,64 +32,26 @@ void PDN::Init()
 }
 void PDN::initGraph()
 {
-    int RowIndex = 0;
-    int ColumnIndex = 0;
     Point<int> StartPoint(0,0) ;
-    int LastX = 0 , LastY = 0 ;
-    vector<Grid> temp ;
+    
     for( auto h : Horizontal )
     {
+        vector<Grid> temp ;
         for(auto v : Vertical)
         {
             Grid grid ;
             Point<int> CrossPoint(v,h);
             grid.Width = CrossPoint.x - StartPoint.x ;
             grid.Length = CrossPoint.y - StartPoint.y ;
+            grid.StartPoint = StartPoint ;
             StartPoint.x += (CrossPoint.x - StartPoint.x) ;
-            cout << grid.Width << " " << grid.Length << endl;
+            temp.push_back(grid);
+//            cout << grid.Width << " " << grid.Length << endl;
         }
         StartPoint.x = 0 ;
         StartPoint.y = h ;
-    }
-    cout << "-----------------------------"<<endl;
-    for(auto h = Horizontal.begin() ; h != Horizontal.end() ; ++h )
-    {
-        
-        for( auto v = Vertical.begin() ; v != Vertical.end() ; ++v )
-        {
-            
-            Grid grid ;
-            Point<int> CrossPoint(*v,*h);
-            if( v  == Vertical.begin())
-            {
-                grid.Width = *v  ;
-                LastX = grid.Width;
-            }
-            else
-            {
-                grid.Width = *v - LastX ;
-                LastX = *v ;
-            }
-            if( h == Horizontal.begin() )
-            {
-                grid.Length = *h  ;
-                LastY = grid.Length;
-            }
-            else
-            {
-                grid.Length = *h - LastY;
-            }
-            
-            cout << grid.Width << " " << grid.Length << endl;
-            temp.push_back(grid);
-            ColumnIndex++;
-        }
         Graph.push_back(temp);
-        temp.clear();
-        LastY = *h ;
-        RowIndex++;
     }
-    cout << "-----------------------------"<<endl;
     for(auto a : Graph)
     {
         for(auto b : a )

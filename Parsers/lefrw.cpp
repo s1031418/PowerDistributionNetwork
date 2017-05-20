@@ -151,8 +151,9 @@ void lefVia(lefiVia *via) {
                     fprintf(fout, " %g %g ", poly.x[k], poly.y[k]);
                 //fprintf(fout, ";\n");
             }
+            VIA.InnerMaps.insert(std::make_pair(innerlayer.NAME, innerlayer));
         }
-        VIA.InnerMaps.insert(std::make_pair(innerlayer.NAME, innerlayer));
+        
     }
     if (via->lefiVia::hasViaRule()) {
         fprintf(fout, "  VIARULE %s ;\n", via->lefiVia::viaRuleName());

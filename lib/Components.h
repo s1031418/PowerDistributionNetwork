@@ -167,7 +167,6 @@ public:
     Point<int> pt1;
     Point<int> pt2;
     std::string MetalName ;
-    int layer ; 
     int Width = -1;
     bool isHorizontal ;
     

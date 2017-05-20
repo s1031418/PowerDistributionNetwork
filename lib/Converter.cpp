@@ -79,19 +79,13 @@ void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string ,
             if( first->second.ROUNTWIDTH == 0 ) // VIA
             {
                 line.pt1 = first->second.ABSOLUTE_POINT1 ;
-                if(first->second.VIANAME[3] >= 48 && first->second.VIANAME[3] <= 57 )
+                for( auto x :ViaMaps[first->second.VIANAME].InnerMaps )
                 {
-                    if(first->second.VIANAME[4] >= 48 && first->second.VIANAME[4] <= 57)
+                    if(LayerMaps[x.first].TYPE == "ROUTING")
                     {
-                        line.layer = 10* (first->second.VIANAME[3] - 48) + (first->second.VIANAME[4] - 48) ;
+                        LineMap[x.first].push_back(line);
                     }
-                    else
-                        line.layer = (first->second.VIANAME[3] - 48) ;
                 }
-                string key1 = "METAL" + to_string(line.layer);
-                string key2 = "METAL" + to_string(line.layer+1);
-                LineMap[key1].push_back(line);
-                LineMap[key2].push_back(line);
                 first++ ;
                 continue;
             }
