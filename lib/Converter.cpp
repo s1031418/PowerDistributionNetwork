@@ -31,31 +31,28 @@ void Converter::initConverterState()
     {
         PinNames.push_back(it->first);
     }
-    // init lines
-    for(int i = 0 ; i < PinNames.size() ; i++)
-    {
-        initLineMap(SpecialNetsMaps[ PinNames[i] ].NETSMULTIMAPS);
-    }
-    BuildCrossPointMap();
-    BuildBlockMaps();
+    
+
+//    BuildCrossPointMap();
+//    BuildBlockMaps();
 }
 void Converter::BuildCrossPointMap()
 {
     
-    for(int i = 0 ; i < lines.size() ; i++)
-    {
-        vector<Point<int>> CrossPoints;
-        for(int j = 0 ; j < lines.size() ; j++)
-        {
-            Point<int> CrossPoint = getCrossPoint(lines[i], lines[j]);
-            if(CrossPoint.x != -1 && CrossPoint.y != -1)
-                CrossPoints.push_back(CrossPoint);
-        }
-        if( !CrossPoints.empty() )
-        {
-            CrossPointMap.insert(make_pair(lines[i], CrossPoints));
-        }
-    }
+//    for(int i = 0 ; i < lines.size() ; i++)
+//    {
+//        vector<Point<int>> CrossPoints;
+//        for(int j = 0 ; j < lines.size() ; j++)
+//        {
+//            Point<int> CrossPoint = getCrossPoint(lines[i], lines[j]);
+//            if(CrossPoint.x != -1 && CrossPoint.y != -1)
+//                CrossPoints.push_back(CrossPoint);
+//        }
+//        if( !CrossPoints.empty() )
+//        {
+//            CrossPointMap.insert(make_pair(lines[i], CrossPoints));
+//        }
+//    }
     
 }
 Point<int> Converter::getCrossPoint(Line line1 , Line line2)
@@ -82,7 +79,19 @@ void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string ,
             if( first->second.ROUNTWIDTH == 0 ) // VIA
             {
                 line.pt1 = first->second.ABSOLUTE_POINT1 ;
-                if( first->second.VIANAME )
+                if(first->second.VIANAME[3] >= 48 && first->second.VIANAME[3] <= 57 )
+                {
+                    if(first->second.VIANAME[4] >= 48 && first->second.VIANAME[4] <= 57)
+                    {
+                        line.layer = 10* (first->second.VIANAME[3] - 48) + (first->second.VIANAME[4] - 48) ;
+                    }
+                    else
+                        line.layer = (first->second.VIANAME[3] - 48) ;
+                }
+                string key1 = "METAL" + to_string(line.layer);
+                string key2 = "METAL" + to_string(line.layer+1);
+                LineMap[key1].push_back(line);
+                LineMap[key2].push_back(line);
                 first++ ;
                 continue;
             }
@@ -94,7 +103,7 @@ void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string ,
                 line.pt2 = right ;
                 line.isHorizontal = true ;
                 line.Width = first->second.ROUNTWIDTH;
-                lines.push_back(line);
+                LineMap[first->second.METALNAME].push_back(line) ;
             }
             else
             {
@@ -104,7 +113,7 @@ void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string ,
                 line.pt2 = top ;
                 line.isHorizontal = false ;
                 line.Width = first->second.ROUNTWIDTH;
-                lines.push_back(line);
+                LineMap[first->second.METALNAME].push_back(line) ;
             }
             first++;
         }
@@ -113,22 +122,27 @@ void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string ,
 }
 void Converter::toSpice2()
 {
-    map<string , vector<Line>> lineMap;
-    for(int i = 0 ; i < PinNames.size() ; i++)
+    
+    for(auto PinName : PinNames)
     {
-        initLineMap(SpecialNetsMaps[ PinNames[i] ].NETSMULTIMAPS , lineMap);
-        
+        map<string , vector<Line>> lineMap;
+        for(auto it = SpecialNetsMaps[PinName].NETSMULTIMAPS.begin() , end = SpecialNetsMaps[PinName].NETSMULTIMAPS.end() ; it != end ; it =  SpecialNetsMaps[PinName].NETSMULTIMAPS.upper_bound(it->first))
+        {
+            vector<Line> vec_line ;
+            lineMap.insert(make_pair(it->first, vec_line));
+        }
+        initLineMap(SpecialNetsMaps[PinName].NETSMULTIMAPS, lineMap);
+        for(auto line_vec : lineMap)
+        {
+            cout << line_vec.first << ":  " << endl ;
+            for(auto line : line_vec.second)
+            {
+                cout << line << endl;
+            }
+        }
     }
     
-    for(auto line : lines)
-    {
-//        cout << line << endl;
-        
-        vector<Point<int>> CrossPoints = CrossPointMap[line] ;
-//        cout << line << endl;
-        print(CrossPoints,line);
-        cout << endl;
-    }
+    
 }
 pair<Point<int>, Point<int>> Converter::getOrder(Point<int> pt1, Point<int> pt2)
 {

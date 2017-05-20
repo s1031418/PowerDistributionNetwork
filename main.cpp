@@ -80,8 +80,9 @@ int main(int argc,  char * argv[])
 //    db.printAllConstraintMsg(ConstraintMaps);
 //    db.printAllWeightMsg(WeightsMaps);
     
+    
     Converter converter ;
-//    converter.toSpice2();
+    converter.toSpice2();
 //    converter.toLocationFile();
     
 //    converter.toSpice();
