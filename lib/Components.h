@@ -12,6 +12,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <vector>
 // A technology LEF file contains all of the LEF technology information for a design,
 // such as placement and routing design rules, and process information for layers.
 
@@ -169,7 +170,8 @@ public:
     std::string MetalName ;
     int Width = -1;
     bool isHorizontal ;
-    
+    bool isPsedoLine = false;
+    std::vector<std::string> ViaMetal;
     inline bool operator< (const Line& right) const
     {
         // 目前還沒寫
@@ -352,6 +354,13 @@ public:
     
 };
 
+
+class Block {
+public:
+    Point<int> LeftDown ;
+    Point<int> RightUp ;
+    std::vector<std::string> Metals ;
+};
 
 
 

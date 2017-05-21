@@ -46,41 +46,15 @@ int main(int argc,  char * argv[])
     def.run(2, defargv);
     initialfile.run();
    
-    PDN pdn ;
-    
-    
-    Point<int>a(8,4);
-    Point<int>b(8,0);
-    
-    
-    
-    
-//    Line line(Point<int>(0,0) , Point<int>(1,1));
-//    cout << line << endl;
-//    map<Line,int> amap ;
-//    amap.insert(make_pair(line, 0));
-//    cout << amap[line] << endl;
-//    Debugger db ;
-//    cout << "tech lef file" << endl;
-//    db.printAllLayerMsg(LayerMaps);
-//    db.printAllViaMsg(ViaMaps);
-//    cout << endl;
-//    cout << "Block lef file" << endl;
-//    db.printAllMacroMsg(MacroMaps);
-//    cout << endl ;
-//    cout << "Def file" << endl;
-//    db.printDieArea(DIEAREA);
-//    db.printAllComponentMsg(ComponentMaps);
-//    db.printAllPinMsg(PinMaps);
-//    db.printAllSpecialNetMsg(SpecialNetsMaps);
-    
-//    cout << "initial File" << endl ;
-//    db.printAllCurrentMsg(CurrnetMaps);
-//    db.printAllVoltageMsg(VoltageMaps);
-//    db.printAllConstraintMsg(ConstraintMaps);
-//    db.printAllWeightMsg(WeightsMaps);
-    
-    
+//    PDN pdn ;
+//    map<Line , vector<Point<int>>,MyComparator> CrossPointMap ;
+//    Line l ;
+//    l.ViaMetal.push_back("METAL5");
+//    l.ViaMetal.push_back("METAL6");
+//    vector<Point<int>> t ;
+//    t.push_back(Point<int>(0,0));
+//    CrossPointMap.insert(make_pair(l, t));
+//    cout <<"rr";
     Converter converter ;
     converter.toSpice2();
 //    converter.toLocationFile();

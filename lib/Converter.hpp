@@ -16,6 +16,7 @@
 using namespace std;
 
 
+
 enum FlipOrient
 {
     TOP,
@@ -38,11 +39,6 @@ struct MyComparator
     }
 };
 
-struct Block {
-    Point<int> LeftDown ;
-    Point<int> RightUp ;
-    vector<string> Metals ;
-};
 
 class Converter {
     
@@ -56,21 +52,22 @@ private:
     
     vector<string> PinNames;
     
-    map<Line , vector<Point<int>>,MyComparator> CrossPointMap ;
+    
     // key:BlockName
     map<string , vector<Block> > BlockMaps ;
-    map<string , Line> ViaMap; 
+    
     PDNHelper myhelper ; 
     
+    void initCrossPointMap(map<Line , vector<Point<int>>,MyComparator> & CrossPointMap ,map<string , vector<Line>> & lineMap , string PinName);
     void BuildBlockMaps();
     void BuildCrossPointMap();
     void initConverterState();
     Point<int> FlipX(float y_axis , Point<int> pt , FlipOrient orientation);
     Point<int> FlipY(float x_axis , Point<int> pt , FlipOrient orientation);
     void initLineMap(std::multimap<std::string,Nets> NetsMM , map<string , vector<Line>> & lineMap);
-    bool isCross(Line line1 , Line line2);
-    Point<int> getCrossPoint(Line line1 , Line line2);
-    void print(vector<Point<int>> CrossPoints, Line myline);
+    
+    
+    void print(map<Line , vector<Point<int>>,MyComparator> & CrossPointMap);
     
     double calculateResistance(double rpsq , int width , double length );
     int getDistance(Point<int> pt1, Point<int> pt2);

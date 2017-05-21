@@ -31,39 +31,55 @@ void Converter::initConverterState()
     {
         PinNames.push_back(it->first);
     }
-    
-
-//    BuildCrossPointMap();
-//    BuildBlockMaps();
+    BuildBlockMaps();
+    BuildCrossPointMap();
 }
-void Converter::BuildCrossPointMap()
+void Converter::initCrossPointMap(map<Line , vector<Point<int>>,MyComparator> & CrossPointMap ,map<string , vector<Line>> & lineMap , string PinName )
 {
-    
-//    for(int i = 0 ; i < lines.size() ; i++)
-//    {
-//        vector<Point<int>> CrossPoints;
-//        for(int j = 0 ; j < lines.size() ; j++)
-//        {
-//            Point<int> CrossPoint = getCrossPoint(lines[i], lines[j]);
-//            if(CrossPoint.x != -1 && CrossPoint.y != -1)
-//                CrossPoints.push_back(CrossPoint);
-//        }
-//        if( !CrossPoints.empty() )
-//        {
-//            CrossPointMap.insert(make_pair(lines[i], CrossPoints));
-//        }
-//    }
-    
-}
-Point<int> Converter::getCrossPoint(Line line1 , Line line2)
-{
-    Point<int> CrossPoint ;
-    if(isCross(line1, line2))
+    Point<int> PowerPinST = PinMaps[PinName].STARTPOINT ;
+    for( auto vec : lineMap )
     {
-        CrossPoint.x = ( !line1.isHorizontal ) ? line1.pt1.x : line2.pt1.x ;
-        CrossPoint.y = ( line1.isHorizontal ) ? line1.pt1.y : line2.pt1.y ;
+        for(int i = 0 ; i < vec.second.size() ; i++)
+        {
+            vector<Point<int>> CrossPoints;
+            // 判斷是不是起點
+            if(vec.second[i].pt1 == PowerPinST || vec.second[i].pt2 == PowerPinST)
+                CrossPoints.push_back(PowerPinST);
+            // 判斷是不是終點
+            Point<int> Result = myhelper.getEndPoint(BlockMaps, vec.second[i].pt1) ;
+            if( Result.x != -1 && Result.y != -1 )
+                CrossPoints.push_back(Result);
+            Result = myhelper.getEndPoint(BlockMaps, vec.second[i].pt2) ;
+            if( Result.x != -1 && Result.y != -1 )
+                CrossPoints.push_back(Result);
+            
+            for(int j = 0 ; j < vec.second.size() ; j++)
+            {
+                if( !vec.second[i].isPsedoLine  )//代表不是psudo line
+                {
+                    
+                    Point<int> CrossPoint = myhelper.getCrossPoint(vec.second[i], vec.second[j]);
+                    if( CrossPoint.x != -1 && CrossPoint.y != -1 )
+                    {
+                        bool isDuplicate = false ;
+                        for(int k = 0 ; k < CrossPoints.size() ; k++)
+                        {
+                            if(CrossPoints[k] == CrossPoint)
+                            {
+                                isDuplicate = true ;
+                                break ;
+                            }
+                            
+                        }
+                        if(!isDuplicate)
+                            CrossPoints.push_back(CrossPoint);
+                    }
+                }
+            }
+            CrossPointMap.insert(make_pair(vec.second[i], CrossPoints));
+        }
     }
-    return CrossPoint ;
+        
 }
 void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string , vector<Line>> & LineMap)
 {
@@ -79,13 +95,18 @@ void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string ,
             if( first->second.ROUNTWIDTH == 0 ) // VIA
             {
                 line.pt1 = first->second.ABSOLUTE_POINT1 ;
+                line.isPsedoLine = true ; 
                 for( auto x :ViaMaps[first->second.VIANAME].InnerMaps )
                 {
                     if(LayerMaps[x.first].TYPE == "ROUTING")
                     {
-                        LineMap[x.first].push_back(line);
+                        line.ViaMetal.push_back(x.first);
+                        
+                        //LineMap[x.first].push_back(line);
                     }
                 }
+                for(auto layer : line.ViaMetal)
+                    LineMap[layer].push_back(line);
                 first++ ;
                 continue;
             }
@@ -96,6 +117,7 @@ void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string ,
                 line.pt1 = left ;
                 line.pt2 = right ;
                 line.isHorizontal = true ;
+                line.MetalName = first->second.METALNAME;
                 line.Width = first->second.ROUNTWIDTH;
                 LineMap[first->second.METALNAME].push_back(line) ;
             }
@@ -106,6 +128,7 @@ void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string ,
                 line.pt1 = bottom ;
                 line.pt2 = top ;
                 line.isHorizontal = false ;
+                line.MetalName = first->second.METALNAME;
                 line.Width = first->second.ROUNTWIDTH;
                 LineMap[first->second.METALNAME].push_back(line) ;
             }
@@ -126,14 +149,11 @@ void Converter::toSpice2()
             lineMap.insert(make_pair(it->first, vec_line));
         }
         initLineMap(SpecialNetsMaps[PinName].NETSMULTIMAPS, lineMap);
-        for(auto line_vec : lineMap)
-        {
-            cout << line_vec.first << ":  " << endl ;
-            for(auto line : line_vec.second)
-            {
-                cout << line << endl;
-            }
-        }
+        map<Line , vector<Point<int>>,MyComparator> CrossPointMap ;
+        initCrossPointMap(CrossPointMap, lineMap , PinName);
+        
+        print(CrossPointMap);
+        
     }
     
     
@@ -256,6 +276,7 @@ pair<Point<int>, Point<int>> Converter::getRotatePoint(Point<int> BlcokLeftDown 
         Point<int> RightDown = FlipY(x_axis, get<0>(E), RIGHT);
         return make_pair(Point<int>( LeftUp.x, RightDown.y), Point<int>( RightDown.x , LeftUp.y ));
     }
+    assert(0);
     return make_pair(Point<int>(0,0), Point<int>(0,0));
 }
 void Converter::BuildBlockMaps()
@@ -263,17 +284,18 @@ void Converter::BuildBlockMaps()
     
     for( auto component : ComponentMaps )
     {
-        cout << component.first << endl;
         Point<int> BlockLeftDown = component.second.STARTPOINT ;
         Point<int> BlockRightUp ;
         BlockRightUp.x = BlockLeftDown.x + (MacroMaps[component.second.MACROTYPE].WIDTH * UNITS_DISTANCE);
         BlockRightUp.y = BlockLeftDown.y + (MacroMaps[component.second.MACROTYPE].LENGTH * UNITS_DISTANCE);
         string orient = component.second.ORIENT ;
+        vector<Block> temp ;
+        // init BlockMap ， 把每個key都塞一個空的vector
+        BlockMaps.insert(make_pair(component.first,temp));
         for( auto blockpin : MacroMaps[component.second.MACROTYPE].BlockPinMaps)
         {
             
             Block block ;
-            vector<Block> block_vec ;
             for(auto innerlayer : blockpin.second.InnerMaps)
             {
                 block.Metals.push_back(innerlayer.first);
@@ -286,124 +308,49 @@ void Converter::BuildBlockMaps()
             BlockPinRightUp.x = BlockLeftDown.x + RightUpScaling.x ;
             BlockPinRightUp.y = BlockLeftDown.y + RightUpScaling.y ;
             pair<Point<int>, Point<int>> RotatePoint = getRotatePoint(BlockLeftDown , BlockRightUp , BlockPinLeftDown, BlockPinRightUp, orient);
+            block.LeftDown = get<0>(RotatePoint) ;
+            block.RightUp = get<1>(RotatePoint);
             
-            BlockPinLeftDown = get<0>(RotatePoint) ;
-            BlockPinRightUp  = get<1>(RotatePoint) ;
-            cout << BlockPinLeftDown << " " << BlockPinRightUp << endl;
-            
+            BlockMaps[component.first].push_back(block);
         }
         
     }
 }
-void Converter::print(vector<Point<int>> CrossPoints , Line myline)
+void Converter::print(map<Line , vector<Point<int>>,MyComparator> & CrossPointMap)
 {
-    if( CrossPoints.size() == 1 )
+    for(auto x : CrossPointMap)
     {
-        //這裡print跟交叉點距離遠的
-        cout << CrossPoints[0] << " ";
-        pair<Point<int>, Point<int>> order =  getOrder(myline.pt1,myline.pt2);
-        if( getDistance(get<0>(order),CrossPoints[0]) >  getDistance(get<1>(order),CrossPoints[0]))
-            cout << get<0>(order) << endl;
+        Line line =x.first ;
+        // print via
+        
+        
+        if(x.second.size() == 0) // Psudo Line
+        {
+            cout << line.ViaMetal[0] << "_" << line.pt1.x << "_" << line.pt1.y  << " " << line.ViaMetal[1] << line.pt1.x << "_" << line.pt1.y << endl;
+            continue ;
+        }
+        
+        // print wire
+        if(myhelper.isHorizontal(line.pt1, line.pt2))
+        {
+            sort(x.second.begin(), x.second.end(), [](const Point<int> & pt1, const Point<int> & pt2)
+                 {
+                     return pt1.x < pt2.x ;
+                 });
+        }
         else
-            cout << get<1>(order) << endl;
+        {
+            sort(x.second.begin(), x.second.end(), [](const Point<int> & pt1, const Point<int> & pt2)
+                 {
+                     return pt1.y < pt2.y ;
+                 });
+        }
+        for(int i = 0 ; i < x.second.size() -1 ; i++)
+            cout << line.MetalName << " " << x.second[i] << " " << x.second[i+1] << endl;
+        
+    }
+    cout << endl;
 
-    }
-    else if (CrossPoints.size() == 2 )
-    {
-        Point<int> pt1 = CrossPoints[0];
-        Point<int> pt2 = CrossPoints[1];
-        pair<Point<int>, Point<int>> order =  getOrder(pt1,pt2);
-        cout << get<0>(order) << " " << get<1>(order)<< endl;
-    }
-    else if (CrossPoints.size() > 2) // 有並聯
-    {
-        
-    }
-//    if( myline.isHorizontal )
-//    {
-//        //水平線，交叉點按左至右排序
-//        std::sort(CrossPoints.begin(), CrossPoints.end(), [](const Point<int> & pt1, const Point<int> & pt2)
-//        {
-//            return pt1.x < pt2.x ;
-//        });
-//    }
-//    else
-//    {
-//        
-//    }
-//    cout << "CrossPoints" << endl;
-//    for(auto CrossPoint : CrossPoints)
-//        cout << CrossPoint << endl;
-}
-//void Converter::toSpice()
-//{
-//    // 第一行必須為註解
-//    // 元件名稱+代號 正節點代號 負節點代號 元件數值
-//    int V_cnt = 1 ;
-//    
-//    
-//    cout << "Comments" << endl;
-//    vector<string> PinNames;
-//    for( auto it = PinMaps.begin(), end = PinMaps.end(); it != end;it = PinMaps.upper_bound(it->first))
-//    {
-//        PinNames.push_back(it->first);
-//    }
-//    for(int i = 0 ; i < PinNames.size() ; i++)
-//    {
-//        int I_cnt = 1 ;
-//        int R_cnt = 1 ;
-//        // print Voltage
-//        // 假設 Pin 沒有 port ，否則應該有迴圈，目前先寫沒有port版本
-////        Point<int> start = PinMaps[ PinNames[i] ].STARTPOINT ;
-////        cout << "V_" << PinNames[i] << "_"<< V_cnt << " " << PinMaps[ PinNames[i] ].METALNAME << "_";
-////        cout << PinMaps[ PinNames[i] ].STARTPOINT.x << " " << PinMaps[ PinNames[i] ].STARTPOINT.y << " " ;
-////        cout << "gnd " << VoltageMaps[ PinNames[i] ] << endl;
-//        
-//        Build();
-//        inorder(root->link);
-//        
-//        // print Current
-////        for(auto c : SpecialNetsMaps[ PinNames[i] ].DESTINATIONMAPS )
-////        {
-////            
-////            cout << "I_" << PinNames[i] << "_" << I_cnt << " ";
-////            
-////            cout << endl;
-////            I_cnt++;
-////        }
-////        
-//        
-//    }
-//    
-//}
-//void Converter::eraseline_vec(vector<Line>& line_vec , Line line)
-//{
-//    for(int i = 0 ; i < line_vec.size() ; i++)
-//    {
-//        if( line_vec[i] == line )
-//            line_vec.erase(line_vec.begin() + i);
-//    }
-//}
-bool Converter::isCross(Line line1 , Line line2)
-{
-    if(line1.isHorizontal && !line2.isHorizontal)
-    {
-        
-        if( line1.pt2.y > line2.pt1.y && line1.pt2.y < line2.pt2.y && line2.pt2.x > line1.pt1.x && line2.pt2.x < line1.pt2.x ) // isIntersaction
-            return true ;
-        else
-            return false ;
-        
-    }
-    else if(!line1.isHorizontal && line2.isHorizontal)
-    {
-        if( line2.pt2.y > line1.pt1.y && line2.pt2.y < line1.pt2.y && line1.pt2.x > line2.pt1.x && line1.pt2.x < line2.pt2.x ) // isIntersaction
-            return true ;
-        else
-            return false ;
-    }
-    else
-        return false;
 }
 double Converter::calculateResistance(double rpsq , int width , double length )
 {
