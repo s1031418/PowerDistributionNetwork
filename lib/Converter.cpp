@@ -25,87 +25,87 @@ Converter::~Converter()
 {
     
 }
-void Converter::BuildPowerMaps()
-{
-    // key pinName , value block
-    for(auto pin : PinMaps)
-    {
-        string orient = pin.second.ORIENT ;
-        Block block ;
-        pair< Point<int>, Point<int> > PowerPinCoordinate = getPowerPinCoordinate(pin.second.STARTPOINT.x, pin.second.STARTPOINT.y, pin.second.RELATIVE_POINT1 , pin.second.RELATIVE_POINT2, orient);
-        block.LeftDown = get<0>(PowerPinCoordinate);
-        block.RightUp = get<1>(PowerPinCoordinate);
-        PowerMaps.insert(make_pair(pin.first, block));
-    }
-}
-pair< Point<int>, Point<int> > Converter::getPowerPinCoordinate(int x , int y , Point<int> r_pt1, Point<int> r_pt2  , string orient)
-{
-    Point<int> pt1 ;
-    Point<int> pt2 ;
-    Point<int> LeftDown;
-    Point<int> RightUp;
-    if (orient == "E")
-    {
-        pt1.x = x + r_pt1.y ;
-        pt1.y = y - r_pt1.x ;
-        pt2.x = x + r_pt2.y ;
-        pt2.y = y - r_pt2.x ;
-    }
-    else if( orient == "N")
-    {
-        pt1.x = x + r_pt1.x ;
-        pt2.x = x + r_pt2.x ;
-        pt1.y = y + r_pt1.y ;
-        pt2.y = y + r_pt2.y ;
-    }
-    else if (orient == "S")
-    {
-        pt1.x = x - r_pt1.x ;
-        pt2.x = x - r_pt2.x ;
-        pt1.y = y - r_pt1.y ;
-        pt2.y = y - r_pt2.y ;
-    }
-    else if (orient == "W")
-    {
-        pt1.x = x - r_pt1.y ;
-        pt2.x = x - r_pt2.y ;
-        pt1.y = y + r_pt1.x ;
-        pt2.y = y + r_pt2.x ;
-    }
-    else if (orient == "FN")
-    {
-        pt1.x = x - r_pt1.x ;
-        pt2.x = x - r_pt2.x ;
-        pt1.y = y + r_pt1.y ;
-        pt2.y = y + r_pt2.y ;
-    }
-    else if(orient == "FS")
-    {
-        pt1.x = x + r_pt1.x ;
-        pt2.x = x + r_pt2.x ;
-        pt1.y = y - r_pt1.y ;
-        pt2.y = y - r_pt2.y ;
-    }
-    else if(orient == "FE")
-    {
-        pt1.x = x - r_pt1.y;
-        pt2.x = x - r_pt2.y;
-        pt1.y = y - r_pt1.x ;
-        pt2.y = y - r_pt2.x ;
-    }
-    else if(orient == "FW")
-    {
-        pt1.x = x + r_pt1.y ;
-        pt2.x = x + r_pt2.y ;
-        pt1.y = y + r_pt1.x;
-        pt2.y = y + r_pt2.x;
-    }
-    LeftDown.x = (pt1.x < pt2.x ) ? pt1.x : pt2.x ;
-    LeftDown.y = (pt1.y < pt2.y ) ? pt1.y : pt2.y ;
-    RightUp.x = (pt1.x > pt2.x ) ? pt1.x : pt2.x ;
-    RightUp.y = (pt1.y > pt2.y ) ? pt1.y : pt2.y ;
-    return make_pair(LeftDown, RightUp);
-}
+//void Converter::BuildPowerMaps()
+//{
+//    // key pinName , value block
+//    for(auto pin : PinMaps)
+//    {
+//        string orient = pin.second.ORIENT ;
+//        Block block ;
+//        pair< Point<int>, Point<int> > PowerPinCoordinate = getPowerPinCoordinate(pin.second.STARTPOINT.x, pin.second.STARTPOINT.y, pin.second.RELATIVE_POINT1 , pin.second.RELATIVE_POINT2, orient);
+//        block.LeftDown = get<0>(PowerPinCoordinate);
+//        block.RightUp = get<1>(PowerPinCoordinate);
+//        PowerMaps.insert(make_pair(pin.first, block));
+//    }
+//}
+//pair< Point<int>, Point<int> > Converter::getPowerPinCoordinate(int x , int y , Point<int> r_pt1, Point<int> r_pt2  , string orient)
+//{
+//    Point<int> pt1 ;
+//    Point<int> pt2 ;
+//    Point<int> LeftDown;
+//    Point<int> RightUp;
+//    if (orient == "E")
+//    {
+//        pt1.x = x + r_pt1.y ;
+//        pt1.y = y - r_pt1.x ;
+//        pt2.x = x + r_pt2.y ;
+//        pt2.y = y - r_pt2.x ;
+//    }
+//    else if( orient == "N")
+//    {
+//        pt1.x = x + r_pt1.x ;
+//        pt2.x = x + r_pt2.x ;
+//        pt1.y = y + r_pt1.y ;
+//        pt2.y = y + r_pt2.y ;
+//    }
+//    else if (orient == "S")
+//    {
+//        pt1.x = x - r_pt1.x ;
+//        pt2.x = x - r_pt2.x ;
+//        pt1.y = y - r_pt1.y ;
+//        pt2.y = y - r_pt2.y ;
+//    }
+//    else if (orient == "W")
+//    {
+//        pt1.x = x - r_pt1.y ;
+//        pt2.x = x - r_pt2.y ;
+//        pt1.y = y + r_pt1.x ;
+//        pt2.y = y + r_pt2.x ;
+//    }
+//    else if (orient == "FN")
+//    {
+//        pt1.x = x - r_pt1.x ;
+//        pt2.x = x - r_pt2.x ;
+//        pt1.y = y + r_pt1.y ;
+//        pt2.y = y + r_pt2.y ;
+//    }
+//    else if(orient == "FS")
+//    {
+//        pt1.x = x + r_pt1.x ;
+//        pt2.x = x + r_pt2.x ;
+//        pt1.y = y - r_pt1.y ;
+//        pt2.y = y - r_pt2.y ;
+//    }
+//    else if(orient == "FE")
+//    {
+//        pt1.x = x - r_pt1.y;
+//        pt2.x = x - r_pt2.y;
+//        pt1.y = y - r_pt1.x ;
+//        pt2.y = y - r_pt2.x ;
+//    }
+//    else if(orient == "FW")
+//    {
+//        pt1.x = x + r_pt1.y ;
+//        pt2.x = x + r_pt2.y ;
+//        pt1.y = y + r_pt1.x;
+//        pt2.y = y + r_pt2.x;
+//    }
+//    LeftDown.x = (pt1.x < pt2.x ) ? pt1.x : pt2.x ;
+//    LeftDown.y = (pt1.y < pt2.y ) ? pt1.y : pt2.y ;
+//    RightUp.x = (pt1.x > pt2.x ) ? pt1.x : pt2.x ;
+//    RightUp.y = (pt1.y > pt2.y ) ? pt1.y : pt2.y ;
+//    return make_pair(LeftDown, RightUp);
+//}
 void Converter::initConverterState()
 {
     
@@ -114,8 +114,8 @@ void Converter::initConverterState()
     {
         PinNames.push_back(it->first);
     }
-    BuildBlockMaps();
-    BuildPowerMaps();
+//    BuildBlockMaps();
+//    BuildPowerMaps();
 }
 void Converter::initCrossPointMap(map<Line , vector<Point<int>>,MyComparator> & CrossPointMap ,map<string , vector<Line>> & lineMap , string PinName , pair<string, Point<int>> & Voltage_Msg , vector<pair<string, Point<int>>> & Current_Msg)
 {
@@ -126,7 +126,7 @@ void Converter::initCrossPointMap(map<Line , vector<Point<int>>,MyComparator> & 
             
             vector<Point<int>> CrossPoints;
             // 判斷是不是起點
-            Point<int> Result = myhelper.getStartPoint(PowerMaps, vec.second[i].pt1 ,vec.second[i].pt2 );
+            Point<int> Result = myhelper.getStartPoint(vec.second[i].pt1 ,vec.second[i].pt2 );
             if( Result != Point<int>() )
             {
                 CrossPoints.push_back(Result);
@@ -134,7 +134,7 @@ void Converter::initCrossPointMap(map<Line , vector<Point<int>>,MyComparator> & 
                 get<1>(Voltage_Msg) = Result ;
             }
             // 判斷是不是終點
-            Result = myhelper.getEndPoint(BlockMaps, vec.second[i].pt1 , vec.second[i].pt2) ;
+            Result = myhelper.getEndPoint(vec.second[i].pt1 , vec.second[i].pt2) ;
             if( Result != Point<int>() )
             {
                 pair<string, Point<int>> temp ;
@@ -182,7 +182,7 @@ void Converter::initCrossPointMap(map<Line , vector<Point<int>>,MyComparator> & 
             CrossPointMap.insert(make_pair(vec.second[i], CrossPoints));
         }
     }
-        
+    
 }
 void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string , vector<Line>> & LineMap , vector<Line> & ViaTable)
 {
@@ -237,7 +237,7 @@ void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string ,
             }
             first++;
         }
-
+        
     }
 }
 void Converter::toSpice()
@@ -247,7 +247,8 @@ void Converter::toSpice()
     pFile = fopen(output.c_str(), "w");
     if( NULL == pFile ) printf("Failed to open file\n");
     fprintf(pFile, "#Comments\n");
-//    cout << "#Comments" << endl;
+    
+    //    cout << "#Comments" << endl;
     for(auto PinName : PinNames)
     {
         map<string , vector<Line>> lineMap;
@@ -262,11 +263,27 @@ void Converter::toSpice()
         initLineMap(SpecialNetsMaps[PinName].NETSMULTIMAPS, lineMap , ViaTable);
         map<Line , vector<Point<int>>,MyComparator> CrossPointMap ;
         initCrossPointMap(CrossPointMap, lineMap , PinName , Voltage_Msg , Current_Msg);
-        
+        ///////////////////////////////////////////////////////
+        // 為了產生 IR_DROP通不通過 ，不是必須的
+        for( int i = 0 ; i < Current_Msg.size() ; i++ )
+        {
+            string metal = get<0>(Voltage_Msg);
+            Point<int> Point = get<1>(Voltage_Msg);
+            transform(metal.begin(), metal.end(), metal.begin(), ::tolower); // transform metal to lowercase
+            string key = metal.append("_").append(to_string(Point.x).append("_").append(to_string(Point.y)) );
+            metal = get<0>(Current_Msg[i]);
+            Point = get<1>(Current_Msg[i]);
+            transform(metal.begin(), metal.end(), metal.begin(), ::tolower); // transform metal to lowercase
+            string value = metal.append("_").append(to_string(Point.x).append("_").append(to_string(Point.y)) );
+            DestinationMap.insert(make_pair(key, value));
+        }
+        ///////////////////////////////////////////////////////
         printResistance(CrossPointMap , PinName , ViaTable , pFile);
         printVoltage(get<0>(Voltage_Msg), get<1>(Voltage_Msg), PinName , pFile);
         printCurrent(Current_Msg , PinName , pFile);
     }
+    
+    
     fprintf(pFile, ".tran 1ns 1ns\n");
     fprintf(pFile, ".end\n");
     fprintf(pFile, ".control\n");
@@ -274,25 +291,28 @@ void Converter::toSpice()
     fprintf(pFile, "run\n");
     fprintf(pFile, "quit\n");
     fprintf(pFile, ".enddc\n");
-//    cout << ".tran 1ns 1ns" << endl;
-//    cout << ".end" << endl;
-//    cout << ".control" << endl;
-//    cout << "set noaskquit" << endl;
-//    cout << "run" << endl;
-//    cout << "quit" << endl;
-//    cout << ".enddc" << endl;
+    //    cout << ".tran 1ns 1ns" << endl;
+    //    cout << ".end" << endl;
+    //    cout << ".control" << endl;
+    //    cout << "set noaskquit" << endl;
+    //    cout << "run" << endl;
+    //    cout << "quit" << endl;
+    //    cout << ".enddc" << endl;
     
     fclose(pFile);
+    
+}
+void Converter::toNgspice()
+{
     string cmd;
     cmd.append("./ngspice ").append(CaseName).append(".sp -o ").append(CaseName).append("_ngspice");
-    cout << cmd << endl;
     system(cmd.c_str());
 }
 void Converter::printVoltage(string MetalName , Point<int> StartPoint , string PinName , FILE * pFile)
 {
-//    fprintf(pFile, "a\n");
+    //    fprintf(pFile, "a\n");
     fprintf(pFile, "V_%s_1 %s_%d_%d gnd %s\n" , PinName.c_str() , MetalName.c_str() , StartPoint.x , StartPoint.y , VoltageMaps[PinName].c_str());
-//    cout << "V_" << PinName << "_1 " << MetalName << "_" << StartPoint.x << "_" << StartPoint.y << " gnd " << VoltageMaps[PinName] << endl ;
+    //    cout << "V_" << PinName << "_1 " << MetalName << "_" << StartPoint.x << "_" << StartPoint.y << " gnd " << VoltageMaps[PinName] << endl ;
     
 }
 void Converter::printCurrent(vector<pair<string, Point<int>>> & Current_Msg , string PinName , FILE * pFile )
@@ -304,9 +324,10 @@ void Converter::printCurrent(vector<pair<string, Point<int>>> & Current_Msg , st
         string title("I" + PinName + "_");
         title.append(to_string(cnt));
         fprintf(pFile, "%s %s_%d_%d gnd " , title.c_str() , get<0>(C).c_str(), get<1>(C).x , get<1>(C).y);
-//        cout << title << " " << get<0>(C) << "_" << get<1>(C).x << "_" << get<1>(C).y << " ";
-//        cout << "gnd " ;
-        pair<string, string> BlockMsg = myhelper.getBlockMsg(BlockMaps, get<1>(C));
+        //        cout << title << " " << get<0>(C) << "_" << get<1>(C).x << "_" << get<1>(C).y << " ";
+        //        cout << "gnd " ;
+        
+        pair<string, string> BlockMsg = myhelper.getBlockMsg(get<1>(C));
         auto begin = CurrnetMaps.lower_bound(get<0>(BlockMsg));
         auto end = CurrnetMaps.upper_bound(get<0>(BlockMsg));
         while (begin != end)
@@ -314,153 +335,153 @@ void Converter::printCurrent(vector<pair<string, Point<int>>> & Current_Msg , st
             if(begin->second.NAME == get<1>(BlockMsg))
             {
                 fprintf(pFile, "%f" , stof( begin->second.CURRENTDRAWN )/ 1000 );
-//                cout << (stof( begin->second.CURRENTDRAWN )/ 1000) ;
+                //                cout << (stof( begin->second.CURRENTDRAWN )/ 1000) ;
             }
             begin++;
         }
         fprintf(pFile, "\n");
-//        cout << endl;
+        //        cout << endl;
         cnt++ ;
     }
     fprintf(pFile, "\n");
-//    cout << endl;
+    //    cout << endl;
 }
-Point<int> Converter::FlipY(float x_axis , Point<int> pt , FlipOrient orientation)
-{
-    int x = 0 , y = 0;
-    if( orientation == RIGHT)
-    {
-        float distance = x_axis - pt.x ;
-        x = pt.x + 2 * distance;
-    }
-    else
-    {
-        float distance = pt.x - x_axis  ;
-        x = pt.x - 2 * distance;
-    }
-    y = pt.y;
-    return Point<int>(x,y);
-}
-Point<int> Converter::FlipX(float y_axis , Point<int> pt , FlipOrient orientation)
-{
-    
-    int x = 0 , y = 0;
-    if( orientation == TOP)
-    {
-        float distance = y_axis - pt.y ;
-        y = pt.y + 2 * distance ;
-    }
-    else
-    {
-        float distance =  pt.y - y_axis;
-        y = pt.y - 2 * distance ;
-    }
-    x = pt.x ;
-    return Point<int>(x,y);
-
-}
-pair<Point<int>, Point<int>> Converter::getRotatePoint(Point<int> BlcokLeftDown , Point<int> BlcokRightUp , Point<int> BlockPinLeftDown , Point<int> BlockPinRightUp , string orient)
-{
-    int BlockWidth = BlcokRightUp.x - BlcokLeftDown.x ;
-    int BlockLength = BlcokRightUp.y - BlcokLeftDown.y ;
-    int BlockPinWidth = BlockPinRightUp.x - BlockPinLeftDown.x ;
-    int BlockPinLength = BlockPinRightUp.y - BlockPinLeftDown.y ;
-    float x_axis = BlcokLeftDown.x + (BlockWidth / 2);
-    float y_axis = BlcokLeftDown.y + (BlockLength / 2);
-    if(orient == "N")
-    {
-        return make_pair(BlockPinLeftDown, BlockPinRightUp);
-    }
-    else if (orient == "FN")
-    {
-        Point<int> RightDown= FlipY(x_axis, BlockPinLeftDown , RIGHT); //變成右下角
-        Point<int> LeftUp = FlipY(x_axis, BlockPinRightUp , RIGHT); //變成左上角
-        return make_pair(Point<int>( LeftUp.x, RightDown.y), Point<int>( RightDown.x , LeftUp.y ));
-    }
-    else if (orient == "W")
-    {
-        int difference = BlockPinLeftDown.y - BlcokLeftDown.y ;
-        pair<Point<int>, Point<int>> BlockCoordinate = getBlockCoordinate(BlcokLeftDown.x, BlcokLeftDown.y,BlockWidth , BlockLength, "W");
-        Point<int> LeftDown( get<1>(BlockCoordinate).x - difference - BlockPinLength, get<0>(BlockCoordinate).y);
-        Point<int> RightUp( get<1>(BlockCoordinate).x - difference, get<0>(BlockCoordinate).y + BlockPinWidth);
-        return make_pair(LeftDown, RightUp);
-    }
-    else if (orient == "FW")
-    {
-        pair<Point<int>, Point<int>> W = getRotatePoint(BlcokLeftDown, BlcokRightUp, BlockPinLeftDown, BlockPinRightUp, "W");
-        pair<Point<int>, Point<int>> BlockCoordinate = getBlockCoordinate(BlcokLeftDown.x, BlcokLeftDown.y,BlockWidth , BlockLength, "W");
-        x_axis = get<0>(BlockCoordinate).x + BlockLength / 2 ;
-        Point<int> RightDown = FlipY(x_axis, get<0>(W) , LEFT);
-        Point<int> LeftUp = FlipY(x_axis, get<1>(W), LEFT);
-        return make_pair(Point<int>( LeftUp.x, RightDown.y), Point<int>( RightDown.x , LeftUp.y ));
-    }
-    else if (orient == "S")
-    {
-        
-        return make_pair( FlipY(x_axis, FlipX(y_axis, BlockPinRightUp, TOP), RIGHT), FlipY(x_axis, FlipX(y_axis, BlockPinLeftDown, TOP), RIGHT));
-    }
-    else if (orient == "FS")
-    {
-        pair<Point<int>, Point<int>> S = getRotatePoint(BlcokLeftDown, BlcokRightUp, BlockPinLeftDown, BlockPinRightUp, "S");
-        Point<int> RightDown = FlipY(x_axis, get<0>(S), LEFT);
-        Point<int> LeftUp = FlipY(x_axis, get<1>(S), LEFT);
-        return make_pair(Point<int>( LeftUp.x, RightDown.y), Point<int>( RightDown.x , LeftUp.y ));
-    }
-    else if (orient == "E")
-    {
-        int difference = BlockPinLeftDown.y - BlcokLeftDown.y ;
-        pair<Point<int>, Point<int>> BlockCoordinate = getBlockCoordinate(BlcokLeftDown.x, BlcokLeftDown.y,BlockWidth , BlockLength, "E");
-        return make_pair(Point<int>( get<0>(BlockCoordinate).x + difference, get<1>(BlockCoordinate).y - BlockPinWidth) , Point<int>(get<0>(BlockCoordinate).x + difference + BlockPinLength , get<1>(BlockCoordinate).y));
-    }
-    else if (orient == "FE")
-    {
-        pair<Point<int>, Point<int>> E = getRotatePoint(BlcokLeftDown, BlcokRightUp, BlockPinLeftDown, BlockPinRightUp, "E");
-        x_axis = BlcokLeftDown.x + BlockLength / 2 ;
-        Point<int> LeftUp = FlipY(x_axis, get<1>(E), RIGHT);
-        Point<int> RightDown = FlipY(x_axis, get<0>(E), RIGHT);
-        return make_pair(Point<int>( LeftUp.x, RightDown.y), Point<int>( RightDown.x , LeftUp.y ));
-    }
-    assert(0);
-    return make_pair(Point<int>(0,0), Point<int>(0,0));
-}
-void Converter::BuildBlockMaps()
-{
-    
-    for( auto component : ComponentMaps )
-    {
-        Point<int> BlockLeftDown = component.second.STARTPOINT ;
-        Point<int> BlockRightUp ;
-        BlockRightUp.x = BlockLeftDown.x + (MacroMaps[component.second.MACROTYPE].WIDTH * UNITS_DISTANCE);
-        BlockRightUp.y = BlockLeftDown.y + (MacroMaps[component.second.MACROTYPE].LENGTH * UNITS_DISTANCE);
-        string orient = component.second.ORIENT ;
-        vector<Block> temp ;
-        // init BlockMap ， 把每個key都塞一個空的vector
-        BlockMaps.insert(make_pair(component.first,temp));
-        for( auto blockpin : MacroMaps[component.second.MACROTYPE].BlockPinMaps)
-        {
-            
-            Block block ;
-            for(auto innerlayer : blockpin.second.InnerMaps)
-            {
-                block.Metals.push_back(innerlayer.first);
-            }
-            Point<float> LeftDownScaling = (blockpin.second.InnerMaps[block.Metals[0]].pt1) * UNITS_DISTANCE ;
-            Point<float> RightUpScaling = (blockpin.second.InnerMaps[block.Metals[0]].pt2) * UNITS_DISTANCE ;
-            Point<int> BlockPinLeftDown , BlockPinRightUp;
-            BlockPinLeftDown.x = BlockLeftDown.x + LeftDownScaling.x ;
-            BlockPinLeftDown.y = BlockLeftDown.y + LeftDownScaling.y ;
-            BlockPinRightUp.x = BlockLeftDown.x + RightUpScaling.x ;
-            BlockPinRightUp.y = BlockLeftDown.y + RightUpScaling.y ;
-            pair<Point<int>, Point<int>> RotatePoint = getRotatePoint(BlockLeftDown , BlockRightUp , BlockPinLeftDown, BlockPinRightUp, orient);
-            block.LeftDown = get<0>(RotatePoint) ;
-            block.RightUp = get<1>(RotatePoint);
-            block.BlockPinName = blockpin.second.Name;
-            BlockMaps[component.first].push_back(block);
-        }
-        
-    }
-   
-}
+//Point<int> Converter::FlipY(float x_axis , Point<int> pt , FlipOrient orientation)
+//{
+//    int x = 0 , y = 0;
+//    if( orientation == RIGHT)
+//    {
+//        float distance = x_axis - pt.x ;
+//        x = pt.x + 2 * distance;
+//    }
+//    else
+//    {
+//        float distance = pt.x - x_axis  ;
+//        x = pt.x - 2 * distance;
+//    }
+//    y = pt.y;
+//    return Point<int>(x,y);
+//}
+//Point<int> Converter::FlipX(float y_axis , Point<int> pt , FlipOrient orientation)
+//{
+//    
+//    int x = 0 , y = 0;
+//    if( orientation == TOP)
+//    {
+//        float distance = y_axis - pt.y ;
+//        y = pt.y + 2 * distance ;
+//    }
+//    else
+//    {
+//        float distance =  pt.y - y_axis;
+//        y = pt.y - 2 * distance ;
+//    }
+//    x = pt.x ;
+//    return Point<int>(x,y);
+//    
+//}
+//pair<Point<int>, Point<int>> Converter::getRotatePoint(Point<int> BlcokLeftDown , Point<int> BlcokRightUp , Point<int> BlockPinLeftDown , Point<int> BlockPinRightUp , string orient)
+//{
+//    int BlockWidth = BlcokRightUp.x - BlcokLeftDown.x ;
+//    int BlockLength = BlcokRightUp.y - BlcokLeftDown.y ;
+//    int BlockPinWidth = BlockPinRightUp.x - BlockPinLeftDown.x ;
+//    int BlockPinLength = BlockPinRightUp.y - BlockPinLeftDown.y ;
+//    float x_axis = BlcokLeftDown.x + (BlockWidth / 2);
+//    float y_axis = BlcokLeftDown.y + (BlockLength / 2);
+//    if(orient == "N")
+//    {
+//        return make_pair(BlockPinLeftDown, BlockPinRightUp);
+//    }
+//    else if (orient == "FN")
+//    {
+//        Point<int> RightDown= FlipY(x_axis, BlockPinLeftDown , RIGHT); //變成右下角
+//        Point<int> LeftUp = FlipY(x_axis, BlockPinRightUp , RIGHT); //變成左上角
+//        return make_pair(Point<int>( LeftUp.x, RightDown.y), Point<int>( RightDown.x , LeftUp.y ));
+//    }
+//    else if (orient == "W")
+//    {
+//        int difference = BlockPinLeftDown.y - BlcokLeftDown.y ;
+//        pair<Point<int>, Point<int>> BlockCoordinate = getBlockCoordinate(BlcokLeftDown.x, BlcokLeftDown.y,BlockWidth , BlockLength, "W");
+//        Point<int> LeftDown( get<1>(BlockCoordinate).x - difference - BlockPinLength, get<0>(BlockCoordinate).y);
+//        Point<int> RightUp( get<1>(BlockCoordinate).x - difference, get<0>(BlockCoordinate).y + BlockPinWidth);
+//        return make_pair(LeftDown, RightUp);
+//    }
+//    else if (orient == "FW")
+//    {
+//        pair<Point<int>, Point<int>> W = getRotatePoint(BlcokLeftDown, BlcokRightUp, BlockPinLeftDown, BlockPinRightUp, "W");
+//        pair<Point<int>, Point<int>> BlockCoordinate = getBlockCoordinate(BlcokLeftDown.x, BlcokLeftDown.y,BlockWidth , BlockLength, "W");
+//        x_axis = get<0>(BlockCoordinate).x + BlockLength / 2 ;
+//        Point<int> RightDown = FlipY(x_axis, get<0>(W) , LEFT);
+//        Point<int> LeftUp = FlipY(x_axis, get<1>(W), LEFT);
+//        return make_pair(Point<int>( LeftUp.x, RightDown.y), Point<int>( RightDown.x , LeftUp.y ));
+//    }
+//    else if (orient == "S")
+//    {
+//        
+//        return make_pair( FlipY(x_axis, FlipX(y_axis, BlockPinRightUp, TOP), RIGHT), FlipY(x_axis, FlipX(y_axis, BlockPinLeftDown, TOP), RIGHT));
+//    }
+//    else if (orient == "FS")
+//    {
+//        pair<Point<int>, Point<int>> S = getRotatePoint(BlcokLeftDown, BlcokRightUp, BlockPinLeftDown, BlockPinRightUp, "S");
+//        Point<int> RightDown = FlipY(x_axis, get<0>(S), LEFT);
+//        Point<int> LeftUp = FlipY(x_axis, get<1>(S), LEFT);
+//        return make_pair(Point<int>( LeftUp.x, RightDown.y), Point<int>( RightDown.x , LeftUp.y ));
+//    }
+//    else if (orient == "E")
+//    {
+//        int difference = BlockPinLeftDown.y - BlcokLeftDown.y ;
+//        pair<Point<int>, Point<int>> BlockCoordinate = getBlockCoordinate(BlcokLeftDown.x, BlcokLeftDown.y,BlockWidth , BlockLength, "E");
+//        return make_pair(Point<int>( get<0>(BlockCoordinate).x + difference, get<1>(BlockCoordinate).y - BlockPinWidth) , Point<int>(get<0>(BlockCoordinate).x + difference + BlockPinLength , get<1>(BlockCoordinate).y));
+//    }
+//    else if (orient == "FE")
+//    {
+//        pair<Point<int>, Point<int>> E = getRotatePoint(BlcokLeftDown, BlcokRightUp, BlockPinLeftDown, BlockPinRightUp, "E");
+//        x_axis = BlcokLeftDown.x + BlockLength / 2 ;
+//        Point<int> LeftUp = FlipY(x_axis, get<1>(E), RIGHT);
+//        Point<int> RightDown = FlipY(x_axis, get<0>(E), RIGHT);
+//        return make_pair(Point<int>( LeftUp.x, RightDown.y), Point<int>( RightDown.x , LeftUp.y ));
+//    }
+//    assert(0);
+//    return make_pair(Point<int>(0,0), Point<int>(0,0));
+//}
+//void Converter::BuildBlockMaps()
+//{
+//    
+//    for( auto component : ComponentMaps )
+//    {
+//        Point<int> BlockLeftDown = component.second.STARTPOINT ;
+//        Point<int> BlockRightUp ;
+//        BlockRightUp.x = BlockLeftDown.x + (MacroMaps[component.second.MACROTYPE].WIDTH * UNITS_DISTANCE);
+//        BlockRightUp.y = BlockLeftDown.y + (MacroMaps[component.second.MACROTYPE].LENGTH * UNITS_DISTANCE);
+//        string orient = component.second.ORIENT ;
+//        vector<Block> temp ;
+//        // init BlockMap ， 把每個key都塞一個空的vector
+//        BlockMaps.insert(make_pair(component.first,temp));
+//        for( auto blockpin : MacroMaps[component.second.MACROTYPE].BlockPinMaps)
+//        {
+//            
+//            Block block ;
+//            for(auto innerlayer : blockpin.second.InnerMaps)
+//            {
+//                block.Metals.push_back(innerlayer.first);
+//            }
+//            Point<float> LeftDownScaling = (blockpin.second.InnerMaps[block.Metals[0]].pt1) * UNITS_DISTANCE ;
+//            Point<float> RightUpScaling = (blockpin.second.InnerMaps[block.Metals[0]].pt2) * UNITS_DISTANCE ;
+//            Point<int> BlockPinLeftDown , BlockPinRightUp;
+//            BlockPinLeftDown.x = BlockLeftDown.x + LeftDownScaling.x ;
+//            BlockPinLeftDown.y = BlockLeftDown.y + LeftDownScaling.y ;
+//            BlockPinRightUp.x = BlockLeftDown.x + RightUpScaling.x ;
+//            BlockPinRightUp.y = BlockLeftDown.y + RightUpScaling.y ;
+//            pair<Point<int>, Point<int>> RotatePoint = getRotatePoint(BlockLeftDown , BlockRightUp , BlockPinLeftDown, BlockPinRightUp, orient);
+//            block.LeftDown = get<0>(RotatePoint) ;
+//            block.RightUp = get<1>(RotatePoint);
+//            block.BlockPinName = blockpin.second.Name;
+//            BlockMaps[component.first].push_back(block);
+//        }
+//        
+//    }
+//    
+//}
 void Converter::printResistance(map<Line , vector<Point<int>>,MyComparator> & CrossPointMap , string PinName , vector<Line> & ViaTable , FILE * pFile)
 {
     
@@ -492,13 +513,13 @@ void Converter::printResistance(map<Line , vector<Point<int>>,MyComparator> & Cr
             string title("R" + PinName + "_");
             title.append(to_string(cnt));
             fprintf(pFile, "%s %s_%d_%d %s_%d_%d " , title.c_str() , line.MetalName.c_str() , x.second[i].x , x.second[i].y , line.MetalName.c_str() , x.second[i+1].x , x.second[i+1].y);
-//            cout << title << " " ;
-//            cout << line.MetalName << "_" << x.second[i].x << "_" << x.second[i].y << " ";
-//            cout << line.MetalName << "_" << x.second[i+1].x << "_" << x.second[i+1].y << " ";
+            //            cout << title << " " ;
+            //            cout << line.MetalName << "_" << x.second[i].x << "_" << x.second[i].y << " ";
+            //            cout << line.MetalName << "_" << x.second[i+1].x << "_" << x.second[i+1].y << " ";
             double length = ( line.isHorizontal ) ? x.second[i+1].x - x.second[i].x : x.second[i+1].y - x.second[i].y ;
             fprintf(pFile, "%g\n" , myhelper.calculateResistance(LayerMaps[line.MetalName].RESISTANCE_RPERSQ, line.Width, length));
-//            cout << myhelper.calculateResistance(LayerMaps[line.MetalName].RESISTANCE_RPERSQ, line.Width, length);
-//            cout << endl;
+            //            cout << myhelper.calculateResistance(LayerMaps[line.MetalName].RESISTANCE_RPERSQ, line.Width, length);
+            //            cout << endl;
             cnt++;
         }
         
@@ -509,21 +530,21 @@ void Converter::printResistance(map<Line , vector<Point<int>>,MyComparator> & Cr
         string title("R" + PinName + "_");
         title.append(to_string(cnt));
         fprintf(pFile, "%s %s_%d_%d %s_%d_%d %g\n" , title.c_str() , via.ViaMetal[0].c_str() , via.pt1.x , via.pt1.y , via.ViaMetal[1].c_str() , via.pt1.x , via.pt1.y , ViaMaps[via.ViaName].RESISTANCE);
-//        cout << title << " " ;
-//        cout << via.ViaMetal[0] << "_" << via.pt1.x << "_" << via.pt1.y  << " ";
-//        cout << via.ViaMetal[1] << "_" << via.pt1.x << "_" << via.pt1.y << " ";
-//        cout << ViaMaps[via.ViaName].RESISTANCE ;
-//        cout << endl;
+        //        cout << title << " " ;
+        //        cout << via.ViaMetal[0] << "_" << via.pt1.x << "_" << via.pt1.y  << " ";
+        //        cout << via.ViaMetal[1] << "_" << via.pt1.x << "_" << via.pt1.y << " ";
+        //        cout << ViaMaps[via.ViaName].RESISTANCE ;
+        //        cout << endl;
         cnt++;
     }
 }
 
 void Converter::toLocationFile()
 {
-    toSpice();
+    
     // print Block location
     FILE * pFile ;
-    pFile = fopen("/Users/Jeff/Documents/c++/EDA_Contest2017(PDN)/EDA_Contest2017(PDN)/output.txt", "w");
+    pFile = fopen("output.txt", "w");
     if( NULL == pFile ) printf("Failed to open file\n");
     
     
@@ -538,10 +559,10 @@ void Converter::toLocationFile()
         
         
         pair<Point<int>,Point<int>> coordinate = getBlockCoordinate(ComponentMaps[BlockNames[i]].STARTPOINT.x ,
-                                                               ComponentMaps[BlockNames[i]].STARTPOINT.y ,
-                                                               UNITS_DISTANCE * MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].WIDTH ,
-                                                               UNITS_DISTANCE * MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].LENGTH ,
-                                                               ComponentMaps[BlockNames[i]].ORIENT );
+                                                                    ComponentMaps[BlockNames[i]].STARTPOINT.y ,
+                                                                    UNITS_DISTANCE * MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].WIDTH ,
+                                                                    UNITS_DISTANCE * MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].LENGTH ,
+                                                                    ComponentMaps[BlockNames[i]].ORIENT );
         auto begin = MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps.begin();
         auto end = MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps.end();
         end-- ;
@@ -596,7 +617,7 @@ void Converter::toLocationFile()
                         fprintf(pFile, "%d %d " , top.x + (begin->second.ROUNTWIDTH / 2) , top.y);
                     }
                     fprintf(pFile, "*\n" );
-//                    fprintf(pFile, "R%s_%d \n" , PinNames[i].c_str() , R_cnt);
+                    //                    fprintf(pFile, "R%s_%d \n" , PinNames[i].c_str() , R_cnt);
                     R_cnt++ ;
                 }
                 begin++;
@@ -605,8 +626,14 @@ void Converter::toLocationFile()
         fprintf(pFile, "\n");
     }
     fclose(pFile);
+    toSpice();
+    toNgspice();
     ngspice ng(CaseName) ;
-    ng.concat() ;
+    ng.ConcatIR_Drop() ;
+    ng.printStats(DestinationMap);
+}
+void Converter::Visualize()
+{
     system("java -jar JavaApplication5.jar");
 }
 pair<Point<int>, Point<int>> Converter::getBlockCoordinate(int x , int y , int width , int length  , string orient  )

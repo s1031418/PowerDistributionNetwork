@@ -6,7 +6,6 @@ OBJS = main.o Parsers/Parsers.o lib/Debugger.o Parsers/lefrw.o Parsers/defrw.o P
 STATICLIB = lib/liblef.a lib/libdef.a
 
 
-
 all:cadXX
 
 cadXX: $(OBJS)

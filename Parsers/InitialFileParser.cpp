@@ -108,7 +108,7 @@ void InitialFileParser::run()
                 
                 // store in data structure
                 regex_t Regex ; // group 1、2、3
-                if ( regcomp(&Regex, "(.*) (.*) (.*)", REG_EXTENDED) ) cerr << "Compile Error";
+                if ( regcomp(&Regex, "(.*) (.*) (([[:digit:]]|[.])+)", REG_EXTENDED) ) cerr << "Compile Error";
                 if(!isMatch(Regex, Data[i]))
                 {
                     if(end == true)

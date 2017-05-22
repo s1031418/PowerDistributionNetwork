@@ -9,23 +9,112 @@
 #include "ngspice.hpp"
 
 
-ngspice::ngspice()
-{
-    
-}
+
 ngspice::ngspice(string casename)
 {
     CaseName = casename ;
+    LoadFile();
+    initvoltage();
+}
+void ngspice::LoadFile()
+{
+    string content ;
+    string FilePath("/Users/Jeff/Documents/c++/EDA_Contest2017(PDN)/EDA_Contest2017(PDN)/");
+    FilePath.append(CaseName).append("_ngspice");
+    fstream fin(FilePath , ios::in);
+    if(!fin) cerr << "Can't open file.";
+    while (getline(fin,content)) {
+        Data.push_back(content);
+    }
+    fin.close();
 }
 ngspice::~ngspice()
 {
     
 }
-void ngspice::concat()
+double ngspice::getIR_DropCons(string Block , string BlockPin )
+{
+    auto begin = ConstraintMaps.lower_bound(Block);
+    auto end = ConstraintMaps.upper_bound(Block);
+    while (begin != end)
+    {
+        if( begin->second.NAME == BlockPin )
+        {
+            return stod(begin->second.CONSTRAINT);
+        }
+        begin++;
+    }
+    return -1 ;
+}
+Point<int> ngspice::translateToPoint(string key)
+{
+    size_t first_pos = key.find("_");
+    size_t last_pos = key.rfind("_");
+    int x = stoi(key.substr(first_pos + 1 , last_pos - first_pos -1 ));
+    int y = stoi(key.substr(last_pos + 1 ));
+    return Point<int>(x,y);
+}
+void ngspice::printStats(multimap<string, string> & DetinationMap)
+{
+    for( auto it = DetinationMap.begin(), end = DetinationMap.end(); it != end;it = DetinationMap.upper_bound(it->first))
+    {
+        auto beginning = DetinationMap.lower_bound(it->first);
+        auto ending = DetinationMap.upper_bound(it->first);
+        while ( beginning != ending )
+        {
+            bool pass = true;
+            double StartVoltage = voltages[beginning->first];
+            double EndVoltage = voltages[beginning->second];
+            Point<int> start = translateToPoint(beginning->first);
+            Point<int> terminal = translateToPoint(beginning->second);
+            pair<string, string> msg = helper.getBlockMsg(terminal);
+            string PinName = helper.getPowerPinMsg(start);
+            string BlockName = get<0>(msg);
+            string BlockPinName = get<1>(msg);
+            double Constraint = getIR_DropCons(BlockName, BlockPinName);
+            double Drop_percent = ((StartVoltage - EndVoltage) / StartVoltage) * 100 ;
+            cout << PinName << " "<< BlockName << " " << BlockPinName << " ";
+            if(EndVoltage < 0)
+                cout << "Terminal Point Voltage is negative(Pass)" << endl ;
+            else if( Drop_percent > Constraint)
+                cout << "Drop " << Drop_percent << "(%) (NoPass)"<< endl;
+            else
+                cout << "Drop " << Drop_percent << "(%) (Pass)" << endl;
+            beginning++;
+        }
+    }
+}
+void ngspice::initvoltage()
+{
+    bool start = false ;
+    for (int i = 0 ; i < Data.size(); i++)
+    {
+        if(Data[i].find("branch") != string::npos)
+        {
+            break;
+        }
+        if(start)
+        {
+            regex_t Regex ; // group 1、3
+            if ( regcomp(&Regex, "(([[:alnum:]]|_|[.])+)[[:space:]]+(-?([[:alnum:]]|_|[.])+)", REG_EXTENDED) ) cerr << "Compile Error";
+            vector<string> results = GetParsingString(Regex, Data[i], vector<int>{1,3});
+            voltages.insert(make_pair(results[0], stod(results[1])));
+            continue;
+        }
+        if( Data[i].find("Node") != string::npos )
+        {
+            start = true ;
+            i += 1 ;
+        }
+    }
+}
+void ngspice::ConcatIR_Drop()
 {
     
     string a ;
-    string input = CaseName.append("_ngspice");
+    string FilePath("/Users/Jeff/Documents/c++/EDA_Contest2017(PDN)/EDA_Contest2017(PDN)/");
+//    string input = CaseName.append("_ngspice");
+    string input = FilePath.append(CaseName).append("_ngspice");
     fstream fin(input, ios::in);
     if(!fin) cerr << "Can't Read File" << endl;
     bool flag = 0 ;
@@ -75,7 +164,7 @@ void ngspice::concat()
             }
     }
     fin.close();
-    fstream fout("output.txt", ios::app);
+    fstream fout("output.txt", ios::app | ios::out);
     for(int i = 0 ; i<tmp.size();i++)
     {
         fout<<tmp[i][0]<<"_"<<tmp[i][1]<<"_"<<tmp[i][2]<<" ";

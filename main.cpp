@@ -36,6 +36,7 @@ void rundef(char * argv[]);
 
 int main(int argc,  char * argv[])
 {
+    
     string CaseName = argv[6];
     // declare objects
     InitialFileParser initialfile(argv[5]) ;
@@ -47,26 +48,15 @@ int main(int argc,  char * argv[])
     // acivate parser
     lef.run(3, lefargv);
     def.run(2, defargv);
+
     initialfile.run();
+    //    test(1);
+        Converter converter(CaseName);
+//        converter.toSpice();
+    ngspice ng(CaseName);
     
-//    PDN pdn ;
-//    map<Line , vector<Point<int>>,MyComparator> CrossPointMap ;
-//    Line l ;
-//    l.ViaMetal.push_back("METAL5");
-//    l.ViaMetal.push_back("METAL6");
-//    vector<Point<int>> t ;
-//    t.push_back(Point<int>(0,0));
-//    CrossPointMap.insert(make_pair(l, t));
-//    cout <<"rr";
-//    cout << CurrnetMaps.find("B1");
-    test(1);
-    Converter converter(CaseName) ;
-//    converter.toLocationFile();
-//    converter.toSpice();
-    converter.toLocationFile();
-    
-    
-//    converter.toSpice();
+        converter.toLocationFile();
+//        converter.Visualize();
     delete[] lefargv;
     delete[] defargv ;
     return 0;

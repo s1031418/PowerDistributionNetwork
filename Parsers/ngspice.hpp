@@ -13,17 +13,30 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "InitialFileParser.hpp"
+#include <cstring>
+#include "PDNHelper.hpp"
+#include <map>
+#include <regex.h>
 using namespace std;
-class ngspice {
+class ngspice : public Parsers{
     
     
 public:
-    ngspice();
     ngspice(string casename);
     ~ngspice();
-    void concat();
+    void initvoltage();
+    void ConcatIR_Drop();
+    double getIR_DropCons(string StartPowerPin , string EndBlockPin );
+    void printStats(multimap<string, string> & DetinationMap);
 private:
+    PDNHelper helper ; 
+    vector<string> Data ;
+    // key值是sp的座標,value是voltage
+    map<string,double> voltages;
     string CaseName;
+    void LoadFile();
+    Point<int> translateToPoint(string key);
 };
 
 #endif /* ngspice_hpp */
