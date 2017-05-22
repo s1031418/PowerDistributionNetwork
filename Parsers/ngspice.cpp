@@ -21,7 +21,26 @@ ngspice::~ngspice()
 {
     
 }
-void ngspice::concat()
+//double ngspice::getIR_DropCons(string StartPowerPin , string EndBlockPin )
+//{
+//    auto begin = ConstraintMaps.lower_bound(StartPowerPin);
+//    auto end = ConstraintMaps.upper_bound(StartPowerPin);
+//    while (begin != end)
+//    {
+//        if( begin->second.NAME == EndBlockPin )
+//        {
+//            return stod(begin->second.CONSTRAINT);
+//        }
+//        begin++;
+//    }
+//    return -1 ;
+//}
+//bool ngspice::analyze( string Block , string EndBlockPin )
+//{
+//    double Constraint = getIR_DropCons(StartPowerPin, EndBlockPin);
+//    
+//}
+void ngspice::ConcatIR_Drop()
 {
     
     string a ;

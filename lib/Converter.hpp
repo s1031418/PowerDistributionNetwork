@@ -12,6 +12,7 @@
 #include "Components.h"
 #include <unordered_map>
 #include <vector>
+#include <algorithm>
 #include "PDNHelper.hpp"
 #include <set>
 #include "ngspice.hpp"
@@ -48,6 +49,8 @@ public:
     ~Converter();
     void toLocationFile();
     void toSpice();
+    void toNgspice();
+    void Visualize();
 private:
     string CaseName ; 
     vector<string> PinNames;

@@ -13,6 +13,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "InitialFileParser.hpp"
+#include <cstring>
+#include <map>
 using namespace std;
 class ngspice {
     
@@ -21,8 +24,12 @@ public:
     ngspice();
     ngspice(string casename);
     ~ngspice();
-    void concat();
+    void ConcatIR_Drop();
+    
+//    bool analyze( string StartPowerPin , string EndBlockPin );
+//    double getIR_DropCons(string StartPowerPin , string EndBlockPin );
 private:
+    map<string,double> VoltageMap;
     string CaseName;
 };
 

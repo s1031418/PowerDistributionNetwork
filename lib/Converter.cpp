@@ -283,9 +283,12 @@ void Converter::toSpice()
 //    cout << ".enddc" << endl;
     
     fclose(pFile);
+    
+}
+void Converter::toNgspice()
+{
     string cmd;
     cmd.append("./ngspice ").append(CaseName).append(".sp -o ").append(CaseName).append("_ngspice");
-    cout << cmd << endl;
     system(cmd.c_str());
 }
 void Converter::printVoltage(string MetalName , Point<int> StartPoint , string PinName , FILE * pFile)
@@ -520,10 +523,10 @@ void Converter::printResistance(map<Line , vector<Point<int>>,MyComparator> & Cr
 
 void Converter::toLocationFile()
 {
-    toSpice();
+    
     // print Block location
     FILE * pFile ;
-    pFile = fopen("/Users/Jeff/Documents/c++/EDA_Contest2017(PDN)/EDA_Contest2017(PDN)/output.txt", "w");
+    pFile = fopen("output.txt", "w");
     if( NULL == pFile ) printf("Failed to open file\n");
     
     
@@ -605,8 +608,13 @@ void Converter::toLocationFile()
         fprintf(pFile, "\n");
     }
     fclose(pFile);
+    toSpice();
+    toNgspice();
     ngspice ng(CaseName) ;
-    ng.concat() ;
+    ng.ConcatIR_Drop() ;
+}
+void Converter::Visualize()
+{
     system("java -jar JavaApplication5.jar");
 }
 pair<Point<int>, Point<int>> Converter::getBlockCoordinate(int x , int y , int width , int length  , string orient  )
