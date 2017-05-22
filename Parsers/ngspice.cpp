@@ -83,6 +83,7 @@ void ngspice::printStats(multimap<string, string> & DetinationMap)
             beginning++;
         }
     }
+    cout << endl;
 }
 void ngspice::initvoltage()
 {

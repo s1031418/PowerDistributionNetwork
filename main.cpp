@@ -29,7 +29,7 @@ char ** getlefargv(char * argv[]);
 char ** getdefargv(char * argv[]);
 void freeargv(char * lefargv[] , char * defargv[]);
 void runlef(char * argv[]);
-void by2(std::multimap<std::string,Nets> & NETSMULTIMAPS);
+void by(int num , std::multimap<std::string,Nets> & NETSMULTIMAPS);
 void test(int num);
 void rundef(char * argv[]);
 // Ex. Team1.exe case1.v case1_input.def tech.lef blocks.lef initial_files caseX
@@ -50,13 +50,16 @@ int main(int argc,  char * argv[])
     def.run(2, defargv);
 
     initialfile.run();
-    //    test(1);
-        Converter converter(CaseName);
-//        converter.toSpice();
-    ngspice ng(CaseName);
+    Converter converter(CaseName);
+    for(int i = 0 ; i < 3 ; i++)
+    {
+        converter.toLocationFile();
+        converter.Visualize();
+        test(2);
+    }
     
-    converter.toLocationFile();
-    converter.Visualize();
+    
+    
     delete[] lefargv;
     delete[] defargv ;
     return 0;
@@ -69,22 +72,20 @@ void test(int num)
         PinNames.push_back(it->first);
     }
     
-    for(int i = 0 ; i < num ; i++)
+    for(auto PinName : PinNames)
     {
-        for(auto PinName : PinNames)
-        {
-            by2(SpecialNetsMaps[PinName].NETSMULTIMAPS);
-        }
+        by(num , SpecialNetsMaps[PinName].NETSMULTIMAPS);
     }
+    
 }
-void by2(std::multimap<std::string,Nets> & NETSMULTIMAPS)
+void by(int num , std::multimap<std::string,Nets> & NETSMULTIMAPS)
 {
     for( auto it = NETSMULTIMAPS.begin(), end = NETSMULTIMAPS.end(); it != end;it = NETSMULTIMAPS.upper_bound(it->first))
     {
         auto first = NETSMULTIMAPS.lower_bound(it->first);
         auto last = NETSMULTIMAPS.upper_bound(it->first);
         while (first != last) {
-            first->second.ROUNTWIDTH *= 2 ;
+            first->second.ROUNTWIDTH *= num ;
             first++;
         }
     }
