@@ -55,8 +55,8 @@ int main(int argc,  char * argv[])
 //        converter.toSpice();
     ngspice ng(CaseName);
     
-        converter.toLocationFile();
-//        converter.Visualize();
+    converter.toLocationFile();
+    converter.Visualize();
     delete[] lefargv;
     delete[] defargv ;
     return 0;

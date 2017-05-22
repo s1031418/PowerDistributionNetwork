@@ -75,7 +75,7 @@ void ngspice::printStats(multimap<string, string> & DetinationMap)
             double Drop_percent = ((StartVoltage - EndVoltage) / StartVoltage) * 100 ;
             cout << PinName << " "<< BlockName << " " << BlockPinName << " ";
             if(EndVoltage < 0)
-                cout << "Terminal Point Voltage is negative(Pass)" << endl ;
+                cout << "Terminal Point Voltage is negative(NoPass)" << endl ;
             else if( Drop_percent > Constraint)
                 cout << "Drop " << Drop_percent << "(%) (NoPass)"<< endl;
             else
