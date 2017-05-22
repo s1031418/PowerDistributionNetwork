@@ -18,11 +18,15 @@ class PDNHelper {
     
 public:
     bool isHorizontal(Point<int> pt1 , Point<int> pt2);
-    double calculateResistance(double rpsq , int width , double length );
     pair<Point<int>, Point<int>> getBlockCoordinate(int x , int y , int width , int length  , string orient ) ;
     bool isCross(Line line1 , Line line2);
     Point<int> getCrossPoint(Line line1 , Line line2);
-    Point<int> getEndPoint(map<string , vector<Block> > & BlockMap ,Point<int> pt );
+    Point<int> getStartPoint(map<string ,Block > & PowerMap ,Point<int> pt1 , Point<int> pt2);
+    Point<int> getEndPoint(map<string , vector<Block> > & BlockMap ,Point<int> pt1 , Point<int> pt2);
+    double calculateResistance(double rpsq , int width , double length );
+    //第一個是BlockName , BlockPinName
+    pair<string, string> getBlockMsg(map<string , vector<Block> > & BlockMaps , Point<int> pt);
+    
 };
 
 #endif /* PDNHelper_hpp */

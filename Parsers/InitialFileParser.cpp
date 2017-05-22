@@ -50,8 +50,8 @@ void InitialFileParser::run()
                 }
                 
                 // store in data structure
-                regex_t Regex ; // group 1、2、4
-                if ( regcomp(&Regex, "[[:space:]]*([[:alnum:]]+)[[:space:]]+(([[:alnum:]]|_)+)[[:space:]]+([[:digit:]]+[.]?[[:digit:]]*)", REG_EXTENDED) ) cerr << "Compile Error";
+                regex_t Regex ; // group 1、2、3
+                if ( regcomp(&Regex, "(.*) (.*) (.*)", REG_EXTENDED) ) cerr << "Compile Error";
                 if(!isMatch(Regex, Data[i]))
                 {
                     if(end == true)
@@ -60,7 +60,7 @@ void InitialFileParser::run()
                         continue ;
                 }
                 PowerPin powerpin ;
-                vector<string> results = GetParsingString(Regex, Data[i], vector<int>{1,2,4});
+                vector<string> results = GetParsingString(Regex, Data[i], vector<int>{1,2,3});
                 
                 powerpin.NAME = results[1];
                 powerpin.CURRENTDRAWN = results[2];
@@ -82,7 +82,7 @@ void InitialFileParser::run()
                 
                 // store in data structure
                 regex_t Regex ; // group 1、2
-                if ( regcomp(&Regex, "[[:space:]]*([[:alnum:]]+)[[:space:]]+([[:digit:]]+[.]?[[:digit:]]*)", REG_EXTENDED) ) cerr << "Compile Error";
+                if ( regcomp(&Regex, "(.*) (.*)", REG_EXTENDED) ) cerr << "Compile Error";
                 if(!isMatch(Regex, Data[i]))
                 {
                     if(end == true)
@@ -107,8 +107,8 @@ void InitialFileParser::run()
                 }
                 
                 // store in data structure
-                regex_t Regex ; // group 1、2、4
-                if ( regcomp(&Regex, "[[:space:]]*([[:alnum:]]+)[[:space:]]+(([[:alnum:]]|_)+)[[:space:]]+([[:digit:]]+[.]?[[:digit:]]*)", REG_EXTENDED) ) cerr << "Compile Error";
+                regex_t Regex ; // group 1、2、3
+                if ( regcomp(&Regex, "(.*) (.*) (.*)", REG_EXTENDED) ) cerr << "Compile Error";
                 if(!isMatch(Regex, Data[i]))
                 {
                     if(end == true)
@@ -118,7 +118,7 @@ void InitialFileParser::run()
                 }
                 Constraint constraint ;
                 
-                vector<string> results = GetParsingString(Regex, Data[i], vector<int>{1,2,4});
+                vector<string> results = GetParsingString(Regex, Data[i], vector<int>{1,2,3});
                 constraint.NAME = results[1];
                 constraint.CONSTRAINT = results[2];
                 ConstraintMaps.insert(make_pair(results[0], constraint));
@@ -138,7 +138,7 @@ void InitialFileParser::run()
                 
                 // store in data structure
                 regex_t Regex ; // group 1、2
-                if ( regcomp(&Regex, "[[:space:]]*([[:alnum:]]+)[[:space:]]+([[:digit:]]+[.]?[[:digit:]]*)", REG_EXTENDED) ) cerr << "Compile Error";
+                if ( regcomp(&Regex, "(.*) (.*)", REG_EXTENDED) ) cerr << "Compile Error";
                 if(!isMatch(Regex, Data[i]))
                 {
                     if(end == true)

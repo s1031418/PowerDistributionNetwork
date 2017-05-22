@@ -128,7 +128,10 @@ public:
     {
         return (this->x == right.x && this->y == right.y);
     }
-    
+    bool operator!=(const Point<T> & right)
+    {
+        return !(*this == right);
+    }
     
 };
 // Point function
@@ -172,6 +175,7 @@ public:
     bool isHorizontal ;
     bool isPsedoLine = false;
     std::vector<std::string> ViaMetal;
+    std::string ViaName ;
     inline bool operator< (const Line& right) const
     {
         // 目前還沒寫
@@ -359,6 +363,7 @@ class Block {
 public:
     Point<int> LeftDown ;
     Point<int> RightUp ;
+    std::string BlockPinName ; 
     std::vector<std::string> Metals ;
 };
 

@@ -20,6 +20,7 @@
 #include <memory>
 #include "PDN.hpp"
 #include <stdexcept>
+
 #include <array>
 using namespace std ;
 
@@ -28,12 +29,14 @@ char ** getlefargv(char * argv[]);
 char ** getdefargv(char * argv[]);
 void freeargv(char * lefargv[] , char * defargv[]);
 void runlef(char * argv[]);
+void by2(std::multimap<std::string,Nets> & NETSMULTIMAPS);
+void test(int num);
 void rundef(char * argv[]);
-// Ex. Team1.exe case1.v case1_input.def tech.lef blocks.lef initial_files
+// Ex. Team1.exe case1.v case1_input.def tech.lef blocks.lef initial_files caseX
 
 int main(int argc,  char * argv[])
 {
-    
+    string CaseName = argv[6];
     // declare objects
     InitialFileParser initialfile(argv[5]) ;
     defrw def ;
@@ -45,7 +48,7 @@ int main(int argc,  char * argv[])
     lef.run(3, lefargv);
     def.run(2, defargv);
     initialfile.run();
-   
+    
 //    PDN pdn ;
 //    map<Line , vector<Point<int>>,MyComparator> CrossPointMap ;
 //    Line l ;
@@ -55,14 +58,46 @@ int main(int argc,  char * argv[])
 //    t.push_back(Point<int>(0,0));
 //    CrossPointMap.insert(make_pair(l, t));
 //    cout <<"rr";
-    Converter converter ;
-    converter.toSpice2();
+//    cout << CurrnetMaps.find("B1");
+    test(1);
+    Converter converter(CaseName) ;
 //    converter.toLocationFile();
+//    converter.toSpice();
+    converter.toLocationFile();
+    
     
 //    converter.toSpice();
     delete[] lefargv;
     delete[] defargv ;
     return 0;
+}
+void test(int num)
+{
+    vector<string> PinNames;
+    for( auto it = PinMaps.begin(), end = PinMaps.end(); it != end;it = PinMaps.upper_bound(it->first))
+    {
+        PinNames.push_back(it->first);
+    }
+    
+    for(int i = 0 ; i < num ; i++)
+    {
+        for(auto PinName : PinNames)
+        {
+            by2(SpecialNetsMaps[PinName].NETSMULTIMAPS);
+        }
+    }
+}
+void by2(std::multimap<std::string,Nets> & NETSMULTIMAPS)
+{
+    for( auto it = NETSMULTIMAPS.begin(), end = NETSMULTIMAPS.end(); it != end;it = NETSMULTIMAPS.upper_bound(it->first))
+    {
+        auto first = NETSMULTIMAPS.lower_bound(it->first);
+        auto last = NETSMULTIMAPS.upper_bound(it->first);
+        while (first != last) {
+            first->second.ROUNTWIDTH *= 2 ;
+            first++;
+        }
+    }
 }
 string exec(const char* cmd)
 {

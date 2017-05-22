@@ -17,10 +17,6 @@ bool PDNHelper::isHorizontal(Point<int> pt1 , Point<int> pt2)
     else
         return false ;
 }
-double PDNHelper::calculateResistance(double rpsq , int width , double length )
-{
-    return rpsq * length / width ;
-}
 pair<Point<int>, Point<int>> PDNHelper::getBlockCoordinate(int x , int y , int width , int length  , string orient  )
 {
     Point<int> pt1 ;
@@ -94,16 +90,54 @@ Point<int> PDNHelper::getCrossPoint(Line line1 , Line line2)
     }
     return CrossPoint ;
 }
-Point<int> PDNHelper::getEndPoint(map<string , vector<Block> > & BlockMap ,Point<int> pt  )
+Point<int> PDNHelper::getEndPoint(map<string , vector<Block> > & BlockMap ,Point<int> pt1  , Point<int> pt2 )
 {
     Point<int> temp ;
     for(auto Blocks : BlockMap)
     {
         for(auto block : Blocks.second)
         {
-            if( pt.x >= block.LeftDown.x && pt.x <= block.RightUp.x && pt.y >= block.LeftDown.y && pt.y <= block.RightUp.y )
+            if( pt1.x >= block.LeftDown.x && pt1.x <= block.RightUp.x && pt1.y >= block.LeftDown.y && pt1.y <= block.RightUp.y )
+                return block.RightUp ;
+            if( pt2.x >= block.LeftDown.x && pt2.x <= block.RightUp.x && pt2.y >= block.LeftDown.y && pt2.y <= block.RightUp.y )
                 return block.RightUp ;
         }
     }
     return temp;
+}
+double PDNHelper::calculateResistance(double rpsq , int width , double length )
+{
+    return rpsq * length / width ;
+}
+pair<string, string> PDNHelper::getBlockMsg(map<string , vector<Block> > & BlockMaps , Point<int> pt)
+{
+    for(auto block : BlockMaps)
+    {
+        for(auto blockpin : block.second)
+        {
+            if( pt.x >= blockpin.LeftDown.x && pt.x <= blockpin.RightUp.x && pt.y >= blockpin.LeftDown.y && pt.y <= blockpin.RightUp.y )
+            {
+                return make_pair(block.first, blockpin.BlockPinName);
+            }
+        }
+    }
+    assert(0);
+}
+Point<int> PDNHelper::getStartPoint(map<string ,Block > & PowerMap ,Point<int> pt1 , Point<int> pt2 )
+{
+    
+    for(auto pin : PowerMap)
+    {
+        // 假如pt1在Powerpin得範圍內
+        if( pt1.x >= pin.second.LeftDown.x && pt1.x <= pin.second.RightUp.x && pt1.y >= pin.second.LeftDown.y && pt1.y <= pin.second.RightUp.y )
+        {
+            return pt1 ;
+        }
+        // 假如pt2在Powerpin得範圍內
+        if( pt2.x >= pin.second.LeftDown.x && pt2.x <= pin.second.RightUp.x && pt2.y >= pin.second.LeftDown.y && pt2.y <= pin.second.RightUp.y )
+        {
+            return pt2 ;
+        }
+    }
+    return Point<int>();
 }

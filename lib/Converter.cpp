@@ -16,43 +16,146 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory>
-Converter::Converter()
+Converter::Converter(string casename)
 {
+    CaseName = casename ;
     initConverterState();
 }
 Converter::~Converter()
 {
     
 }
+void Converter::BuildPowerMaps()
+{
+    // key pinName , value block
+    for(auto pin : PinMaps)
+    {
+        string orient = pin.second.ORIENT ;
+        Block block ;
+        pair< Point<int>, Point<int> > PowerPinCoordinate = getPowerPinCoordinate(pin.second.STARTPOINT.x, pin.second.STARTPOINT.y, pin.second.RELATIVE_POINT1 , pin.second.RELATIVE_POINT2, orient);
+        block.LeftDown = get<0>(PowerPinCoordinate);
+        block.RightUp = get<1>(PowerPinCoordinate);
+        PowerMaps.insert(make_pair(pin.first, block));
+    }
+}
+pair< Point<int>, Point<int> > Converter::getPowerPinCoordinate(int x , int y , Point<int> r_pt1, Point<int> r_pt2  , string orient)
+{
+    Point<int> pt1 ;
+    Point<int> pt2 ;
+    Point<int> LeftDown;
+    Point<int> RightUp;
+    if (orient == "E")
+    {
+        pt1.x = x + r_pt1.y ;
+        pt1.y = y - r_pt1.x ;
+        pt2.x = x + r_pt2.y ;
+        pt2.y = y - r_pt2.x ;
+    }
+    else if( orient == "N")
+    {
+        pt1.x = x + r_pt1.x ;
+        pt2.x = x + r_pt2.x ;
+        pt1.y = y + r_pt1.y ;
+        pt2.y = y + r_pt2.y ;
+    }
+    else if (orient == "S")
+    {
+        pt1.x = x - r_pt1.x ;
+        pt2.x = x - r_pt2.x ;
+        pt1.y = y - r_pt1.y ;
+        pt2.y = y - r_pt2.y ;
+    }
+    else if (orient == "W")
+    {
+        pt1.x = x - r_pt1.y ;
+        pt2.x = x - r_pt2.y ;
+        pt1.y = y + r_pt1.x ;
+        pt2.y = y + r_pt2.x ;
+    }
+    else if (orient == "FN")
+    {
+        pt1.x = x - r_pt1.x ;
+        pt2.x = x - r_pt2.x ;
+        pt1.y = y + r_pt1.y ;
+        pt2.y = y + r_pt2.y ;
+    }
+    else if(orient == "FS")
+    {
+        pt1.x = x + r_pt1.x ;
+        pt2.x = x + r_pt2.x ;
+        pt1.y = y - r_pt1.y ;
+        pt2.y = y - r_pt2.y ;
+    }
+    else if(orient == "FE")
+    {
+        pt1.x = x - r_pt1.y;
+        pt2.x = x - r_pt2.y;
+        pt1.y = y - r_pt1.x ;
+        pt2.y = y - r_pt2.x ;
+    }
+    else if(orient == "FW")
+    {
+        pt1.x = x + r_pt1.y ;
+        pt2.x = x + r_pt2.y ;
+        pt1.y = y + r_pt1.x;
+        pt2.y = y + r_pt2.x;
+    }
+    LeftDown.x = (pt1.x < pt2.x ) ? pt1.x : pt2.x ;
+    LeftDown.y = (pt1.y < pt2.y ) ? pt1.y : pt2.y ;
+    RightUp.x = (pt1.x > pt2.x ) ? pt1.x : pt2.x ;
+    RightUp.y = (pt1.y > pt2.y ) ? pt1.y : pt2.y ;
+    return make_pair(LeftDown, RightUp);
+}
 void Converter::initConverterState()
 {
+    
     // init pin_name
     for( auto it = PinMaps.begin(), end = PinMaps.end(); it != end;it = PinMaps.upper_bound(it->first))
     {
         PinNames.push_back(it->first);
     }
     BuildBlockMaps();
-    BuildCrossPointMap();
+    BuildPowerMaps();
 }
-void Converter::initCrossPointMap(map<Line , vector<Point<int>>,MyComparator> & CrossPointMap ,map<string , vector<Line>> & lineMap , string PinName )
+void Converter::initCrossPointMap(map<Line , vector<Point<int>>,MyComparator> & CrossPointMap ,map<string , vector<Line>> & lineMap , string PinName , pair<string, Point<int>> & Voltage_Msg , vector<pair<string, Point<int>>> & Current_Msg)
 {
-    Point<int> PowerPinST = PinMaps[PinName].STARTPOINT ;
     for( auto vec : lineMap )
     {
         for(int i = 0 ; i < vec.second.size() ; i++)
         {
+            
             vector<Point<int>> CrossPoints;
             // 判斷是不是起點
-            if(vec.second[i].pt1 == PowerPinST || vec.second[i].pt2 == PowerPinST)
-                CrossPoints.push_back(PowerPinST);
+            Point<int> Result = myhelper.getStartPoint(PowerMaps, vec.second[i].pt1 ,vec.second[i].pt2 );
+            if( Result != Point<int>() )
+            {
+                CrossPoints.push_back(Result);
+                get<0>(Voltage_Msg) = vec.second[i].MetalName;
+                get<1>(Voltage_Msg) = Result ;
+            }
             // 判斷是不是終點
-            Point<int> Result = myhelper.getEndPoint(BlockMaps, vec.second[i].pt1) ;
-            if( Result.x != -1 && Result.y != -1 )
+            Result = myhelper.getEndPoint(BlockMaps, vec.second[i].pt1 , vec.second[i].pt2) ;
+            if( Result != Point<int>() )
+            {
+                pair<string, Point<int>> temp ;
+                get<0>(temp) = vec.second[i].MetalName ;
+                get<1>(temp) = Result;
+                if( Current_Msg.empty() ) Current_Msg.push_back(temp);
+                
+                if( !Current_Msg.empty() )
+                {
+                    //判斷有重複就不能insert
+                    bool insert = true;
+                    for(auto C : Current_Msg)
+                    {
+                        if( get<0>(C) == get<0>(temp) && get<1>(C) == get<1>(temp))
+                            insert = false;
+                    }
+                    if(insert)
+                        Current_Msg.push_back(temp);
+                }
                 CrossPoints.push_back(Result);
-            Result = myhelper.getEndPoint(BlockMaps, vec.second[i].pt2) ;
-            if( Result.x != -1 && Result.y != -1 )
-                CrossPoints.push_back(Result);
-            
+            }
             for(int j = 0 ; j < vec.second.size() ; j++)
             {
                 if( !vec.second[i].isPsedoLine  )//代表不是psudo line
@@ -81,7 +184,7 @@ void Converter::initCrossPointMap(map<Line , vector<Point<int>>,MyComparator> & 
     }
         
 }
-void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string , vector<Line>> & LineMap)
+void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string , vector<Line>> & LineMap , vector<Line> & ViaTable)
 {
     
     // foreach NetsMM
@@ -95,18 +198,18 @@ void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string ,
             if( first->second.ROUNTWIDTH == 0 ) // VIA
             {
                 line.pt1 = first->second.ABSOLUTE_POINT1 ;
-                line.isPsedoLine = true ; 
+                line.isPsedoLine = true ;
+                line.ViaName = first->second.VIANAME ;
                 for( auto x :ViaMaps[first->second.VIANAME].InnerMaps )
                 {
                     if(LayerMaps[x.first].TYPE == "ROUTING")
                     {
                         line.ViaMetal.push_back(x.first);
-                        
-                        //LineMap[x.first].push_back(line);
                     }
                 }
                 for(auto layer : line.ViaMetal)
                     LineMap[layer].push_back(line);
+                ViaTable.push_back(line);
                 first++ ;
                 continue;
             }
@@ -137,9 +240,14 @@ void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string ,
 
     }
 }
-void Converter::toSpice2()
+void Converter::toSpice()
 {
-    
+    FILE * pFile ;
+    string output = CaseName + ".sp" ;
+    pFile = fopen(output.c_str(), "w");
+    if( NULL == pFile ) printf("Failed to open file\n");
+    fprintf(pFile, "#Comments\n");
+//    cout << "#Comments" << endl;
     for(auto PinName : PinNames)
     {
         map<string , vector<Line>> lineMap;
@@ -148,38 +256,74 @@ void Converter::toSpice2()
             vector<Line> vec_line ;
             lineMap.insert(make_pair(it->first, vec_line));
         }
-        initLineMap(SpecialNetsMaps[PinName].NETSMULTIMAPS, lineMap);
+        pair<string, Point<int>> Voltage_Msg ;
+        vector<pair<string, Point<int>>> Current_Msg;
+        vector<Line> ViaTable ;
+        initLineMap(SpecialNetsMaps[PinName].NETSMULTIMAPS, lineMap , ViaTable);
         map<Line , vector<Point<int>>,MyComparator> CrossPointMap ;
-        initCrossPointMap(CrossPointMap, lineMap , PinName);
+        initCrossPointMap(CrossPointMap, lineMap , PinName , Voltage_Msg , Current_Msg);
         
-        print(CrossPointMap);
-        
+        printResistance(CrossPointMap , PinName , ViaTable , pFile);
+        printVoltage(get<0>(Voltage_Msg), get<1>(Voltage_Msg), PinName , pFile);
+        printCurrent(Current_Msg , PinName , pFile);
     }
+    fprintf(pFile, ".tran 1ns 1ns\n");
+    fprintf(pFile, ".end\n");
+    fprintf(pFile, ".control\n");
+    fprintf(pFile, "set noaskquit\n");
+    fprintf(pFile, "run\n");
+    fprintf(pFile, "quit\n");
+    fprintf(pFile, ".enddc\n");
+//    cout << ".tran 1ns 1ns" << endl;
+//    cout << ".end" << endl;
+//    cout << ".control" << endl;
+//    cout << "set noaskquit" << endl;
+//    cout << "run" << endl;
+//    cout << "quit" << endl;
+//    cout << ".enddc" << endl;
     
+    fclose(pFile);
+    string cmd;
+    cmd.append("./ngspice ").append(CaseName).append(".sp -o ").append(CaseName).append("_ngspice");
+    cout << cmd << endl;
+    system(cmd.c_str());
+}
+void Converter::printVoltage(string MetalName , Point<int> StartPoint , string PinName , FILE * pFile)
+{
+//    fprintf(pFile, "a\n");
+    fprintf(pFile, "V_%s_1 %s_%d_%d gnd %s\n" , PinName.c_str() , MetalName.c_str() , StartPoint.x , StartPoint.y , VoltageMaps[PinName].c_str());
+//    cout << "V_" << PinName << "_1 " << MetalName << "_" << StartPoint.x << "_" << StartPoint.y << " gnd " << VoltageMaps[PinName] << endl ;
     
 }
-pair<Point<int>, Point<int>> Converter::getOrder(Point<int> pt1, Point<int> pt2)
+void Converter::printCurrent(vector<pair<string, Point<int>>> & Current_Msg , string PinName , FILE * pFile )
 {
-    if(myhelper.isHorizontal(pt1, pt2))
+    int cnt = 1 ;
+    
+    for(auto C : Current_Msg)
     {
-        Point<int> right = ( pt1.x > pt2.x ) ? pt1 : pt2 ;
-        Point<int> left =  ( pt1.x < pt2.x ) ? pt1 : pt2 ;
-        return make_pair(left, right);
+        string title("I" + PinName + "_");
+        title.append(to_string(cnt));
+        fprintf(pFile, "%s %s_%d_%d gnd " , title.c_str() , get<0>(C).c_str(), get<1>(C).x , get<1>(C).y);
+//        cout << title << " " << get<0>(C) << "_" << get<1>(C).x << "_" << get<1>(C).y << " ";
+//        cout << "gnd " ;
+        pair<string, string> BlockMsg = myhelper.getBlockMsg(BlockMaps, get<1>(C));
+        auto begin = CurrnetMaps.lower_bound(get<0>(BlockMsg));
+        auto end = CurrnetMaps.upper_bound(get<0>(BlockMsg));
+        while (begin != end)
+        {
+            if(begin->second.NAME == get<1>(BlockMsg))
+            {
+                fprintf(pFile, "%f" , stof( begin->second.CURRENTDRAWN )/ 1000 );
+//                cout << (stof( begin->second.CURRENTDRAWN )/ 1000) ;
+            }
+            begin++;
+        }
+        fprintf(pFile, "\n");
+//        cout << endl;
+        cnt++ ;
     }
-    else
-    {
-        Point<int> top = ( pt1.y > pt2.y ) ? pt1 : pt2 ;
-        Point<int> bottom =  ( pt1.y < pt2.y ) ? pt1 : pt2 ;
-        return make_pair(bottom, top);
-    }
-    assert(0);
-}
-int Converter::getDistance(Point<int> pt1, Point<int> pt2)
-{
-    if(myhelper.isHorizontal(pt1, pt2))
-        return abs(pt1.x - pt2.x);
-    else
-        return abs(pt1.y - pt2.y);
+    fprintf(pFile, "\n");
+//    cout << endl;
 }
 Point<int> Converter::FlipY(float x_axis , Point<int> pt , FlipOrient orientation)
 {
@@ -310,27 +454,25 @@ void Converter::BuildBlockMaps()
             pair<Point<int>, Point<int>> RotatePoint = getRotatePoint(BlockLeftDown , BlockRightUp , BlockPinLeftDown, BlockPinRightUp, orient);
             block.LeftDown = get<0>(RotatePoint) ;
             block.RightUp = get<1>(RotatePoint);
-            
+            block.BlockPinName = blockpin.second.Name;
             BlockMaps[component.first].push_back(block);
         }
         
     }
+   
 }
-void Converter::print(map<Line , vector<Point<int>>,MyComparator> & CrossPointMap)
+void Converter::printResistance(map<Line , vector<Point<int>>,MyComparator> & CrossPointMap , string PinName , vector<Line> & ViaTable , FILE * pFile)
 {
+    
+    int cnt =1 ;
+    // print wire
     for(auto x : CrossPointMap)
     {
         Line line =x.first ;
-        // print via
-        
-        
         if(x.second.size() == 0) // Psudo Line
         {
-            cout << line.ViaMetal[0] << "_" << line.pt1.x << "_" << line.pt1.y  << " " << line.ViaMetal[1] << line.pt1.x << "_" << line.pt1.y << endl;
             continue ;
         }
-        
-        // print wire
         if(myhelper.isHorizontal(line.pt1, line.pt2))
         {
             sort(x.second.begin(), x.second.end(), [](const Point<int> & pt1, const Point<int> & pt2)
@@ -346,18 +488,39 @@ void Converter::print(map<Line , vector<Point<int>>,MyComparator> & CrossPointMa
                  });
         }
         for(int i = 0 ; i < x.second.size() -1 ; i++)
-            cout << line.MetalName << " " << x.second[i] << " " << x.second[i+1] << endl;
+        {
+            string title("R" + PinName + "_");
+            title.append(to_string(cnt));
+            fprintf(pFile, "%s %s_%d_%d %s_%d_%d " , title.c_str() , line.MetalName.c_str() , x.second[i].x , x.second[i].y , line.MetalName.c_str() , x.second[i+1].x , x.second[i+1].y);
+//            cout << title << " " ;
+//            cout << line.MetalName << "_" << x.second[i].x << "_" << x.second[i].y << " ";
+//            cout << line.MetalName << "_" << x.second[i+1].x << "_" << x.second[i+1].y << " ";
+            double length = ( line.isHorizontal ) ? x.second[i+1].x - x.second[i].x : x.second[i+1].y - x.second[i].y ;
+            fprintf(pFile, "%g\n" , myhelper.calculateResistance(LayerMaps[line.MetalName].RESISTANCE_RPERSQ, line.Width, length));
+//            cout << myhelper.calculateResistance(LayerMaps[line.MetalName].RESISTANCE_RPERSQ, line.Width, length);
+//            cout << endl;
+            cnt++;
+        }
         
     }
-    cout << endl;
+    // print via
+    for(auto via : ViaTable)
+    {
+        string title("R" + PinName + "_");
+        title.append(to_string(cnt));
+        fprintf(pFile, "%s %s_%d_%d %s_%d_%d %g\n" , title.c_str() , via.ViaMetal[0].c_str() , via.pt1.x , via.pt1.y , via.ViaMetal[1].c_str() , via.pt1.x , via.pt1.y , ViaMaps[via.ViaName].RESISTANCE);
+//        cout << title << " " ;
+//        cout << via.ViaMetal[0] << "_" << via.pt1.x << "_" << via.pt1.y  << " ";
+//        cout << via.ViaMetal[1] << "_" << via.pt1.x << "_" << via.pt1.y << " ";
+//        cout << ViaMaps[via.ViaName].RESISTANCE ;
+//        cout << endl;
+        cnt++;
+    }
+}
 
-}
-double Converter::calculateResistance(double rpsq , int width , double length )
-{
-    return rpsq * length / width ;
-}
 void Converter::toLocationFile()
 {
+    toSpice();
     // print Block location
     FILE * pFile ;
     pFile = fopen("/Users/Jeff/Documents/c++/EDA_Contest2017(PDN)/EDA_Contest2017(PDN)/output.txt", "w");
@@ -386,7 +549,7 @@ void Converter::toLocationFile()
         fprintf(pFile, "%d %d ", get<0>(coordinate).x , get<0>(coordinate).y);
         fprintf(pFile, "%s ", MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[(end)->first].NAME.c_str());
         fprintf(pFile, "%d %d ", get<1>(coordinate).x , get<1>(coordinate).y);
-        fprintf(pFile, "%s_%s_%s\n", BlockNames[i].c_str() , MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[begin->first].NAME.c_str() , MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[(end)->first].NAME.c_str());
+        fprintf(pFile, "%s~%s\n" , MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[begin->first].NAME.c_str() , MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[(end)->first].NAME.c_str());
     }
     // print nets location
     vector<string> PinNames;
@@ -432,7 +595,8 @@ void Converter::toLocationFile()
                         // print right_up_corner
                         fprintf(pFile, "%d %d " , top.x + (begin->second.ROUNTWIDTH / 2) , top.y);
                     }
-                    fprintf(pFile, "R%s_%d \n" , PinNames[i].c_str() , R_cnt);
+                    fprintf(pFile, "*\n" );
+//                    fprintf(pFile, "R%s_%d \n" , PinNames[i].c_str() , R_cnt);
                     R_cnt++ ;
                 }
                 begin++;
@@ -441,6 +605,9 @@ void Converter::toLocationFile()
         fprintf(pFile, "\n");
     }
     fclose(pFile);
+    ngspice ng(CaseName) ;
+    ng.concat() ;
+    system("java -jar JavaApplication5.jar");
 }
 pair<Point<int>, Point<int>> Converter::getBlockCoordinate(int x , int y , int width , int length  , string orient  )
 {
