@@ -43,6 +43,7 @@ public:
     void toLocationFile();
     void toSpice();
     void toNgspice();
+    void toOutputDef();
     void Visualize();
 private:
     string CaseName ;

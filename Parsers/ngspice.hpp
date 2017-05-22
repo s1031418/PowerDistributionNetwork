@@ -36,6 +36,7 @@ private:
     map<string,double> voltages;
     string CaseName;
     void LoadFile();
+    // 將sp的座標轉為Point
     Point<int> translateToPoint(string key);
 };
 

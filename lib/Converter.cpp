@@ -24,7 +24,8 @@ Converter::Converter(string casename)
 Converter::~Converter()
 {
     
-}void Converter::initConverterState()
+}
+void Converter::initConverterState()
 {
     
     // init pin_name
@@ -318,7 +319,10 @@ void Converter::printResistance(map<Line , vector<Point<int>>,MyComparator> & Cr
         cnt++;
     }
 }
-
+void Converter::toOutputDef()
+{
+    
+}
 void Converter::toLocationFile()
 {
     
