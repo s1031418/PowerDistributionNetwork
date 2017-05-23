@@ -25,6 +25,64 @@ bool PDNHelper::isHorizontal(Point<int> pt1 , Point<int> pt2)
     else
         return false ;
 }
+string PDNHelper::NETSMULTIMAPSToString(multimap<string,Nets> & NETSMULTIMAPS)
+{
+    bool first = true ;
+    string line;
+    for( auto it = NETSMULTIMAPS.begin(), end = NETSMULTIMAPS.end(); it != end;it = NETSMULTIMAPS.upper_bound(it->first))
+    {
+        auto beginning = NETSMULTIMAPS.lower_bound(it->first);
+        auto ending = NETSMULTIMAPS.upper_bound(it->first);
+        while (beginning != ending)
+        {
+            if(first)
+            {
+                line.append("   + FIXED ");
+                first = false ;
+            }
+            else
+                line.append(" NEW ");
+//            line.append(beginning->second.STATE).append(" ");
+            line.append(" ").append(beginning->second.METALNAME).append(" ").append(to_string(beginning->second.ROUNTWIDTH)).append(" ");
+            
+            if( beginning->second.ROUNTWIDTH != 0 )
+            {
+                line.append(" + SHAPE ").append(beginning->second.SHAPE).append(" ( ");
+                line.append(to_string(beginning->second.ABSOLUTE_POINT1.x)).append(" ");
+                line.append(to_string(beginning->second.ABSOLUTE_POINT1.y)).append(" ) ");
+                line.append("( ");
+                line.append(to_string(beginning->second.ABSOLUTE_POINT2.x)).append(" ");
+                line.append(to_string(beginning->second.ABSOLUTE_POINT2.y)).append(" )\n");
+            }
+            else
+            {
+                line.append(" ( ");
+                line.append(to_string(beginning->second.ABSOLUTE_POINT1.x)).append(" ");
+                line.append(to_string(beginning->second.ABSOLUTE_POINT1.y)).append(" ) ");
+                line.append(beginning->second.VIANAME).append("\n");
+            }
+            beginning++;
+        }
+    }
+    line.pop_back();
+//    cout << line << endl;
+    return line ;
+}
+string PDNHelper::DestinationMapToString(multimap<string,string> & DestinationMap)
+{
+    string line ;
+    for( auto it = DestinationMap.begin(), end = DestinationMap.end(); it != end;it = DestinationMap.upper_bound(it->first))
+    {
+        auto beginning = DestinationMap.lower_bound(it->first);
+        auto ending = DestinationMap.upper_bound(it->first);
+        while (beginning != ending)
+        {
+            line.append(" ( ").append(beginning->first).append(" ").append(beginning->second).append(" ) ");
+            beginning++;
+        }
+    }
+    return line ; 
+}
 void PDNHelper::InitBlockMaps()
 {
     for( auto component : ComponentMaps )

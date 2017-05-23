@@ -77,6 +77,11 @@ public:
     //回傳旋轉完的左下跟右上
     pair<Point<int>, Point<int>> getRotatePoint(Point<int> BlcokLeftDown , Point<int> BlcokRightUp , Point<int> BlockPinLeftDown , Point<int> BlockPinRightUp , string orient);
     
+    // 將Detination Map 全部轉為 string
+    string DestinationMapToString(multimap<string,string>& DestinationMap);
+    // 將NETSMULTI MAP 全部轉為 string
+    string NETSMULTIMAPSToString(multimap<string,Nets> & NETSMULTIMAPS);
+    
     
 };
 

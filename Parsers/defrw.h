@@ -20,6 +20,7 @@
 #include "defrReader.hpp"
 #include "defiAlias.hpp"
 #include "Components.h"
+#include <fstream>
 extern double UNITS_DISTANCE ;
 extern Diearea DIEAREA ;
 // key:BlockName , value: Components
@@ -29,14 +30,19 @@ extern std::map<std::string,Pin> PinMaps;
 // key:PinName , value SpectialNet
 extern std::map<std::string,SpecialNets> SpecialNetsMaps ;
 
+extern std::vector<std::string> OriginDef ; 
+
 
 class defrw {
     
     
 public:
-    defrw();
+    defrw(int argc , char ** argv);
     ~defrw();
-    int run(int argc , char ** argv);
+    int run();
+private:
+    int argc ;
+    char ** argv ;
 };
 
 #endif /* defrw_h */

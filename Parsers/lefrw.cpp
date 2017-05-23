@@ -2263,14 +2263,16 @@ void printWarning(const char *str)
 
 
 
-lefrw::lefrw()
+lefrw::lefrw(int argc , char ** argv)
 {
+    this->argc = argc ;
+    this->argv = argv ;
 }
 lefrw::~lefrw()
 {
     fclose(fout);
 }
-int lefrw::run(int argc, char** argv )
+int lefrw::run()
 {
     
     char* inFile[100];

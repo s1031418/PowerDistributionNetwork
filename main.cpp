@@ -36,27 +36,26 @@ void rundef(char * argv[]);
 
 int main(int argc,  char * argv[])
 {
-    
     string CaseName = argv[6];
-    // declare objects
     InitialFileParser initialfile(argv[5]) ;
-    defrw def ;
-    lefrw lef ;
-    // get lef、def argument value
     char ** lefargv = getlefargv(argv) ;
     char ** defargv = getdefargv(argv) ;
-    // acivate parser
-    lef.run(3, lefargv);
-    def.run(2, defargv);
-
+    defrw def(2, defargv) ;
+    lefrw lef(3, lefargv);
+    lef.run();
+    def.run();
     initialfile.run();
     Converter converter(CaseName);
+//    Debugger db ;
+//    db.printAllSpecialNetMsg(SpecialNetsMaps);
+    
     for(int i = 0 ; i < 3 ; i++)
     {
         converter.toLocationFile();
         converter.Visualize();
         test(2);
     }
+    converter.toOutputDef();
     
     
     

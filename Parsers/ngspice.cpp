@@ -62,7 +62,6 @@ void ngspice::printStats(multimap<string, string> & DetinationMap)
         auto ending = DetinationMap.upper_bound(it->first);
         while ( beginning != ending )
         {
-            bool pass = true;
             double StartVoltage = voltages[beginning->first];
             double EndVoltage = voltages[beginning->second];
             Point<int> start = translateToPoint(beginning->first);

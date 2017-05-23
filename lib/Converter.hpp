@@ -50,8 +50,9 @@ private:
     vector<string> PinNames;
     // key是起點座標 , value:終點座標 一個起點可能有多個終點
     multimap<string, string> DestinationMap;
-    
     vector<Line> ViaTable ;
+    // 用來儲存 inputdef 
+    vector<string> Data ;
     PDNHelper myhelper ;
     
     void initCrossPointMap(map<Line , vector<Point<int>>,MyComparator> & CrossPointMap ,map<string , vector<Line>> & lineMap , string PinName , pair<string, Point<int>> & Voltage_Msg , vector<pair<string, Point<int>>> & Current_Msg );

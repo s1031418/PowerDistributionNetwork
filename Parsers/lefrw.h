@@ -43,14 +43,12 @@ class lefrw {
     
     
 public:
-    lefrw();
+    lefrw(int argc, char ** argv);
     ~lefrw();
-    int run(int argc, char ** argv);
-    
-    
-    
+    int run();
 private:
-    
+    int argc ;
+    char ** argv ;
     
 };
 #endif /* lefrw_h */

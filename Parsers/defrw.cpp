@@ -54,6 +54,8 @@ std::map<std::string,Components> ComponentMaps ;
 std::map<std::string,Pin> PinMaps;
 // key:SourceName , value SpectialNet
 std::map<std::string,SpecialNets> SpecialNetsMaps ;
+
+std::vector<std::string> OriginDef ; 
 // TX_DIR:TRANSLATION ON
 
 void myLogFunction(const char* errMsg){
@@ -3003,15 +3005,23 @@ void printWarning1(const char *str)
 {
     fprintf(stderr, "%s\n", str);
 }
-defrw::defrw()
+defrw::defrw(int argc, char** argv)
 {
+    this->argc = argc ;
+    this->argv = argv ;
     
+    std::fstream fin(argv[1], std::ios::in) ;
+    std::string EachLine ;
+    while (getline(fin,EachLine))
+    {
+        OriginDef.push_back(EachLine);
+    }
 }
 defrw::~defrw()
 {
     fclose(fout1);
 }
-int defrw::run(int argc, char** argv)
+int defrw::run()
 {
     int num = 99;
     char* inFile[1000];
