@@ -41,9 +41,10 @@ public:
     Converter(string Casename);
     ~Converter();
     void toLocationFile();
-    void toSpice();
+    void toSpiceAndOutputFile();
     void toNgspice();
     void toOutputDef();
+    
     void Visualize();
 private:
     string CaseName ;
@@ -54,7 +55,7 @@ private:
     // 用來儲存 inputdef 
     vector<string> Data ;
     PDNHelper myhelper ;
-    
+    void caluMetalUse(map<string , vector<Line>> & lineMap , map<string,long double> & MetalUsage);
     void initCrossPointMap(map<Line , vector<Point<int>>,MyComparator> & CrossPointMap ,map<string , vector<Line>> & lineMap , string PinName , pair<string, Point<int>> & Voltage_Msg , vector<pair<string, Point<int>>> & Current_Msg );
     void BuildCrossPointMap();
     void initConverterState();

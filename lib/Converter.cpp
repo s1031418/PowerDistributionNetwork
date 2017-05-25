@@ -157,9 +157,12 @@ void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string ,
         
     }
 }
-void Converter::toSpice()
+void Converter::toSpiceAndOutputFile()
 {
     FILE * pFile ;
+    // key值為metal層，value為這層用的金屬面積
+    map<string,long double> MetalUsage ;
+    
     string output = CaseName + ".sp" ;
     pFile = fopen(output.c_str(), "w");
     if( NULL == pFile ) printf("Failed to open file\n");
@@ -168,6 +171,7 @@ void Converter::toSpice()
     //    cout << "#Comments" << endl;
     for(auto PinName : PinNames)
     {
+        // key是Metal層
         map<string , vector<Line>> lineMap;
         for(auto it = SpecialNetsMaps[PinName].NETSMULTIMAPS.begin() , end = SpecialNetsMaps[PinName].NETSMULTIMAPS.end() ; it != end ; it =  SpecialNetsMaps[PinName].NETSMULTIMAPS.upper_bound(it->first))
         {
@@ -178,6 +182,7 @@ void Converter::toSpice()
         vector<pair<string, Point<int>>> Current_Msg;
         vector<Line> ViaTable ;
         initLineMap(SpecialNetsMaps[PinName].NETSMULTIMAPS, lineMap , ViaTable);
+        
         map<Line , vector<Point<int>>,MyComparator> CrossPointMap ;
         initCrossPointMap(CrossPointMap, lineMap , PinName , Voltage_Msg , Current_Msg);
         ///////////////////////////////////////////////////////
@@ -195,11 +200,13 @@ void Converter::toSpice()
             DestinationMap.insert(make_pair(key, value));
         }
         ///////////////////////////////////////////////////////
+        caluMetalUse(lineMap, MetalUsage);
         printResistance(CrossPointMap , PinName , ViaTable , pFile);
         printVoltage(get<0>(Voltage_Msg), get<1>(Voltage_Msg), PinName , pFile);
         printCurrent(Current_Msg , PinName , pFile);
     }
-    
+//    for(auto metal : MetalUsage)
+//        cout << metal.first << " " << metal.second << endl;
     
     fprintf(pFile, ".tran 1ns 1ns\n");
     fprintf(pFile, ".end\n");
@@ -208,14 +215,6 @@ void Converter::toSpice()
     fprintf(pFile, "run\n");
     fprintf(pFile, "quit\n");
     fprintf(pFile, ".enddc\n");
-    //    cout << ".tran 1ns 1ns" << endl;
-    //    cout << ".end" << endl;
-    //    cout << ".control" << endl;
-    //    cout << "set noaskquit" << endl;
-    //    cout << "run" << endl;
-    //    cout << "quit" << endl;
-    //    cout << ".enddc" << endl;
-    
     fclose(pFile);
     
 }
@@ -402,11 +401,6 @@ void Converter::toLocationFile()
         fprintf(pFile, "%s~%s\n" , MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[begin->first].NAME.c_str() , MacroMaps[ ComponentMaps[BlockNames[i]].MACROTYPE ].obs.InnerMaps[(end)->first].NAME.c_str());
     }
     // print nets location
-    vector<string> PinNames;
-    for( auto it = PinMaps.begin(), end = PinMaps.end(); it != end;it = PinMaps.upper_bound(it->first))
-    {
-        PinNames.push_back(it->first);
-    }
     for (int i = 0; i < PinNames.size(); i++) {
         int R_cnt = 1 ; // Resistance Count
         for( auto it = SpecialNetsMaps[ PinNames[i] ].NETSMULTIMAPS.begin(), end = SpecialNetsMaps[ PinNames[i] ].NETSMULTIMAPS.end(); it != end;it = SpecialNetsMaps[ PinNames[i] ].NETSMULTIMAPS.upper_bound(it->first))
@@ -455,7 +449,7 @@ void Converter::toLocationFile()
         fprintf(pFile, "\n");
     }
     fclose(pFile);
-    toSpice();
+    toSpiceAndOutputFile();
     toNgspice();
     ngspice ng(CaseName) ;
     ng.ConcatIR_Drop() ;
@@ -466,6 +460,58 @@ void Converter::Visualize()
 {
     system("java -jar JavaApplication5.jar  ");
 }
-
+void Converter::caluMetalUse(map<string , vector<Line>> & lineMap , map<string,long double> & MetalUsage)
+{
+    
+    // key直為某兩條線，value為那兩條線的重疊面積
+    map<string,long double> duplicate;
+    vector<Line> Pseudolines;
+    for( auto metal : lineMap )
+    {
+        //還沒有扣掉重疊的
+        long double Fake_Area = 0 ;
+        for( int i = 0 ; i < metal.second.size(); i++ )
+        {
+            long double length = (metal.second[i]).isHorizontal ? metal.second[i].pt2.x - metal.second[i].pt1.x : metal.second[i].pt2.y - metal.second[i].pt1.y ;
+            long double area = metal.second[i].Width * length / 1000000 ;
+            Fake_Area += area;
+            for(int j = 0 ; j < metal.second.size() ; j++)
+            {
+                if(metal.second[i].isPsedoLine)
+                {
+                    Pseudolines.push_back(metal.second[i]);
+                }
+                // line map 會將同層的金屬當key ，所以進來的一定都是同層的金屬
+                // 假如同層金屬且有交叉，不會是Metal遇到VIA
+                if(  !metal.second[i].isPsedoLine && !metal.second[j].isPsedoLine && myhelper.isCross(metal.second[i], metal.second[j]) )
+                {
+                    Point<int> cross = myhelper.getCrossPoint(metal.second[i], metal.second[j]);
+                    string key = to_string(cross.x).append(to_string(cross.y));
+                    double dup_area = (metal.second[i].Width) * (metal.second[j].Width) / 1000000;
+                    if( duplicate.find(key) == duplicate.end())
+                        duplicate.insert( make_pair(key, dup_area));
+                }
+            }
+        }
+        long double Real_Area = Fake_Area ;
+        // 減去線重疊的面積
+        for( auto area : duplicate )
+        {
+            Real_Area -= area.second;
+        }
+        // 減去VIA的面積
+        for(auto via : Pseudolines )
+        {
+            Point<float> pt1 =  ViaMaps[via.ViaName].InnerMaps[via.ViaMetal[0]].pt1;
+            Point<float> pt2 =  ViaMaps[via.ViaName].InnerMaps[via.ViaMetal[0]].pt2;
+            long double area = ( (pt2.x - pt1.x) * UNITS_DISTANCE ) * ( (pt2.y - pt1.y) * UNITS_DISTANCE ) / 1000000 ;
+            Real_Area -= area ;
+        }
+        if( MetalUsage.find(metal.first) == MetalUsage.end() )
+            MetalUsage.insert(make_pair(metal.first, Real_Area));
+        else
+            MetalUsage[metal.first] += Real_Area ;
+    }
+}
 
 
