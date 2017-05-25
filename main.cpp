@@ -46,6 +46,7 @@ int main(int argc,  char * argv[])
     def.run();
     initialfile.run();
     Converter converter(CaseName);
+//    converter.toSpiceAndOutputFile();
 //    Debugger db ;
 //    db.printAllSpecialNetMsg(SpecialNetsMaps);
     
