@@ -47,11 +47,6 @@ private:
     // function:
     void initLineVec();
     void initGraph();
-//    Root * root ;
-//    void getLineVec(vector<Line> & VertialLine_Vec , vector<Line> & HorizontalLine_Vec );
-//    void createColumnNode();
-//    bool isHorizontal(Point<int> pt1 , Point<int> pt2);
-//    void FreeMemory(Root * root);
 };
 
 #endif /* PDN_hpp */
