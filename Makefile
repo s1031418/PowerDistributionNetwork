@@ -2,7 +2,7 @@
 
 CXX = g++
 CXXFLAGS = -std=c++11  -I Parsers -I include -I lib
-OBJS = main.o Parsers/Parsers.o lib/Debugger.o Parsers/lefrw.o Parsers/defrw.o Parsers/InitialFileParser.o lib/Converter.o lib/PDN.o lib/PDNHelper.o Parsers/ngspice.o
+OBJS = main.o Parsers/Parsers.o lib/Debugger.o Parsers/lefrw.o Parsers/defrw.o Parsers/InitialFileParser.o lib/Converter.o lib/PDN.o lib/PDNHelper.o Parsers/ngspice.o lib/Graph_SP.o lib/BinaryHeap.o
 STATICLIB = lib/liblef.a lib/libdef.a
 
 
@@ -17,6 +17,8 @@ PDNHelper.o:lib/PDNHelper.cpp
 lefrw.o:lefrw.cpp
 ngspice.o:ngspice.cpp
 defrw.o:defrw.cpp
+Graph_SP.o:Graph_SP.cpp
+BinaryHeap:BinaryHeap.cpp
 Converter.o:lib/Converter.cpp
 Parser.o: Parsers/Parsers.cpp
 InitialFileParser.o:Parsers/InitialFileParser.cpp
