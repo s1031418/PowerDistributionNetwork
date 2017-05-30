@@ -9,8 +9,12 @@
 #include "BinaryHeap.hpp"
 
 
-
-
+void BinaryHeap::swap(int key1 , int key2)
+{
+    auto temp = LUT[key1];
+    LUT[key1] = LUT[key2];
+    LUT[key2] = temp ;
+}
 
 void BinaryHeap::swap(struct HeapNode & p1 , struct HeapNode &p2)
 {
@@ -20,16 +24,9 @@ void BinaryHeap::swap(struct HeapNode & p1 , struct HeapNode &p2)
 }
 int BinaryHeap::FindPosition(int node )
 {
-    int idx = 0;
-    for (int i = 1; i < heap.size(); i++)
-    {
-        if (heap[i].element == node)
-        {
-            idx = i;
-            break;
-        }
-    }
-    return idx;
+    if( LUT.find(node) == LUT.end() )
+        return -1;
+    return LUT[node];
 }
 int BinaryHeap::GetParentNode(int node)
 {
@@ -60,9 +57,12 @@ void BinaryHeap::MinHeapify(int node , int length)
         smallest = right ;
     if( smallest != node )
     {
+        swap(heap[smallest].element, heap[node].element);
         swap(heap[smallest], heap[node]);
         MinHeapify(smallest, length);
     }
+    
+        
 }
 void BinaryHeap::BuildMinHeap(vector<int> array)
 {
@@ -70,6 +70,7 @@ void BinaryHeap::BuildMinHeap(vector<int> array)
     {
         heap[ i + 1 ].element = i ;
         heap[ i + 1 ].key = array[i] ;
+        LUT.insert(make_pair( i  , i + 1));
     }
     for( int i = (int)heap.size()/2 ; i >= 1 ; i-- )
         MinHeapify(i, (int)heap.size() -1 );
@@ -87,21 +88,33 @@ void BinaryHeap::BuildMinHeap(vector<HeapNode> array)
 void BinaryHeap::DecreaseKey(int node , int newKey)
 {
     int index_node = FindPosition(node);      // 找到node所在的位置index
-    
+    if( index_node == -1 ) return; 
     if (newKey > heap[index_node].key) {      // 如果不是把node的Key下修, 便終止此函式
-        std::cout << "new key is larger than current key\n";
+//        std::cout << "new key is larger than current key\n";
         return;
     }
     heap[index_node].key = newKey;            // 更新node之Key後, 需要檢查是否新的subtree滿足Min Heap
     while (index_node > 1 && heap[GetParentNode(index_node)].key > heap[index_node].key) {
+        swap(heap[index_node].element, heap[GetParentNode(index_node)].element);
         swap(heap[index_node], heap[GetParentNode(index_node)]);
         index_node = GetParentNode(index_node);
     }
-
+    
+        
+}
+bool BinaryHeap::check()
+{
+    for(int i = 0 ; i < heap.size() ; i++)
+    {
+        if (LUT[i] != heap[i].element)
+            return false;
+    }
+    return true;
 }
 void BinaryHeap::MinHeapInsert(int node , int key)
 {
     heap.push_back(HeapNode(node,key));    // 在heap[]尾巴新增一個node
+    
     DecreaseKey(node, key);
 }
 int BinaryHeap::Minimum()
@@ -115,10 +128,19 @@ int BinaryHeap::ExtractMin()
         exit(-1);
     }
     int min = heap[1].element;    // 此時heap的第一個node具有最小key值
+    LUT[ heap[heap.size()-1].element ] = 1 ;
+    LUT.erase(heap[1].element);
+    
     // 便以min記錄其element, 最後回傳min
     // delete the first element/vertex
     heap[1] = heap[heap.size()-1];            // 把最後一個element放到第一個位置,
+    
     heap.erase(heap.begin()+heap.size()-1);   // 再刪除最後一個element
+   
+    
+    
+    
+    
     MinHeapify(1, (int)heap.size());          // 目前, heap[1]具有最大Key, 需要進行調整
     
     return min;       // 回傳heap中具有最小key的element

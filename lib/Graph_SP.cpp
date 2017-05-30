@@ -63,6 +63,7 @@ void Graph_SP::Relax(int from , int to , int weight)
 void Graph_SP::Dijkstra(int Start )
 {
     InitalizeSingleSource(Start);
+    
     BinaryHeap minQueue(num_vertex);
     minQueue.BuildMinHeap(distance);
     while (!minQueue.IsEmpty())
@@ -72,6 +73,7 @@ void Graph_SP::Dijkstra(int Start )
         {
             Relax(u, it->first, it->second);
             minQueue.DecreaseKey(it->first, distance[it->first]);
+            
         }
     }
     cout << "print predecessor:" << endl;

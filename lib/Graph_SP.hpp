@@ -13,8 +13,22 @@
 #include <list>
 #include "BinaryHeap.hpp"
 #include <climits>
+#include <queue>
 
 const int Max_Distance = INT_MAX ;
+
+struct Node
+{
+    int key ;
+    int value ;
+};
+struct cmpLess
+{
+    bool operator ()(const Node & a,const Node & b)
+    {
+        return a.key < b.key;
+    }
+};
 class Graph_SP // SP means Shortest Path
 {
     

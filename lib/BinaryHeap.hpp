@@ -13,7 +13,8 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-
+#include <set>
+#include <unordered_map>
 // element 為資料，key為priority
 struct HeapNode {
     int element , key ;
@@ -41,9 +42,12 @@ public:
     int ExtractMin(); // 回傳vertex位置的index
 private:
     vector<HeapNode> heap ;
+    unordered_map<int, int> LUT;
     void swap(struct HeapNode & p1 , struct HeapNode &p2);
+    void swap(int key1 , int key2);
     int FindPosition(int node );
     int GetParentNode(int node);
+    bool check();
 };
 
 #endif /* BinaryHeap_hpp */
