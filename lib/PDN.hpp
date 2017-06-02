@@ -18,35 +18,12 @@
 #include <set>
 using namespace std ;
 
-class Grid
-{
-public:
-    Point<int> StartPoint ;
-    int Width;
-    int Length;
-    int UML ; // UpperMetalLayer
-    int LML ; // LowerMetalLayer
-};
 class PDN
 {
 public:
     PDN();
     ~PDN();
-    void optimize();
-    void toSpice();
-    void Init();
 private:
-    // variable:
-    PDNHelper myhelper ;
-    vector< vector< Grid > > Graph ;
-    set<int> Vertical ;
-    set<int> Horizontal ;
-    vector<string> PinNames;
-    
-    // -----------------------------------------------------
-    // function:
-    void initLineVec();
-    void initGraph();
 };
 
 #endif /* PDN_hpp */

@@ -31,6 +31,8 @@ public:
     
     PDNHelper();
     ~PDNHelper();
+    vector<string> PinNames;
+    
     map<string , Block > PowerMaps ;
     map<string , vector<Block> > BlockMaps ;
     

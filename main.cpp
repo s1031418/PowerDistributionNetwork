@@ -20,7 +20,8 @@
 #include <memory>
 #include "PDN.hpp"
 #include <stdexcept>
-
+#include "flute_net.hpp"
+#include "GlobalRouter.hpp"
 #include <array>
 using namespace std ;
 
@@ -46,17 +47,27 @@ int main(int argc,  char * argv[])
     def.run();
     initialfile.run();
     Converter converter(CaseName);
+    
+    flute_net flute;
+    vector<Point<int>> Points;
+    Points.push_back(Point<int>(1,2));
+    Points.push_back(Point<int>(5,6));
+    Points.push_back(Point<int>(100,2));
+    Points.push_back(Point<int>(83,3));
+    flute.getSteinerPoint(Points);
+//    GlobalRouter gr ;
+    
 //    converter.toSpiceAndOutputFile();
 //    Debugger db ;
 //    db.printAllSpecialNetMsg(SpecialNetsMaps);
     
-    for(int i = 0 ; i < 3 ; i++)
-    {
-        converter.toLocationFile();
-        converter.Visualize();
-        test(2);
-    }
-    converter.toOutputDef();
+//    for(int i = 0 ; i < 3 ; i++)
+//    {
+//        converter.toLocationFile();
+////        converter.Visualize();
+//        test(2);
+//    }
+//    converter.toOutputDef();
     
     
     

@@ -102,15 +102,6 @@ void BinaryHeap::DecreaseKey(int node , int newKey)
     
         
 }
-bool BinaryHeap::check()
-{
-    for(int i = 0 ; i < heap.size() ; i++)
-    {
-        if (LUT[i] != heap[i].element)
-            return false;
-    }
-    return true;
-}
 void BinaryHeap::MinHeapInsert(int node , int key)
 {
     heap.push_back(HeapNode(node,key));    // 在heap[]尾巴新增一個node
@@ -136,10 +127,6 @@ int BinaryHeap::ExtractMin()
     heap[1] = heap[heap.size()-1];            // 把最後一個element放到第一個位置,
     
     heap.erase(heap.begin()+heap.size()-1);   // 再刪除最後一個element
-   
-    
-    
-    
     
     MinHeapify(1, (int)heap.size());          // 目前, heap[1]具有最大Key, 需要進行調整
     

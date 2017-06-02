@@ -47,7 +47,7 @@ private:
     void swap(int key1 , int key2);
     int FindPosition(int node );
     int GetParentNode(int node);
-    bool check();
+    
 };
 
 #endif /* BinaryHeap_hpp */

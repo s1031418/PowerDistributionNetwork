@@ -11,6 +11,10 @@
 
 PDNHelper::PDNHelper()
 {
+    for( auto it = PinMaps.begin(), end = PinMaps.end(); it != end;it = PinMaps.upper_bound(it->first))
+    {
+        PinNames.push_back(it->first);
+    }
     InitBlockMaps();
     InitPowerMaps();
 }
@@ -356,7 +360,7 @@ pair<string, string> PDNHelper::getBlockMsg(Point<int> pt)
             }
         }
     }
-    assert(0);
+    return make_pair(string(), string());
 }
 Point<int> PDNHelper::FlipY(float x_axis , Point<int> pt , FlipOrient orientation)
 {
