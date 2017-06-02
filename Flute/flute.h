@@ -35,6 +35,8 @@
 #define D1(A) (25+120/((A)*(A)))     // flute_mr is used for D1 < d <= D2
 #define D2(A) ((A)<=6 ? 500 : 75+5*(A))
 
+// add
+#include<vector>
 typedef struct
 {
     DTYPE x, y;   // starting point of the branch
@@ -48,6 +50,16 @@ typedef struct
     Branch *branch;   // array of tree branches
 } Tree;
 
+// add
+struct node {
+    bool isSteiner ;
+    float x ;
+    float y ;
+    int target ;
+};
+
+
+
 // User-Callable Functions
 extern void readLUT();
 extern DTYPE flute_wl(int d, DTYPE x[], DTYPE y[], int acc);
@@ -56,6 +68,7 @@ extern Tree flute(int d, DTYPE x[], DTYPE y[], int acc);
 //Macro: Tree flutes(int d, DTYPE xs[], DTYPE ys[], int s[], int acc);
 extern DTYPE wirelength(Tree t);
 extern void printtree(Tree t);
+extern void gettree(Tree t , std::vector<node> & SteinerTree);
 extern void plottree(Tree t);
 
 // Other useful functions
@@ -69,23 +82,23 @@ extern Tree flutes_HD(int d, DTYPE xs[], DTYPE ys[], int s[], int acc);
 extern Tree flutes_RDP(int d, DTYPE xs[], DTYPE ys[], int s[], int acc);
 
 #if REMOVE_DUPLICATE_PIN==1
-  #define flutes_wl(d, xs, ys, s, acc) flutes_wl_RDP(d, xs, ys, s, acc) 
-  #define flutes(d, xs, ys, s, acc) flutes_RDP(d, xs, ys, s, acc) 
+#define flutes_wl(d, xs, ys, s, acc) flutes_wl_RDP(d, xs, ys, s, acc)
+#define flutes(d, xs, ys, s, acc) flutes_RDP(d, xs, ys, s, acc)
 #else
-  #define flutes_wl(d, xs, ys, s, acc) flutes_wl_ALLD(d, xs, ys, s, acc) 
-  #define flutes(d, xs, ys, s, acc) flutes_ALLD(d, xs, ys, s, acc) 
+#define flutes_wl(d, xs, ys, s, acc) flutes_wl_ALLD(d, xs, ys, s, acc)
+#define flutes(d, xs, ys, s, acc) flutes_ALLD(d, xs, ys, s, acc)
 #endif
 
 #define flutes_wl_ALLD(d, xs, ys, s, acc) flutes_wl_LMD(d, xs, ys, s, acc)
 #define flutes_ALLD(d, xs, ys, s, acc) \
-    (d<=D ? flutes_LD(d, xs, ys, s) \
-          : (d<=D1(acc) ? flutes_MD(d, xs, ys, s, acc) \
-                        : flutes_HD(d, xs, ys, s, acc)))
+(d<=D ? flutes_LD(d, xs, ys, s) \
+: (d<=D1(acc) ? flutes_MD(d, xs, ys, s, acc) \
+: flutes_HD(d, xs, ys, s, acc)))
 
 #define flutes_wl_LMD(d, xs, ys, s, acc) \
-    (d<=D ? flutes_wl_LD(d, xs, ys, s) : flutes_wl_MD(d, xs, ys, s, acc))
+(d<=D ? flutes_wl_LD(d, xs, ys, s) : flutes_wl_MD(d, xs, ys, s, acc))
 #define flutes_LMD(d, xs, ys, s, acc) \
-    (d<=D ? flutes_LD(d, xs, ys, s) : flutes_MD(d, xs, ys, s, acc))
+(d<=D ? flutes_LD(d, xs, ys, s) : flutes_MD(d, xs, ys, s, acc))
 
 #define max(x,y) ((x)>(y)?(x):(y))
 #define min(x,y) ((x)<(y)?(x):(y))

@@ -15,7 +15,9 @@
 #include "flute.h"
 #include "Components.h"
 #include <iostream>
+#include <iomanip>
 using namespace std;
+
 class flute_net {
     
     
@@ -23,7 +25,12 @@ public:
     flute_net();
     ~flute_net();
     
-    void getSteinerPoint(vector<Point<int>> Points);
+    void getSteinerTree(vector<Point<int>> Points);
+    void printSteinerTree();
+    
+    vector<node> SteinerTree ;
+    int length ;
+    int length_noRSMT ; 
 };
 
 #endif /* flute_net_hpp */

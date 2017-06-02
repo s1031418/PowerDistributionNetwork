@@ -54,7 +54,8 @@ int main(int argc,  char * argv[])
     Points.push_back(Point<int>(5,6));
     Points.push_back(Point<int>(100,2));
     Points.push_back(Point<int>(83,3));
-    flute.getSteinerPoint(Points);
+    flute.getSteinerTree(Points);
+    flute.printSteinerTree();
 //    GlobalRouter gr ;
     
 //    converter.toSpiceAndOutputFile();
