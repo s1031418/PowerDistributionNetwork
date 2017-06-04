@@ -27,6 +27,8 @@ public:
     
     void getSteinerTree(vector<Point<int>> Points);
     void printSteinerTree();
+    void printDebugMeg();
+    void Demo();
     
     vector<node> SteinerTree ;
     int length ;

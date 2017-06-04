@@ -14,6 +14,7 @@
 #include "defrw.h"
 #include "Graph_SP.hpp"
 #include "PDNHelper.hpp"
+#include "flute_net.hpp"
 class Grid
 {
 public:

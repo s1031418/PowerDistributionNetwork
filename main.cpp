@@ -20,7 +20,6 @@
 #include <memory>
 #include "PDN.hpp"
 #include <stdexcept>
-#include "flute_net.hpp"
 #include "GlobalRouter.hpp"
 #include <array>
 using namespace std ;
@@ -48,14 +47,8 @@ int main(int argc,  char * argv[])
     initialfile.run();
     Converter converter(CaseName);
     
-    flute_net flute;
-    vector<Point<int>> Points;
-    Points.push_back(Point<int>(1,2));
-    Points.push_back(Point<int>(5,6));
-    Points.push_back(Point<int>(100,2));
-    Points.push_back(Point<int>(83,3));
-    flute.getSteinerTree(Points);
-    flute.printSteinerTree();
+    flute_net f ;
+    f.Demo();
 //    GlobalRouter gr ;
     
 //    converter.toSpiceAndOutputFile();
