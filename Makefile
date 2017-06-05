@@ -2,7 +2,7 @@
 
 CXX = g++
 CXXFLAGS = -std=c++11  -I Parsers -I include -I lib -I Flute -I Router
-OBJS = main.o Parsers/Parsers.o lib/Debugger.o Parsers/lefrw.o Parsers/defrw.o Parsers/InitialFileParser.o lib/Converter.o lib/PDN.o lib/PDNHelper.o Parsers/ngspice.o lib/Graph_SP.o lib/BinaryHeap.o Router/GlobalRouter.o lib/flute_net.o
+OBJS = main.o Parsers/Parsers.o lib/Debugger.o Parsers/lefrw.o Parsers/defrw.o Parsers/InitialFileParser.o lib/Converter.o lib/PDN.o lib/PDNHelper.o Parsers/ngspice.o lib/Graph_SP.o lib/BinaryHeap.o Router/GlobalRouter.o Flute/flute_net.o
 STATICLIB = lib/liblef.a lib/libdef.a lib/flute.a
 
 

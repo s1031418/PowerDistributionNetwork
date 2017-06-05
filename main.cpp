@@ -47,10 +47,13 @@ int main(int argc,  char * argv[])
     initialfile.run();
     Converter converter(CaseName);
     
-    flute_net f ;
-    f.Demo();
-//    GlobalRouter gr ;
+//    flute_net f ;
+//    f.Demo();
+//    Graph_SP g ;
+//    g.Demo();
     
+    GlobalRouter gr ;
+    gr.Route();
 //    converter.toSpiceAndOutputFile();
 //    Debugger db ;
 //    db.printAllSpecialNetMsg(SpecialNetsMaps);

@@ -15,7 +15,7 @@
 #include <climits>
 #include <queue>
 
-const int Max_Distance = INT_MAX ;
+const int Max_Distance = 100000 ;
 
 struct Node
 {
@@ -45,6 +45,11 @@ public:
     
     void Dijkstra(int Start = 0);
     
+    vector<int> getPath( int target );
+    
+    
+    
+    void Demo();
     friend class BinaryHeap ;
     
 private:
