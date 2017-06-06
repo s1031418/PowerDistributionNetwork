@@ -87,6 +87,7 @@ string PDNHelper::DestinationMapToString(multimap<string,string> & DestinationMa
     }
     return line ; 
 }
+
 void PDNHelper::InitBlockMaps()
 {
     for( auto component : ComponentMaps )
@@ -118,10 +119,26 @@ void PDNHelper::InitBlockMaps()
             block.LeftDown = get<0>(RotatePoint) ;
             block.RightUp = get<1>(RotatePoint);
             block.BlockPinName = blockpin.second.Name;
+            // 不考慮BlockPin有在端點
+            // 如果需要考慮判斷對哪邊開口比較大，DIRECTION就為哪個方向
+            if( block.LeftDown.x == BlockLeftDown.x ) block.Direction = LEFT ;
+            if( block.RightUp.x == BlockRightUp.x ) block.Direction = RIGHT ;
+            if( block.LeftDown.y == BlockLeftDown.y ) block.Direction = DOWN ;
+            if( block.RightUp.y == BlockRightUp.y ) block.Direction = TOP ;
             BlockMaps[component.first].push_back(block);
         }
         
     }
+    
+    // Print BlockMap
+//    for( auto x : BlockMaps )
+//    {
+//        for( auto y : x.second )
+//        {
+//            cout << x.first << " " ;
+//            cout << y.BlockPinName << endl;
+//        }
+//    }
 }
 pair< Point<int>, Point<int> > PDNHelper::getPowerPinCoordinate(int x , int y , Point<int> r_pt1, Point<int> r_pt2  , string orient)
 {
@@ -362,7 +379,7 @@ pair<string, string> PDNHelper::getBlockMsg(Point<int> pt)
     }
     return make_pair(string(), string());
 }
-Point<int> PDNHelper::FlipY(float x_axis , Point<int> pt , FlipOrient orientation)
+Point<int> PDNHelper::FlipY(float x_axis , Point<int> pt , DIRECTION orientation)
 {
     int x = 0 , y = 0;
     if( orientation == RIGHT)
@@ -378,7 +395,7 @@ Point<int> PDNHelper::FlipY(float x_axis , Point<int> pt , FlipOrient orientatio
     y = pt.y;
     return Point<int>(x,y);
 }
-Point<int> PDNHelper::FlipX(float y_axis , Point<int> pt , FlipOrient orientation)
+Point<int> PDNHelper::FlipX(float y_axis , Point<int> pt , DIRECTION orientation)
 {
     
     int x = 0 , y = 0;
@@ -438,4 +455,13 @@ Point<int> PDNHelper::getStartPoint(Point<int> pt1 , Point<int> pt2 )
         }
     }
     return Point<int>();
+}
+Block PDNHelper::getBlock( string BlockName , string BlockPinName )
+{
+    for(auto x : BlockMaps[BlockName])
+    {
+        if( x.BlockPinName == BlockPinName )
+            return x ;
+    }
+    return Block();
 }

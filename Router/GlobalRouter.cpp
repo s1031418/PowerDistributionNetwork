@@ -124,7 +124,7 @@ bool GlobalRouter::isBlock(Grid grid)
 void GlobalRouter::initGraph_SP()
 {
     int Size = (int)(Grids[0].size() * Grids.size()) ;
-    Graph_SP g(Size);
+    graph.resize(Size);
     int RowSize = (int)Grids.size() - 1;
     int ColSize = (int)Grids[0].size() - 1;
     for(int row = 0 ; row <= RowSize ; row++)
@@ -138,33 +138,33 @@ void GlobalRouter::initGraph_SP()
                 if( row == 0 && col == 0 )
                 {
                     int weight = ( isBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row + 1, col) , weight );
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row + 1, col) , weight );
                     weight = ( isBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row , col+1) , weight );
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row , col+1) , weight );
                 }
                 //左上
                 else if ( row == RowSize && col == 0  )
                 {
                     int weight = ( isBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row - 1, col ), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row - 1, col ), weight);
                     weight = ( isBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row , col + 1), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row , col + 1), weight);
                 }
                 //右下
                 else if (row == 0 && col == ColSize)
                 {
                     int weight = ( isBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row + 1, col ), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row + 1, col ), weight);
                     weight = ( isBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row , col - 1), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row , col - 1), weight);
                 }
                 //右上
                 else
                 {
                     int weight = ( isBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row - 1, col ), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row - 1, col ), weight);
                     weight = ( isBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row , col - 1), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row , col - 1), weight);
                 }
             }
             // 四周
@@ -174,63 +174,163 @@ void GlobalRouter::initGraph_SP()
                 if( row == 0 )
                 {
                     int weight = ( isBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row + 1, col ), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row + 1, col ), weight);
                     weight = ( isBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row, col +1), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row, col +1), weight);
                     weight = ( isBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row , col-1 ), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row , col-1 ), weight);
                 }
                 // 左
                 else if ( col == 0 )
                 {
                     int weight = ( isBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row + 1, col ), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row + 1, col ), weight);
                     weight = ( isBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row, col +1), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row, col +1), weight);
                     weight = ( isBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row-1, col ), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row-1, col ), weight);
                 }
                 // 上
                 else if ( row == RowSize )
                 {
                     int weight = ( isBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row - 1, col ), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row - 1, col ), weight);
                     weight = ( isBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row, col +1), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row, col +1), weight);
                     weight = ( isBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row , col-1 ), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row , col-1 ), weight);
                 }
                 // 右
                 else
                 {
                     int weight = ( isBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row + 1, col ), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row + 1, col ), weight);
                     weight = ( isBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row, col-1), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row, col-1), weight);
                     weight = ( isBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-                    g.AddEdge(translate2D_1D(row, col), translate2D_1D(row-1, col ), weight);
+                    graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row-1, col ), weight);
                 }
             }
             // 四周
             else
             {
                 int weight = ( isBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-                g.AddEdge(translate2D_1D(row, col), translate2D_1D(row + 1, col ), weight);
+                graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row + 1, col ), weight);
                 weight = ( isBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-                g.AddEdge(translate2D_1D(row, col), translate2D_1D(row-1, col ), weight);
+                graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row-1, col ), weight);
                 weight = ( isBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-                g.AddEdge(translate2D_1D(row, col), translate2D_1D(row, col-1), weight);
+                graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row, col-1), weight);
                 weight = ( isBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-                g.AddEdge(translate2D_1D(row, col), translate2D_1D(row, col +1), weight);
+                graph.AddEdge(translate2D_1D(row, col), translate2D_1D(row, col +1), weight);
             }
         }
     }
-    g.Dijkstra();
-    g.getPath(8);
+}
+pair<int, int> GlobalRouter::getGridCoordinate( Point<int> LeftDown , Point<int> RightUp )
+{
+    // find X coordinate of LeftDownX and RightUpX
+    int LastX = 0 , CurrentX = 0 ;
+    int LeftX = 0 , RightX = 0 ;
+    for( int i = 0 ; i < Grids[0].size() ; i++)
+    {
+        CurrentX = LastX + Grids[0][i].Width;
+        if( LeftDown.x >= LastX && LeftDown.x <= CurrentX  )
+            LeftX = i;
+        if( RightUp.x >= LastX && RightUp.x <= CurrentX  )
+            RightX = i;
+        LastX = CurrentX ;
+    }
+    bool X_Mutliple = ( LeftX == RightX ) ? false : true ;
+    // find Y coordinate of LeftDownY and RightUpY
+    int LastY = 0 , CurrentY = 0 ;
+    int BottomY = 0 , TopY = 0 ;
+    for( int i = 0 ; i < Grids.size() ; i++)
+    {
+        CurrentY = LastY + Grids[i][0].Length;
+        if( LeftDown.y >= LastY && LeftDown.y <= CurrentY  )
+            BottomY = i;
+        if( RightUp.y >= LastY && RightUp.y <= CurrentY  )
+            TopY = i;
+        LastY = CurrentY ;
+    }
+    bool Y_Mutliple = ( BottomY == TopY ) ? false : true ;
+    if( !X_Mutliple && !Y_Mutliple ) return  make_pair(TopY, RightX);
+    if( X_Mutliple && !Y_Mutliple )
+    {
+        if( RightX - LeftX > 1 )
+        {
+            return make_pair(TopY, LeftX+1);;
+        }
+        else
+        {
+            int Right_Boundary = Grids[0][LeftX].StartPoint.x + Grids[0][LeftX].Width ;
+            if( Right_Boundary - LeftDown.x >= RightUp.x - Right_Boundary )
+                return make_pair(TopY, LeftX);
+            else
+                return make_pair(TopY, RightX);
+        }
+    }
+    if( !X_Mutliple && Y_Mutliple )
+    {
+        if( TopY - BottomY > 1 )
+        {
+            return make_pair(BottomY + 1, LeftX);;
+        }
+        else
+        {
+            int Up_Boundary = Grids[0][BottomY].StartPoint.y + Grids[0][BottomY].Length ;
+            if( Up_Boundary - LeftDown.y >= RightUp.y - Up_Boundary )
+                return make_pair(BottomY, LeftX);
+            else
+                return make_pair(TopY, LeftX);
+        }
+    }
+    // 不預期會有Pin穿過2d的AREA
+    assert(0);
 }
 void GlobalRouter::Route()
 {
     initGraph_SP();
+    flute_net flute;
+    cout << "Global Routing:" << endl;
+    
+//    Points.push_back(Point<int>(0,4));
+//    Points.push_back(Point<int>(2,4));
+//    Points.push_back(Point<int>(0,2));
+//    flute.getSteinerTree(Points);
+//    flute.printSteinerTree();
+    // foreach Connection
+    for( auto it = Connection.begin(), end = Connection.end(); it != end;it = Connection.upper_bound(it->first))
+    {
+        cout << "PowerPin( Start ) : " << it->first ;
+        // PowerPin( Start )
+        pair< Point<int>, Point<int> > SCoordinate = helper.getPowerPinCoordinate(PinMaps[it->first].STARTPOINT.x, PinMaps[it->first].STARTPOINT.y, PinMaps[it->first].RELATIVE_POINT1, PinMaps[it->first].RELATIVE_POINT2, PinMaps[it->first].ORIENT);
+        pair<int, int> SGridCoordinate = getGridCoordinate(get<0>(SCoordinate), get<1>(SCoordinate));
+        cout << "( " << get<0>(SGridCoordinate) << " , " << get<1>(SGridCoordinate) << " )" << endl;
+        
+        vector<Point<int>> Points ;
+        Points.push_back(Point<int>(get<0>(SGridCoordinate),get<1>(SGridCoordinate) ));
+        auto beginning = Connection.lower_bound(it->first);
+        auto endding = Connection.upper_bound(it->first);
+        while (beginning != endding)
+        {
+            // BlockPin(Target)
+            Block block = helper.getBlock(beginning->second.BlockName, beginning->second.BlockPinName);
+            pair<int, int> TGridCoordinate = getGridCoordinate(block.LeftDown, block.RightUp);
+            if( block.Direction == LEFT ) get<1>(TGridCoordinate) -= 1  ;
+            if( block.Direction == RIGHT ) get<1>(TGridCoordinate) += 1 ;
+            if( block.Direction == TOP ) get<0>(TGridCoordinate) += 1;
+            if( block.Direction == DOWN ) get<0>(TGridCoordinate) -= 1;
+            cout << "BlockPin( Target ) : " << beginning->second.BlockName << "_" << beginning->second.BlockPinName;
+            cout << "( " << get<0>(TGridCoordinate) << " , " << get<1>(TGridCoordinate) << " )" << endl;
+            Points.push_back(Point<int>( get<0>(TGridCoordinate) , get<1>(TGridCoordinate) )  );
+            beginning++;
+        }
+        flute.getSteinerTree(Points);
+        
+        flute.printSteinerTree();
+    }
+
 }
 int GlobalRouter::translate2D_1D(int row , int column)
 {

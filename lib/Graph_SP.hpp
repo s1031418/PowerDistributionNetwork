@@ -36,6 +36,8 @@ public:
     Graph_SP();
     Graph_SP(int n);
     
+    void resize(int n );
+    
     void AddEdge(int from , int to , int weight);
     void PrintDataArray(vector<int> array);
     void PrintIntArray(int * array);

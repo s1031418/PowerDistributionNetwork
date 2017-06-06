@@ -16,14 +16,6 @@
 #include "defrw.h"
 #include <string>
 using namespace std ;
-enum FlipOrient
-{
-    TOP,
-    DOWN,
-    RIGHT,
-    LEFT
-    
-};
 
 class PDNHelper {
     
@@ -34,15 +26,16 @@ public:
     vector<string> PinNames;
     
     map<string , Block > PowerMaps ;
+    // Key: BlockName , value : BlockPin的詳細資訊 (包含BlockPinName , Blockpin 座標 , Blockpin 包含的Metal層)
     map<string , vector<Block> > BlockMaps ;
     
     pair< Point<int>, Point<int> > getPowerPinCoordinate(int x , int y , Point<int> r_pt1, Point<int> r_pt2  , string orient);
     
     // 對Ｘ軸做鏡射
-    Point<int> FlipX(float y_axis , Point<int> pt , FlipOrient orientation);
+    Point<int> FlipX(float y_axis , Point<int> pt , DIRECTION orientation);
     
     // 對Ｙ軸做鏡射
-    Point<int> FlipY(float x_axis , Point<int> pt , FlipOrient orientation);
+    Point<int> FlipY(float x_axis , Point<int> pt , DIRECTION orientation);
     void InitBlockMaps();
     void InitPowerMaps();
     
@@ -72,6 +65,10 @@ public:
     //第一個是BlockName , BlockPinName
     pair<string, string> getBlockMsg(Point<int> pt);
     
+    // 給BlockName跟BlockPinName ， return 這個BlockPin的Detail(Block)
+    // 找不到就回傳空的Block
+    Block getBlock( string BlockName , string BlockPinName );
+    
     //給我一個點，判斷他是屬於哪個PowerPin
     // 回傳 PowerPin Name
     string getPowerPinMsg(Point<int> pt);
@@ -84,6 +81,7 @@ public:
     string DestinationMapToString(multimap<string,string>& DestinationMap);
     // 將NETSMULTI MAP 全部轉為 string
     string NETSMULTIMAPSToString(multimap<string,Nets> & NETSMULTIMAPS);
+    
     
     
 };

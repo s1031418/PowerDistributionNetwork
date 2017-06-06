@@ -13,6 +13,9 @@
 #include <string>
 #include <map>
 #include <vector>
+
+
+
 // A technology LEF file contains all of the LEF technology information for a design,
 // such as placement and routing design rules, and process information for layers.
 
@@ -357,14 +360,25 @@ public:
     std::string CONSTRAINT ;
     
 };
+enum DIRECTION
+{
+    TOP,
+    DOWN,
+    RIGHT,
+    LEFT
+    
+};
 
 
 class Block {
 public:
+    Block(){};
     Point<int> LeftDown ;
     Point<int> RightUp ;
     std::string BlockPinName ; 
     std::vector<std::string> Metals ;
+    // BlockPin轉向哪個方向
+    DIRECTION Direction;
 };
 
 

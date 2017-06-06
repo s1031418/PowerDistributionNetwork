@@ -21,6 +21,7 @@
 #include "PDN.hpp"
 #include <stdexcept>
 #include "GlobalRouter.hpp"
+#include "verilog.hpp"
 #include <array>
 using namespace std ;
 
@@ -37,6 +38,7 @@ void rundef(char * argv[]);
 int main(int argc,  char * argv[])
 {
     string CaseName = argv[6];
+    verilog verilog(argv[1]);
     InitialFileParser initialfile(argv[5]) ;
     char ** lefargv = getlefargv(argv) ;
     char ** defargv = getdefargv(argv) ;
@@ -45,6 +47,7 @@ int main(int argc,  char * argv[])
     lef.run();
     def.run();
     initialfile.run();
+    verilog.run();
     Converter converter(CaseName);
     
 //    flute_net f ;
@@ -54,6 +57,7 @@ int main(int argc,  char * argv[])
     
     GlobalRouter gr ;
     gr.Route();
+//    gr.Route();
 //    converter.toSpiceAndOutputFile();
 //    Debugger db ;
 //    db.printAllSpecialNetMsg(SpecialNetsMaps);

@@ -93,7 +93,11 @@ void Graph_SP::Demo()
     
     g9.Dijkstra(0);
 }
-
+void Graph_SP::resize(int n )
+{
+    num_vertex = n ;
+    AdjList.resize(num_vertex);
+}
 void Graph_SP::Dijkstra(int Start )
 {
     InitalizeSingleSource(Start);
