@@ -55,17 +55,19 @@ int main(int argc,  char * argv[])
 //    Graph_SP g ;
 //    g.Demo();
     
-    GlobalRouter gr ;
-    gr.Route();
+//    GlobalRouter gr ;
 //    gr.Route();
-//    converter.toSpiceAndOutputFile();
+//    gr.Route();
+    
+    
+    
 //    Debugger db ;
 //    db.printAllSpecialNetMsg(SpecialNetsMaps);
     
 //    for(int i = 0 ; i < 3 ; i++)
 //    {
-//        converter.toLocationFile();
-////        converter.Visualize();
+        converter.toLocationFile();
+//        converter.Visualize();
 //        test(2);
 //    }
 //    converter.toOutputDef();

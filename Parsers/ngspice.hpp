@@ -18,18 +18,24 @@
 #include "PDNHelper.hpp"
 #include <map>
 #include <regex.h>
+
 using namespace std;
+
 class ngspice : public Parsers{
     
     
 public:
-    ngspice(string casename);
+    
+    ngspice();
     ~ngspice();
+    void init(string casename);
     void initvoltage();
     void ConcatIR_Drop();
     double getIR_DropCons(string StartPowerPin , string EndBlockPin );
     void printStats(multimap<string, string> & DetinationMap);
+    map<pair<string, string> , double> DropMap;
     
+    void setCaseName(string name);
 private:
     PDNHelper helper ; 
     vector<string> Data ;

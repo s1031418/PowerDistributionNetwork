@@ -70,16 +70,18 @@ vector<int> Graph_SP::getPath( int target )
         cout << "No Solution" << endl;
         return vector<int>();
     }
+    Paths.push_back(target);
     while( pre != -1 )
     {
         Paths.push_back(pre);
         pre = predecessor[pre];
     }
-    cout << "Shortest Path:" << endl;
     
-    for( int i = (int)Paths.size()-1 ; i >= 0 ; i-- )
-        cout << setw(4) << Paths[i]  ;
-    cout << setw(4) << target << endl;
+//    cout << "Shortest Path:" << endl;
+//    
+//    for( int i = (int)Paths.size()-1 ; i >= 0 ; i-- )
+//        cout << setw(4) << Paths[i]  ;
+//    cout << setw(4) << target << endl;
     return Paths ;
 }
 void Graph_SP::Demo()

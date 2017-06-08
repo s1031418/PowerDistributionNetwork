@@ -19,6 +19,7 @@
 Converter::Converter(string casename)
 {
     CaseName = casename ;
+    
     initConverterState();
 }
 Converter::~Converter()
@@ -157,11 +158,48 @@ void Converter::initLineMap(std::multimap<std::string,Nets> NetsMM ,map<string ,
         
     }
 }
-void Converter::toSpiceAndOutputFile()
+void Converter::printOutputFile()
+{
+    FILE * pFile = nullptr ;
+    pFile = fopen("output_files", "w");
+    fprintf(pFile, "# The metal usage report\n" );
+    long double TotalUsage = 0 ;
+    
+    for(auto metal : MetalUsage)
+    {
+        
+        string alias = getAlias(metal.first);
+        fprintf(pFile, "%s %Lf\n" , alias.c_str() , metal.second);
+        TotalUsage += stod(WeightsMaps[alias]) * metal.second ;
+    }
+    
+    fprintf(pFile, "Total %Lf\n" , TotalUsage);
+    fclose(pFile);
+}
+string Converter::getAlias(string name)
+{
+    if( name == "METAL1" ) return "M1";
+    if( name == "METAL2" ) return "M2";
+    if( name == "METAL3" ) return "M3";
+    if( name == "METAL4" ) return "M4";
+    if( name == "METAL5" ) return "M5";
+    if( name == "METAL6" ) return "M6";
+    if( name == "METAL7" ) return "M7";
+    if( name == "METAL8" ) return "M8";
+    if( name == "METAL9" ) return "M9";
+    if( name == "METAL10" ) return "M10";
+    if( name == "METAL11" ) return "M11";
+    if( name == "METAL12" ) return "M12";
+    if( name == "METAL13" ) return "M13";
+    if( name == "METAL14" ) return "M14";
+    if( name == "METAL15" ) return "M15";
+    // 假如METAL超過15層
+    assert(0);
+}
+void Converter::toSpice()
 {
     FILE * pFile ;
-    // key值為metal層，value為這層用的金屬面積
-    map<string,long double> MetalUsage ;
+    
     
     string output = CaseName + ".sp" ;
     pFile = fopen(output.c_str(), "w");
@@ -200,13 +238,13 @@ void Converter::toSpiceAndOutputFile()
             DestinationMap.insert(make_pair(key, value));
         }
         ///////////////////////////////////////////////////////
-        caluMetalUse(lineMap, MetalUsage);
+        caluMetalUse(lineMap);
         printResistance(CrossPointMap , PinName , ViaTable , pFile);
         printVoltage(get<0>(Voltage_Msg), get<1>(Voltage_Msg), PinName , pFile);
         printCurrent(Current_Msg , PinName , pFile);
     }
-//    for(auto metal : MetalUsage)
-//        cout << metal.first << " " << metal.second << endl;
+    printOutputFile();
+    
     
     fprintf(pFile, ".tran 1ns 1ns\n");
     fprintf(pFile, ".end\n");
@@ -217,6 +255,33 @@ void Converter::toSpiceAndOutputFile()
     fprintf(pFile, ".enddc\n");
     fclose(pFile);
     
+}
+void Converter::toOutputFile()
+{
+    FILE * pFile = nullptr ;
+    pFile = fopen("output_files", "w");
+    fprintf(pFile, "# The metal usage report\n" );
+    long double TotalUsage = 0 ;
+    
+    for(auto metal : MetalUsage)
+    {
+        
+        string alias = getAlias(metal.first);
+        fprintf(pFile, "%s %Lf\n" , alias.c_str() , metal.second);
+        TotalUsage += stod(WeightsMaps[alias]) * metal.second ;
+    }
+    
+    fprintf(pFile, "Total %Lf\n" , TotalUsage);
+    fprintf(pFile, "\n\n");
+    fprintf(pFile, "# The IR drop of each power pin (%)\n" );
+    for( auto x : ng.DropMap )
+    {
+        fprintf(pFile, "%s/%s %f\n" , x.first.first.c_str() , x.first.second.c_str() , x.second);
+    }
+    
+    
+    
+    fclose(pFile);
 }
 void Converter::toNgspice()
 {
@@ -449,41 +514,39 @@ void Converter::toLocationFile()
         fprintf(pFile, "\n");
     }
     fclose(pFile);
-    toSpiceAndOutputFile();
+    toSpice();
     toNgspice();
-    ngspice ng(CaseName) ;
+    ng.init(CaseName);
     ng.ConcatIR_Drop() ;
     ng.printStats(DestinationMap);
+    toOutputFile();
     DestinationMap.clear();
 }
 void Converter::Visualize()
 {
     system("java -jar JavaApplication5.jar  ");
 }
-void Converter::caluMetalUse(map<string , vector<Line>> & lineMap , map<string,long double> & MetalUsage)
+void Converter::caluMetalUse(map<string , vector<Line>> & lineMap)
 {
-    
-    // key直為某兩條線，value為那兩條線的重疊面積
-    map<string,long double> duplicate;
     vector<Line> Pseudolines;
     for( auto metal : lineMap )
     {
+        // key直為某兩條線，value為那兩條線的重疊面積
+        map<string,long double> duplicate;
         //還沒有扣掉重疊的
         long double Fake_Area = 0 ;
         for( int i = 0 ; i < metal.second.size(); i++ )
         {
+            if( metal.second[i].isPsedoLine ) continue ;
             long double length = (metal.second[i]).isHorizontal ? metal.second[i].pt2.x - metal.second[i].pt1.x : metal.second[i].pt2.y - metal.second[i].pt1.y ;
             long double area = metal.second[i].Width * length / 1000000 ;
             Fake_Area += area;
             for(int j = 0 ; j < metal.second.size() ; j++)
             {
-                if(metal.second[i].isPsedoLine)
-                {
-                    Pseudolines.push_back(metal.second[i]);
-                }
+                if( metal.second[j].isPsedoLine ) continue ;
                 // line map 會將同層的金屬當key ，所以進來的一定都是同層的金屬
                 // 假如同層金屬且有交叉，不會是Metal遇到VIA
-                if(  !metal.second[i].isPsedoLine && !metal.second[j].isPsedoLine && myhelper.isCross(metal.second[i], metal.second[j]) )
+                if( myhelper.isCross(metal.second[i], metal.second[j]) )
                 {
                     Point<int> cross = myhelper.getCrossPoint(metal.second[i], metal.second[j]);
                     string key = to_string(cross.x).append(to_string(cross.y));
@@ -498,14 +561,6 @@ void Converter::caluMetalUse(map<string , vector<Line>> & lineMap , map<string,l
         for( auto area : duplicate )
         {
             Real_Area -= area.second;
-        }
-        // 減去VIA的面積
-        for(auto via : Pseudolines )
-        {
-            Point<float> pt1 =  ViaMaps[via.ViaName].InnerMaps[via.ViaMetal[0]].pt1;
-            Point<float> pt2 =  ViaMaps[via.ViaName].InnerMaps[via.ViaMetal[0]].pt2;
-            long double area = ( (pt2.x - pt1.x) * UNITS_DISTANCE ) * ( (pt2.y - pt1.y) * UNITS_DISTANCE ) / 1000000 ;
-            Real_Area -= area ;
         }
         if( MetalUsage.find(metal.first) == MetalUsage.end() )
             MetalUsage.insert(make_pair(metal.first, Real_Area));

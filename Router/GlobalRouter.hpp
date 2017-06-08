@@ -61,17 +61,21 @@ private:
     // 判斷這個grid是否為block
     bool isBlock(Grid grid);
     // 轉換2d座標為1d
-    int translate2D_1D(int row , int column);
+    int translate2D_1D(int x , int y);
     // 轉換1d座標為2d
     pair<int, int> translate1D_2D(int index);
     
     // 給我一個方塊的左下右上，算出他在哪些Grid裡面
     // 如果這個方塊介於兩個的Grid之間
-    // return 包比較多的那個Grid
+    // return 包比較多的那個GridY
+    // 第一個值為X座標，第二個為Y座標
     pair<int, int> getGridCoordinate( Point<int> LeftDown , Point<int> RightUp );
     
     
+    void printPath(vector<int> & path);
     
+    
+    Point<int> getTerminalGridCoordinate(int x , int y , int target , vector<node> & SteierTree) ;
     
 };
 

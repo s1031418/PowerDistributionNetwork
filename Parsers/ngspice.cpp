@@ -8,11 +8,15 @@
 
 #include "ngspice.hpp"
 
-
-
-ngspice::ngspice(string casename)
+ngspice::ngspice()
 {
-    CaseName = casename ;
+    
+}
+
+
+void ngspice::init(string casename)
+{
+    setCaseName(casename);
     LoadFile();
     initvoltage();
 }
@@ -22,7 +26,11 @@ void ngspice::LoadFile()
     string FilePath("/Users/Jeff/Documents/c++/EDA_Contest2017(PDN)/EDA_Contest2017(PDN)/");
     FilePath.append(CaseName).append("_ngspice");
     fstream fin(FilePath , ios::in);
-    if(!fin) cerr << "Can't open file.";
+    if(!fin)
+    {
+        cerr << "Can't open ngspice file.";
+        exit(1);
+    }
     while (getline(fin,content)) {
         Data.push_back(content);
     }
@@ -54,6 +62,10 @@ Point<int> ngspice::translateToPoint(string key)
     int y = stoi(key.substr(last_pos + 1 ));
     return Point<int>(x,y);
 }
+void ngspice::setCaseName(string name)
+{
+    CaseName = name ; 
+}
 void ngspice::printStats(multimap<string, string> & DetinationMap)
 {
     for( auto it = DetinationMap.begin(), end = DetinationMap.end(); it != end;it = DetinationMap.upper_bound(it->first))
@@ -73,6 +85,7 @@ void ngspice::printStats(multimap<string, string> & DetinationMap)
             double Constraint = getIR_DropCons(BlockName, BlockPinName);
             double Drop_percent = ((StartVoltage - EndVoltage) / StartVoltage) * 100 ;
             cout << PinName << " "<< BlockName << " " << BlockPinName << " ";
+            DropMap.insert(make_pair(make_pair(BlockName, BlockPinName), Drop_percent));
             if(EndVoltage < 0)
                 cout << "Terminal Point Voltage is negative(NoPass)" << endl ;
             else if( Drop_percent > Constraint)

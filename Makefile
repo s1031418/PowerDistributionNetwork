@@ -28,9 +28,11 @@ InitialFileParser.o:Parsers/InitialFileParser.cpp
 Debugger.o:lib/Debugger.cpp
 
 run_case1:
-	time ./cadXX.out TestCase/2017/case1/case1.v TestCase/2017/case1/case1_input.def TestCase/2017/case1/tech.lef TestCase/2017/case1/blocks.lef TestCase/2017/case1/initial_files case1
+	time ./cadXX.out TestCase/2017/case1/case1.v TestCase/2017/case1/case1_output.def TestCase/2017/case1/tech.lef TestCase/2017/case1/blocks.lef TestCase/2017/case1/initial_files case1
 run_case2:
 	time ./cadXX.out TestCase/2017/case2/case2.v TestCase/2017/case2/case2_input.def TestCase/2017/case2/tech.lef TestCase/2017/case2/blocks.lef TestCase/2017/case2/initial_files case2 
+run_case3:	
+	time ./cadXX.out TestCase/2016/case3/case3.v TestCase/2016/case3/case3_input.def TestCase/2016/case3/tech.lef TestCase/2016/case3/blocks.lef TestCase/2016/case3/initial_files case3
 .PHONY : clean
 clean:
 	-rm cadXX.out $(OBJS)

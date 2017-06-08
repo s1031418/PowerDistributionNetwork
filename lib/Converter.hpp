@@ -41,10 +41,10 @@ public:
     Converter(string Casename);
     ~Converter();
     void toLocationFile();
-    void toSpiceAndOutputFile();
+    void toSpice();
     void toNgspice();
     void toOutputDef();
-    
+    void toOutputFile();
     void Visualize();
 private:
     string CaseName ;
@@ -54,8 +54,12 @@ private:
     vector<Line> ViaTable ;
     // 用來儲存 inputdef 
     vector<string> Data ;
+    ngspice ng ;
+    // key值為metal層，value為這層用的金屬面積
+    map<string,long double> MetalUsage ;
+    
     PDNHelper myhelper ;
-    void caluMetalUse(map<string , vector<Line>> & lineMap , map<string,long double> & MetalUsage);
+    void caluMetalUse(map<string , vector<Line>> & lineMap );
     void initCrossPointMap(map<Line , vector<Point<int>>,MyComparator> & CrossPointMap ,map<string , vector<Line>> & lineMap , string PinName , pair<string, Point<int>> & Voltage_Msg , vector<pair<string, Point<int>>> & Current_Msg );
     void BuildCrossPointMap();
     void initConverterState();
@@ -63,7 +67,7 @@ private:
     void printVoltage(string MetalName , Point<int> StartPoint , string PinName , FILE * pfile );
     void printCurrent(vector<pair<string, Point<int>>> & Current_Msg , string PinName , FILE * pFile);
     void printResistance(map<Line , vector<Point<int>>,MyComparator> & CrossPointMap , string PinName, vector<Line> & ViaTable , FILE * pFile);
-    
-    
+    void printOutputFile();
+    string getAlias(string name);
 };
 #endif /* Converter_hpp */
