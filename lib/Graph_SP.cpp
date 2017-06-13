@@ -22,13 +22,6 @@ Graph_SP::Graph_SP(int n)
 }
 void Graph_SP::AddEdge(int from , int to , int weight)
 {
-    // initlization
-    if( adjList.find(from) == adjList.end() )
-    {
-        adjList.insert(make_pair(from, list<pair<int, int>>()));
-    }
-    adjList[from].push_back(make_pair(to, weight));
-    
     AdjList[from].push_back(make_pair(to, weight));
 }
 void Graph_SP::PrintDataArray(vector<int> array)
@@ -48,23 +41,16 @@ void Graph_SP::PrintIntArray(int * array)
 
 void Graph_SP::InitalizeSingleSource(int Start)
 {
-    // origin version
-//    distance.resize(num_vertex);
-//    predecessor.resize(num_vertex);
-//    
-//    for(int i = 0 ; i < num_vertex ;i++)
-//    {
-//        distance[i] = Max_Distance ;
-//        predecessor[i] = -1;
-//    }
-//    distance[Start] = 0 ;
-    // improve version
+     
+    distance.resize(num_vertex);
+    predecessor.resize(num_vertex);
     
-    for( auto element : adjList )
+    for(int i = 0 ; i < num_vertex ;i++)
     {
-        a.insert(make_pair(element.first, Max_Distance));
-        b.insert(make_pair(element.first, -1));
+        distance[i] = Max_Distance ;
+        predecessor[i] = -1;
     }
+    distance[Start] = 0 ;
 }
 void Graph_SP::Relax(int from , int to , int weight)
 {
@@ -149,10 +135,10 @@ void Graph_SP::Dijkstra(int Start )
             
         }
     }
-    cout << "print predecessor:" << endl;
-    PrintDataArray(predecessor);
-    cout << "print distance:" << endl;
-    PrintDataArray(distance);
+//    cout << "print predecessor:" << endl;
+//    PrintDataArray(predecessor);
+//    cout << "print distance:" << endl;
+//    PrintDataArray(distance);
     
     
 }

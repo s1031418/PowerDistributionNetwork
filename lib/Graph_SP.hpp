@@ -58,10 +58,10 @@ public:
     
 private:
     int num_vertex ;
-    map<int , list<pair<int, int>>> adjList; 
+     
     vector<list<pair<int, int>>> AdjList ;
     vector<int> predecessor , distance ;
-    map<int , int > a , b ;
+    
 };
 
 #endif /* Graph_SP_hpp */

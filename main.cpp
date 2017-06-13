@@ -55,11 +55,11 @@ int main(int argc,  char * argv[])
     
 //    flute_net f ;
 //    f.Demo();
-    Graph_SP g ;
-    g.Demo();
+//    Graph_SP g ;
+//    g.Demo();
     
-//    GlobalRouter gr ;
-//    gr.Route();
+    GlobalRouter gr ;
+    gr.Route();
 //    int x = 1;
 //    int y = 98;
 //    int z = 2;
