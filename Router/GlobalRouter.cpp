@@ -35,12 +35,12 @@ void GlobalRouter::toGridGraph()
             else cout << " NEW ";
             if( isBlock( col )) cout << " METAL5 " ;
             else cout << " METAL6 " ;
-            cout << col.Width << " " ;
+            cout << col.width << " " ;
             cout << " + SHAPE STRIPE ";
-            cout << " ( "<< col.StartPoint.x + col.Width / 2 ;
-            cout << " "<< col.StartPoint.y << " )" ;
-            cout << " ( "<< col.StartPoint.x + col.Width / 2 ;
-            cout << " "<< col.StartPoint.y + col.Length << " )" ;
+            cout << " ( "<< col.startpoint.x + col.width / 2 ;
+            cout << " "<< col.startpoint.y << " )" ;
+            cout << " ( "<< col.startpoint.x + col.width / 2 ;
+            cout << " "<< col.startpoint.y + col.length << " )" ;
             cout << endl;
         }
     }
@@ -49,8 +49,9 @@ void GlobalRouter::toGridGraph()
 void GlobalRouter::initGrids()
 {
     initBlockMap();
-    initLineVec();
-    Point<int> StartPoint(0,0) ;
+    CutByBlockBoundary();
+//    CutByUserDefine();
+    Point<int> startpoint(0,0) ;
     for( auto h : Horizontal )
     {
         vector<Grid> temp ;
@@ -58,23 +59,23 @@ void GlobalRouter::initGrids()
         {
             Grid grid ;
             Point<int> CrossPoint(v,h);
-            grid.Width = CrossPoint.x - StartPoint.x ;
-            grid.Length = CrossPoint.y - StartPoint.y ;
-            grid.StartPoint = StartPoint ;
+            grid.width = CrossPoint.x - startpoint.x ;
+            grid.length = CrossPoint.y - startpoint.y ;
+            grid.startpoint = startpoint ;
             
-            pair<bool, string> result = isBlock(StartPoint, Point<int>( StartPoint.x + grid.Width , StartPoint.y + grid.Length ) );
+            pair<bool, string> result = isBlock(startpoint, Point<int>( startpoint.x + grid.width , startpoint.y + grid.length ) );
             if( get<0>(result) )
             {
                 auto begin = MacroMaps[get<1>(result)].obs.InnerMaps.begin();
                 auto end = --MacroMaps[get<1>(result)].obs.InnerMaps.end() ;
-                grid.LowerMetal = stoi(begin->first.substr(5));
-                grid.UpperMetal = stoi(end->first.substr(5));
+                grid.lowermetal = stoi(begin->first.substr(5));
+                grid.uppermetal = stoi(end->first.substr(5));
             }
-            StartPoint.x += (CrossPoint.x - StartPoint.x) ;
+            startpoint.x += (CrossPoint.x - startpoint.x) ;
             temp.push_back(grid);
         }
-        StartPoint.x = 0 ;
-        StartPoint.y = h ;
+        startpoint.x = 0 ;
+        startpoint.y = h ;
         Grids.push_back(temp);
     }
     
@@ -82,11 +83,12 @@ void GlobalRouter::initGrids()
 //    {
 //        for(auto b : a)
 //        {
-//            Point<int> rightup(b.StartPoint.x+b.Width , b.StartPoint.y + b.Length);
-//            cout << "LeftDown:" << b.StartPoint << " RightUp:" <<  rightup;
-//            cout << "[ " << b.LowerMetal << "," << b.UpperMetal << " ]" << endl;
+//            Point<int> rightup(b.startpoint.x+b.width , b.startpoint.y + b.length);
+//            cout << "LeftDown:" << b.startpoint << " RightUp:" <<  rightup;
+//            cout << "[ " << b.lowermetal << "," << b.uppermetal << " ]" << endl;
 //        }
 //    }
+    
 }
 pair<bool, string> GlobalRouter::isBlock(Point<int> LeftDown , Point<int> RightUp)
 {
@@ -116,7 +118,7 @@ void GlobalRouter::initBlockMap()
 }
 bool GlobalRouter::isBlock(Grid grid)
 {
-    if( grid.LowerMetal == 0 && grid.UpperMetal == 0 )
+    if( grid.lowermetal == 0 && grid.uppermetal == 0 )
         return false ;
     else
         return true ; 
@@ -234,7 +236,7 @@ pair<int, int> GlobalRouter::getGridCoordinate( Point<int> LeftDown , Point<int>
     int LeftX = 0 , RightX = 0 ;
     for( int i = 0 ; i < Grids[0].size() ; i++)
     {
-        CurrentX = LastX + Grids[0][i].Width;
+        CurrentX = LastX + Grids[0][i].width;
         if( LeftDown.x >= LastX && LeftDown.x <= CurrentX  )
             LeftX = i;
         if( RightUp.x >= LastX && RightUp.x <= CurrentX  )
@@ -247,7 +249,7 @@ pair<int, int> GlobalRouter::getGridCoordinate( Point<int> LeftDown , Point<int>
     int BottomY = 0 , TopY = 0 ;
     for( int i = 0 ; i < Grids.size() ; i++)
     {
-        CurrentY = LastY + Grids[i][0].Length;
+        CurrentY = LastY + Grids[i][0].length;
         if( LeftDown.y >= LastY && LeftDown.y <= CurrentY  )
             BottomY = i;
         if( RightUp.y >= LastY && RightUp.y <= CurrentY  )
@@ -264,7 +266,7 @@ pair<int, int> GlobalRouter::getGridCoordinate( Point<int> LeftDown , Point<int>
         }
         else
         {
-            int Right_Boundary = Grids[0][LeftX].StartPoint.x + Grids[0][LeftX].Width ;
+            int Right_Boundary = Grids[0][LeftX].startpoint.x + Grids[0][LeftX].width ;
             if( Right_Boundary - LeftDown.x >= RightUp.x - Right_Boundary )
                 return make_pair(LeftX , TopY);
             else
@@ -279,7 +281,7 @@ pair<int, int> GlobalRouter::getGridCoordinate( Point<int> LeftDown , Point<int>
         }
         else
         {
-            int Up_Boundary = Grids[0][BottomY].StartPoint.y + Grids[0][BottomY].Length ;
+            int Up_Boundary = Grids[0][BottomY].startpoint.y + Grids[0][BottomY].length ;
             if( Up_Boundary - LeftDown.y >= RightUp.y - Up_Boundary )
                 return make_pair(LeftX , BottomY);
             else
@@ -288,6 +290,34 @@ pair<int, int> GlobalRouter::getGridCoordinate( Point<int> LeftDown , Point<int>
     }
     // 不預期會有Pin穿過2d的AREA
     assert(0);
+}
+pair<int, int> GlobalRouter::getGridCoordinate( Point<int> pt )
+{
+    // find X coordinate of LeftDownX and RightUpX
+    int LastX = 0 , CurrentX = 0 ;
+    int X = 0 ;
+    for( int i = 0 ; i < Grids[0].size() ; i++)
+    {
+        CurrentX = LastX + Grids[0][i].width;
+        if( pt.x >= LastX && pt.x <= CurrentX  )
+            X = i;
+        LastX = CurrentX ;
+    }
+    // find Y coordinate of LeftDownY and RightUpY
+    int LastY = 0 , CurrentY = 0 ;
+    int Y = 0 ;
+    for( int i = 0 ; i < Grids.size() ; i++)
+    {
+        CurrentY = LastY + Grids[i][0].length;
+        if( pt.y >= LastY && pt.y <= CurrentY  )
+            Y = i;
+        LastY = CurrentY ;
+    }
+    return make_pair(X, Y);
+}
+pair<int, int> GlobalRouter::ripple(int X , int Y)
+{
+    return make_pair(0, 0);
 }
 void GlobalRouter::Route()
 {
@@ -303,7 +333,9 @@ void GlobalRouter::Route()
         cout << "( " << get<0>(SGridCoordinate) << " , " << get<1>(SGridCoordinate) << " )" << endl;
         
         vector<Point<int>> Points ;
-        Points.push_back(Point<int>(get<0>(SGridCoordinate) , get<1>(SGridCoordinate) ));
+        Grid SGrid = Grids[SGridCoordinate.second][SGridCoordinate.first] ;
+        Point<int> Middle ( SGrid.startpoint.x +  SGrid.width / 2  , SGrid.startpoint.y + SGrid.length / 2);
+        Points.push_back( Middle);
         auto beginning = Connection.lower_bound(it->first);
         auto endding = Connection.upper_bound(it->first);
         // 儲存所有Source Target的Point，轉換成Grid座標儲存
@@ -318,60 +350,57 @@ void GlobalRouter::Route()
             if( block.Direction == DOWN ) get<1>(TGridCoordinate) -= 1;
             cout << "BlockPin( Target ) : " << beginning->second.BlockName << "_" << beginning->second.BlockPinName;
             cout << "( " << get<0>(TGridCoordinate) << " , " << get<1>(TGridCoordinate) << " )" << endl;
-            Points.push_back(Point<int>( get<0>(TGridCoordinate) , get<1>(TGridCoordinate) )  );
+            Grid TGrid = Grids[TGridCoordinate.second][TGridCoordinate.first] ;
+            Point<int> Middle ( TGrid.startpoint.x +  TGrid.width / 2  , TGrid.startpoint.y + TGrid.length / 2);
+            Points.push_back(Middle);
             beginning++;
         }
-        // 一個Source一個Target
-        if( Points.size() == 2 )
+        flute.getSteinerTree(Points);
+        for( int x = 0 ; x < flute.SteinerTree.size() ; x++ )
         {
-            graph.Dijkstra(translate2D_1D(Points[0].x , Points[0].y ));
-            vector<int> Path = graph.getPath(translate2D_1D(Points[1].x , Points[1].y ));
-            printPath(Path);
+            int X = flute.SteinerTree[x].x ;
+            int Y = flute.SteinerTree[x].y ;
+            int Target = flute.SteinerTree[x].target ;
+            cout << x << ":" << "x=" << X << " y=" << Y ;
+            cout << " e=" << Target << " ";
             cout << endl;
         }
-        // 一個Source多個Target，用Flute
-        else
+        for( int x = 0 ; x < flute.SteinerTree.size() ; x++ )
         {
-            flute.getSteinerTree(Points);
-            for( int x = 0 ; x < flute.SteinerTree.size() ; x++ )
-            {
-                int X = flute.SteinerTree[x].x ;
-                int Y = flute.SteinerTree[x].y ;
-                int Target = flute.SteinerTree[x].target ;
-                cout << x << ":" << "x=" << X << " y=" << Y ;
-                cout << " e=" << Target << " ";
-//                cout << Grids[ flute.SteinerTree[x].y ][ flute.SteinerTree[x].x ].StartPoint ;
-                if( flute.SteinerTree[x].isSteiner &&  isBlock (Grids[Y][X] ))
-                {
-                    // Steiner Point 在 Block 上
-                    cout << "Steiner Point is invalid " << endl;
-                    // 還沒處理
-                    assert(0);
-                }
-                graph.Dijkstra( translate2D_1D(X, Y));
-//                if( flute.SteinerTree[ Target ].x == X &&  flute.SteinerTree[ Target ].y == Y )
-//                {
-//                    cout << " go myself " << endl;
-//                    continue;
-//                }
-                Point<int> terminal = getTerminalGridCoordinate(X, Y, Target, flute.SteinerTree);
-                if( terminal.x == X && terminal.y == Y )
-                {
-                    cout << "(" << flute.SteinerTree[x].x << "," << flute.SteinerTree[x].y << ")->";
-                    cout << "(" << flute.SteinerTree[x].x << "," << flute.SteinerTree[x].y << ")"<< endl;
-                    continue;
-                }
-                vector<int> Path  = graph.getPath( translate2D_1D ( terminal.x ,terminal.y )  );
-//                vector<int> Path  = graph.getPath( translate2D_1D ( flute.SteinerTree[ Target ].x  , flute.SteinerTree[ Target ].y )  );
-                printPath(Path);
-                cout << endl;
-            }
+            int X = flute.SteinerTree[x].x ;
+            int Y = flute.SteinerTree[x].y ;
+            int Target = flute.SteinerTree[x].target ;
             
+
+            pair<int,int> SGridCoordinate = getGridCoordinate(Point<int>(X,Y));
+            Point<int> terminal = getTerminalCoordinate(X, Y, Target, flute.SteinerTree);
+            pair<int,int> TGridCoordinate = getGridCoordinate(terminal);
+            Grid SGrid = Grids[SGridCoordinate.second][SGridCoordinate.first];
+            if( isBlock(SGrid))
+            {
+                cout << "Steiner Point is invalid " << endl;
+                assert(0);
+            }
+            if( SGridCoordinate.first == TGridCoordinate.first && SGridCoordinate.second == TGridCoordinate.second ) continue;
+            cout << " START:(" << SGridCoordinate.first << "," << SGridCoordinate.second << ")";
+            cout << " TERMINAL:(" << TGridCoordinate.first << "," << TGridCoordinate.second << ")";
+            cout << endl;
+            graph.Dijkstra( translate2D_1D(SGridCoordinate.first, SGridCoordinate.second));
+            vector<int> Path  = graph.getPath( translate2D_1D ( TGridCoordinate.first ,TGridCoordinate.second ) );
+            printPath(Path);
+            cout << endl;
+//            cout << "Grid:" ;
+//            cout << gridCoordinate.first << "," << gridCoordinate.second << " " ;
+//            if( flute.SteinerTree[x].isSteiner ) cout << "s";
+//            cout << x << ":" << "x=" << X << " y=" << Y ;
+//            cout << " e=" << Target << " ";
+//            cout << endl;
         }
+        cout << "------------------------------------end------------------------------------" << endl;
     }
     
 }
-Point<int> GlobalRouter::getTerminalGridCoordinate(int x , int y , int target , vector<node> & SteierTree)
+Point<int> GlobalRouter::getTerminalCoordinate(int x , int y , int target , vector<node> & SteierTree)
 {
     int OldTarget = target , newTarget = target;
     int TargetX = SteierTree[target].x ;
@@ -408,7 +437,34 @@ pair<int, int> GlobalRouter::translate1D_2D(int index)
     int x = index % (int)size ;
     return make_pair(x, y);
 }
-void GlobalRouter::initLineVec()
+
+
+
+
+
+void GlobalRouter::CutByUserDefine()
+{
+    int x_diff = DIEAREA.pt2.x - DIEAREA.pt1.x ;
+    int y_diff = DIEAREA.pt2.y - DIEAREA.pt1.y ;
+    int default_length = 1 * UNITS_DISTANCE ;
+    int scaling_length = default_length * Scaling ;
+    
+    // Set Vertical Line
+    for( int i = scaling_length ; i <= x_diff ; i += scaling_length )
+        Vertical.insert(i);
+    
+    
+    // Set Horizontal Line
+    for( int i = scaling_length ; i <= y_diff ; i += scaling_length )
+        Horizontal.insert(i);
+    
+    // DIEAREA is not align .
+    if( *Vertical.end() != DIEAREA.pt2.x ) Vertical.insert(DIEAREA.pt2.x);
+    if( *Horizontal.end() != DIEAREA.pt2.y ) Horizontal.insert(DIEAREA.pt2.y);
+}
+
+
+void GlobalRouter::CutByBlockBoundary()
 {
     for (auto Conponent : ComponentMaps)
     {
@@ -422,4 +478,5 @@ void GlobalRouter::initLineVec()
     Horizontal.insert(DIEAREA.pt2.y);
     if( *Vertical.begin() == DIEAREA.pt1.x ) Vertical.erase(Vertical.begin());
     if( *Horizontal.begin() == DIEAREA.pt1.y ) Horizontal.erase(Horizontal.begin());
+    
 }

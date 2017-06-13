@@ -18,17 +18,12 @@
 #include "lefrw.h"
 #include "defrw.h"
 #include "flute_net.hpp"
-class Grid
-{
-public:
-    Point<int> StartPoint ;
-    int Width;
-    int Length;
-    int LowerMetal = 0 ; // UpperMetalLayer
-    int UpperMetal = 0 ; // LowerMetalLayer
-    int Capacity ;
-    bool OverFlow ;
-};
+#include "RouterComponents.hpp"
+
+// User Define Parameters
+// Define Global Routing Grid Size
+// Grid Size = Scaling * minimal space
+const unsigned Scaling = 500 ;
 
 
 class GlobalRouter {
@@ -51,7 +46,13 @@ private:
     map<string, pair<Point<int>, Point<int>>> BlockMap;
     // -----------------------------------------------------
     // function:
-    void initLineVec();
+    
+    // Cut By BlockBoundary ( non-uniform )
+    void CutByBlockBoundary();
+    
+    // Cut By Minimal Space ( uniform )
+    void CutByUserDefine();
+    
     void initGrids();
     void initBlockMap();
     void initGraph_SP();
@@ -71,11 +72,19 @@ private:
     // 第一個值為X座標，第二個為Y座標
     pair<int, int> getGridCoordinate( Point<int> LeftDown , Point<int> RightUp );
     
+    // 給我一個點，算出它屬於哪一個Grid
+    // 如果點在交界上，如果是Ｘ就return左邊的，如果是Ｙ就return下面的
+    // 第一個值為X座標，第二個為Y座標
+    pair<int, int> getGridCoordinate( Point<int> pt );
     
+    
+    pair<int, int> ripple(int X , int Y);
+    
+    // print shortest path of Dijkstra algorithm
     void printPath(vector<int> & path);
     
-    
-    Point<int> getTerminalGridCoordinate(int x , int y , int target , vector<node> & SteierTree) ;
+    // get x y coordinate of flute results 
+    Point<int> getTerminalCoordinate(int x , int y , int target , vector<node> & SteierTree) ;
     
 };
 

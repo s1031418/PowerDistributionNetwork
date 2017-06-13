@@ -36,6 +36,7 @@ public:
     void MinHeapify(int node , int length);
     void BuildMinHeap(vector<int> array);
     void BuildMinHeap(vector<HeapNode> array);
+    
     void DecreaseKey(int node , int newKey);
     void MinHeapInsert(int node , int key);
     int Minimum(); // 回傳vertex位置的index

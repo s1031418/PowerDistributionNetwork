@@ -22,6 +22,13 @@ Graph_SP::Graph_SP(int n)
 }
 void Graph_SP::AddEdge(int from , int to , int weight)
 {
+    // initlization
+    if( adjList.find(from) == adjList.end() )
+    {
+        adjList.insert(make_pair(from, list<pair<int, int>>()));
+    }
+    adjList[from].push_back(make_pair(to, weight));
+    
     AdjList[from].push_back(make_pair(to, weight));
 }
 void Graph_SP::PrintDataArray(vector<int> array)
@@ -41,18 +48,27 @@ void Graph_SP::PrintIntArray(int * array)
 
 void Graph_SP::InitalizeSingleSource(int Start)
 {
-    distance.resize(num_vertex);
-    predecessor.resize(num_vertex);
+    // origin version
+//    distance.resize(num_vertex);
+//    predecessor.resize(num_vertex);
+//    
+//    for(int i = 0 ; i < num_vertex ;i++)
+//    {
+//        distance[i] = Max_Distance ;
+//        predecessor[i] = -1;
+//    }
+//    distance[Start] = 0 ;
+    // improve version
     
-    for(int i = 0 ; i < num_vertex ;i++)
+    for( auto element : adjList )
     {
-        distance[i] = Max_Distance ;
-        predecessor[i] = -1;
+        a.insert(make_pair(element.first, Max_Distance));
+        b.insert(make_pair(element.first, -1));
     }
-    distance[Start] = 0 ;
 }
 void Graph_SP::Relax(int from , int to , int weight)
 {
+    
     if( distance[to] > distance[from] + weight  )
     {
         distance[to] = distance[from] + weight ;
@@ -87,6 +103,7 @@ vector<int> Graph_SP::getPath( int target )
 void Graph_SP::Demo()
 {
     Graph_SP g9(6);
+//    Graph_SP g9;
     g9.AddEdge(0, 1, 8);g9.AddEdge(0, 5, 1);
     g9.AddEdge(1, 0, 3);g9.AddEdge(1, 2, 1);
     g9.AddEdge(2, 0, 5);g9.AddEdge(2, 3, 2);g9.AddEdge(2, 4, 2);
@@ -102,6 +119,22 @@ void Graph_SP::resize(int n )
 }
 void Graph_SP::Dijkstra(int Start )
 {
+//    num_vertex = (int)adjList.size()+1  ;
+////    cout << num_vertex << endl;
+//    InitalizeSingleSource(Start);
+//    
+//    BinaryHeap minQueue(num_vertex);
+//    minQueue.BuildMinHeap(distance);
+//    while (!minQueue.IsEmpty())
+//    {
+//        int u = minQueue.ExtractMin();
+//        for(auto it = adjList[u].begin() ; it != adjList[u].end() ; it++)
+//        {
+//            Relax(u, it->first, it->second);
+//            minQueue.DecreaseKey(it->first, distance[it->first]);
+//            
+//        }
+//    }
     InitalizeSingleSource(Start);
     
     BinaryHeap minQueue(num_vertex);
@@ -116,10 +149,10 @@ void Graph_SP::Dijkstra(int Start )
             
         }
     }
-//    cout << "print predecessor:" << endl;
-//    PrintDataArray(predecessor);
-//    cout << "print distance:" << endl;
-//    PrintDataArray(distance);
+    cout << "print predecessor:" << endl;
+    PrintDataArray(predecessor);
+    cout << "print distance:" << endl;
+    PrintDataArray(distance);
     
     
 }

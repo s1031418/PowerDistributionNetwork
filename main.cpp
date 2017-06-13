@@ -35,6 +35,9 @@ void test(int num);
 void rundef(char * argv[]);
 // Ex. Team1.exe case1.v case1_input.def tech.lef blocks.lef initial_files caseX
 
+
+// 下次進度：
+// 將graph_sp 用 hash實作，因為3d to 1d 轉換出來的index 很大，用vector會大爆炸！！！
 int main(int argc,  char * argv[])
 {
     string CaseName = argv[6];
@@ -52,10 +55,43 @@ int main(int argc,  char * argv[])
     
 //    flute_net f ;
 //    f.Demo();
-//    Graph_SP g ;
-//    g.Demo();
+    Graph_SP g ;
+    g.Demo();
     
 //    GlobalRouter gr ;
+//    gr.Route();
+//    int x = 1;
+//    int y = 98;
+//    int z = 2;
+//    int WIDTH = 10000 ;
+//    int LENGTH = 10000 ;
+//    
+////    cout << x + WIDTH * (y + DEPTH * z);
+//    cout << "OriginCoordinate:" << "(" << x << "," << y << "," << z << ")" << endl;
+//    
+//    
+//    // transform 3d to 1d
+//    
+//    int one_D = x + y * WIDTH + z * WIDTH * LENGTH ;
+//    cout << "Transform 3d to 1d:" ;
+//    cout << one_D << endl;
+//
+//    // tranform 3d to 1d
+//    x = one_D % WIDTH ;
+//    y = ( one_D / WIDTH ) % LENGTH ;
+//    z = one_D / ( WIDTH * LENGTH ) ;
+//    cout << "Transform 1d to 3d:";
+//    cout << "(" << x << "," << y << "," << z << ")" << endl;
+    
+    
+    // transform 1d to 2d
+//     size = WIDTH;
+//     y = one_D / (int)size ;
+//     x = one_D % (int)size ;
+//    cout << "2d:" << x << "," << y << endl;
+    
+    
+    
 //    gr.Route();
 //    gr.Route();
     
@@ -66,7 +102,7 @@ int main(int argc,  char * argv[])
     
 //    for(int i = 0 ; i < 3 ; i++)
 //    {
-        converter.toLocationFile();
+//        converter.toLocationFile();
 //        converter.Visualize();
 //        test(2);
 //    }

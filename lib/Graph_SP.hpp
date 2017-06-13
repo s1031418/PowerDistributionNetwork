@@ -14,21 +14,21 @@
 #include "BinaryHeap.hpp"
 #include <climits>
 #include <queue>
-
+#include <map>
 const int Max_Distance = 100000 ;
 
-struct Node
-{
-    int key ;
-    int value ;
-};
-struct cmpLess
-{
-    bool operator ()(const Node & a,const Node & b)
-    {
-        return a.key < b.key;
-    }
-};
+//struct Node
+//{
+//    int key ;
+//    int value ;
+//};
+//struct cmpLess
+//{
+//    bool operator ()(const Node & a,const Node & b)
+//    {
+//        return a.key < b.key;
+//    }
+//};
 class Graph_SP // SP means Shortest Path
 {
     
@@ -39,6 +39,8 @@ public:
     void resize(int n );
     
     void AddEdge(int from , int to , int weight);
+    
+    
     void PrintDataArray(vector<int> array);
     void PrintIntArray(int * array);
     
@@ -56,9 +58,10 @@ public:
     
 private:
     int num_vertex ;
+    map<int , list<pair<int, int>>> adjList; 
     vector<list<pair<int, int>>> AdjList ;
     vector<int> predecessor , distance ;
-    
+    map<int , int > a , b ;
 };
 
 #endif /* Graph_SP_hpp */
