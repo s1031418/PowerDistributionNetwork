@@ -1,8 +1,8 @@
 
 
 CXX = g++
-CXXFLAGS = -std=c++11  -I Parsers -I include -I lib -I Flute -I Router 
-OBJS = main.o Parsers/Parsers.o lib/Debugger.o Parsers/lefrw.o Parsers/defrw.o Parsers/InitialFileParser.o lib/Converter.o lib/PDN.o lib/PDNHelper.o Parsers/ngspice.o lib/Graph_SP.o lib/BinaryHeap.o Router/GlobalRouter.o Flute/flute_net.o Parsers/verilog.o Router/DetailRouter.o Router/RouterUtil.o Router/Weights.o
+CXXFLAGS = -std=c++11  -I Parsers -I include -I lib -I Flute -I Router -I PDN
+OBJS = main.o Parsers/Parsers.o Parsers/Printer.o Parsers/lefrw.o Parsers/defrw.o Parsers/InitialFileParser.o PDN/Converter.o PDN/PDN.o PDN/PDNHelper.o Parsers/ngspice.o Router/Graph_SP.o Router/BinaryHeap.o Router/GlobalRouter.o Flute/flute_net.o Parsers/verilog.o Router/DetailRouter.o Router/RouterUtil.o Router/Weights.o
 STATICLIB = lib/liblef.a lib/libdef.a lib/flute.a
 
 
@@ -13,7 +13,7 @@ cadXX: $(OBJS)
 
 main.o: main.cpp Parsers/lefrw.o
 PDN.o:lib/PDN.cpp
-PDNHelper.o:lib/PDNHelper.cpp
+PDNHelper.o:PDN/PDNHelper.cpp
 GlobalRouter.o:Router/GlobalRouter.cpp
 DetailRouter.o:Router/DetailRouter.cpp
 RouterUtil.o:Router/RouterUtil.cpp
