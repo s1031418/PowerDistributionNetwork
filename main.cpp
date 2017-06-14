@@ -35,8 +35,6 @@ void rundef(char * argv[]);
 // Ex. Team1.exe case1.v case1_input.def tech.lef blocks.lef initial_files caseX
 
 
-// 下次進度：
-// 將graph_sp 用 hash實作，因為3d to 1d 轉換出來的index 很大，用vector會大爆炸！！！
 int main(int argc,  char * argv[])
 {
     string CaseName = argv[6];
