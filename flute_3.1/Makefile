@@ -5,7 +5,7 @@ SRC     = dist.c dl.c err.c heap.c mst2.c neighbors.c \
 	bookshelf_IO.c memAlloc.c flute.c flute_mst.c
 OBJ     = $(SRC:.c=.o)
 
-all: flute-net flute-ckt rand-pts lib
+all: flute-net flute-ckt  lib
 
 flute-net: flute-net.c ${OBJ}
 	$(CC) $(CFLAGS) -o flute-net flute-net.c ${OBJ} -lm
