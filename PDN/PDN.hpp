@@ -12,8 +12,8 @@
 #include <stdio.h>
 #include <vector>
 #include <string>
-#include <vector>
-#include "Components.h"
+#include <list>
+#include "../Parsers/Components.h"
 #include "PDNHelper.hpp"
 #include <set>
 using namespace std ;
@@ -23,6 +23,7 @@ class PDN
 public:
     PDN();
     ~PDN();
+    map < string,map < string , vector<Line > > > ADJ_List;
 private:
 };
 

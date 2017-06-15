@@ -24,11 +24,11 @@
 #else
 #   include <windows.h>
 #endif /* not WIN32 */
-#include "lefrReader.hpp"
-#include "lefwWriter.hpp"
-#include "lefiDebug.hpp"
-#include "lefiEncryptInt.hpp"
-#include "lefiUtil.hpp"
+#include "../include/lefrReader.hpp"
+#include "../include/lefwWriter.hpp"
+#include "../include/lefiDebug.hpp"
+#include "../include/lefiEncryptInt.hpp"
+#include "../include/lefiUtil.hpp"
 #include "Components.h"
 #include <string>
 #include <map>

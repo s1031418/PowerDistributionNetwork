@@ -17,8 +17,8 @@
 #ifndef WIN32
 #   include <unistd.h>
 #endif /* not WIN32 */
-#include "defrReader.hpp"
-#include "defiAlias.hpp"
+#include "../include/defrReader.hpp"
+#include "../include/defiAlias.hpp"
 #include "Components.h"
 #include <fstream>
 extern double UNITS_DISTANCE ;
