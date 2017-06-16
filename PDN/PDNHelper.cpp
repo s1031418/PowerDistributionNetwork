@@ -5,7 +5,6 @@
 //  Created by 吳峻陞 on 20/05/2017.
 //  Copyright © 2017 吳峻陞. All rights reserved.
 //
-
 #include "PDNHelper.hpp"
 
 
@@ -302,7 +301,7 @@ bool PDNHelper::isCross(Line line1 , Line line2)
         int RightX = isHorizontal(non_psedo_line.pt1, non_psedo_line.pt2) ? non_psedo_line.pt2.x : non_psedo_line.pt2.x + (non_psedo_line.Width / 2) ;
         int TopY = isHorizontal(non_psedo_line.pt1, non_psedo_line.pt2) ? non_psedo_line.pt1.y + ( non_psedo_line.Width / 2 ) : non_psedo_line.pt2.y ;
         int BottomY = isHorizontal(non_psedo_line.pt1, non_psedo_line.pt2) ? non_psedo_line.pt2.y - ( non_psedo_line.Width / 2 ) : non_psedo_line.pt1.y ;
-        if( psedo_line.pt1.x > leftX && psedo_line.pt1.x < RightX && psedo_line.pt1.y > BottomY && psedo_line.pt1.y < TopY )
+        if( psedo_line.pt1.x >= leftX && psedo_line.pt1.x <= RightX && psedo_line.pt1.y >= BottomY && psedo_line.pt1.y <= TopY )
             return true ;
         else
             return false ;
@@ -310,7 +309,7 @@ bool PDNHelper::isCross(Line line1 , Line line2)
     if(line1.isHorizontal && !(line2.isHorizontal))
     {
         
-        if( line1.pt2.y > line2.pt1.y && line1.pt2.y < line2.pt2.y && line2.pt2.x > line1.pt1.x && line2.pt2.x < line1.pt2.x ) // isIntersaction
+        if( line1.pt2.y >= line2.pt1.y && line1.pt2.y <= line2.pt2.y && line2.pt2.x >= line1.pt1.x && line2.pt2.x <= line1.pt2.x ) // isIntersaction
             return true ;
         else
             return false ;
@@ -318,13 +317,21 @@ bool PDNHelper::isCross(Line line1 , Line line2)
     }
     else if( !(line1.isHorizontal) && line2.isHorizontal)
     {
-        if( line2.pt2.y > line1.pt1.y && line2.pt2.y < line1.pt2.y && line1.pt2.x > line2.pt1.x && line1.pt2.x < line2.pt2.x ) // isIntersaction
+        if( line2.pt2.y >= line1.pt1.y && line2.pt2.y <= line1.pt2.y && line1.pt2.x >= line2.pt1.x && line1.pt2.x <= line2.pt2.x ) // isIntersaction
             return true ;
         else
             return false ;
     }
     else
         return false;
+}
+bool PDNHelper::isCrossWithCoordinate ( Line line , pair < Point<int> , Point<int> > pairPoint)
+{
+    if ( line.pt1.x >= pairPoint.first.x && line.pt1.x <= pairPoint.second.x && line.pt1.y >= pairPoint.first.y && line.pt1.y <= pairPoint.second.y )
+        return true ;
+    if ( line.pt2.x >= pairPoint.first.x && line.pt2.x <= pairPoint.second.x && line.pt2.y >= pairPoint.first.y && line.pt2.y <= pairPoint.second.y )
+        return true ;
+    return false ; 
 }
 Point<int> PDNHelper::getCrossPoint(Line line1 , Line line2)
 {
