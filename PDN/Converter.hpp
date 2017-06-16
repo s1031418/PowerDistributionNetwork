@@ -9,13 +9,13 @@
 #ifndef Converter_hpp
 #define Converter_hpp
 #include <stdio.h>
-#include "Components.h"
+#include "../Parsers/Components.h"
 #include <unordered_map>
 #include <vector>
 #include <algorithm>
 #include "PDNHelper.hpp"
 #include <set>
-#include "ngspice.hpp"
+#include "../Parsers/ngspice.hpp"
 using namespace std;
 
 

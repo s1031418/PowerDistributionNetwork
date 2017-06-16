@@ -23,7 +23,7 @@ void ngspice::init(string casename)
 void ngspice::LoadFile()
 {
     string content ;
-    string FilePath("/Users/Jeff/Documents/c++/EDA_Contest2017(PDN)/EDA_Contest2017(PDN)/");
+    string FilePath;
     FilePath.append(CaseName).append("_ngspice");
     fstream fin(FilePath , ios::in);
     if(!fin)
@@ -125,7 +125,7 @@ void ngspice::ConcatIR_Drop()
 {
     
     string a ;
-    string FilePath("/Users/Jeff/Documents/c++/EDA_Contest2017(PDN)/EDA_Contest2017(PDN)/");
+    string FilePath;
 //    string input = CaseName.append("_ngspice");
     string input = FilePath.append(CaseName).append("_ngspice");
     fstream fin(input, ios::in);
@@ -177,12 +177,13 @@ void ngspice::ConcatIR_Drop()
             }
     }
     fin.close();
-    fstream fout("output.txt", ios::app | ios::out);
-    for(int i = 0 ; i<tmp.size();i++)
+    fstream fout( "output.txt", (ios::app | ios::out) );
+    for (int i = 0 ; i < tmp.size() ; i++)
     {
         fout<<tmp[i][0]<<"_"<<tmp[i][1]<<"_"<<tmp[i][2]<<" ";
         fout<<tmp[i][0]<<"_"<<tmp[i][1]<<"_"<<tmp[i][2]<<" ";
-        if(tmp[i][3].size()>3)
+        
+        if (tmp[i][3].size()>3)
             fout<<tmp[i][3][0]<<tmp[i][3][1]<<tmp[i][3][2]<<tmp[i][3][3];
         else
             fout<<tmp[i][3];

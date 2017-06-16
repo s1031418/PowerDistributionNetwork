@@ -383,12 +383,14 @@ void Converter::printResistance(map<Line , vector<Point<int>>,MyComparator> & Cr
         cnt++;
     }
 }
+//have error 
 void Converter::toOutputDef()
 {
     int StartIndex = 0 ;
     int EndIndex = 0 ;
     int Rowindex = 0 ;
     vector<string> temp = OriginDef ;
+
     for(auto line : temp)
     {
         if( line.find("SPECIALNETS") != string::npos )
@@ -407,7 +409,7 @@ void Converter::toOutputDef()
         Rowindex++;
     }
     // vector 用 erase 要注意 performace
-    temp.erase(temp.begin() + StartIndex, temp.begin() + EndIndex + 1 );
+    temp.erase(temp.begin() + StartIndex, temp.begin()+EndIndex + 1 );
     vector<string> NewDefSp;
     NewDefSp.push_back("SPECIALNETS " + to_string(SpecialNetsMaps.size()) + " ;");
     
@@ -430,7 +432,7 @@ void Converter::toOutputDef()
     fstream fout(output , ios::out);
     for( auto x : temp )
         fout << x << endl;
-    
+     
 }
 void Converter::toLocationFile()
 {

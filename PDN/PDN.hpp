@@ -23,7 +23,7 @@ class PDN
 public:
     PDN();
     ~PDN();
-    map < string,map < string , vector<Line > > > ADJ_List;
+    map <  string , map < string  , vector <Line> > >  List;
 private:
 };
 
