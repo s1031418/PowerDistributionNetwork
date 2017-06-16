@@ -5,7 +5,8 @@
 //
 
 #include "PDN.hpp"
-
+#include <stack>
+#include <deque>
 #include "../Parsers/defrw.h"
 #include "../Parsers/lefrw.h"
 
@@ -47,17 +48,21 @@ PDN::PDN()
         getPowerPinRegion = myHelper.getPowerPinCoordinate(PinMaps[PinName].STARTPOINT.x,PinMaps[PinName].STARTPOINT.y , PinMaps[PinName].RELATIVE_POINT1, PinMaps[PinName].RELATIVE_POINT2 ,PinMaps[PinName].ORIENT);
         pair < Point <int> ,Point<int> > getBlockPinRegion;
         vector<Line> terminalLine;
-        
+        map < Line,map <string ,string > > TerimialLineToBlockPinName;
+        map < Line,string > StartLineToPowerPinName;
+        map < string , string > BlockNameAndBlockPinName;
+        map < string , string > BlockNameAndPinName;
         for ( auto it = SpecialNetsMaps[PinName].DESTINATIONMAPS.begin(); it != SpecialNetsMaps[PinName].DESTINATIONMAPS.end();it = SpecialNetsMaps[PinName].DESTINATIONMAPS.upper_bound(it->first))
         {
             vector<Block>nowBlockPin =  myHelper.BlockMaps[it->first];
+            BlockNameAndBlockPinName[ it->first ] = it->second;
+            BlockNameAndPinName[ it->first ] = PinName ;
             for (int i = 0 ; i < nowBlockPin.size();i++ )
             {
                 getBlockPinRegion.first = nowBlockPin[i].LeftDown;
                 getBlockPinRegion.second = nowBlockPin[i].RightUp;
                 if (it->second.compare(nowBlockPin[i].BlockPinName) == 0) //check same blockPin
                 {
-                   // cout<<it->first<<" "<<it->second<<" "<<nowBlockPin[i].LeftDown<<" "<<nowBlockPin[i].RightUp<<endl;
                     for(int j = 0 ; j < nowBlockPin[i].Metals.size();j++) //for each blockPin layer 
                     {
                         for(int k = 0 ; k < vec_special_net_line.size();k++) //for each now line 
@@ -67,11 +72,11 @@ PDN::PDN()
                                 if(myHelper.isCrossWithCoordinate(vec_special_net_line[k],getBlockPinRegion))
                                 {
                                     terminalLine.push_back(vec_special_net_line[k]);
+                                    TerimialLineToBlockPinName[ vec_special_net_line[k] ] = BlockNameAndBlockPinName ; 
                                 }
                             }
                         }
                     }
-                     //cout<<it->first<<" "<<it->second<<" "<<nowBlockPin[i].LeftDown<<" "<<nowBlockPin[i].RightUp<<endl;
                 }
             }
         }
@@ -85,32 +90,46 @@ PDN::PDN()
                 {
                     startLine = vec_special_net_line[i];
                     OrderLine.push_back(startLine);
+                    StartLineToPowerPinName[vec_special_net_line[i]] = PinName ;
                     break;
                 }
             }
         }
-
-            cout << "this is start    line : "<<startLine<<endl ;
+        
+        stack<Line> Stack;
+        vector<Line> List ;
+        startLine.isTraversal = true ;
+        Stack.push(startLine);
+        map < string ,vector<Line> > BlockPinToOrderLine;
+        
+        cout << "this is start    line : "<<startLine<<endl ;
+        
         for (int i = 0 ; i < terminalLine.size();i++)
         {
             cout<<  "this is terminal line : "<<terminalLine[i]<<endl;
         }
+        //while (Stack.size() != 0)
+        //{
+            //cout<<Stack.top()<<endl;
+            //Stack.top().isTraversal = 1 ;
+            //bool checkAllNoCross = 0 ;
+            //for (int i = 0 ; i < vec_special_net_line.size(); i++ )
+            //{
+                //if (vec_special_net_line[i].isTraversal == true )
+                    //continue;
+                //if (myHelper.isCross(Stack.top(),vec_special_net_line[i]))
+                //{
+                    //checkAllNoCross = 1 ;
+                    //Stack.push(vec_special_net_line[i]);
+                    //break;
+                //}
+            //}
+            //if (checkAllNoCross == 0 )
+            //{
+                //Stack.pop();
+            //}
+        //}
         
-        for ( int i = 0 ; i < vec_special_net_line.size();i++)
-        {
-            for( int  j = 0 ; j < vec_special_net_line.size();j++)
-            {
-                if(i==j)
-                    continue;
-                else 
-                {
-                    if (myHelper.isCross(vec_special_net_line[i],vec_special_net_line[j]))
-                    {
-                                                
-                    }
-                }
-            }
-        }
     }
 }
 

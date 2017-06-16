@@ -175,6 +175,7 @@ public:
     Point<int> pt2;
     std::string MetalName ;
     int Width = -1;
+    bool isTraversal = false;
     bool isHorizontal ;
     bool isPsedoLine = false;
     std::vector<std::string> ViaMetal;
