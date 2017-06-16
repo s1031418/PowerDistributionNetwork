@@ -78,7 +78,7 @@ public:
     
     //給Block左下跟右上角，BlockPin左下跟右上角，還有方向
     //回傳旋轉完的左下跟右上
-    pair<Point<int>, Point<int>> getRotatePoint(Point<int> BlcokLeftDown , Point<int> BlcokRightUp , Point<int> BlockPinLeftDown , Point<int> BlockPinRightUp , string orient);
+    pair<Point<int>, Point<int>> getBlockPinCoordinate(Point<int> BlcokLeftDown , Point<int> BlcokRightUp , Point<int> BlockPinLeftDown , Point<int> BlockPinRightUp , string orient);
     
     // 將Detination Map 全部轉為 string
     string DestinationMapToString(multimap<string,string>& DestinationMap);

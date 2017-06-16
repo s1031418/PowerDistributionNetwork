@@ -114,7 +114,7 @@ void PDNHelper::InitBlockMaps()
             BlockPinLeftDown.y = BlockLeftDown.y + LeftDownScaling.y ;
             BlockPinRightUp.x = BlockLeftDown.x + RightUpScaling.x ;
             BlockPinRightUp.y = BlockLeftDown.y + RightUpScaling.y ;
-            pair<Point<int>, Point<int>> RotatePoint = getRotatePoint(BlockLeftDown , BlockRightUp , BlockPinLeftDown, BlockPinRightUp, orient);
+            pair<Point<int>, Point<int>> RotatePoint = getBlockPinCoordinate(BlockLeftDown , BlockRightUp , BlockPinLeftDown, BlockPinRightUp, orient);
             block.LeftDown = get<0>(RotatePoint) ;
             block.RightUp = get<1>(RotatePoint);
             block.BlockPinName = blockpin.second.Name;
@@ -207,7 +207,7 @@ pair< Point<int>, Point<int> > PDNHelper::getPowerPinCoordinate(int x , int y , 
     RightUp.y = (pt1.y > pt2.y ) ? pt1.y : pt2.y ;
     return make_pair(LeftDown, RightUp);
 }
-pair<Point<int>, Point<int>> PDNHelper::getRotatePoint(Point<int> BlcokLeftDown , Point<int> BlcokRightUp , Point<int> BlockPinLeftDown , Point<int> BlockPinRightUp , string orient)
+pair<Point<int>, Point<int>> PDNHelper::getBlockPinCoordinate(Point<int> BlcokLeftDown , Point<int> BlcokRightUp , Point<int> BlockPinLeftDown , Point<int> BlockPinRightUp , string orient)
 {
     int BlockWidth = BlcokRightUp.x - BlcokLeftDown.x ;
     int BlockLength = BlcokRightUp.y - BlcokLeftDown.y ;
@@ -235,7 +235,7 @@ pair<Point<int>, Point<int>> PDNHelper::getRotatePoint(Point<int> BlcokLeftDown 
     }
     else if (orient == "FW")
     {
-        pair<Point<int>, Point<int>> W = getRotatePoint(BlcokLeftDown, BlcokRightUp, BlockPinLeftDown, BlockPinRightUp, "W");
+        pair<Point<int>, Point<int>> W = getBlockPinCoordinate(BlcokLeftDown, BlcokRightUp, BlockPinLeftDown, BlockPinRightUp, "W");
         pair<Point<int>, Point<int>> BlockCoordinate = getBlockCoordinate(BlcokLeftDown.x, BlcokLeftDown.y,BlockWidth , BlockLength, "W");
         x_axis = get<0>(BlockCoordinate).x + BlockLength / 2 ;
         Point<int> RightDown = FlipY(x_axis, get<0>(W) , LEFT);
@@ -249,7 +249,7 @@ pair<Point<int>, Point<int>> PDNHelper::getRotatePoint(Point<int> BlcokLeftDown 
     }
     else if (orient == "FS")
     {
-        pair<Point<int>, Point<int>> S = getRotatePoint(BlcokLeftDown, BlcokRightUp, BlockPinLeftDown, BlockPinRightUp, "S");
+        pair<Point<int>, Point<int>> S = getBlockPinCoordinate(BlcokLeftDown, BlcokRightUp, BlockPinLeftDown, BlockPinRightUp, "S");
         Point<int> RightDown = FlipY(x_axis, get<0>(S), LEFT);
         Point<int> LeftUp = FlipY(x_axis, get<1>(S), LEFT);
         return make_pair(Point<int>( LeftUp.x, RightDown.y), Point<int>( RightDown.x , LeftUp.y ));
@@ -262,7 +262,7 @@ pair<Point<int>, Point<int>> PDNHelper::getRotatePoint(Point<int> BlcokLeftDown 
     }
     else if (orient == "FE")
     {
-        pair<Point<int>, Point<int>> E = getRotatePoint(BlcokLeftDown, BlcokRightUp, BlockPinLeftDown, BlockPinRightUp, "E");
+        pair<Point<int>, Point<int>> E = getBlockPinCoordinate(BlcokLeftDown, BlcokRightUp, BlockPinLeftDown, BlockPinRightUp, "E");
         x_axis = BlcokLeftDown.x + BlockLength / 2 ;
         Point<int> LeftUp = FlipY(x_axis, get<1>(E), RIGHT);
         Point<int> RightDown = FlipY(x_axis, get<0>(E), RIGHT);
