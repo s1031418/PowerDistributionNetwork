@@ -16,6 +16,7 @@ PDN::PDN()
     PDNHelper myHelper;
     for ( auto PinName : myHelper.PinNames)
     {
+        cout<<PinName<<endl;
         vector < Line >  vec_special_net_line;
         for ( auto it = SpecialNetsMaps[PinName].NETSMULTIMAPS.begin() ; it != SpecialNetsMaps[PinName].NETSMULTIMAPS.end();it = SpecialNetsMaps[PinName].NETSMULTIMAPS.upper_bound(it->first))
         {
@@ -35,13 +36,20 @@ PDN::PDN()
                     line.isPsedoLine =true;
                 else 
                     line.isPsedoLine = false ;
+                if (line.isPsedoLine)
+                {
+                    for ( auto x : ViaMaps[first->second.VIANAME].InnerMaps)
+                    {
+                        line.ViaMetal.push_back(x.first);
+                    }
+                }
                 vec_special_net_line.push_back(line);
                 first ++ ;
             }
 
         }
         //for(int i = 0 ; i < vec_special_net_line.size();i++)
-            //cout<<"line : "<<vec_special_net_line[i]<<endl;
+        //cout<<"line : "<<vec_special_net_line[i]<<endl;
         vector < Line >OrderLine;
         //get Which is Start Line 
         pair < Point <int> ,Point<int> > getPowerPinRegion;
@@ -80,7 +88,7 @@ PDN::PDN()
                 }
             }
         }
-        
+
         Line startLine; 
         for (int i = 0 ; i < vec_special_net_line.size();i++)
         {
@@ -95,42 +103,161 @@ PDN::PDN()
                 }
             }
         }
-        
-        stack<Line> Stack;
+        for (int i = 0  ; i < vec_special_net_line.size();i++)
+        {
+            if (vec_special_net_line[i].isPsedoLine)
+            {
+                Line Psedo(vec_special_net_line[i].pt1 , vec_special_net_line[i].pt2);
+                Psedo.ViaName = vec_special_net_line[i].ViaName ;
+                Psedo.Width = vec_special_net_line[i].Width;
+                Psedo.ViaMetal = vec_special_net_line[i].ViaMetal;
+                for ( int j = 0 ; j < vec_special_net_line[i].ViaMetal.size();j++)
+                {
+                    if (vec_special_net_line[i].ViaMetal[j].compare(vec_special_net_line[i].MetalName)!=0)
+                    {
+                        Psedo.MetalName = vec_special_net_line[i].ViaMetal[j];
+                        vec_special_net_line.push_back(Psedo);
+                    }
+                }
+            }
+        }
+        for (int i = 0 ; i < vec_special_net_line.size();i++)
+        {
+            if ( vec_special_net_line[i].Width == 0)
+                vec_special_net_line[i].isPsedoLine = 1 ;
+        }
+        //for (int i = 0 ; i < vec_special_net_line.size();i++)
+        //{
+        //cout<< vec_special_net_line[i]<<" "<<vec_special_net_line[i].MetalName<<endl;
+        //}
         vector<Line> List ;
         startLine.isTraversal = true ;
-        Stack.push(startLine);
         map < string ,vector<Line> > BlockPinToOrderLine;
-        
-        cout << "this is start    line : "<<startLine<<endl ;
-        
-        for (int i = 0 ; i < terminalLine.size();i++)
-        {
-            cout<<  "this is terminal line : "<<terminalLine[i]<<endl;
-        }
-        //while (Stack.size() != 0)
+        //for(int i = 0 ; i < vec_special_net_line.size();i++)
         //{
-            //cout<<Stack.top()<<endl;
-            //Stack.top().isTraversal = 1 ;
-            //bool checkAllNoCross = 0 ;
-            //for (int i = 0 ; i < vec_special_net_line.size(); i++ )
-            //{
-                //if (vec_special_net_line[i].isTraversal == true )
-                    //continue;
-                //if (myHelper.isCross(Stack.top(),vec_special_net_line[i]))
-                //{
-                    //checkAllNoCross = 1 ;
-                    //Stack.push(vec_special_net_line[i]);
-                    //break;
-                //}
-            //}
-            //if (checkAllNoCross == 0 )
-            //{
-                //Stack.pop();
-            //}
+        //cout<<vec_special_net_line[i]<<" "<<vec_special_net_line[i].MetalName<<endl;
         //}
-        
+        //cout << "this is start    line : "<<startLine<<endl ;
+
+        //for (int i = 0 ; i < terminalLine.size();i++)
+        //{
+        //cout<<  "this is terminal line : "<<terminalLine[i]<<endl;
+        //}
+        DFS(vec_special_net_line ,startLine); 
     }
+}
+void PDN::DFS( vector<Line>&vec_special_net_line , Line & start)
+{
+    PDNHelper myHelper ; 
+    stack <Line> Stack;
+    Stack.push(start);
+    for (int i = 0 ; i < vec_special_net_line.size();i++)
+    {
+        if (start==vec_special_net_line[i])
+            vec_special_net_line[i].isTraversal = 1;
+        if (vec_special_net_line[i].MetalName[0]!='M')
+            vec_special_net_line[i].isTraversal = 1; 
+    }
+    while (Stack.size() != 0)
+    {  
+        cout << Stack.top() <<" is top "<<Stack.top().MetalName<<endl;
+        bool checkAllNoCross = 0 ;
+        //via find via ( first first )
+        bool flag = 0 ;
+        if(Stack.top().isPsedoLine)
+        {
+            for (int i = 0 ; i < vec_special_net_line.size(); i++ )
+            {
+                if (vec_special_net_line[i] == Stack.top() && vec_special_net_line[i].MetalName.compare(Stack.top().MetalName)==0 )
+                    continue;
+                if (vec_special_net_line[i].isTraversal == true)
+                    continue;
+                if (( (Stack.top().pt1 == vec_special_net_line[i].pt1) && (Stack.top().pt2 == vec_special_net_line[i].pt2) )&& (vec_special_net_line[i].MetalName[0]=='M') ) // via find via (first first) 
+                {
+                    checkAllNoCross = 1 ;
+                    vec_special_net_line[i].isTraversal = 1 ;
+                    Stack.push(vec_special_net_line[i]);
+                    flag = 1 ;
+                    break;
+                }
+            }
+            if (flag)
+                continue;
+            for (int i = 0 ; i < vec_special_net_line.size(); i++ ) //via find wire (last)
+            {
+                if (vec_special_net_line[i] == Stack.top() && vec_special_net_line[i].MetalName.compare(Stack.top().MetalName)==0 )
+                    continue;
+                if (vec_special_net_line[i].isTraversal == true)
+                    continue;
+                if (myHelper.isCross(Stack.top(),vec_special_net_line[i])&& Stack.top().MetalName.compare(vec_special_net_line[i].MetalName)==0)//find line 
+                {
+                    if (vec_special_net_line[i].isTraversal == true )
+                        continue;
+                    checkAllNoCross = 1 ;
+                    vec_special_net_line[i].isTraversal = 1 ;
+                    Stack.push(vec_special_net_line[i]);
+                    break;
+                }
+            }
+        }
+        else 
+        {
+            for (int i = 0 ; i < vec_special_net_line.size(); i++ ) // wire find via
+            {
+                if (vec_special_net_line[i] == Stack.top() && vec_special_net_line[i].MetalName.compare(Stack.top().MetalName)==0 )
+                        continue;
+                if (vec_special_net_line[i].isTraversal == true)
+                        continue;
+                if(vec_special_net_line[i].isPsedoLine)
+                {
+                    if (myHelper.isCross(Stack.top(),vec_special_net_line[i])&& Stack.top().MetalName.compare(vec_special_net_line[i].MetalName)==0)//find line 
+                    {
+                        if (vec_special_net_line[i].isTraversal == true )
+                            continue;
+                        checkAllNoCross = 1 ;
+                        vec_special_net_line[i].isTraversal = 1 ;
+                        Stack.push(vec_special_net_line[i]);
+                        flag =1 ;
+                        break;
+                    }
+                }
+            }
+            if(flag)
+                continue;
+            for (int i = 0 ; i < vec_special_net_line.size(); i++ ) // wire find wire (last)
+            {
+                if (vec_special_net_line[i] == Stack.top() && vec_special_net_line[i].MetalName.compare(Stack.top().MetalName)==0 )
+                    continue;
+                if (vec_special_net_line[i].isTraversal == true)
+                    continue;
+                if (myHelper.isCross(Stack.top(),vec_special_net_line[i])&& Stack.top().MetalName.compare(vec_special_net_line[i].MetalName)==0)//find line 
+                {
+                    if (vec_special_net_line[i].isTraversal == true )
+                        continue;
+                    checkAllNoCross = 1 ;
+                    vec_special_net_line[i].isTraversal = 1 ;
+                    Stack.push(vec_special_net_line[i]);
+                    break;
+                }
+            }
+            //for (int j = 0 ; j < vec_special_net_line.size();j++) //wire find via (first)
+            //{
+            //if (vec_special_net_line[j] == Stack.top() && vec_special_net_line[j].MetalName == Stack.top().MetalName  )
+            //continue;
+            //if (vec_special_net_line[j].isTraversal == true)
+            //continue;
+            //if (myHelper.isCross(Stack.top(),vec_special_net_line[j])&&Stack.top().MetalName.compare(vec_special_net_line[j].MetalName)==0 )
+            //{
+            //checkAllNoCross = 1 ;
+            //vec_special_net_line[j].isTraversal = 1 ;
+            //Stack.push(vec_special_net_line[j]);
+            //break;
+            //}
+            //}
+        }
+        if (checkAllNoCross == 0 )
+                Stack.pop();
+    }    
 }
 
 
