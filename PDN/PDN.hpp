@@ -17,6 +17,45 @@
 #include "PDNHelper.hpp"
 #include <set>
 using namespace std ;
+struct MyComparator
+{
+    bool operator()(const Line & left , const Line & right) const
+    {
+        if ( left.pt1.x > right.pt1.x )
+            return true;
+        else if ( left.pt1.x < right.pt1.x )
+            return false;
+        else 
+        {
+            if (left.pt1.y > right.pt1.y)
+                return true ;
+            else if (left.pt1.y < right.pt1.y)
+                return false;
+            else 
+            {
+                if (left.pt2.x > right.pt2.x)
+                    return true;
+                else if (left.pt2.x < right.pt2.x)
+                    return false;
+                else 
+                {
+                    if (left.pt2.y > left.pt2.y)
+                        return true;
+                    else if (left.pt2.y < left.pt2.y)
+                        return false;
+                    else 
+                    {
+                        if(left.MetalName.compare(right.MetalName)!=0)
+                            return true;
+                        else 
+                            return false;
+                    }
+                }
+            }
+        }
+    }
+}; 
+
 
 class PDN
 {

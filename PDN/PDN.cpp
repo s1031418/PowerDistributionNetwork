@@ -226,9 +226,9 @@ vector < vector <Line> > PDN::DFS( vector<Line>&vec_special_net_line , Line & st
             for (int i = 0 ; i < vec_special_net_line.size(); i++ ) // wire find via
             {
                 if (vec_special_net_line[i] == Stack.top() && vec_special_net_line[i].MetalName.compare(Stack.top().MetalName)==0 )
-                        continue;
+                    continue;
                 if (vec_special_net_line[i].isTraversal == true)
-                        continue;
+                    continue;
                 if(vec_special_net_line[i].isPsedoLine)
                 {
                     if (myHelper.isCross(Stack.top(),vec_special_net_line[i])&& Stack.top().MetalName.compare(vec_special_net_line[i].MetalName)==0)//find line 
@@ -266,8 +266,8 @@ vector < vector <Line> > PDN::DFS( vector<Line>&vec_special_net_line , Line & st
         }
         if (checkAllNoCross == 0 )
         {
-                tmp_vec.pop_back();
-                Stack.pop();
+            tmp_vec.pop_back();
+            Stack.pop();
         }
     }    
     return Return_vec;
