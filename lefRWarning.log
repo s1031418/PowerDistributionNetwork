@@ -1,8 +1,0 @@
-Warnings from file: TestCase/2017/case1/blocks.lef
-
-WARNING (LEFPARS-2003): BUSBITCHARS is a required statement on LEF file with version 5.5 and earlier.
-Without BUSBITCHARS defined, the LEF file is technically incorrect.
-Refer the LEF/DEF 5.5 or earlier Language Referece manual on how to define this statement. See file TestCase/2017/case1/blocks.lef at line 366
-WARNING (LEFPARS-2004): DIVIDERCHAR is a required statementon LEF file with version 5.5 and earlier.
-Without DIVIDECHAR defined, the LEF file is technically incorrect.
-Refer the LEF/DEF 5.5 or earlier Language Referece manual on how to define this statement. See file TestCase/2017/case1/blocks.lef at line 366
