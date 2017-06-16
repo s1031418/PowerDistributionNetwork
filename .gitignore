@@ -65,3 +65,7 @@
 
 .DS_Store
 *.swp
+
+
+# LOG
+.log
