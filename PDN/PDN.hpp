@@ -24,7 +24,7 @@ public:
     PDN();
     ~PDN();
     map <  string , map < string  , vector <Line> > >  List;
-    void  DFS( vector<Line>& vec_special_net_line , Line& line ) ;
+    vector< vector <Line> >  DFS( vector<Line>& vec_special_net_line , Line& line , vector <Line> & terminals ) ;
 private:
 };
 

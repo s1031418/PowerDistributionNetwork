@@ -143,14 +143,28 @@ PDN::PDN()
         //{
         //cout<<  "this is terminal line : "<<terminalLine[i]<<endl;
         //}
-        DFS(vec_special_net_line ,startLine); 
+        vector< vector <Line> > Ans;
+
+        Ans = DFS(vec_special_net_line ,startLine,terminalLine); 
+        cout<<"---------------"<<endl;
+        for(int i = 0 ; i < Ans.size();i++ )
+        {
+            for(int j = 0 ; j < Ans[i].size();j++)
+            {
+                cout << Ans[i][j]<<endl;
+            }
+            cout<<"---------------"<<endl;
+        }
     }
 }
-void PDN::DFS( vector<Line>&vec_special_net_line , Line & start)
+vector < vector <Line> > PDN::DFS( vector<Line>&vec_special_net_line , Line & start , vector<Line> & terminals )
 {
     PDNHelper myHelper ; 
     stack <Line> Stack;
     Stack.push(start);
+    vector<Line>tmp_vec;
+    tmp_vec.push_back(start);
+    vector<vector < Line > >Return_vec;
     for (int i = 0 ; i < vec_special_net_line.size();i++)
     {
         if (start==vec_special_net_line[i])
@@ -159,7 +173,12 @@ void PDN::DFS( vector<Line>&vec_special_net_line , Line & start)
             vec_special_net_line[i].isTraversal = 1; 
     }
     while (Stack.size() != 0)
-    {  
+    {
+        for (int i = 0 ; i < terminals.size();i++)
+        {
+            if(Stack.top() == terminals[i] )
+                Return_vec.push_back(tmp_vec);
+        }
         cout << Stack.top() <<" is top "<<Stack.top().MetalName<<endl;
         bool checkAllNoCross = 0 ;
         //via find via ( first first )
@@ -177,6 +196,7 @@ void PDN::DFS( vector<Line>&vec_special_net_line , Line & start)
                     checkAllNoCross = 1 ;
                     vec_special_net_line[i].isTraversal = 1 ;
                     Stack.push(vec_special_net_line[i]);
+                    tmp_vec.push_back(vec_special_net_line[i]);           
                     flag = 1 ;
                     break;
                 }
@@ -196,6 +216,7 @@ void PDN::DFS( vector<Line>&vec_special_net_line , Line & start)
                     checkAllNoCross = 1 ;
                     vec_special_net_line[i].isTraversal = 1 ;
                     Stack.push(vec_special_net_line[i]);
+                    tmp_vec.push_back(vec_special_net_line[i]);           
                     break;
                 }
             }
@@ -217,6 +238,7 @@ void PDN::DFS( vector<Line>&vec_special_net_line , Line & start)
                         checkAllNoCross = 1 ;
                         vec_special_net_line[i].isTraversal = 1 ;
                         Stack.push(vec_special_net_line[i]);
+                        tmp_vec.push_back(vec_special_net_line[i]);           
                         flag =1 ;
                         break;
                     }
@@ -237,27 +259,18 @@ void PDN::DFS( vector<Line>&vec_special_net_line , Line & start)
                     checkAllNoCross = 1 ;
                     vec_special_net_line[i].isTraversal = 1 ;
                     Stack.push(vec_special_net_line[i]);
+                    tmp_vec.push_back(vec_special_net_line[i]);           
                     break;
                 }
             }
-            //for (int j = 0 ; j < vec_special_net_line.size();j++) //wire find via (first)
-            //{
-            //if (vec_special_net_line[j] == Stack.top() && vec_special_net_line[j].MetalName == Stack.top().MetalName  )
-            //continue;
-            //if (vec_special_net_line[j].isTraversal == true)
-            //continue;
-            //if (myHelper.isCross(Stack.top(),vec_special_net_line[j])&&Stack.top().MetalName.compare(vec_special_net_line[j].MetalName)==0 )
-            //{
-            //checkAllNoCross = 1 ;
-            //vec_special_net_line[j].isTraversal = 1 ;
-            //Stack.push(vec_special_net_line[j]);
-            //break;
-            //}
-            //}
         }
         if (checkAllNoCross == 0 )
+        {
+                tmp_vec.pop_back();
                 Stack.pop();
+        }
     }    
+    return Return_vec;
 }
 
 
