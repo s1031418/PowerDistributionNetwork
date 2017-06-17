@@ -54,7 +54,7 @@ PDN::PDN()
         map < Line , myPair > TerimialLineToBlockPinName;
         for ( auto it = SpecialNetsMaps[PinName].DESTINATIONMAPS.begin(); it != SpecialNetsMaps[PinName].DESTINATIONMAPS.end();it = SpecialNetsMaps[PinName].DESTINATIONMAPS.upper_bound(it->first))
         {
-            
+
             vector<Block>nowBlockPin =  myHelper.BlockMaps[it->first]; 
             BlockNameAndBlockPinName.set(it->first ,it->second); 
             for (int i = 0 ; i < nowBlockPin.size();i++ )
@@ -81,7 +81,7 @@ PDN::PDN()
                 }
             }
         }
-    
+
         Line startLine; 
         for (int i = 0 ; i < vec_special_net_line.size();i++)
         {
@@ -119,6 +119,7 @@ PDN::PDN()
             else 
                 vec_special_net_line[i].isPsedoLine = 0 ;
         }
+
         //cout << "this is start    line : "<<startLine<<endl ;
 
         //for (int i = 0 ; i < terminalLine.size();i++)
@@ -143,31 +144,30 @@ PDN::PDN()
             getPartLine =  in_map  [ it -> second];   
             for (int i = 0 ; i < getPartLine.size();i++)
             {
-                cout<< getPartLine[i] << " "<<getPartLine[i].isPsedoLine <<" "<<getPartLine[i].MetalName<<endl;
-                if ( getPartLine[i].Width == 0)
-                    getPartLine[i].isPsedoLine = 1 ;
-                else 
-                    getPartLine[i].isPsedoLine = 0 ;
+                //if ( getPartLine[i].Width == 0)
+                    //getPartLine[i].isPsedoLine = 1 ;
+                //else 
+                    //getPartLine[i].isPsedoLine = 0 ;
             }  
             //for(int i = 0 ; i < getPartLine.size();i++)
             //{
-                //if (getPartLine[i].isPsedoLine)
-                //{
-                    //if (!getPartLine[i-1].isPsedoLine&&!getPartLine[i+1].isPsedoLine)
-                    //{
-                        //getPartLine.erase(getPartLine.begin()+i);
-                    //}
-                //}
+            //if (getPartLine[i].isPsedoLine)
+            //{
+            //if (!getPartLine[i-1].isPsedoLine&&!getPartLine[i+1].isPsedoLine)
+            //{
+            //getPartLine.erase(getPartLine.begin()+i);
+            //}
+            //}
             //}
             for(int i = 0 ; i < getPartLine.size();i++)
             {
-                cout<< getPartLine[i]<<" is :  "<<getPartLine[i].isPsedoLine <<endl;
+                cout<< getPartLine[i]<<endl;
             }
             cout<<endl;
         }
     }
 }
-vector < vector <Line> > PDN::DFS( vector<Line>&vec_special_net_line , Line & start , vector<Line> & terminals )
+vector < vector <Line> > PDN::DFS( vector<Line>&vec_special_net_line , Line & start , vector<Line> & terminals ) 
 {
     PDNHelper myHelper ; 
     stack <Line> Stack;
