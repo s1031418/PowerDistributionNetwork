@@ -11,6 +11,7 @@
 #include "../Parsers/lefrw.h"
 
 
+
 PDN::PDN()
 {
     PDNHelper myHelper;
@@ -49,12 +50,13 @@ PDN::PDN()
         getPowerPinRegion = myHelper.getPowerPinCoordinate(PinMaps[PinName].STARTPOINT.x,PinMaps[PinName].STARTPOINT.y , PinMaps[PinName].RELATIVE_POINT1, PinMaps[PinName].RELATIVE_POINT2 ,PinMaps[PinName].ORIENT);
         pair < Point <int> ,Point<int> > getBlockPinRegion;
         vector<Line> terminalLine;
-        map < Line, pair<string , string> > TerimialLineToBlockPinName;
-        pair<string , string > BlockNameAndBlockPinName;
+        myPair BlockNameAndBlockPinName;
+        map < Line , myPair > TerimialLineToBlockPinName;
         for ( auto it = SpecialNetsMaps[PinName].DESTINATIONMAPS.begin(); it != SpecialNetsMaps[PinName].DESTINATIONMAPS.end();it = SpecialNetsMaps[PinName].DESTINATIONMAPS.upper_bound(it->first))
         {
-            vector<Block>nowBlockPin =  myHelper.BlockMaps[it->first];
-            BlockNameAndBlockPinName = make_pair(it->first ,it->second); 
+            
+            vector<Block>nowBlockPin =  myHelper.BlockMaps[it->first]; 
+            BlockNameAndBlockPinName.set(it->first ,it->second); 
             for (int i = 0 ; i < nowBlockPin.size();i++ )
             {
                 getBlockPinRegion.first = nowBlockPin[i].LeftDown;
@@ -69,9 +71,9 @@ PDN::PDN()
                             {
                                 if(myHelper.isCrossWithCoordinate(vec_special_net_line[k],getBlockPinRegion))
                                 {
-                                    terminalLine.push_back(vec_special_net_line[k]);
-                                    TerimialLineToBlockPinName[ vec_special_net_line[k] ] = BlockNameAndBlockPinName;
-                                    //TerimialLineToBlockPinName[ vec_special_net_line[k] ] = BlockNameAndBlockPinName ; 
+                                    terminalLine.push_back(vec_special_net_line[k]); 
+                                    TerimialLineToBlockPinName.insert(make_pair(vec_special_net_line[k],BlockNameAndBlockPinName));
+//                                    TerimialLineToBlockPinName[ vec_special_net_line[k] ] = BlockNameAndBlockPinName;
                                 }
                             }
                         }
@@ -114,6 +116,8 @@ PDN::PDN()
         {
             if ( vec_special_net_line[i].Width == 0)
                 vec_special_net_line[i].isPsedoLine = 1 ;
+            else 
+                vec_special_net_line[i].isPsedoLine = 0 ;
         }
         //cout << "this is start    line : "<<startLine<<endl ;
 
@@ -135,6 +139,11 @@ PDN::PDN()
      //       cout <<terminalLine[i] <<" "<< TerimialLineToBlockPinName[ terminalLine[i] ].first<<" "<< TerimialLineToBlockPinName[ terminalLine[i]].second<<endl;
 
         Ans = DFS(vec_special_net_line ,startLine,terminalLine); 
+        for (int i = 0 ; i < Ans.size(); i++)
+        {
+            for(int j = 0 ; j < Ans[i].size();j++)
+                cout<<Ans[i][j]<<" "<<Ans[i][j].isPsedoLine<<endl;
+        }
         //cout<<"---------------"<<endl;
         map <string , vector<Line> > strToVec;
         for(int i = 0 ; i < Ans.size();i++ )
@@ -149,8 +158,28 @@ PDN::PDN()
             cout<< it->first <<" "<<it->second<<endl;
             in_map=   ADJ_List [ it -> first ];
             getPartLine =  in_map  [ it -> second];   
+            for (int i = 0 ; i < getPartLine.size();i++)
+            {
+                cout<< getPartLine[i] << " "<<getPartLine[i].isPsedoLine<<endl;
+                if ( getPartLine[i].Width == 0)
+                    getPartLine[i].isPsedoLine = 1 ;
+                else 
+                    getPartLine[i].isPsedoLine = 0 ;
+            }  
             for(int i = 0 ; i < getPartLine.size();i++)
-                cout<<getPartLine[i]<<endl;
+            {
+                if (getPartLine[i].isPsedoLine)
+                {
+                    if (!getPartLine[i-1].isPsedoLine&&!getPartLine[i+1].isPsedoLine)
+                    {
+                        getPartLine.erase(getPartLine.begin()+i);
+                    }
+                }
+            }
+            for(int i = 0 ; i < getPartLine.size();i++)
+            {
+                cout<< getPartLine[i]<<" is :  "<<getPartLine[i].Width <<endl;
+            }
             cout<<endl;
         }
     }
