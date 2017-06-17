@@ -37,34 +37,24 @@ PDN::PDN()
                 else 
                     line.isPsedoLine = false ;
                 if (line.isPsedoLine)
-                {
-                    for ( auto x : ViaMaps[first->second.VIANAME].InnerMaps)
-                    {
-                        line.ViaMetal.push_back(x.first);
-                    }
-                }
+                    for ( auto it = ViaMaps[first->second.VIANAME].InnerMaps.begin(); it != ViaMaps[first->second.VIANAME].InnerMaps.end(); ++it)
+                        line.ViaMetal.push_back(it->first);
                 vec_special_net_line.push_back(line);
                 first ++ ;
             }
 
         }
-        //for(int i = 0 ; i < vec_special_net_line.size();i++)
-        //cout<<"line : "<<vec_special_net_line[i]<<endl;
-        vector < Line >OrderLine;
         //get Which is Start Line 
         pair < Point <int> ,Point<int> > getPowerPinRegion;
         getPowerPinRegion = myHelper.getPowerPinCoordinate(PinMaps[PinName].STARTPOINT.x,PinMaps[PinName].STARTPOINT.y , PinMaps[PinName].RELATIVE_POINT1, PinMaps[PinName].RELATIVE_POINT2 ,PinMaps[PinName].ORIENT);
         pair < Point <int> ,Point<int> > getBlockPinRegion;
         vector<Line> terminalLine;
-        //map < Line,map <string ,string > > TerimialLineToBlockPinName;
-        //map < Line,string > StartLineToPowerPinName;
-        map < string , string > BlockNameAndBlockPinName;
-        map < string , string > BlockNameAndPinName;
+        map < Line, pair<string , string> > TerimialLineToBlockPinName;
+        pair<string , string > BlockNameAndBlockPinName;
         for ( auto it = SpecialNetsMaps[PinName].DESTINATIONMAPS.begin(); it != SpecialNetsMaps[PinName].DESTINATIONMAPS.end();it = SpecialNetsMaps[PinName].DESTINATIONMAPS.upper_bound(it->first))
         {
             vector<Block>nowBlockPin =  myHelper.BlockMaps[it->first];
-            BlockNameAndBlockPinName[ it->first ] = it->second;
-            BlockNameAndPinName[ it->first ] = PinName ;
+            BlockNameAndBlockPinName = make_pair(it->first ,it->second); 
             for (int i = 0 ; i < nowBlockPin.size();i++ )
             {
                 getBlockPinRegion.first = nowBlockPin[i].LeftDown;
@@ -80,6 +70,7 @@ PDN::PDN()
                                 if(myHelper.isCrossWithCoordinate(vec_special_net_line[k],getBlockPinRegion))
                                 {
                                     terminalLine.push_back(vec_special_net_line[k]);
+                                    TerimialLineToBlockPinName[ vec_special_net_line[k] ] = BlockNameAndBlockPinName;
                                     //TerimialLineToBlockPinName[ vec_special_net_line[k] ] = BlockNameAndBlockPinName ; 
                                 }
                             }
@@ -88,7 +79,7 @@ PDN::PDN()
                 }
             }
         }
-
+    
         Line startLine; 
         for (int i = 0 ; i < vec_special_net_line.size();i++)
         {
@@ -97,8 +88,6 @@ PDN::PDN()
                 if ( myHelper.isCrossWithCoordinate( vec_special_net_line[i] , getPowerPinRegion ) )  
                 {
                     startLine = vec_special_net_line[i];
-                    OrderLine.push_back(startLine);
-                    //StartLineToPowerPinName[vec_special_net_line[i]] = PinName ;
                     break;
                 }
             }
@@ -126,17 +115,6 @@ PDN::PDN()
             if ( vec_special_net_line[i].Width == 0)
                 vec_special_net_line[i].isPsedoLine = 1 ;
         }
-        //for (int i = 0 ; i < vec_special_net_line.size();i++)
-        //{
-        //cout<< vec_special_net_line[i]<<" "<<vec_special_net_line[i].MetalName<<endl;
-        //}
-        vector<Line> List ;
-        startLine.isTraversal = true ;
-        map < string ,vector<Line> > BlockPinToOrderLine;
-        //for(int i = 0 ; i < vec_special_net_line.size();i++)
-        //{
-        //cout<<vec_special_net_line[i]<<" "<<vec_special_net_line[i].MetalName<<endl;
-        //}
         //cout << "this is start    line : "<<startLine<<endl ;
 
         //for (int i = 0 ; i < terminalLine.size();i++)
@@ -144,42 +122,37 @@ PDN::PDN()
         //cout<<  "this is terminal line : "<<terminalLine[i]<<endl;
         //}
         vector< vector <Line> > Ans;
-        map < Line , string > d;
-        for (int i = 0 ; i < vec_special_net_line.size();i++)
-        {
-            d [ vec_special_net_line[i]  ] = vec_special_net_line[i].MetalName ;
-        }
-        for ( int i = 0 ; i < vec_special_net_line.size() ; i++)
-        {
-            cout<<vec_special_net_line[i]<<" "<<vec_special_net_line[i].MetalName<<endl;
-        }
-        for (int i = 0 ; i < vec_special_net_line.size();i++)
-        {
-            long long int sum = 0 ;
-            for(int j = 0 ; j < vec_special_net_line[i].MetalName.size() ; j++)
-            {
-                sum += int(vec_special_net_line[i].MetalName[j]) * pow(26,j);
-            }
-            sum += vec_special_net_line[i].pt1.x;
-            sum += vec_special_net_line[i].pt1.y;
-            sum += vec_special_net_line[i].pt2.x;
-            sum += vec_special_net_line[i].pt2.y;
-            cout<<vec_special_net_line[i]<<" "<<d[vec_special_net_line[i]]<<" "<<sum<<endl;
-        }
-        //for ( auto x : d )
+        //for ( int i = 0 ; i < vec_special_net_line.size() ; i++)
         //{
-            //cout << x.first << " " << x.second<<endl;
+            //cout<<vec_special_net_line[i]<<" "<<vec_special_net_line[i].MetalName<<endl;
         //}
+        //for (int i = 0 ; i < vec_special_net_line.size();i++)
+        //{
+            //cout<<vec_special_net_line[i]<<" "<<d[vec_special_net_line[i]]<<endl;
+        //}
+
+        //for (int i = 0  ; i < terminalLine.size();i++)
+     //       cout <<terminalLine[i] <<" "<< TerimialLineToBlockPinName[ terminalLine[i] ].first<<" "<< TerimialLineToBlockPinName[ terminalLine[i]].second<<endl;
+
         Ans = DFS(vec_special_net_line ,startLine,terminalLine); 
         //cout<<"---------------"<<endl;
-        //for(int i = 0 ; i < Ans.size();i++ )
-        //{
-            //for(int j = 0 ; j < Ans[i].size();j++)
-            //{
-                //cout << Ans[i][j]<<endl;
-            //}
-            //cout<<"---------------"<<endl;
-        //}
+        map <string , vector<Line> > strToVec;
+        for(int i = 0 ; i < Ans.size();i++ )
+        {
+            strToVec[TerimialLineToBlockPinName[ Ans[i].back() ].second ] = Ans[i];   
+            ADJ_List [ TerimialLineToBlockPinName  [ Ans[i].back() ].first  ] = strToVec;
+        }
+        map <string , vector<Line> > in_map;
+        vector <Line> getPartLine;
+        for ( auto it = SpecialNetsMaps[PinName].DESTINATIONMAPS.begin(); it != SpecialNetsMaps[PinName].DESTINATIONMAPS.end();it = SpecialNetsMaps[PinName].DESTINATIONMAPS.upper_bound(it->first))
+        {
+            cout<< it->first <<" "<<it->second<<endl;
+            in_map=   ADJ_List [ it -> first ];
+            getPartLine =  in_map  [ it -> second];   
+            for(int i = 0 ; i < getPartLine.size();i++)
+                cout<<getPartLine[i]<<endl;
+            cout<<endl;
+        }
     }
 }
 vector < vector <Line> > PDN::DFS( vector<Line>&vec_special_net_line , Line & start , vector<Line> & terminals )

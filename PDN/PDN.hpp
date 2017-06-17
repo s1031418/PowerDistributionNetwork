@@ -8,7 +8,7 @@
 
 #ifndef PDN_hpp
 #define PDN_hpp
-
+#include <utility>   
 #include <stdio.h>
 #include <vector>
 #include <string>
@@ -24,7 +24,7 @@ class PDN
     public:
         PDN();
         ~PDN();
-        map <  string , map < string  , vector <Line> > >  List;
+        map <  string , map < string  , vector <Line> > >  ADJ_List;
         vector< vector <Line> >  DFS( vector<Line>& vec_special_net_line , Line& line , vector <Line> & terminals ) ;
     private:
 };
