@@ -73,7 +73,7 @@ PDN::PDN()
                                 {
                                     terminalLine.push_back(vec_special_net_line[k]); 
                                     TerimialLineToBlockPinName.insert(make_pair(vec_special_net_line[k],BlockNameAndBlockPinName));
-//                                    TerimialLineToBlockPinName[ vec_special_net_line[k] ] = BlockNameAndBlockPinName;
+                                    //TerimialLineToBlockPinName[ vec_special_net_line[k] ] = BlockNameAndBlockPinName;
                                 }
                             }
                         }
@@ -126,24 +126,7 @@ PDN::PDN()
         //cout<<  "this is terminal line : "<<terminalLine[i]<<endl;
         //}
         vector< vector <Line> > Ans;
-        //for ( int i = 0 ; i < vec_special_net_line.size() ; i++)
-        //{
-            //cout<<vec_special_net_line[i]<<" "<<vec_special_net_line[i].MetalName<<endl;
-        //}
-        //for (int i = 0 ; i < vec_special_net_line.size();i++)
-        //{
-            //cout<<vec_special_net_line[i]<<" "<<d[vec_special_net_line[i]]<<endl;
-        //}
-
-        //for (int i = 0  ; i < terminalLine.size();i++)
-     //       cout <<terminalLine[i] <<" "<< TerimialLineToBlockPinName[ terminalLine[i] ].first<<" "<< TerimialLineToBlockPinName[ terminalLine[i]].second<<endl;
-
-        Ans = DFS(vec_special_net_line ,startLine,terminalLine); 
-        for (int i = 0 ; i < Ans.size(); i++)
-        {
-            for(int j = 0 ; j < Ans[i].size();j++)
-                cout<<Ans[i][j]<<" "<<Ans[i][j].isPsedoLine<<endl;
-        }
+        Ans= DFS(vec_special_net_line,startLine,terminalLine);
         //cout<<"---------------"<<endl;
         map <string , vector<Line> > strToVec;
         for(int i = 0 ; i < Ans.size();i++ )
@@ -160,25 +143,25 @@ PDN::PDN()
             getPartLine =  in_map  [ it -> second];   
             for (int i = 0 ; i < getPartLine.size();i++)
             {
-                cout<< getPartLine[i] << " "<<getPartLine[i].isPsedoLine<<endl;
+                cout<< getPartLine[i] << " "<<getPartLine[i].isPsedoLine <<" "<<getPartLine[i].MetalName<<endl;
                 if ( getPartLine[i].Width == 0)
                     getPartLine[i].isPsedoLine = 1 ;
                 else 
                     getPartLine[i].isPsedoLine = 0 ;
             }  
+            //for(int i = 0 ; i < getPartLine.size();i++)
+            //{
+                //if (getPartLine[i].isPsedoLine)
+                //{
+                    //if (!getPartLine[i-1].isPsedoLine&&!getPartLine[i+1].isPsedoLine)
+                    //{
+                        //getPartLine.erase(getPartLine.begin()+i);
+                    //}
+                //}
+            //}
             for(int i = 0 ; i < getPartLine.size();i++)
             {
-                if (getPartLine[i].isPsedoLine)
-                {
-                    if (!getPartLine[i-1].isPsedoLine&&!getPartLine[i+1].isPsedoLine)
-                    {
-                        getPartLine.erase(getPartLine.begin()+i);
-                    }
-                }
-            }
-            for(int i = 0 ; i < getPartLine.size();i++)
-            {
-                cout<< getPartLine[i]<<" is :  "<<getPartLine[i].Width <<endl;
+                cout<< getPartLine[i]<<" is :  "<<getPartLine[i].isPsedoLine <<endl;
             }
             cout<<endl;
         }
