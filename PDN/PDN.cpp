@@ -56,8 +56,8 @@ PDN::PDN()
         getPowerPinRegion = myHelper.getPowerPinCoordinate(PinMaps[PinName].STARTPOINT.x,PinMaps[PinName].STARTPOINT.y , PinMaps[PinName].RELATIVE_POINT1, PinMaps[PinName].RELATIVE_POINT2 ,PinMaps[PinName].ORIENT);
         pair < Point <int> ,Point<int> > getBlockPinRegion;
         vector<Line> terminalLine;
-        map < Line,map <string ,string > > TerimialLineToBlockPinName;
-        map < Line,string > StartLineToPowerPinName;
+        //map < Line,map <string ,string > > TerimialLineToBlockPinName;
+        //map < Line,string > StartLineToPowerPinName;
         map < string , string > BlockNameAndBlockPinName;
         map < string , string > BlockNameAndPinName;
         for ( auto it = SpecialNetsMaps[PinName].DESTINATIONMAPS.begin(); it != SpecialNetsMaps[PinName].DESTINATIONMAPS.end();it = SpecialNetsMaps[PinName].DESTINATIONMAPS.upper_bound(it->first))
@@ -80,7 +80,7 @@ PDN::PDN()
                                 if(myHelper.isCrossWithCoordinate(vec_special_net_line[k],getBlockPinRegion))
                                 {
                                     terminalLine.push_back(vec_special_net_line[k]);
-                                    TerimialLineToBlockPinName[ vec_special_net_line[k] ] = BlockNameAndBlockPinName ; 
+                                    //TerimialLineToBlockPinName[ vec_special_net_line[k] ] = BlockNameAndBlockPinName ; 
                                 }
                             }
                         }
@@ -98,7 +98,7 @@ PDN::PDN()
                 {
                     startLine = vec_special_net_line[i];
                     OrderLine.push_back(startLine);
-                    StartLineToPowerPinName[vec_special_net_line[i]] = PinName ;
+                    //StartLineToPowerPinName[vec_special_net_line[i]] = PinName ;
                     break;
                 }
             }
@@ -144,17 +144,42 @@ PDN::PDN()
         //cout<<  "this is terminal line : "<<terminalLine[i]<<endl;
         //}
         vector< vector <Line> > Ans;
-
-        Ans = DFS(vec_special_net_line ,startLine,terminalLine); 
-        cout<<"---------------"<<endl;
-        for(int i = 0 ; i < Ans.size();i++ )
+        map < Line , string > d;
+        for (int i = 0 ; i < vec_special_net_line.size();i++)
         {
-            for(int j = 0 ; j < Ans[i].size();j++)
-            {
-                cout << Ans[i][j]<<endl;
-            }
-            cout<<"---------------"<<endl;
+            d [ vec_special_net_line[i]  ] = vec_special_net_line[i].MetalName ;
         }
+        for ( int i = 0 ; i < vec_special_net_line.size() ; i++)
+        {
+            cout<<vec_special_net_line[i]<<" "<<vec_special_net_line[i].MetalName<<endl;
+        }
+        for (int i = 0 ; i < vec_special_net_line.size();i++)
+        {
+            long long int sum = 0 ;
+            for(int j = 0 ; j < vec_special_net_line[i].MetalName.size() ; j++)
+            {
+                sum += int(vec_special_net_line[i].MetalName[j]) * pow(26,j);
+            }
+            sum += vec_special_net_line[i].pt1.x;
+            sum += vec_special_net_line[i].pt1.y;
+            sum += vec_special_net_line[i].pt2.x;
+            sum += vec_special_net_line[i].pt2.y;
+            cout<<vec_special_net_line[i]<<" "<<d[vec_special_net_line[i]]<<" "<<sum<<endl;
+        }
+        //for ( auto x : d )
+        //{
+            //cout << x.first << " " << x.second<<endl;
+        //}
+        Ans = DFS(vec_special_net_line ,startLine,terminalLine); 
+        //cout<<"---------------"<<endl;
+        //for(int i = 0 ; i < Ans.size();i++ )
+        //{
+            //for(int j = 0 ; j < Ans[i].size();j++)
+            //{
+                //cout << Ans[i][j]<<endl;
+            //}
+            //cout<<"---------------"<<endl;
+        //}
     }
 }
 vector < vector <Line> > PDN::DFS( vector<Line>&vec_special_net_line , Line & start , vector<Line> & terminals )
@@ -179,7 +204,7 @@ vector < vector <Line> > PDN::DFS( vector<Line>&vec_special_net_line , Line & st
             if(Stack.top() == terminals[i] )
                 Return_vec.push_back(tmp_vec);
         }
-        cout << Stack.top() <<" is top "<<Stack.top().MetalName<<endl;
+        //cout << Stack.top() <<" is top "<<Stack.top().MetalName<<endl;
         bool checkAllNoCross = 0 ;
         //via find via ( first first )
         bool flag = 0 ;

@@ -13,7 +13,7 @@
 #include <string>
 #include <map>
 #include <vector>
-
+#include <cmath>
 
 
 // A technology LEF file contains all of the LEF technology information for a design,
@@ -182,21 +182,37 @@ public:
     std::string ViaName ;
     inline bool operator< (const Line& right) const
     {
-        // 目前還沒寫
-        return true ;
-//        if( this->pt1.x ==  right.pt1.x &&  this->pt1.y ==  right.pt1.y && this->pt2.x ==  right.pt2.x &&  this->pt2.y ==  right.pt2.y) return  false;
-//        if(this->pt1.x == this->pt2.x && right.pt1.x == right.pt2.x) // vertical
-//        {
-//            return (this->pt1.y <   right.pt2.y);
-//        }
-//        else if (this->pt1.y == this->pt2.y && right.pt1.y == right.pt2.y) // horizontal
-//        {
-//            return (this->pt1.x <   right.pt2.x) ;
-//        }
-//        return true ;
+        long long int leftSum = 0;
+        for (int i  = 0  ; i < this->MetalName.size();i++)
+            leftSum += int(this->MetalName[i]) * pow(26,i);
+        long long int rightSum = 0 ;
+        for (int i  = 0  ; i < right.MetalName.size();i++)
+            rightSum += int(right.MetalName[i]) * pow(26,i);
+        rightSum+= right.pt1.x;
+        rightSum+= right.pt1.y;
+        rightSum+= right.pt2.x;
+        rightSum+= right.pt2.y;
+        leftSum += this->pt1.x;
+        leftSum += this->pt1.y;
+        leftSum += this->pt2.x;
+        leftSum += this->pt2.y;
+        return leftSum < rightSum ; 
+    }
+        //// 目前還沒寫
+        //return true ;
+////        if( this->pt1.x ==  right.pt1.x &&  this->pt1.y ==  right.pt1.y && this->pt2.x ==  right.pt2.x &&  this->pt2.y ==  right.pt2.y) return  false;
+////        if(this->pt1.x == this->pt2.x && right.pt1.x == right.pt2.x) // vertical
+////        {
+////            return (this->pt1.y <   right.pt2.y);
+////        }
+////        else if (this->pt1.y == this->pt2.y && right.pt1.y == right.pt2.y) // horizontal
+////        {
+////            return (this->pt1.x <   right.pt2.x) ;
+////        }
+////        return true ;
 
         
-    }
+    //}
     const Line & operator=(const Line & right  )
     {
         if( this != &right )
