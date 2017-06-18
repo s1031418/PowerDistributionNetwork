@@ -14,6 +14,7 @@
 #include <string>
 #include <list>
 #include "../Parsers/Components.h"
+#include "Converter.hpp"
 #include "PDNHelper.hpp"
 #include <set>
 #include <cmath>
@@ -55,8 +56,9 @@ class PDN
     public:
         PDN();
         ~PDN();
-        map <  string , map < string  , vector <Line> > >  ADJ_List;
+        map < string , map <  string , map < string  , vector <Line> > > >  ADJ_List;
         vector< vector <Line> >  DFS( vector<Line>& vec_special_net_line , Line& line , vector <Line> & terminals ) ;
+        void OPT();
     private:
 };
 

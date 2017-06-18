@@ -17,7 +17,6 @@ PDN::PDN()
     PDNHelper myHelper;
     for ( auto PinName : myHelper.PinNames)
     {
-        cout<<PinName<<endl;
         vector < Line >  vec_special_net_line;
         for ( auto it = SpecialNetsMaps[PinName].NETSMULTIMAPS.begin() ; it != SpecialNetsMaps[PinName].NETSMULTIMAPS.end();it = SpecialNetsMaps[PinName].NETSMULTIMAPS.upper_bound(it->first))
         {
@@ -130,38 +129,57 @@ PDN::PDN()
         Ans= DFS(vec_special_net_line,startLine,terminalLine);
         //cout<<"---------------"<<endl;
         map <string , vector<Line> > strToVec;
+        map <string , map<string , vector<Line> > > sec_in_map;
         for(int i = 0 ; i < Ans.size();i++ )
         {
             strToVec[TerimialLineToBlockPinName[ Ans[i].back() ].second ] = Ans[i];   
-            ADJ_List [ TerimialLineToBlockPinName  [ Ans[i].back() ].first  ] = strToVec;
+            sec_in_map[ TerimialLineToBlockPinName[Ans[i].back()].first ]  = strToVec ;
+            ADJ_List [ PinName ] = sec_in_map ;
         }
-        map <string , vector<Line> > in_map;
-        vector <Line> getPartLine;
-        for ( auto it = SpecialNetsMaps[PinName].DESTINATIONMAPS.begin(); it != SpecialNetsMaps[PinName].DESTINATIONMAPS.end();it = SpecialNetsMaps[PinName].DESTINATIONMAPS.upper_bound(it->first))
-        {
-            cout<< it->first <<" "<<it->second<<endl;
-            in_map=   ADJ_List [ it -> first ];
-            getPartLine =  in_map  [ it -> second];   
-            for (int i = 0 ; i < getPartLine.size();i++)
-            {
-                //if ( getPartLine[i].Width == 0)
-                    //getPartLine[i].isPsedoLine = 1 ;
-                //else 
-                    //getPartLine[i].isPsedoLine = 0 ;
-            }  
+    }
+}
+
+void PDN::OPT (  )
+{
+    ngspice ng;
+    //ng.init("case1");
+    PDNHelper myHelper;
+    //for ( auto PinName : myHelper.PinNames )
+    //{
+      //  ng.printStats( SpecialNetsMaps[PinName].DESTINATIONMAPS );
+    //}
+    //for (int i = 0 ; i < ng.NoPassInfo.size();i++)
+    //{
+
+    //}
+    map <string , map<string , vector<Line> > > sec_in_map;
+    map <string , vector<Line> > third_in_map;
+    vector <Line> getPartLine;
+    //for(int i = 0 ; i < ng.NoPassInfo.size();i++)
+    //{
+            //sec_in_map =   ADJ_List [ ng.NoPassInfo[i][0]  ];
+            //third_in_map  =  sec_in_map  [ ng.NoPassInfo[i][1]]; 
+            //getPartLine = third_in_map [ ng.NoPassInfo[i][2] ];
             //for(int i = 0 ; i < getPartLine.size();i++)
             //{
-            //if (getPartLine[i].isPsedoLine)
-            //{
-            //if (!getPartLine[i-1].isPsedoLine&&!getPartLine[i+1].isPsedoLine)
-            //{
-            //getPartLine.erase(getPartLine.begin()+i);
+                //cout<< getPartLine[i]<<" "<<getPartLine[i].MetalName<<endl;
             //}
-            //}
-            //}
+            //cout<<endl;
+
+    //}
+    cout<<"----------------\n";
+    for ( auto PinName = PinMaps.begin() ; PinName != PinMaps.end() ; ++PinName )
+    {
+        for ( auto it = SpecialNetsMaps[PinName->second.NAME].DESTINATIONMAPS.begin(); it != SpecialNetsMaps[PinName->second.NAME].DESTINATIONMAPS.end();it = SpecialNetsMaps[PinName->second.NAME].DESTINATIONMAPS.upper_bound(it->first))
+        {
+            cout<< it->first <<" "<<it->second<<endl;
+            sec_in_map =   ADJ_List [ PinName->second.NAME ];
+            third_in_map  =  sec_in_map  [ it -> first ]; 
+            getPartLine = third_in_map [it->second];
+            cout<< PinName->second.NAME<<endl; 
             for(int i = 0 ; i < getPartLine.size();i++)
             {
-                cout<< getPartLine[i]<<endl;
+                cout<< getPartLine[i]<<" "<<getPartLine[i].MetalName<<endl;
             }
             cout<<endl;
         }
