@@ -12,7 +12,8 @@
 
 
 
-PDN::PDN()
+PDN::PDN(string str)
+    :WhichCase(str)
 {
     PDNHelper myHelper;
     for ( auto PinName : myHelper.PinNames)
@@ -128,6 +129,13 @@ PDN::PDN()
         vector< vector <Line> > Ans;
         Ans= DFS(vec_special_net_line,startLine,terminalLine);
         //cout<<"---------------"<<endl;
+        //
+        //
+        //for (int i = 0 ; i < Ans.size();i++)
+        //{
+            //for(int j = 0 ;  j<Ans[i].size();j++)
+                //cout<<Ans[i][j]<<endl;
+        //}
         map <string , vector<Line> > strToVec;
         map <string , map<string , vector<Line> > > sec_in_map;
         for(int i = 0 ; i < Ans.size();i++ )
@@ -138,56 +146,58 @@ PDN::PDN()
         }
     }
 }
-
-void PDN::OPT (  )
+void PDN::ToSpecialNetsMaps()
 {
-    ngspice ng;
-    //ng.init("case1");
     PDNHelper myHelper;
-    //for ( auto PinName : myHelper.PinNames )
-    //{
-      //  ng.printStats( SpecialNetsMaps[PinName].DESTINATIONMAPS );
-    //}
-    //for (int i = 0 ; i < ng.NoPassInfo.size();i++)
-    //{
-
-    //}
     map <string , map<string , vector<Line> > > sec_in_map;
     map <string , vector<Line> > third_in_map;
-    vector <Line> getPartLine;
-    //for(int i = 0 ; i < ng.NoPassInfo.size();i++)
-    //{
-            //sec_in_map =   ADJ_List [ ng.NoPassInfo[i][0]  ];
-            //third_in_map  =  sec_in_map  [ ng.NoPassInfo[i][1]]; 
-            //getPartLine = third_in_map [ ng.NoPassInfo[i][2] ];
-            //for(int i = 0 ; i < getPartLine.size();i++)
-            //{
-                //cout<< getPartLine[i]<<" "<<getPartLine[i].MetalName<<endl;
-            //}
-            //cout<<endl;
-
-    //}
-    cout<<"----------------\n";
-    for ( auto PinName = PinMaps.begin() ; PinName != PinMaps.end() ; ++PinName )
+    for ( auto PinName : myHelper.PinNames )
     {
-        for ( auto it = SpecialNetsMaps[PinName->second.NAME].DESTINATIONMAPS.begin(); it != SpecialNetsMaps[PinName->second.NAME].DESTINATIONMAPS.end();it = SpecialNetsMaps[PinName->second.NAME].DESTINATIONMAPS.upper_bound(it->first))
+        sec_in_map = ADJ_List[PinName];
+        for (auto it = sec_in_map.begin();it!=sec_in_map.end();++it)
         {
-            cout<< it->first <<" "<<it->second<<endl;
-            sec_in_map =   ADJ_List [ PinName->second.NAME ];
-            third_in_map  =  sec_in_map  [ it -> first ]; 
-            getPartLine = third_in_map [it->second];
-            cout<< PinName->second.NAME<<endl; 
-            for(int i = 0 ; i < getPartLine.size();i++)
+            third_in_map = it->second;
+            for( auto in_it = third_in_map.begin();in_it!=third_in_map.end();++in_it )
             {
-                cout<< getPartLine[i]<<" "<<getPartLine[i].MetalName<<endl;
+                for(int i = 0 ; i < in_it->second.size();i++)
+                    cout<<in_it->second[i]<<endl;
             }
             cout<<endl;
         }
     }
 }
+
+void PDN::OPT (  )
+{
+    PDNHelper myHelper;
+    
+    Converter con(WhichCase);
+    con.toSpice();
+
+    ngspice ng ;
+    ng.init(WhichCase);
+    ng.printStats(con.DestinationMap);
+
+    map <string , map<string , vector<Line> > > sec_in_map;
+    map <string , vector<Line> > third_in_map;
+    vector<Line> getPartLine ;
+    cout<<"----------------\n";
+    for(int i = 0 ; i < ng.NoPassInfo.size();i++)
+    {
+        cout<<ng.NoPassInfo[i][0]<<" "<<ng.NoPassInfo[i][1]<<" "<<ng.NoPassInfo[i][2]<<endl;
+        sec_in_map = ADJ_List[ ng.NoPassInfo[i][0] ];
+        third_in_map = sec_in_map[ ng.NoPassInfo[i][1]];
+        getPartLine = third_in_map [ ng.NoPassInfo[i][2] ] ;
+        for(int j = 0 ; j < getPartLine.size();j++ )
+        {
+            cout<<getPartLine[j]<<endl;
+        }
+        cout<<"-----------------\n";
+    }
+}
 vector < vector <Line> > PDN::DFS( vector<Line>&vec_special_net_line , Line & start , vector<Line> & terminals ) 
 {
-    PDNHelper myHelper ; 
+    PDNHelper myHelper;
     stack <Line> Stack;
     Stack.push(start);
     vector<Line>tmp_vec;
