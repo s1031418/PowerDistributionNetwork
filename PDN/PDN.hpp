@@ -19,38 +19,6 @@
 #include <set>
 #include <cmath>
 using namespace std ;
-class myPair
-{
-    public:
-    string first;
-    string second;
-    myPair ()
-        :first(),second()
-    {
-    };
-    ~myPair (){}
-    myPair (const string  str1 , const string  str2 )
-    {
-        first = str1;
-        second = str2;
-    };
-
-    myPair (myPair const & cp) 
-        :first(cp.first),second(cp.second)
-    {
-    };
-    myPair operator = ( myPair const &cp  )
-    {
-        first = cp.first;
-        second = cp.second;
-    };
-    void set (string str1,string str2)
-    {
-        first = str1;
-        second = str2;
-    }   
-};
-
 class PDN
 {
     public:

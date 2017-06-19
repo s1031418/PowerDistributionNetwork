@@ -395,7 +395,10 @@ vector <Nets*> PDN::DFS ( vector<Nets*>&lineGroup , Nets* &start  , string block
             Stack.pop();
         }
     }
+    assert(0);
+    return vector <Nets*>() ;
 }
+
 
 PDN::~PDN()
 {
