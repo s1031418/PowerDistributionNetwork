@@ -56,8 +56,8 @@ int main(int argc,  char * argv[])
 //    Graph_SP g ;
 //    g.Demo();
     
-    GlobalRouter gr ;
-    gr.Route();
+    //GlobalRouter gr ;
+    //gr.Route();
 //    int x = 1;
 //    int y = 98;
 //    int z = 2;
@@ -87,7 +87,7 @@ int main(int argc,  char * argv[])
 //     y = one_D / (int)size ;
 //     x = one_D % (int)size ;
 //    cout << "2d:" << x << "," << y << endl;
-    
+   
     
     
 //    gr.Route();
@@ -98,13 +98,13 @@ int main(int argc,  char * argv[])
 //    Debugger db ;
 //    db.printAllSpecialNetMsg(SpecialNetsMaps);
     
-//    for(int i = 0 ; i < 3 ; i++)
-//    {
-//        converter.toLocationFile();
-//        converter.Visualize();
-//        test(2);
-//    }
-//    converter.toOutputDef();
+    //for(int i = 0 ; i < 3 ; i++)
+    //{
+        //converter.toLocationFile();
+       //// converter.Visualize();
+       //// test(2);
+    //}
+    //converter.toOutputDef();
     
     
     

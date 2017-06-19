@@ -2,9 +2,6 @@
 //  PDNHelper.cpp
 //  EDA_Contest2017(PDN)
 //
-//  Created by 吳峻陞 on 20/05/2017.
-//  Copyright © 2017 吳峻陞. All rights reserved.
-//
 #include "PDNHelper.hpp"
 
 
@@ -67,7 +64,7 @@ string PDNHelper::NETSMULTIMAPSToString(multimap<string,Nets> & NETSMULTIMAPS)
             beginning++;
         }
     }
-    line.pop_back();
+ //   line.pop_back();
 //    cout << line << endl;
     return line ;
 }
@@ -325,7 +322,8 @@ bool PDNHelper::isCross(Line line1 , Line line2)
     else
         return false;
 }
-bool PDNHelper::isCrossWithCoordinate ( Line line , pair < Point<int> , Point<int> > pairPoint)
+
+bool PDNHelper::isCrossWithCoordinate ( Line line , pair < Point<int> , Point<int> > & pairPoint)
 {
     if ( line.pt1.x >= pairPoint.first.x && line.pt1.x <= pairPoint.second.x && line.pt1.y >= pairPoint.first.y && line.pt1.y <= pairPoint.second.y )
         return true ;

@@ -48,7 +48,7 @@ public:
     bool isCross(Line line1 , Line line2);
     
     // 給我一條線及左下右上的點判斷是否交叉
-    bool isCrossWithCoordinate(Line line , pair< Point<int> , Point<int> > blockCroordinate) ;
+    bool isCrossWithCoordinate(Line line , pair< Point<int> , Point<int> > & blockCroordinate) ;
 
     //給我兩條線，回傳兩條線的交叉點
     //如果是Pseudo Line，就回傳Psedo Line的中點(VIA中點)

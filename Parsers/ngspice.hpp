@@ -15,7 +15,7 @@
 #include <string>
 #include "InitialFileParser.hpp"
 #include <cstring>
-#include "PDNHelper.hpp"
+#include "../PDN/PDNHelper.hpp"
 #include <map>
 #include <regex.h>
 
@@ -24,8 +24,7 @@ using namespace std;
 class ngspice : public Parsers{
     
     
-public:
-    
+public: 
     ngspice();
     ~ngspice();
     void init(string casename);
