@@ -18,6 +18,7 @@
 #include "lefrw.h"
 #include "defrw.h"
 #include "flute_net.hpp"
+#include "RouterUtil.hpp"
 #include "RouterComponents.hpp"
 
 // User Define Parameters
@@ -34,13 +35,15 @@ public:
     ~GlobalRouter();
     void Route();
     void toGridGraph();
+    
+    
 private:
     // variable:
-    PDNHelper helper ;
-    vector< vector< Grid > > Grids ;
+    RouterUtil RouterHelper; 
+    Graph_SP graph;
     set<int> Vertical ;
     set<int> Horizontal ;
-    Graph_SP graph;
+    vector< vector< Grid > > Grids ;
     
     // key:BlockName , value:那個block的左下及右上座標
     map<string, pair<Point<int>, Point<int>>> BlockMap;
@@ -54,13 +57,9 @@ private:
     void CutByUserDefine();
     
     void initGrids();
-    void initBlockMap();
-    void initGraph_SP();
-    // 第一個為是不是屬於這個Block，第二個這個Block Name
-    pair<bool, string> isBlock(Point<int> LeftDown , Point<int> RightUp);
     
-    // 判斷這個grid是否為block
-    bool isBlock(Grid grid);
+    void initGraph_SP();
+    
     // 轉換2d座標為1d
     int translate2D_1D(int x , int y);
     // 轉換1d座標為2d
