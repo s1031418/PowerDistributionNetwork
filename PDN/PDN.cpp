@@ -12,7 +12,7 @@
 
 
 
-    PDN::PDN(string str)
+PDN::PDN(string str)
 :WhichCase(str)
 {
 }

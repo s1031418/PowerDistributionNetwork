@@ -170,7 +170,10 @@ class Line
         pt2 = Y ;
     };
     ~Line(){};
-
+    Line( Line const & cp) 
+        :pt1(cp.pt1),pt2(cp.pt2),MetalName(cp.MetalName),isPsedoLine(cp.isPsedoLine),ViaName(cp.ViaName),ViaMetal(cp.ViaMetal),Width(cp.Width),isHorizontal(cp.isHorizontal),isTraversal(cp.isTraversal)
+    {
+    }
     Point<int> pt1;
     Point<int> pt2;
     std::string MetalName ;
@@ -250,6 +253,7 @@ const Line & operator=(const Line & right  )
         this->MetalName = right.MetalName ;
         this->Width = right.Width ;
         this->isHorizontal = right.isHorizontal ;
+        this->isPsedoLine = right.isPsedoLine;
     }
     return *this ;
 }

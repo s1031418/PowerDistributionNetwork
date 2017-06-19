@@ -54,11 +54,18 @@ class myPair
 class PDN
 {
     public:
-        PDN();
+        PDN(string str);
         ~PDN();
-        map < string , map <  string , map < string  , vector <Line> > > >  ADJ_List;
-        vector< vector <Line> >  DFS( vector<Line>& vec_special_net_line , Line& line , vector <Line> & terminals ) ;
-        void OPT();
+        string WhichCase; 
+        PDNHelper myHelper;
+        vector <Nets*> DFS ( vector<Nets*>&lineGroup , Nets* &start  , string blockName ,string blockPinName  );
+        //vector< vector <Line> >  DFS( vector<Line>& vec_special_net_line , Line& line , vector <Line> & terminals ) ;
+        vector <vector <string >> getNoPassInfo ();
+        vector <vector <string >> getPassInfo ();
+        void FineTune( Nets* & source , Nets* & target , map<Nets*,bool>&isModify  );
+        void DRC ( vector<Nets*> &lineGroup , map < Nets* , bool >& isModify  );
+        void Optimize();
+        void ToSpecialNetsMaps();
     private:
 };
 
