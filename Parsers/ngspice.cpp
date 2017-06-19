@@ -68,6 +68,8 @@ void ngspice::setCaseName(string name)
 }
 void ngspice::printStats(multimap<string, string> & DetinationMap)
 {
+    vector <string> rowInfo;
+    vector <string> PassrowInfo;
     for( auto it = DetinationMap.begin(), end = DetinationMap.end(); it != end;it = DetinationMap.upper_bound(it->first))
     {
         auto beginning = DetinationMap.lower_bound(it->first);
@@ -87,11 +89,32 @@ void ngspice::printStats(multimap<string, string> & DetinationMap)
             cout << PinName << " "<< BlockName << " " << BlockPinName << " ";
             DropMap.insert(make_pair(make_pair(BlockName, BlockPinName), Drop_percent));
             if(EndVoltage < 0)
+            {
                 cout << "Terminal Point Voltage is negative(NoPass)" << endl ;
+                rowInfo.push_back(PinName);
+                rowInfo.push_back(BlockName);
+                rowInfo.push_back(BlockPinName);
+                NoPassInfo.push_back(rowInfo);
+                rowInfo.resize(0);
+            }
             else if( Drop_percent > Constraint)
+            {
                 cout << "Drop " << Drop_percent << "(%) (NoPass)"<< endl;
+                rowInfo.push_back(PinName);
+                rowInfo.push_back(BlockName);
+                rowInfo.push_back(BlockPinName);
+                NoPassInfo.push_back(rowInfo);
+                rowInfo.resize(0);
+            }
             else
+            {
                 cout << "Drop " << Drop_percent << "(%) (Pass)" << endl;
+                PassrowInfo.push_back(PinName);
+                PassrowInfo.push_back(BlockName);
+                PassrowInfo.push_back(BlockPinName);
+                PassInfo.push_back(PassrowInfo);
+                PassInfo.resize(0);
+            }
             beginning++;
         }
     }

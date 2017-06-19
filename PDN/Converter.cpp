@@ -547,7 +547,7 @@ void Converter::caluMetalUse(map<string , vector<Line>> & lineMap)
             {
                 if( metal.second[j].isPsedoLine ) continue ;
                 // line map 會將同層的金屬當key ，所以進來的一定都是同層的金屬
-                // 假如同層金屬且有交叉，不會是Metal遇到VIA
+                
                 if( myhelper.isCross(metal.second[i], metal.second[j]) )
                 {
                     Point<int> cross = myhelper.getCrossPoint(metal.second[i], metal.second[j]);

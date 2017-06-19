@@ -46,15 +46,15 @@ public:
     void toOutputDef();
     void toOutputFile();
     void Visualize();
+    multimap<string, string> DestinationMap;
 private:
     string CaseName ;
     vector<string> PinNames;
     // key是起點座標 , value:終點座標 一個起點可能有多個終點
-    multimap<string, string> DestinationMap;
+    ngspice ng ;
     vector<Line> ViaTable ;
     // 用來儲存 inputdef 
     vector<string> Data ;
-    ngspice ng ;
     // key值為metal層，value為這層用的金屬面積
     map<string,long double> MetalUsage ;
     

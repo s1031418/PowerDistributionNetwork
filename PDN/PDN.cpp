@@ -12,305 +12,390 @@
 
 
 
-PDN::PDN(string str)
-    :WhichCase(str)
+    PDN::PDN(string str)
+:WhichCase(str)
 {
-    PDNHelper myHelper;
-    for ( auto PinName : myHelper.PinNames)
-    {
-        vector < Line >  vec_special_net_line;
-        for ( auto it = SpecialNetsMaps[PinName].NETSMULTIMAPS.begin() ; it != SpecialNetsMaps[PinName].NETSMULTIMAPS.end();it = SpecialNetsMaps[PinName].NETSMULTIMAPS.upper_bound(it->first))
-        {
-            auto first = SpecialNetsMaps[PinName].NETSMULTIMAPS.lower_bound( it->second.METALNAME);
-            auto last = SpecialNetsMaps[PinName].NETSMULTIMAPS.upper_bound(it->second.METALNAME);
-
-            while (first != last)
-            {
-                Line line(first->second.ABSOLUTE_POINT1,first->second.ABSOLUTE_POINT2) ;
-                line.Width = first->second.ROUNTWIDTH;
-                line.MetalName = first->second.METALNAME;
-                if(myHelper.isHorizontal(line.pt1,line.pt2))
-                    line.isHorizontal = true ;
-                else 
-                    line.isHorizontal = false;
-                if(line.Width==0) // if Via 
-                    line.isPsedoLine =true;
-                else 
-                    line.isPsedoLine = false ;
-                if (line.isPsedoLine)
-                    for ( auto it = ViaMaps[first->second.VIANAME].InnerMaps.begin(); it != ViaMaps[first->second.VIANAME].InnerMaps.end(); ++it)
-                        line.ViaMetal.push_back(it->first);
-                vec_special_net_line.push_back(line);
-                first ++ ;
-            }
-
-        }
-        //get Which is Start Line 
-        pair < Point <int> ,Point<int> > getPowerPinRegion;
-        getPowerPinRegion = myHelper.getPowerPinCoordinate(PinMaps[PinName].STARTPOINT.x,PinMaps[PinName].STARTPOINT.y , PinMaps[PinName].RELATIVE_POINT1, PinMaps[PinName].RELATIVE_POINT2 ,PinMaps[PinName].ORIENT);
-        pair < Point <int> ,Point<int> > getBlockPinRegion;
-        vector<Line> terminalLine;
-        myPair BlockNameAndBlockPinName;
-        map < Line , myPair > TerimialLineToBlockPinName;
-        for ( auto it = SpecialNetsMaps[PinName].DESTINATIONMAPS.begin(); it != SpecialNetsMaps[PinName].DESTINATIONMAPS.end();it = SpecialNetsMaps[PinName].DESTINATIONMAPS.upper_bound(it->first))
-        {
-
-            vector<Block>nowBlockPin =  myHelper.BlockMaps[it->first]; 
-            BlockNameAndBlockPinName.set(it->first ,it->second); 
-            for (int i = 0 ; i < nowBlockPin.size();i++ )
-            {
-                getBlockPinRegion.first = nowBlockPin[i].LeftDown;
-                getBlockPinRegion.second = nowBlockPin[i].RightUp;
-                if (it->second.compare(nowBlockPin[i].BlockPinName) == 0) //check same blockPin
-                {
-                    for(int j = 0 ; j < nowBlockPin[i].Metals.size();j++) //for each blockPin layer 
-                    {
-                        for(int k = 0 ; k < vec_special_net_line.size();k++) //for each now line 
-                        {
-                            if (nowBlockPin[i].Metals[j].compare(vec_special_net_line[k].MetalName)==0)//check same layer 
-                            {
-                                if(myHelper.isCrossWithCoordinate(vec_special_net_line[k],getBlockPinRegion))
-                                {
-                                    terminalLine.push_back(vec_special_net_line[k]); 
-                                    TerimialLineToBlockPinName.insert(make_pair(vec_special_net_line[k],BlockNameAndBlockPinName));
-                                    //TerimialLineToBlockPinName[ vec_special_net_line[k] ] = BlockNameAndBlockPinName;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        Line startLine; 
-        for (int i = 0 ; i < vec_special_net_line.size();i++)
-        {
-            if (vec_special_net_line[i].MetalName.compare(PinMaps[PinName].METALNAME) == 0 ) //check same layer
-            {
-                if ( myHelper.isCrossWithCoordinate( vec_special_net_line[i] , getPowerPinRegion ) )  
-                {
-                    startLine = vec_special_net_line[i];
-                    break;
-                }
-            }
-        }
-        for (int i = 0  ; i < vec_special_net_line.size();i++)
-        {
-            if (vec_special_net_line[i].isPsedoLine)
-            {
-                Line Psedo(vec_special_net_line[i].pt1 , vec_special_net_line[i].pt2);
-                Psedo.ViaName = vec_special_net_line[i].ViaName ;
-                Psedo.Width = vec_special_net_line[i].Width;
-                Psedo.ViaMetal = vec_special_net_line[i].ViaMetal;
-                for ( int j = 0 ; j < vec_special_net_line[i].ViaMetal.size();j++)
-                {
-                    if (vec_special_net_line[i].ViaMetal[j].compare(vec_special_net_line[i].MetalName)!=0)
-                    {
-                        Psedo.MetalName = vec_special_net_line[i].ViaMetal[j];
-                        vec_special_net_line.push_back(Psedo);
-                    }
-                }
-            }
-        }
-        for (int i = 0 ; i < vec_special_net_line.size();i++)
-        {
-            if ( vec_special_net_line[i].Width == 0)
-                vec_special_net_line[i].isPsedoLine = 1 ;
-            else 
-                vec_special_net_line[i].isPsedoLine = 0 ;
-        }
-
-        //cout << "this is start    line : "<<startLine<<endl ;
-
-        //for (int i = 0 ; i < terminalLine.size();i++)
-        //{
-        //cout<<  "this is terminal line : "<<terminalLine[i]<<endl;
-        //}
-        vector< vector <Line> > Ans;
-        Ans= DFS(vec_special_net_line,startLine,terminalLine);
-        //cout<<"---------------"<<endl;
-        //
-        //
-        //for (int i = 0 ; i < Ans.size();i++)
-        //{
-            //for(int j = 0 ;  j<Ans[i].size();j++)
-                //cout<<Ans[i][j]<<endl;
-        //}
-        map <string , vector<Line> > strToVec;
-        map <string , map<string , vector<Line> > > sec_in_map;
-        for(int i = 0 ; i < Ans.size();i++ )
-        {
-            strToVec[TerimialLineToBlockPinName[ Ans[i].back() ].second ] = Ans[i];   
-            sec_in_map[ TerimialLineToBlockPinName[Ans[i].back()].first ]  = strToVec ;
-            ADJ_List [ PinName ] = sec_in_map ;
-        }
-    }
 }
-void PDN::ToSpecialNetsMaps()
+vector <vector <string >> PDN::getNoPassInfo ()
 {
-    PDNHelper myHelper;
-    map <string , map<string , vector<Line> > > sec_in_map;
-    map <string , vector<Line> > third_in_map;
-    for ( auto PinName : myHelper.PinNames )
-    {
-        sec_in_map = ADJ_List[PinName];
-        for (auto it = sec_in_map.begin();it!=sec_in_map.end();++it)
-        {
-            third_in_map = it->second;
-            for( auto in_it = third_in_map.begin();in_it!=third_in_map.end();++in_it )
-            {
-                for(int i = 0 ; i < in_it->second.size();i++)
-                    cout<<in_it->second[i]<<endl;
-            }
-            cout<<endl;
-        }
-    }
-}
-
-void PDN::OPT (  )
-{
-    PDNHelper myHelper;
-    
     Converter con(WhichCase);
     con.toSpice();
-
     ngspice ng ;
     ng.init(WhichCase);
     ng.printStats(con.DestinationMap);
-
-    map <string , map<string , vector<Line> > > sec_in_map;
-    map <string , vector<Line> > third_in_map;
-    vector<Line> getPartLine ;
-    cout<<"----------------\n";
-    for(int i = 0 ; i < ng.NoPassInfo.size();i++)
+    return ng.NoPassInfo;
+}
+vector <vector <string >> PDN::getPassInfo ()
+{
+    Converter con(WhichCase);
+    con.toSpice();
+    ngspice ng ;
+    ng.init(WhichCase);
+    ng.printStats(con.DestinationMap);
+    return ng.PassInfo;
+}
+//for all no pass * 2 and 不重複*到
+void PDN::Optimize()
+{
+    vector< vector <string> > NoPassInfo = getNoPassInfo() ;
+    vector< vector <string> > PassInfo   = getPassInfo() ;
+    //use vector be careful the insert and erase time ;
+    vector < Nets* > lineGroup ;
+    cout<<"This is NoPass : \n";
+    for(int i = 0 ; i < NoPassInfo.size();i++)
     {
-        cout<<ng.NoPassInfo[i][0]<<" "<<ng.NoPassInfo[i][1]<<" "<<ng.NoPassInfo[i][2]<<endl;
-        sec_in_map = ADJ_List[ ng.NoPassInfo[i][0] ];
-        third_in_map = sec_in_map[ ng.NoPassInfo[i][1]];
-        getPartLine = third_in_map [ ng.NoPassInfo[i][2] ] ;
-        for(int j = 0 ; j < getPartLine.size();j++ )
+        cout<<NoPassInfo[i][0]<<" "<<NoPassInfo[i][1]<< " "<<NoPassInfo[i][2]<<endl;
+    }
+    cout<<"---------\n";
+    cout<<"This is Pass : \n";
+    for(int i = 0 ; i < PassInfo.size();i++)
+    {
+        cout<<PassInfo[i][0]<<" "<<PassInfo[i][1]<< " "<<PassInfo[i][2]<<endl;
+    }
+    cout<<"---------\n";
+    map < Nets* , bool > isModify ;
+    // use No Pass PinName to get the Net Infomation no pass = optimize 
+    for(int i =  0 ; i < NoPassInfo.size();i++ ) //NoPassInfo [i][0] = PinName , [i][1] = BlockName , [i][2] = BlockPinName
+    {
+        for ( auto it = SpecialNetsMaps[NoPassInfo[i][0]].NETSMULTIMAPS.begin() ; it != SpecialNetsMaps[NoPassInfo[i][0]].NETSMULTIMAPS.end();it = SpecialNetsMaps[NoPassInfo[i][0]].NETSMULTIMAPS.upper_bound(it->first))
         {
-            cout<<getPartLine[j]<<endl;
+            auto first = SpecialNetsMaps[NoPassInfo[i][0]].NETSMULTIMAPS.lower_bound(it->second.METALNAME);
+            auto last = SpecialNetsMaps[NoPassInfo[i][0]].NETSMULTIMAPS.upper_bound(it->second.METALNAME);
+            while (first != last)
+            {
+                if(first->second.ROUNTWIDTH!=0)
+                {
+                if(myHelper.isHorizontal(first->second.ABSOLUTE_POINT1, first->second.ABSOLUTE_POINT2))
+                {
+                    Point<int> right = ( first->second.ABSOLUTE_POINT1.x > first->second.ABSOLUTE_POINT2.x ) ? first->second.ABSOLUTE_POINT1 : first->second.ABSOLUTE_POINT2 ;
+                    Point<int> left =  ( first->second.ABSOLUTE_POINT1.x < first->second.ABSOLUTE_POINT2.x ) ? first->second.ABSOLUTE_POINT1 : first->second.ABSOLUTE_POINT2 ;
+                    first->second.ABSOLUTE_POINT1 = left ;
+                    first->second.ABSOLUTE_POINT2 = right ;
+                }
+                else
+                {
+                    Point<int> top = (first->second.ABSOLUTE_POINT1.y > first->second.ABSOLUTE_POINT2.y) ? first->second.ABSOLUTE_POINT1 : first->second.ABSOLUTE_POINT2;
+                    Point<int> bottom = (first->second.ABSOLUTE_POINT1.y < first->second.ABSOLUTE_POINT2.y) ? first->second.ABSOLUTE_POINT1 : first->second.ABSOLUTE_POINT2 ;
+                    first->second.ABSOLUTE_POINT2 = top ;
+                    first->second.ABSOLUTE_POINT1 = bottom ;
+                }
+                }
+                Nets *ptr = new Nets ;
+                ptr = & first -> second;
+                lineGroup.push_back ( ptr ) ;
+                first++;
+            }
         }
-        cout<<"-----------------\n";
+        Point <int> tmpPoint;
+        Nets * start = new Nets ; 
+        start = nullptr;
+        for ( int i = 0 ; i < lineGroup.size();i++)
+        {
+            tmpPoint = myHelper.getStartPoint(lineGroup[i]->ABSOLUTE_POINT1 , lineGroup[i]->ABSOLUTE_POINT2);
+            if (tmpPoint.x != -1 && tmpPoint.y != -1)
+                start = lineGroup[i];
+        }
+        vector <Nets*> PinToBlockPinLines ;
+        //for (int i = 0 ; i < lineGroup.size();i++ )
+        //{
+        //cout << lineGroup[i]->ABSOLUTE_POINT1 << " " << lineGroup[i]->ABSOLUTE_POINT2<<endl;
+        //}
+        cout<<"-------------"<<endl;
+        PinToBlockPinLines = DFS ( lineGroup , start, NoPassInfo[i][1] , NoPassInfo[i][2]  );
+        cout <<NoPassInfo[i][0]<<" "<<NoPassInfo[i][1]<<" "<<NoPassInfo[i][2]<<endl;
+        //for (int i = 0  ; i < PinToBlockPinLines.size();i++)
+            //cout << PinToBlockPinLines[i]->ABSOLUTE_POINT1<<" "<<PinToBlockPinLines[i]->ABSOLUTE_POINT2<<endl;
+        //cout<<endl; 
+        for (int i =  0  ; i  < PinToBlockPinLines.size() ; i++ )
+        {
+            if ( isModify [PinToBlockPinLines[i]] == true )
+                continue; 
+            else
+            {
+                PinToBlockPinLines[i]->ROUNTWIDTH *= 2 ; 
+                isModify[ PinToBlockPinLines[i] ] = true ;
+            }
+        }    
+        //for(int i = 0 ; i < PinToBlockPinLines.size();i++)
+            //cout<<PinToBlockPinLines[i]->ABSOLUTE_POINT1<<" "<<PinToBlockPinLines[i]->ABSOLUTE_POINT2<<endl;
+        //cout<<"****\n";
+        DRC(PinToBlockPinLines,isModify);   
+        lineGroup.resize(0);
     }
 }
-vector < vector <Line> > PDN::DFS( vector<Line>&vec_special_net_line , Line & start , vector<Line> & terminals ) 
+void PDN::DRC ( vector<Nets*> &lineGroup , map <Nets*,bool>&isModify )
 {
-    PDNHelper myHelper;
-    stack <Line> Stack;
-    Stack.push(start);
-    vector<Line>tmp_vec;
-    tmp_vec.push_back(start);
-    vector<vector < Line > >Return_vec;
-    for (int i = 0 ; i < vec_special_net_line.size();i++)
+    
+    vector<Nets*>NoViaLineGroup;
+    for(int i = 0  ; i < lineGroup.size();i++)
     {
-        if (start==vec_special_net_line[i])
-            vec_special_net_line[i].isTraversal = 1;
-        if (vec_special_net_line[i].MetalName[0]!='M')
-            vec_special_net_line[i].isTraversal = 1; 
+        if(lineGroup[i]->ROUNTWIDTH!=0)
+            NoViaLineGroup.push_back(lineGroup[i]);
     }
-    while (Stack.size() != 0)
+    for(int i = 0 ; i < NoViaLineGroup.size()-1;i++ )
     {
-        for (int i = 0 ; i < terminals.size();i++)
+        FineTune(NoViaLineGroup[i],NoViaLineGroup[i+1],isModify);
+    }
+}
+void PDN::FineTune( Nets* & source , Nets* & target , map<Nets*,bool>&isModify )
+{
+    //if ( isModify[source] )
+    //{
+    if ( myHelper.isHorizontal( source->ABSOLUTE_POINT1,source->ABSOLUTE_POINT2 ) == true)
+    {
+        int S_LeftX = source->ABSOLUTE_POINT1.x;
+        int S_RightX = source->ABSOLUTE_POINT2.x ;
+        int S_Y = source->ABSOLUTE_POINT1.y; //S_Y = 不變得Y
+        int S_TopY = S_Y + ( source->ROUNTWIDTH/2 );
+        int S_BotY = S_Y - ( source->ROUNTWIDTH/2 );
+        //Target is Vetertical so 不變X
+        int T_X = target->ABSOLUTE_POINT1.x ; 
+        int T_LeftX = T_X - (target->ROUNTWIDTH / 2) ;
+        int T_RightX = T_X + (target->ROUNTWIDTH / 2) ;
+        int T_TopY = target->ABSOLUTE_POINT2.y;
+        int T_BotY = target->ABSOLUTE_POINT1.y;
+        //水平線有六種狀況 垂直也有
+        if ( S_BotY <= T_BotY && S_TopY >= T_BotY && T_LeftX <= S_RightX && T_RightX >= S_RightX && T_TopY >= S_TopY && T_BotY >= S_BotY    ) //右上ok   
         {
-            if(Stack.top() == terminals[i] )
-                Return_vec.push_back(tmp_vec);
+            cout<<"FK!"<<endl;
+            source->ABSOLUTE_POINT2.x = T_RightX ;
+            target->ABSOLUTE_POINT1.y = S_BotY;
         }
-        //cout << Stack.top() <<" is top "<<Stack.top().MetalName<<endl;
-        bool checkAllNoCross = 0 ;
-        //via find via ( first first )
-        bool flag = 0 ;
-        if(Stack.top().isPsedoLine)
+        else if ( S_RightX >= T_LeftX  && S_RightX <= T_RightX && T_TopY >= S_BotY && S_TopY >= T_TopY   ) //右下ok
         {
-            for (int i = 0 ; i < vec_special_net_line.size(); i++ )
+            source->ABSOLUTE_POINT2.x = T_RightX;
+            target->ABSOLUTE_POINT2.y = S_TopY;
+        }
+        else if ( S_TopY >= T_BotY && S_TopY <= T_TopY && S_BotY >= T_BotY && S_BotY <= T_TopY && S_RightX >= T_LeftX && S_RightX <= T_RightX )//右邊ok
+        {
+            source->ABSOLUTE_POINT2.x = T_RightX ;
+        }
+        else if ( T_TopY >= S_TopY && T_BotY <= S_TopY && S_LeftX >= T_LeftX && T_RightX >= S_LeftX && S_RightX >= T_X ) //左上(不確定)
+        {
+            source->ABSOLUTE_POINT1.x = T_LeftX;
+            target->ABSOLUTE_POINT1.y = S_BotY;
+        }
+        else if ( T_TopY >= S_BotY && T_TopY <= S_TopY && T_RightX >= S_LeftX && T_RightX <= S_RightX && T_LeftX <= S_LeftX) // 左下(不確定)
+        {
+            source->ABSOLUTE_POINT1.x = T_LeftX;
+            target->ABSOLUTE_POINT2.y = S_TopY;
+        }
+        else if ( S_TopY >= T_BotY && S_TopY <= T_TopY && S_BotY >= T_BotY && S_BotY <= T_TopY && S_LeftX >= T_LeftX && S_LeftX <= T_RightX  )  //左邊ok
+        {
+            source->ABSOLUTE_POINT1.x = T_LeftX ;
+        }
+        else if ( S_TopY >= T_BotY && T_LeftX >= S_LeftX && S_RightX >= S_LeftX  && T_BotY >= S_BotY   ) //在source裡面的上面
+        {
+            target->ABSOLUTE_POINT1.y = S_BotY;
+        }
+        else if ( S_TopY >= T_TopY && T_TopY >= S_BotY && T_LeftX >= S_LeftX && S_RightX >= T_RightX  ) //在source裡面的下面
+        {
+            target->ABSOLUTE_POINT2.y = S_TopY;
+        }
+    }
+    else //source is Vetertical 
+    {
+        int S_X = source->ABSOLUTE_POINT1.x ; // source is Vetertical so x is cons 
+        int S_LeftX = S_X - ( source->ROUNTWIDTH/2 );
+        int S_RightX = S_X + ( source->ROUNTWIDTH/2 );
+        int S_TopY = source->ABSOLUTE_POINT2.y;
+        int S_BotY = source->ABSOLUTE_POINT1.y;
+        int T_Y = target ->ABSOLUTE_POINT1.y; // target is H so y is cons ;
+        int T_LeftX = target->ABSOLUTE_POINT1.x ;
+        int T_RightX = target->ABSOLUTE_POINT2.x;
+        int T_TopY = T_Y + (target->ROUNTWIDTH/2);
+        int T_BotY = T_Y - (target->ROUNTWIDTH/2);
+        if ( S_TopY >= T_BotY && S_TopY <= T_TopY && T_LeftX >= S_LeftX && T_LeftX <= S_RightX && T_BotY >=S_BotY && T_BotY <= S_TopY )//右上ok
+        {
+            source->ABSOLUTE_POINT2.y = T_TopY;
+            target->ABSOLUTE_POINT1.x = S_LeftX;
+        }
+        else if ( S_BotY >= T_BotY && S_BotY <= T_TopY && T_LeftX >= S_LeftX && T_LeftX <= S_RightX )//右下ok
+        {
+            source->ABSOLUTE_POINT1.y = T_BotY;
+            target->ABSOLUTE_POINT1.x = S_LeftX;
+        }
+        else if ( S_TopY <= T_TopY && S_TopY >= T_BotY && S_LeftX >= T_LeftX && S_LeftX <= T_RightX && S_RightX>= T_LeftX && S_RightX<=T_RightX )//上面
+        {
+            source->ABSOLUTE_POINT2.y = T_TopY;
+        }
+        else if ( S_TopY >= T_BotY && S_TopY <= T_TopY && T_RightX >= S_LeftX && T_RightX <= S_RightX && T_BotY >= S_BotY && T_TopY > S_BotY ) //左上
+        {
+            source->ABSOLUTE_POINT2.y = T_TopY;
+            target->ABSOLUTE_POINT2.x = S_RightX;
+        }
+        else if ( S_BotY >= T_BotY && S_BotY <= T_TopY && S_LeftX >= T_LeftX && S_LeftX <= T_RightX && S_TopY >= T_TopY && S_BotY >= T_BotY )// 左下
+        {
+            source->ABSOLUTE_POINT1.y = T_BotY;
+            target->ABSOLUTE_POINT2.x = S_RightX;
+        }
+        else if ( S_TopY >= T_BotY && S_TopY <= T_TopY && S_LeftX >= T_RightX && S_LeftX <= T_RightX && S_RightX >= T_LeftX && S_RightX <= T_RightX )//下面
+        {
+            source->ABSOLUTE_POINT1.y = T_BotY;
+        }
+        else if ( S_TopY >= T_TopY && T_BotY >= S_BotY && T_RightX >= S_LeftX && T_RightX <=S_RightX ) //在source裡的左邊
+        {
+            target->ABSOLUTE_POINT2.x = S_RightX;   
+        }
+        else if  (S_TopY >= T_TopY && T_BotY >= S_BotY && T_LeftX >= S_LeftX && S_RightX >= T_LeftX ) //在source的右邊
+        {
+            target->ABSOLUTE_POINT1.x = S_LeftX;
+        }
+    }
+}
+
+vector <Nets*> PDN::DFS ( vector<Nets*>&lineGroup , Nets* &start  , string blockName ,string blockPinName  ) 
+{
+    vector <bool> isTrav;
+    for (int i = 0 ; i < lineGroup.size();i++)
+    {
+        if (start == lineGroup[i])
+            isTrav.push_back(1);
+        else 
+            isTrav.push_back(0);
+    }
+    stack <Nets*> Stack ; 
+    Stack.push(start);
+    Point<int> tmpPoint;
+    pair<string ,string >tmpPair;
+    Nets *terminalNet = new Nets ;
+    for (int i =  0 ; i < lineGroup.size();i++)
+    {
+        tmpPoint = myHelper.getEndPoint(lineGroup[i]->ABSOLUTE_POINT1,lineGroup[i]->ABSOLUTE_POINT2);
+        if ( tmpPoint.x != -1 && tmpPoint.y != -1)
+        {
+            tmpPair = myHelper.getBlockMsg(tmpPoint);
+            if (tmpPair.first == blockName && tmpPair.second == blockPinName )
             {
-                if (vec_special_net_line[i] == Stack.top() && vec_special_net_line[i].MetalName.compare(Stack.top().MetalName)==0 )
+                terminalNet = lineGroup[i];
+            }
+        }
+    }
+    vector <Nets*> return_vec;
+    return_vec.push_back(start);
+    while (Stack.size()!=0)
+    {
+        if (Stack.top()->ABSOLUTE_POINT1 == terminalNet->ABSOLUTE_POINT1 && Stack.top()->ABSOLUTE_POINT2 == terminalNet->ABSOLUTE_POINT2  )
+            return return_vec;
+        bool flag = 0 ;
+        bool checkAllNoCross = 0 ;
+        if(Stack.top()->ROUNTWIDTH == 0 )
+        {
+            for (int i = 0 ; i < lineGroup.size();i++)
+            {
+                if ( lineGroup[i] == Stack.top() )
                     continue;
-                if (vec_special_net_line[i].isTraversal == true)
+                if ( isTrav[i] == 1 )
                     continue;
-                if (( (Stack.top().pt1 == vec_special_net_line[i].pt1) && (Stack.top().pt2 == vec_special_net_line[i].pt2) )&& (vec_special_net_line[i].MetalName[0]=='M') ) // via find via (first first) 
+                if ( Stack.top()->ABSOLUTE_POINT1 == lineGroup[i]->ABSOLUTE_POINT1 && Stack.top()->ABSOLUTE_POINT2 == lineGroup[i]->ABSOLUTE_POINT2  )
                 {
                     checkAllNoCross = 1 ;
-                    vec_special_net_line[i].isTraversal = 1 ;
-                    Stack.push(vec_special_net_line[i]);
-                    tmp_vec.push_back(vec_special_net_line[i]);           
+                    isTrav[i] = 1 ;
+                    Stack.push(lineGroup[i]);
+                    return_vec.push_back(lineGroup[i]);
                     flag = 1 ;
                     break;
                 }
             }
-            if (flag)
+            if(flag)
                 continue;
-            for (int i = 0 ; i < vec_special_net_line.size(); i++ ) //via find wire (last)
+            for (int i  = 0  ; i < lineGroup.size();i++)
             {
-                if (vec_special_net_line[i] == Stack.top() && vec_special_net_line[i].MetalName.compare(Stack.top().MetalName)==0 )
+                if ( lineGroup[i] == Stack.top() )
                     continue;
-                if (vec_special_net_line[i].isTraversal == true)
+                if ( isTrav[i] == 1 )
                     continue;
-                if (myHelper.isCross(Stack.top(),vec_special_net_line[i])&& Stack.top().MetalName.compare(vec_special_net_line[i].MetalName)==0)//find line 
+                if (Stack.top()->ROUNTWIDTH==0 &&lineGroup[i]->ROUNTWIDTH==0 )
+                    continue;
+                Line tmpLine1(lineGroup[i]->ABSOLUTE_POINT1 , lineGroup[i]->ABSOLUTE_POINT2);
+                Line tmpLine2(Stack.top()->ABSOLUTE_POINT1 , Stack.top()->ABSOLUTE_POINT2);
+                tmpLine1.isHorizontal = myHelper.isHorizontal(lineGroup[i]->ABSOLUTE_POINT1,lineGroup[i]->ABSOLUTE_POINT2);
+                tmpLine2.isHorizontal = myHelper.isHorizontal(Stack.top()->ABSOLUTE_POINT1,Stack.top()->ABSOLUTE_POINT2);
+                tmpLine1.Width = lineGroup[i]->ROUNTWIDTH;
+                tmpLine2.Width = Stack.top()->ROUNTWIDTH;
+                if (Stack.top()->ROUNTWIDTH==0)
+                    tmpLine2.isPsedoLine = 1 ;
+                if (lineGroup[i]->ROUNTWIDTH==0)
+                    tmpLine1.isPsedoLine = 1;
+                if (myHelper.isCross( tmpLine1 , tmpLine2  ) )
                 {
-                    if (vec_special_net_line[i].isTraversal == true )
-                        continue;
+                    isTrav[i] = 1 ;
                     checkAllNoCross = 1 ;
-                    vec_special_net_line[i].isTraversal = 1 ;
-                    Stack.push(vec_special_net_line[i]);
-                    tmp_vec.push_back(vec_special_net_line[i]);           
+                    Stack.push(lineGroup[i]);
+                    return_vec.push_back(lineGroup[i]);
                     break;
                 }
             }
         }
         else 
         {
-            for (int i = 0 ; i < vec_special_net_line.size(); i++ ) // wire find via
+            for (int i = 0 ; i < lineGroup.size();i++)
             {
-                if (vec_special_net_line[i] == Stack.top() && vec_special_net_line[i].MetalName.compare(Stack.top().MetalName)==0 )
+                
+                if (  lineGroup[i] == Stack.top()   )
                     continue;
-                if (vec_special_net_line[i].isTraversal == true)
+                if ( isTrav[i] == 1 )
                     continue;
-                if(vec_special_net_line[i].isPsedoLine)
+                if(lineGroup[i]->ROUNTWIDTH == 0)
                 {
-                    if (myHelper.isCross(Stack.top(),vec_special_net_line[i])&& Stack.top().MetalName.compare(vec_special_net_line[i].MetalName)==0)//find line 
+                    //cout<<"****"<<endl;
+                    Line tmpLine1(lineGroup[i]->ABSOLUTE_POINT1 , lineGroup[i]->ABSOLUTE_POINT2);
+                    Line tmpLine2(Stack.top()->ABSOLUTE_POINT1 , Stack.top()->ABSOLUTE_POINT2);
+                    tmpLine1.isHorizontal = myHelper.isHorizontal(lineGroup[i]->ABSOLUTE_POINT1,lineGroup[i]->ABSOLUTE_POINT2);
+                    tmpLine1.isPsedoLine = 1 ;
+                    tmpLine2.isHorizontal = myHelper.isHorizontal(Stack.top()->ABSOLUTE_POINT1,Stack.top()->ABSOLUTE_POINT2);
+                    tmpLine1.Width = lineGroup[i]->ROUNTWIDTH;
+                    tmpLine2.Width = Stack.top()->ROUNTWIDTH;
+                    if (Stack.top()->ROUNTWIDTH==0)
+                        tmpLine2.isPsedoLine = 1 ;
+                    if ( myHelper.isCross(tmpLine1,tmpLine2) )
                     {
-                        if (vec_special_net_line[i].isTraversal == true )
-                            continue;
                         checkAllNoCross = 1 ;
-                        vec_special_net_line[i].isTraversal = 1 ;
-                        Stack.push(vec_special_net_line[i]);
-                        tmp_vec.push_back(vec_special_net_line[i]);           
-                        flag =1 ;
+                        isTrav[i] = 1 ;
+                        Stack.push(lineGroup[i]);
+                        return_vec.push_back(lineGroup[i]);
+                        flag = 1 ;
                         break;
                     }
                 }
             }
             if(flag)
                 continue;
-            for (int i = 0 ; i < vec_special_net_line.size(); i++ ) // wire find wire (last)
+            for (int i = 0 ; i < lineGroup.size();i++)
             {
-                if (vec_special_net_line[i] == Stack.top() && vec_special_net_line[i].MetalName.compare(Stack.top().MetalName)==0 )
+                if ( lineGroup[i] == Stack.top()  )
                     continue;
-                if (vec_special_net_line[i].isTraversal == true)
+                if ( isTrav[i] == 1 )
                     continue;
-                if (myHelper.isCross(Stack.top(),vec_special_net_line[i])&& Stack.top().MetalName.compare(vec_special_net_line[i].MetalName)==0)//find line 
+                Line tmpLine1(lineGroup[i]->ABSOLUTE_POINT1 , lineGroup[i]->ABSOLUTE_POINT2);
+                Line tmpLine2(Stack.top()->ABSOLUTE_POINT1 , Stack.top()->ABSOLUTE_POINT2);
+                tmpLine1.isHorizontal = myHelper.isHorizontal(lineGroup[i]->ABSOLUTE_POINT1,lineGroup[i]->ABSOLUTE_POINT2);
+                tmpLine2.isHorizontal = myHelper.isHorizontal(Stack.top()->ABSOLUTE_POINT1,Stack.top()->ABSOLUTE_POINT2);
+                tmpLine1.Width = lineGroup[i]->ROUNTWIDTH;
+                tmpLine2.Width = Stack.top()->ROUNTWIDTH;
+                if (Stack.top()->ROUNTWIDTH==0)
+                    tmpLine2.isPsedoLine = 1 ;
+                if (lineGroup[i]->ROUNTWIDTH==0)
+                    tmpLine1.isPsedoLine = 1;
+                if ( myHelper.isCross(tmpLine1,tmpLine2) )
                 {
-                    if (vec_special_net_line[i].isTraversal == true )
-                        continue;
                     checkAllNoCross = 1 ;
-                    vec_special_net_line[i].isTraversal = 1 ;
-                    Stack.push(vec_special_net_line[i]);
-                    tmp_vec.push_back(vec_special_net_line[i]);           
+                    isTrav[i] = 1 ;
+                    Stack.push(lineGroup[i]);
+                    return_vec.push_back(lineGroup[i]);
+                    flag = 1 ;
                     break;
                 }
             }
+
         }
-        if (checkAllNoCross == 0 )
+        if(checkAllNoCross == 0 )
         {
-            tmp_vec.pop_back();
+            return_vec.pop_back();
             Stack.pop();
         }
-    }    
-    return Return_vec;
+    }
 }
-
 
 PDN::~PDN()
 {

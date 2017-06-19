@@ -49,8 +49,6 @@ int main(int argc,  char * argv[])
     initialfile.run();
     verilog.run();
     Converter converter(CaseName);
-    PDN a;
-
 //    flute_net f ;
 //    f.Demo();
 //    Graph_SP g ;
@@ -98,14 +96,19 @@ int main(int argc,  char * argv[])
 //    Debugger db ;
 //    db.printAllSpecialNetMsg(SpecialNetsMaps);
     
-    //for(int i = 0 ; i < 3 ; i++)
-    //{
-        //converter.toLocationFile();
+    for(int i = 0 ; i < 3 ; i++)
+    {
+        converter.toLocationFile();
        //// converter.Visualize();
        //// test(2);
-    //}
-    //converter.toOutputDef();
-    
+    }
+    cout<<"-----ngspice---end------\n";
+    PDN a(CaseName);
+    a.Optimize();
+    a.Optimize();
+    //a.ToSpecialNetsMaps();
+    converter.toOutputDef();
+//    converter.Visualize();
     
     
     delete[] lefargv;

@@ -32,8 +32,9 @@ public:
     void ConcatIR_Drop();
     double getIR_DropCons(string StartPowerPin , string EndBlockPin );
     void printStats(multimap<string, string> & DetinationMap);
-    map<pair<string, string> , double> DropMap;
-    
+    map<pair<string, string> , double> DropMap; 
+    vector < vector <string> > NoPassInfo;
+    vector < vector <string> > PassInfo;
     void setCaseName(string name);
 private:
     PDNHelper helper ; 
