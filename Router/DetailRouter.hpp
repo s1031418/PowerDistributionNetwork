@@ -10,15 +10,30 @@
 #define DetailRouter_hpp
 
 #include <stdio.h>
+#include <string>
+#include <vector>
+#include "RouterUtil.hpp"
+#include <map>
+#include <set>
+#include "GlobalRouter.hpp"
 
+using namespace std;
 class DetailRouter
 {
     
 public:
     DetailRouter();
     ~DetailRouter();
-private:
+    // Model為3D的Graph 
+    void InitGrids();
+    void DetailRoute();
     
+    void CutByPitch(double pitch , set<int> & Horizontal , set<int> & Vertical );
+    
+private:
+    map<string ,vector< vector< Grid > >> MLGrids ; // MutiLayer Grids
+    RouterUtil RouteHelper ; 
+    GlobalRouter gr ;
 };
 
 #endif /* DetailRouter_hpp */

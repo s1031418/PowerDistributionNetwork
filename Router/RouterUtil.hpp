@@ -10,16 +10,34 @@
 #define RouterUtil_hpp
 
 #include <stdio.h>
-
-
-class RouterUtil
+#include "RouterComponents.hpp"
+#include <string>
+#include "lefrw.h"
+#include "defrw.h"
+#include "PDNHelper.hpp"
+using namespace std; 
+class RouterUtil : public PDNHelper 
 {
     
 public:
     RouterUtil();
     ~RouterUtil();
+    
+    
+    
+    
+    // 判斷這個grid是否為block
+    bool IsBlock(Grid grid);
+    // 第一個為是不是屬於這個Block，第二個這個Block Name
+    pair<bool, string> IsBlock(Point<int> LeftDown , Point<int> RightUp);
+    
+    
 private:
     
+    PDNHelper helper ;
+    void InitBlockMap();
+    // key:BlockName , value:那個block的左下及右上座標
+    map<string, pair<Point<int>, Point<int>>> BlockMap;
 };
 
 

@@ -33,8 +33,10 @@ public:
     Point<int> startpoint ;
     unsigned int width;
     unsigned int length;
+    //  非block 的 Grid 兩個metal都為0 
     unsigned int lowermetal = 0 ;
     unsigned int uppermetal = 0 ;
+    // key為metal層
     std::map<std::string,GridComponent> layers ;
 };
 
