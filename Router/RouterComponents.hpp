@@ -14,16 +14,23 @@
 #include <map>
 class Border
 {
-    Point<unsigned> leftdown ;
-    Point<unsigned> rightdown ;
-    Point<unsigned> leftup ;
-    Point<unsigned> rightup ;
+    std::pair<Point<unsigned>, Point<unsigned>> LeftEdge ;
+    std::pair<Point<unsigned>, Point<unsigned>> RightEdge ;
+    std::pair<Point<unsigned>, Point<unsigned>> TopEdge ;
+    std::pair<Point<unsigned>, Point<unsigned>> BottomEdge ;
+//    Point<unsigned> leftdown ;
+//    Point<unsigned> rightdown ;
+//    Point<unsigned> leftup ;
+//    Point<unsigned> rightup ;
 };
+
+
 
 class GridComponent
 {
-    unsigned int capacity;
-    bool overflow;
+    // 上下左右
+    unsigned int capacity = 4 ;
+    bool overflow = false ;
     Border border ;
 };
 

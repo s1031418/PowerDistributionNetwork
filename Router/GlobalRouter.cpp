@@ -345,7 +345,7 @@ void GlobalRouter::Route()
             Grid SGrid = Grids[SGridCoordinate.second][SGridCoordinate.first];
             if( RouterHelper.IsBlock(SGrid))
             {
-                
+                //ripple(<#int X#>, <#int Y#>);
                 cout << "Steiner Point is invalid " << endl;
                 assert(0);
             }
