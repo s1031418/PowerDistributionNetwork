@@ -15,6 +15,7 @@
 PDN::PDN(string str)
 :WhichCase(str)
 {
+    //getRoutingResource();
 }
 vector <vector <string >> PDN::getNoPassInfo ()
 {
@@ -33,6 +34,76 @@ vector <vector <string >> PDN::getPassInfo ()
     ng.init(WhichCase);
     ng.printStats(con.DestinationMap);
     return ng.PassInfo;
+}
+bool PDN::isHorizontalExist( Nets* NET1,Nets* NET2 )
+{
+    if ( NET1->ABSOLUTE_POINT1.x >= NET2->ABSOLUTE_POINT1.x && NET1->ABSOLUTE_POINT1.x <= NET2->ABSOLUTE_POINT2.x )//NET1的前面x存在在NET2裡
+        return true;
+    if ( NET1->ABSOLUTE_POINT2.x >= NET2->ABSOLUTE_POINT1.x && NET1->ABSOLUTE_POINT2.x <= NET2->ABSOLUTE_POINT2.x )//NET1的後面的X存在在NET2裡
+        return true;
+    if ( NET2->ABSOLUTE_POINT1.x >= NET1->ABSOLUTE_POINT1.x && NET2->ABSOLUTE_POINT1.x <= NET1->ABSOLUTE_POINT2.x )//NET2的前面的x存在在NET1裡
+        return true;
+    if ( NET2->ABSOLUTE_POINT2.x >= NET1->ABSOLUTE_POINT1.x && NET2->ABSOLUTE_POINT2.x <= NET1->ABSOLUTE_POINT2.x )//NET2的後面的X存在在NET1裡
+        return true;
+    return false;
+}
+void PDN::getRoutingResource()
+{
+    vector < Nets* > temp;
+    //add all wire to vector 
+    for (auto PinName : myHelper.PinNames)
+    {
+        for ( auto it = SpecialNetsMaps[PinName].NETSMULTIMAPS.begin() ; it != SpecialNetsMaps[PinName].NETSMULTIMAPS.end();it = SpecialNetsMaps[PinName].NETSMULTIMAPS.upper_bound(it->first))
+        {
+            auto first = SpecialNetsMaps[PinName].NETSMULTIMAPS.lower_bound(it->second.METALNAME);
+            auto last = SpecialNetsMaps[PinName].NETSMULTIMAPS.upper_bound(it->second.METALNAME);
+            while (first != last)
+            {
+                Nets *ptr = new Nets ;
+                ptr = & first -> second;
+                if (first->second.ROUNTWIDTH!=0)
+                    temp.push_back(ptr);
+                first++;
+            }
+        }
+    }
+    Nets *ptr = new Nets ;
+    ptr->ABSOLUTE_POINT1.x = 0 ;
+    ptr->ABSOLUTE_POINT1.y = 3000000;
+    ptr->ABSOLUTE_POINT2.x = 3000000;
+    ptr->ABSOLUTE_POINT2.y = 3000000;
+    ptr->ROUNTWIDTH = 0 ; 
+    temp.push_back(ptr);
+    for ( int i = 0  ; i < temp.size();i++)
+    {
+        if (temp[i]->ABSOLUTE_POINT1.y==3000000)
+            continue;
+        int TopResource = 2147483647 ; // Only H line have  
+        int BottomResource = 2147483647; //Only H line have 
+        int LeftResource = 2147483647 ; //Only V line have
+        int RightResource = 2147483647  ; //Only V line have
+        if(myHelper.isHorizontal(temp[i]->ABSOLUTE_POINT1,temp[i]->ABSOLUTE_POINT2))
+        {
+            for(int j = 0 ; j < temp.size();j++)
+            {
+                if(i==j || !myHelper.isHorizontal(temp[j]->ABSOLUTE_POINT1,temp[j]->ABSOLUTE_POINT2) )
+                    continue;
+                if(!isHorizontalExist(temp[i],temp[j]))
+                    continue;
+                if( temp[j]->ABSOLUTE_POINT1.y < temp[i]->ABSOLUTE_POINT1.y )
+                    continue;
+                //cout<<"this is : "<<temp[i]->ABSOLUTE_POINT1<<" "<<temp[i]->ABSOLUTE_POINT2<<endl;
+                //cout<<"that is : "<<temp[j]->ABSOLUTE_POINT1<<" "<<temp[j]->ABSOLUTE_POINT2<<endl;
+                //cout<<"this top is : "<<temp[i]->ABSOLUTE_POINT1.y+ temp[i]->ROUNTWIDTH/2<<endl;
+                //cout<<"that bot is : "<<temp[j]->ABSOLUTE_POINT2.y - temp[j]->ROUNTWIDTH/2<<endl;
+                int topDistance = abs( (temp[i]->ABSOLUTE_POINT1.y + temp[i]->ROUNTWIDTH/2) - (temp[j]->ABSOLUTE_POINT1.y - temp[j]->ROUNTWIDTH/2)  );
+                if(TopResource > topDistance)
+                    TopResource = topDistance;
+            }
+            cout<<temp[i]->ABSOLUTE_POINT1<<" "<<temp[i]->ABSOLUTE_POINT2<<" top resource : "<<TopResource<<endl;
+        }
+    }
+
 }
 //for all no pass * 2 and 不重複*到
 void PDN::Optimize()
@@ -65,20 +136,20 @@ void PDN::Optimize()
             {
                 if(first->second.ROUNTWIDTH!=0)
                 {
-                if(myHelper.isHorizontal(first->second.ABSOLUTE_POINT1, first->second.ABSOLUTE_POINT2))
-                {
-                    Point<int> right = ( first->second.ABSOLUTE_POINT1.x > first->second.ABSOLUTE_POINT2.x ) ? first->second.ABSOLUTE_POINT1 : first->second.ABSOLUTE_POINT2 ;
-                    Point<int> left =  ( first->second.ABSOLUTE_POINT1.x < first->second.ABSOLUTE_POINT2.x ) ? first->second.ABSOLUTE_POINT1 : first->second.ABSOLUTE_POINT2 ;
-                    first->second.ABSOLUTE_POINT1 = left ;
-                    first->second.ABSOLUTE_POINT2 = right ;
-                }
-                else
-                {
-                    Point<int> top = (first->second.ABSOLUTE_POINT1.y > first->second.ABSOLUTE_POINT2.y) ? first->second.ABSOLUTE_POINT1 : first->second.ABSOLUTE_POINT2;
-                    Point<int> bottom = (first->second.ABSOLUTE_POINT1.y < first->second.ABSOLUTE_POINT2.y) ? first->second.ABSOLUTE_POINT1 : first->second.ABSOLUTE_POINT2 ;
-                    first->second.ABSOLUTE_POINT2 = top ;
-                    first->second.ABSOLUTE_POINT1 = bottom ;
-                }
+                    if(myHelper.isHorizontal(first->second.ABSOLUTE_POINT1, first->second.ABSOLUTE_POINT2))
+                    {
+                        Point<int> right = ( first->second.ABSOLUTE_POINT1.x > first->second.ABSOLUTE_POINT2.x ) ? first->second.ABSOLUTE_POINT1 : first->second.ABSOLUTE_POINT2 ;
+                        Point<int> left =  ( first->second.ABSOLUTE_POINT1.x < first->second.ABSOLUTE_POINT2.x ) ? first->second.ABSOLUTE_POINT1 : first->second.ABSOLUTE_POINT2 ;
+                        first->second.ABSOLUTE_POINT1 = left ;
+                        first->second.ABSOLUTE_POINT2 = right ;               
+                    }
+                    else
+                    {
+                        Point<int> top = (first->second.ABSOLUTE_POINT1.y > first->second.ABSOLUTE_POINT2.y) ? first->second.ABSOLUTE_POINT1 : first->second.ABSOLUTE_POINT2;
+                        Point<int> bottom = (first->second.ABSOLUTE_POINT1.y < first->second.ABSOLUTE_POINT2.y) ? first->second.ABSOLUTE_POINT1 : first->second.ABSOLUTE_POINT2 ;
+                        first->second.ABSOLUTE_POINT2 = top ;
+                        first->second.ABSOLUTE_POINT1 = bottom ;
+                    }
                 }
                 Nets *ptr = new Nets ;
                 ptr = & first -> second;
@@ -104,7 +175,7 @@ void PDN::Optimize()
         PinToBlockPinLines = DFS ( lineGroup , start, NoPassInfo[i][1] , NoPassInfo[i][2]  );
         cout <<NoPassInfo[i][0]<<" "<<NoPassInfo[i][1]<<" "<<NoPassInfo[i][2]<<endl;
         //for (int i = 0  ; i < PinToBlockPinLines.size();i++)
-            //cout << PinToBlockPinLines[i]->ABSOLUTE_POINT1<<" "<<PinToBlockPinLines[i]->ABSOLUTE_POINT2<<endl;
+        //cout << PinToBlockPinLines[i]->ABSOLUTE_POINT1<<" "<<PinToBlockPinLines[i]->ABSOLUTE_POINT2<<endl;
         //cout<<endl; 
         for (int i =  0  ; i  < PinToBlockPinLines.size() ; i++ )
         {
@@ -117,7 +188,7 @@ void PDN::Optimize()
             }
         }    
         //for(int i = 0 ; i < PinToBlockPinLines.size();i++)
-            //cout<<PinToBlockPinLines[i]->ABSOLUTE_POINT1<<" "<<PinToBlockPinLines[i]->ABSOLUTE_POINT2<<endl;
+        //cout<<PinToBlockPinLines[i]->ABSOLUTE_POINT1<<" "<<PinToBlockPinLines[i]->ABSOLUTE_POINT2<<endl;
         //cout<<"****\n";
         DRC(PinToBlockPinLines,isModify);   
         lineGroup.resize(0);
@@ -125,7 +196,7 @@ void PDN::Optimize()
 }
 void PDN::DRC ( vector<Nets*> &lineGroup , map <Nets*,bool>&isModify )
 {
-    
+
     vector<Nets*>NoViaLineGroup;
     for(int i = 0  ; i < lineGroup.size();i++)
     {
@@ -157,7 +228,6 @@ void PDN::FineTune( Nets* & source , Nets* & target , map<Nets*,bool>&isModify )
         //水平線有六種狀況 垂直也有
         if ( S_BotY <= T_BotY && S_TopY >= T_BotY && T_LeftX <= S_RightX && T_RightX >= S_RightX && T_TopY >= S_TopY && T_BotY >= S_BotY    ) //右上ok   
         {
-            cout<<"FK!"<<endl;
             source->ABSOLUTE_POINT2.x = T_RightX ;
             target->ABSOLUTE_POINT1.y = S_BotY;
         }
@@ -244,8 +314,9 @@ void PDN::FineTune( Nets* & source , Nets* & target , map<Nets*,bool>&isModify )
     }
 }
 
-vector <Nets*> PDN::DFS ( vector<Nets*>&lineGroup , Nets* &start  , string blockName ,string blockPinName  ) 
-{
+
+
+vector <Nets*> PDN::DFS ( vector<Nets*>&lineGroup , Nets* &start  , string blockName ,string blockPinName  ){
     vector <bool> isTrav;
     for (int i = 0 ; i < lineGroup.size();i++)
     {
@@ -331,7 +402,7 @@ vector <Nets*> PDN::DFS ( vector<Nets*>&lineGroup , Nets* &start  , string block
         {
             for (int i = 0 ; i < lineGroup.size();i++)
             {
-                
+
                 if (  lineGroup[i] == Stack.top()   )
                     continue;
                 if ( isTrav[i] == 1 )
@@ -396,7 +467,21 @@ vector <Nets*> PDN::DFS ( vector<Nets*>&lineGroup , Nets* &start  , string block
         }
     }
 }
-
+void PDN::AddVia( vector<Nets*> &lineGroup , map <Nets* , bool > &isAdd  )
+{
+    for(int i = 0  ;  i < lineGroup.size();i++)
+    {
+        if ( isAdd[lineGroup[i]] == true )
+            continue;
+        if ( lineGroup[i]->ROUNTWIDTH == 0  )
+        {
+            if ( lineGroup[i-1]->METALNAME.compare(lineGroup[i+1]->METALNAME)==0 )//只檢查單科Via via連via還沒做
+            {
+            
+            }
+        }
+    }
+}
 PDN::~PDN()
 {
 

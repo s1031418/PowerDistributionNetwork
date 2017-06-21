@@ -58,14 +58,24 @@ class PDN
         ~PDN();
         string WhichCase; 
         PDNHelper myHelper;
+        //map < Nets* , vector<int> > Routing_Resource_Map;
+        //未完成的拿routingResource;
+        void getRoutingResource ();
         vector <Nets*> DFS ( vector<Nets*>&lineGroup , Nets* &start  , string blockName ,string blockPinName  );
-        //vector< vector <Line> >  DFS( vector<Line>& vec_special_net_line , Line& line , vector <Line> & terminals ) ;
+        //利用NGSPICE抓出來沒過的線段的PinName BlockName BlockPinName <PinName>放在[i][0] <BlockName>放在[i][1] <BlockPinName>放在[i][2] ;
         vector <vector <string >> getNoPassInfo ();
+        //同上 抓出過的
         vector <vector <string >> getPassInfo ();
+        //上條線根下條線如果加寬會有issue產生 故做微調 多打金屬補齊
         void FineTune( Nets* & source , Nets* & target , map<Nets*,bool>&isModify  );
+        //檢查線是否跨層 是的話就打好打滿VIA
+        void AddVia( vector<Nets*> &lineGroup , map <Nets* , bool > &isAdd  );
+        //給PowerPinName BlockName BlockPinName 找出他的部分線段 用的時候要小心是否改過了
         void DRC ( vector<Nets*> &lineGroup , map < Nets* , bool >& isModify  );
+        //判斷兩條線的2個X座標是否存在於對方的線段中
+        bool isHorizontalExist( Nets* NET1,Nets* NET2 );
+        //開啟優化引擎(目前只有*2)
         void Optimize();
-        void ToSpecialNetsMaps();
     private:
 };
 
