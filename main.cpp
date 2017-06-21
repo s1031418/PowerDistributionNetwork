@@ -16,10 +16,10 @@
 #include "InitialFileParser.hpp"
 #include <cstdio>
 #include "Converter.hpp"
+#include "DetailRouter.hpp"
 #include <memory>
 #include "PDN.hpp"
 #include <stdexcept>
-#include "GlobalRouter.hpp"
 #include "verilog.hpp"
 #include <array>
 using namespace std ;
@@ -53,6 +53,7 @@ int main(int argc,  char * argv[])
 //    f.Demo();
 //    Graph_SP g ;
 //    g.Demo();
+    DetailRouter dr ;
     
     //GlobalRouter gr ;
     //gr.Route();
@@ -121,8 +122,18 @@ int main(int argc,  char * argv[])
    // converter.toLocationFile();
     //a.Optimize();
   //  converter.toLocationFile();
+//    for(int i = 0 ; i < 3 ; i++)
+//    {
+//        converter.toLocationFile();
+       //// converter.Visualize();
+       //// test(2);
+//    }
+//    cout<<"-----ngspice---end------\n";
+//    PDN a(CaseName);
+//    a.Optimize();
+//    a.Optimize();
     //a.ToSpecialNetsMaps();
-    converter.toOutputDef();
+//    converter.toOutputDef();
 //    converter.Visualize();
     cout<<"*************************************\n";
     delete[] lefargv;

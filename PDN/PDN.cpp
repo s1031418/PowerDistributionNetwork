@@ -469,6 +469,8 @@ vector <Nets*> PDN::DFS ( vector<Nets*>&lineGroup , Nets* &start  , string block
             Stack.pop();
         }
     }
+    assert(0);
+    return vector <Nets*>() ;
 }
 void PDN::AddVia( vector<Nets*> &lineGroup , map <Nets* , bool > &isAdd  ,string PinName)
 {
@@ -614,6 +616,7 @@ pair <Point<int>,Point<int> > PDN::getTwoLineRegion( Nets* NET1 , Nets* NET2 )
     }
     return return_pair;
 }
+
 PDN::~PDN()
 {
 

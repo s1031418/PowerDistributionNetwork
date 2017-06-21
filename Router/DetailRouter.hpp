@@ -16,8 +16,20 @@
 #include <map>
 #include <set>
 #include "GlobalRouter.hpp"
-
+#include "Components.h"
 using namespace std;
+
+
+
+class RouteConstraint
+{
+public:
+    vector<int> AllowLayers ; // 允許走第幾層layer
+    vector<DIRECTION> AllowDirections ;
+    
+};
+
+
 class DetailRouter
 {
     
@@ -26,10 +38,14 @@ public:
     ~DetailRouter();
     // Model為3D的Graph 
     void InitGrids();
+    
+    void InitGraph_SP(RouteConstraint constraint);
     void DetailRoute();
     
+    // 依照Pitch切uniform的Grid
     void CutByPitch(double pitch , set<int> & Horizontal , set<int> & Vertical );
     
+    void NetOrder();
 private:
     map<string ,vector< vector< Grid > >> MLGrids ; // MutiLayer Grids
     RouterUtil RouteHelper ; 

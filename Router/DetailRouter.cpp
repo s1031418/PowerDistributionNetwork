@@ -20,7 +20,10 @@ DetailRouter::~DetailRouter()
 {
     
 }
-
+void DetailRouter::InitGraph_SP(RouteConstraint constraint)
+{
+    
+}
 void DetailRouter::CutByPitch(double pitch , set<int> & Horizontal , set<int> & Vertical )
 {
     int x_diff = DIEAREA.pt2.x - DIEAREA.pt1.x ;
@@ -42,6 +45,8 @@ void DetailRouter::CutByPitch(double pitch , set<int> & Horizontal , set<int> & 
 
 void DetailRouter::InitGrids()
 {
+    cout << "Begin Initialize MultiLayer Grid Graph ..." << endl;
+    clock_t Start = clock();
     for( auto layer : LayerMaps )
     {
         // 代表屬於Metal層
@@ -80,12 +85,20 @@ void DetailRouter::InitGrids()
             MLGrids.insert(make_pair(layer.first, Grids));
         }
     }
-    cout << "Done" << endl;
+    clock_t End = clock();
+    double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
+    cout << "Initialize MultiLayer Grid Graph Done" << endl ;
+    cout << "We cost " << duration << "(s)" << endl;
 }
+
 
 void DetailRouter::DetailRoute()
 {
     
     gr.Route();
+    
+}
+void DetailRouter::NetOrder()
+{
     
 }
