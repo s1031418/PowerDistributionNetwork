@@ -164,33 +164,39 @@ ThreeDGridLocation GlobalRouter::get3DGridLocation( int z)
     else return other_3D ;
     assert(0);
     return other_3D ;
-//    
-//    if( z == z_lowest )
-//    {
-//        if( x == lowest && y == lowest ) return vertex_Bottom ;
-//        if( x == x_lowest && y == y_highest )  return vertex_Bottom ;
-//        if( x == x_highest && y == y_lowest )  return vertex_Bottom ;
-//        if( x == x_highest && y == y_highest ) return vertex_Bottom ;
-//        if( x == lowest && y != y_lowest && y != y_highest )
-//    }
-//    else if( z == z_highest )
-//    {
-//        
-//    }
-//    if( z == z_lowest && x == x_lowest && y == y_lowest  )  return vertex_3D ;
-//    if( z == z_lowest && x == x_lowest && y == y_highest )  return vertex_3D ;
-//    if( z == z_lowest && x == x_highest && y == y_lowest )  return vertex_3D ;
-//    if( z == z_lowest && x == x_highest && y == y_highest ) return vertex_3D ;
-//    if( z == z_highest && x == x_lowest && y == y_lowest  )  return vertex_3D ;
-//    if( z == z_highest && x == x_lowest && y == y_highest )  return vertex_3D ;
-//    if( z == z_highest && x == x_highest && y == y_lowest )  return vertex_3D ;
-//    if( z == z_highest && x == x_highest && y == y_highest )  return vertex_3D ;
-//    if( z == )
-//    return vertex ;
 }
 int GlobalRouter::translate3D_1D(int x , int y , int z)
 {
     return translate2D_1D(x, y) +  (int)((z - 1) * Grids[0].size() * Grids.size() );
+}
+tuple<int,int,int> GlobalRouter::translate1D_3D(int index)
+{
+    int z = ( index / (int)(Grids[0].size() * Grids.size()) ) + 1 ;
+    index %= (int)(Grids[0].size() * Grids.size()) ;
+    auto xy = translate1D_2D(index);
+    return make_tuple(xy.first, xy.second , z);
+}
+unsigned GlobalRouter::cost(int z , bool horizontal , Grid & grid)
+{
+    string key ;
+    if( z == 1 ) key = "M1" ;
+    if( z == 2 ) key = "M2" ;
+    if( z == 3 ) key = "M3" ;
+    if( z == 4 ) key = "M4" ;
+    if( z == 5 ) key = "M5" ;
+    if( z == 6 ) key = "M6" ;
+    if( z == 7 ) key = "M7" ;
+    if( z == 8 ) key = "M8" ;
+    if( z == 9 ) key = "M9" ;
+    if( z == 10 ) key = "M10" ;
+    if( z == 11 ) key = "M11" ;
+    if( z == 12 ) key = "M12" ;
+    if( z == 13 ) key = "M13" ;
+    if( z == 14 ) key = "M14" ;
+    if( z == 15 ) key = "M15" ;
+    unsigned weights = stod(WeightsMaps[key]) * 100 ;
+    unsigned area = ( horizontal == true ) ? DEFAULT_WIDTH * grid.width : DEFAULT_WIDTH * grid.length ;
+    return weights * area ;
 }
 void GlobalRouter::InitGraph_SP()
 {
@@ -200,7 +206,7 @@ void GlobalRouter::InitGraph_SP()
     graph.resize(Size);
     int RowSize = (int)Grids.size() - 1;
     int ColSize = (int)Grids[0].size() - 1;
-    int weight = 0 ;
+//    int weight = 0 ;
     Edge edge ;
     for( int z = lowest ; z <= highest ; z++ )
     {
@@ -214,42 +220,134 @@ void GlobalRouter::InitGraph_SP()
                 switch (location.first)
                 {
                     case vertex_rightup:
+                        edge.to = translate3D_1D(x-1 , y , z);
+                        edge.weight = cost(z, true, Grids[y][x-1]) ;
+                        edges.push_back(edge);
                         
-                        weight = 1 ;
-                        edge.weight = weight ;
-                        edge.to = translate3D_1D(x+1 , y , z);
+                        edge.to = translate3D_1D(x, y-1, z);
+                        edge.weight = cost(z, false, Grids[y-1][x]);
                         edges.push_back(edge);
                         break;
                     case vertex_rightdown:
+                        edge.to = translate3D_1D(x-1 , y , z);
+                        edge.weight = cost(z, true, Grids[y][x-1]) ;
+                        edges.push_back(edge);
+                        
+                        edge.to = translate3D_1D(x, y+1, z);
+                        edge.weight = cost(z, false, Grids[y+1][x]);
+                        edges.push_back(edge);
                         break;
                     case vertex_leftup:
+                        edge.to = translate3D_1D(x+1 , y , z);
+                        edge.weight = cost(z, true, Grids[y][x+1]) ;
+                        edges.push_back(edge);
+                        
+                        edge.to = translate3D_1D(x, y-1, z);
+                        edge.weight = cost(z, false, Grids[y-1][x]);
+                        edges.push_back(edge);
                         break;
                     case vertex_leftdown:
+                        edge.to = translate3D_1D(x+1 , y , z);
+                        edge.weight = cost(z, true, Grids[y][x+1]) ;
+                        edges.push_back(edge);
+                        
+                        edge.to = translate3D_1D(x, y+1, z);
+                        edge.weight = cost(z, false, Grids[y+1][x]);
+                        edges.push_back(edge);
                         break;
                     case border_top:
+                        edge.to = translate3D_1D(x+1 , y , z);
+                        edge.weight = cost(z, true, Grids[y][x+1]) ;
+                        edges.push_back(edge);
+                        
+                        edge.to = translate3D_1D(x-1 , y , z);
+                        edge.weight = cost(z, true, Grids[y][x-1]) ;
+                        edges.push_back(edge);
+                        
+                        edge.to = translate3D_1D(x, y-1, z);
+                        edge.weight = cost(z, false, Grids[y-1][x]);
+                        edges.push_back(edge);
                         break;
                     case border_bottom :
+                        edge.to = translate3D_1D(x+1 , y , z);
+                        edge.weight = cost(z, true, Grids[y][x+1]) ;
+                        edges.push_back(edge);
+                        
+                        edge.to = translate3D_1D(x-1 , y , z);
+                        edge.weight = cost(z, true, Grids[y][x-1]) ;
+                        edges.push_back(edge);
+                        
+                        edge.to = translate3D_1D(x, y+1, z);
+                        edge.weight = cost(z, false, Grids[y+1][x]);
+                        edges.push_back(edge);
                         break;
                     case border_right :
+                        edge.to = translate3D_1D(x-1 , y , z);
+                        edge.weight = cost(z, true, Grids[y][x-1]) ;
+                        edges.push_back(edge);
+                        
+                        edge.to = translate3D_1D(x, y+1, z);
+                        edge.weight = cost(z, false, Grids[y+1][x]);
+                        edges.push_back(edge);
+                        
+                        edge.to = translate3D_1D(x, y-1, z);
+                        edge.weight = cost(z, false, Grids[y-1][x]);
+                        edges.push_back(edge);
                         break;
                     case border_left:
+                        edge.to = translate3D_1D(x+1 , y , z);
+                        edge.weight = cost(z, true, Grids[y][x+1]) ;
+                        edges.push_back(edge);
+                        
+                        edge.to = translate3D_1D(x, y+1, z);
+                        edge.weight = cost(z, false, Grids[y+1][x]);
+                        edges.push_back(edge);
+                        
+                        edge.to = translate3D_1D(x, y-1, z);
+                        edge.weight = cost(z, false, Grids[y-1][x]);
+                        edges.push_back(edge);
                         break;
                     case other_2D:
+                        edge.to = translate3D_1D(x+1 , y , z);
+                        edge.weight = cost(z, true, Grids[y][x+1]) ;
+                        edges.push_back(edge);
+                        
+                        edge.to = translate3D_1D(x-1 , y , z);
+                        edge.weight = cost(z, true, Grids[y][x-1]) ;
+                        edges.push_back(edge);
+                        
+                        edge.to = translate3D_1D(x, y+1, z);
+                        edge.weight = cost(z, false, Grids[y+1][x]);
+                        edges.push_back(edge);
+                        
+                        edge.to = translate3D_1D(x, y-1, z);
+                        edge.weight = cost(z, false, Grids[y-1][x]);
+                        edges.push_back(edge);
                         break;
                     default:
                         break;
                 }
                 switch (location.second)
                 {
+                    // 目前假設走via 沒有 penalty
                     case top:
-                        weight = 1 ;
-                        edge.weight = weight ;
                         edge.to = translate3D_1D(x , y , z-1);
+                        edge.weight = 0 ;
                         edges.push_back(edge);
                         break;
                     case bottom:
+                        edge.to = translate3D_1D(x , y , z+1);
+                        edge.weight = 0 ;
+                        edges.push_back(edge);
                         break;
                     case other_3D:
+                        edge.to = translate3D_1D(x , y , z+1);
+                        edge.weight = 0 ;
+                        edges.push_back(edge);
+                        
+                        edge.to = translate3D_1D(x , y , z-1);
+                        edge.weight = 0 ;
+                        edges.push_back(edge);
                         break;
                     default:
                         break;
