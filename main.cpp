@@ -96,21 +96,35 @@ int main(int argc,  char * argv[])
 //    Debugger db ;
 //    db.printAllSpecialNetMsg(SpecialNetsMaps);
     
-    for(int i = 0 ; i < 3 ; i++)
+    //for(int i = 0 ; i < 3 ; i++)
+    //{
+        //converter.toLocationFile();
+       ////// converter.Visualize();
+        ////test(2);
+      //}
+    PDN a(CaseName);
+    for(int i = 0 ; i < 3; i++)
     {
         converter.toLocationFile();
-       //// converter.Visualize();
-       //// test(2);
+        a.Optimize();
     }
-    cout<<"-----ngspice---end------\n";
-    PDN a(CaseName);
-    a.Optimize();
-    a.Optimize();
+    converter.toSpice();
+    ngspice ng ;
+    ng.init(CaseName);
+    cout<<"*************FINAL:***************\n";
+    ng.printStats(converter.DestinationMap);
+    //cout<<"-----ngspice---end------\n";
+    //converter.toLocationFile();
+    //a.Optimize();
+   // converter.toLocationFile();
+    //a.Optimize();
+   // converter.toLocationFile();
+    //a.Optimize();
+  //  converter.toLocationFile();
     //a.ToSpecialNetsMaps();
     converter.toOutputDef();
 //    converter.Visualize();
-    
-    
+    cout<<"*************************************\n";
     delete[] lefargv;
     delete[] defargv ;
     return 0;

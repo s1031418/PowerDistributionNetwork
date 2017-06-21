@@ -69,13 +69,16 @@ class PDN
         //上條線根下條線如果加寬會有issue產生 故做微調 多打金屬補齊
         void FineTune( Nets* & source , Nets* & target , map<Nets*,bool>&isModify  );
         //檢查線是否跨層 是的話就打好打滿VIA
-        void AddVia( vector<Nets*> &lineGroup , map <Nets* , bool > &isAdd  );
+        void AddVia( vector<Nets*> &lineGroup , map <Nets* , bool > &isAdd  , string PinName);
         //給PowerPinName BlockName BlockPinName 找出他的部分線段 用的時候要小心是否改過了
         void DRC ( vector<Nets*> &lineGroup , map < Nets* , bool >& isModify  );
         //判斷兩條線的2個X座標是否存在於對方的線段中
         bool isHorizontalExist( Nets* NET1,Nets* NET2 );
         //開啟優化引擎(目前只有*2)
         void Optimize();
+        //拿到兩條線的交叉區域(只准丟進來一條H一條V的"線") 不能丟進VIA return pair first 是左下角 second 是右上角;
+        pair<Point<int>,Point<int>> getTwoLineRegion( Nets* NET1 , Nets* NET2 );
+        int getViaWidth ( Nets * via ) ;
     private:
 };
 
