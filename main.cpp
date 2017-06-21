@@ -53,8 +53,10 @@ int main(int argc,  char * argv[])
 //    f.Demo();
 //    Graph_SP g ;
 //    g.Demo();
-    DetailRouter dr ;
-    
+    GlobalRouter gr ;
+    gr.Route();
+//    DetailRouter dr ;
+//    dr.DetailRoute();
     //GlobalRouter gr ;
     //gr.Route();
 //    int x = 1;

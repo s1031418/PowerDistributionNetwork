@@ -21,3 +21,8 @@ void Weights::Init()
 {
     
 }
+
+unsigned Weights::CostFunction()
+{
+    return 0;
+}

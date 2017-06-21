@@ -24,8 +24,6 @@ public:
     ~RouterUtil();
     
     
-    
-    
     // 判斷這個grid是否為block
     bool IsBlock(Grid grid);
     // 第一個為是不是屬於這個Block，第二個這個Block Name
@@ -34,7 +32,7 @@ public:
     
 private:
     
-    PDNHelper helper ;
+    
     void InitBlockMap();
     // key:BlockName , value:那個block的左下及右上座標
     map<string, pair<Point<int>, Point<int>>> BlockMap;

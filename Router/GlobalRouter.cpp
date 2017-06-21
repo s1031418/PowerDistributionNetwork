@@ -13,7 +13,17 @@
 
 GlobalRouter::GlobalRouter()
 {
-    initGrids();
+    
+    // Init lowest and highest
+    vector<string> metals ;
+    for( auto x : LayerMaps )
+    {
+        if( x.second.TYPE == "ROUTING" )
+            metals.push_back(x.first);
+    }
+    lowest = stoi(metals[0].substr(5));
+    highest = stoi(metals[metals.size()-1].substr(5));
+    InitGrids();
 //    toGridGraph();
 }
 
@@ -46,8 +56,10 @@ void GlobalRouter::toGridGraph()
     }
     
 }
-void GlobalRouter::initGrids()
+void GlobalRouter::InitGrids()
 {
+    cout << "Begin Initialize Global Grid Graph ..." << endl;
+    clock_t Start = clock();
     CutByBlockBoundary();
 //    CutByUserDefine();
     Point<int> startpoint(0,0) ;
@@ -57,11 +69,11 @@ void GlobalRouter::initGrids()
         for(auto v : Vertical)
         {
             Grid grid ;
+            grid.capacities.resize(highest+1);
             Point<int> CrossPoint(v,h);
             grid.width = CrossPoint.x - startpoint.x ;
             grid.length = CrossPoint.y - startpoint.y ;
             grid.startpoint = startpoint ;
-            
             pair<bool, string> result = RouterHelper.IsBlock(startpoint, Point<int>( startpoint.x + grid.width , startpoint.y + grid.length ) );
             if( get<0>(result) )
             {
@@ -70,6 +82,23 @@ void GlobalRouter::initGrids()
                 grid.lowermetal = stoi(begin->first.substr(5));
                 grid.uppermetal = stoi(end->first.substr(5));
             }
+            // 代表非Block的區域
+            if( grid.lowermetal == 0 && grid.uppermetal  == 0)
+            {
+                for( int i = lowest ; i <= highest ; i++ )
+                    grid.capacities[i] = grid.width * grid.length ;
+            }
+            else
+            {
+                for( int i = lowest ; i <= highest ; i++ )
+                {
+                    if( i >= grid.lowermetal && i <= grid.uppermetal )
+                        grid.capacities[i] = 0 ;
+                    else
+                        grid.capacities[i] = grid.width * grid.length ;
+                }
+            }
+            
             startpoint.x += (CrossPoint.x - startpoint.x) ;
             temp.push_back(grid);
         }
@@ -77,124 +106,265 @@ void GlobalRouter::initGrids()
         startpoint.y = h ;
         Grids.push_back(temp);
     }
-    
-//    for(auto a : Grids)
-//    {
-//        for(auto b : a)
-//        {
-//            Point<int> rightup(b.startpoint.x+b.width , b.startpoint.y + b.length);
-//            cout << "LeftDown:" << b.startpoint << " RightUp:" <<  rightup;
-//            cout << "[ " << b.lowermetal << "," << b.uppermetal << " ]" << endl;
-//        }
-//    }
+    clock_t End = clock();
+    double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
+    cout << "Initialize Global Grid Graph Done" << endl ;
+    cout << "We cost " << duration << "(s)" << endl;
+//    printAllGrids();
     
 }
-
-void GlobalRouter::initGraph_SP()
+void GlobalRouter::printAllGrids()
 {
-    int Size = (int)(Grids[0].size() * Grids.size()) ;
+    
+    for(auto a : Grids)
+    {
+        for(auto b : a)
+        {
+            Point<int> rightup(b.startpoint.x+b.width , b.startpoint.y + b.length);
+            cout << "LeftDown:" << b.startpoint << " RightUp:" <<  rightup;
+            cout << "[ " << b.lowermetal << "," << b.uppermetal << " ]" << endl;
+            cout << "OverFlow:" << boolalpha << b.overflow << endl;
+            cout << "Capacities:" << endl ;
+            for( int i = 0 ; i < b.capacities.size() ; i++ )
+                cout << "Layer" << i << ":" << b.capacities[i] << endl;
+            cout << "----------------------------------------------------------------" << endl;
+        }
+        
+    }
+}
+TwoDGridLocation GlobalRouter::get2DGridLocation(int x , int y)
+{
+    int x_lowest = 0 ;
+    int x_highest = (int)Grids[0].size() - 1;
+    int y_lowest = 0 ;
+    int y_highest = (int)Grids.size() -1 ;
+    
+    if( x == x_lowest && y == y_lowest ) return vertex_leftdown ;
+    else if( x == x_lowest && y == y_highest ) return vertex_leftup ;
+    else if( x == x_highest && y == y_lowest ) return vertex_rightdown ;
+    else if( x == x_highest && y == y_highest ) return vertex_rightup ;
+    else if ( x == x_lowest ) return border_left ;
+    else if( x == x_highest ) return border_right ;
+    else if( y == y_lowest ) return border_bottom ;
+    else if( y == y_highest ) return border_top ;
+    else return other_2D ;
+    assert(0);
+    return other_2D ;
+}
+pair<TwoDGridLocation, ThreeDGridLocation> GlobalRouter::getGridLocation(int x , int y , int z )
+{
+    TwoDGridLocation TwoD = get2DGridLocation(x, y);
+    ThreeDGridLocation ThreeD = get3DGridLocation(z);
+    return make_pair(TwoD, ThreeD);
+}
+ThreeDGridLocation GlobalRouter::get3DGridLocation( int z)
+{
+    if( z == lowest ) return bottom ;
+    else if (z == highest) return top ;
+    else return other_3D ;
+    assert(0);
+    return other_3D ;
+//    
+//    if( z == z_lowest )
+//    {
+//        if( x == lowest && y == lowest ) return vertex_Bottom ;
+//        if( x == x_lowest && y == y_highest )  return vertex_Bottom ;
+//        if( x == x_highest && y == y_lowest )  return vertex_Bottom ;
+//        if( x == x_highest && y == y_highest ) return vertex_Bottom ;
+//        if( x == lowest && y != y_lowest && y != y_highest )
+//    }
+//    else if( z == z_highest )
+//    {
+//        
+//    }
+//    if( z == z_lowest && x == x_lowest && y == y_lowest  )  return vertex_3D ;
+//    if( z == z_lowest && x == x_lowest && y == y_highest )  return vertex_3D ;
+//    if( z == z_lowest && x == x_highest && y == y_lowest )  return vertex_3D ;
+//    if( z == z_lowest && x == x_highest && y == y_highest ) return vertex_3D ;
+//    if( z == z_highest && x == x_lowest && y == y_lowest  )  return vertex_3D ;
+//    if( z == z_highest && x == x_lowest && y == y_highest )  return vertex_3D ;
+//    if( z == z_highest && x == x_highest && y == y_lowest )  return vertex_3D ;
+//    if( z == z_highest && x == x_highest && y == y_highest )  return vertex_3D ;
+//    if( z == )
+//    return vertex ;
+}
+int GlobalRouter::translate3D_1D(int x , int y , int z)
+{
+    return translate2D_1D(x, y) +  (int)((z - 1) * Grids[0].size() * Grids.size() );
+}
+void GlobalRouter::InitGraph_SP()
+{
+    cout << "Begin Initialize 3D Shortest Path Graph ..." << endl;
+    clock_t Start = clock();
+    int Size = (int)(Grids[0].size() * Grids.size() * highest ) ;
     graph.resize(Size);
     int RowSize = (int)Grids.size() - 1;
     int ColSize = (int)Grids[0].size() - 1;
-    for(int row = 0 ; row <= RowSize ; row++)
+    int weight = 0 ;
+    Edge edge ;
+    for( int z = lowest ; z <= highest ; z++ )
     {
-        for( int col = 0 ; col <= ColSize ; col++ )
+        for( int y = 0 ; y <= ColSize ; y++)
         {
-            // 四周端點
-            if( (row == 0 && col == 0) || (row == RowSize && col == 0 )  || ( row == 0 && col == ColSize ) || ( row == RowSize && col == ColSize ) )
+            for( int x = 0 ; x <= RowSize ; x++ )
             {
-                // 左下
-                if( row == 0 && col == 0 )
+                int from = translate3D_1D(x, y, z);
+                vector<Edge> edges ;
+                auto location = getGridLocation(x, y, z);
+                switch (location.first)
                 {
-                    int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D(col , row), translate2D_1D(col, row + 1) , weight );
-                    weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D(col , row), translate2D_1D(col+1 , row) , weight );
+                    case vertex_rightup:
+                        
+                        weight = 1 ;
+                        edge.weight = weight ;
+                        edge.to = translate3D_1D(x+1 , y , z);
+                        edges.push_back(edge);
+                        break;
+                    case vertex_rightdown:
+                        break;
+                    case vertex_leftup:
+                        break;
+                    case vertex_leftdown:
+                        break;
+                    case border_top:
+                        break;
+                    case border_bottom :
+                        break;
+                    case border_right :
+                        break;
+                    case border_left:
+                        break;
+                    case other_2D:
+                        break;
+                    default:
+                        break;
                 }
-                //左上
-                else if ( row == RowSize && col == 0  )
+                switch (location.second)
                 {
-                    int weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D(col , row), translate2D_1D(col , row -1 ), weight);
-                    weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D(col , row), translate2D_1D( col + 1 , row ), weight);
+                    case top:
+                        weight = 1 ;
+                        edge.weight = weight ;
+                        edge.to = translate3D_1D(x , y , z-1);
+                        edges.push_back(edge);
+                        break;
+                    case bottom:
+                        break;
+                    case other_3D:
+                        break;
+                    default:
+                        break;
                 }
-                //右下
-                else if (row == 0 && col == ColSize)
+                for( auto edge : edges )
                 {
-                    int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D(col , row ), translate2D_1D( col  , row + 1 ), weight);
-                    weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col - 1 , row ), weight);
+                    graph.AddEdge(from, edge.to, edge.weight);
                 }
-                //右上
-                else
-                {
-                    int weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col  , row - 1), weight);
-                    weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D(col , row ), translate2D_1D( col - 1 , row ), weight);
-                }
-            }
-            // 四周
-            else if( col == 0 || row == 0 || row == RowSize || col == ColSize )
-            {
-                // 下
-                if( row == 0 )
-                {
-                    int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row + 1 ), weight);
-                    weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col +1 , row ), weight);
-                    weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col-1 , row ), weight);
-                }
-                // 左
-                else if ( col == 0 )
-                {
-                    int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row + 1 ), weight);
-                    weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col +1 , row ), weight);
-                    weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row - 1), weight);
-                }
-                // 上
-                else if ( row == RowSize )
-                {
-                    int weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row - 1), weight);
-                    weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col +1 , row ), weight);
-                    weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col-1 , row ), weight);
-                }
-                // 右
-                else
-                {
-                    int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row + 1 ), weight);
-                    weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col-1 , row ), weight);
-                    weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row - 1), weight);
-                }
-            }
-            // 四周
-            else
-            {
-                int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-                graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row + 1 ), weight);
-                weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-                graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row - 1), weight);
-                weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-                graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col-1 , row ), weight);
-                weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-                graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col +1 , row ), weight);
             }
         }
     }
     
+    
+//    for(int row = 0 ; row <= RowSize ; row++)
+//    {
+//        for( int col = 0 ; col <= ColSize ; col++ )
+//        {
+//            // 四周端點
+//            if( (row == 0 && col == 0) || (row == RowSize && col == 0 )  || ( row == 0 && col == ColSize ) || ( row == RowSize && col == ColSize ) )
+//            {
+//                // 左下
+//                if( row == 0 && col == 0 )
+//                {
+//                    int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D(col , row), translate2D_1D(col, row + 1) , weight );
+//                    weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D(col , row), translate2D_1D(col+1 , row) , weight );
+//                }
+//                //左上
+//                else if ( row == RowSize && col == 0  )
+//                {
+//                    int weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D(col , row), translate2D_1D(col , row -1 ), weight);
+//                    weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D(col , row), translate2D_1D( col + 1 , row ), weight);
+//                }
+//                //右下
+//                else if (row == 0 && col == ColSize)
+//                {
+//                    int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D(col , row ), translate2D_1D( col  , row + 1 ), weight);
+//                    weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col - 1 , row ), weight);
+//                }
+//                //右上
+//                else
+//                {
+//                    int weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col  , row - 1), weight);
+//                    weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D(col , row ), translate2D_1D( col - 1 , row ), weight);
+//                }
+//            }
+//            // 四周
+//            else if( col == 0 || row == 0 || row == RowSize || col == ColSize )
+//            {
+//                // 下
+//                if( row == 0 )
+//                {
+//                    int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row + 1 ), weight);
+//                    weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col +1 , row ), weight);
+//                    weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col-1 , row ), weight);
+//                }
+//                // 左
+//                else if ( col == 0 )
+//                {
+//                    int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row + 1 ), weight);
+//                    weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col +1 , row ), weight);
+//                    weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row - 1), weight);
+//                }
+//                // 上
+//                else if ( row == RowSize )
+//                {
+//                    int weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row - 1), weight);
+//                    weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col +1 , row ), weight);
+//                    weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col-1 , row ), weight);
+//                }
+//                // 右
+//                else
+//                {
+//                    int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row + 1 ), weight);
+//                    weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col-1 , row ), weight);
+//                    weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
+//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row - 1), weight);
+//                }
+//            }
+//            // 四周
+//            else
+//            {
+//                int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
+//                graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row + 1 ), weight);
+//                weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
+//                graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row - 1), weight);
+//                weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
+//                graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col-1 , row ), weight);
+//                weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
+//                graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col +1 , row ), weight);
+//            }
+//        }
+//    }
+    clock_t End = clock();
+    double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
+    cout << "3D Shortest Path Graph Done" << endl ;
+    cout << "We cost " << duration << "(s)" << endl;
 }
 pair<int, int> GlobalRouter::getGridCoordinate( Point<int> LeftDown , Point<int> RightUp )
 {
@@ -288,7 +458,11 @@ pair<int, int> GlobalRouter::ripple(int X , int Y)
 }
 void GlobalRouter::Route()
 {
-    initGraph_SP();
+    cout << "Begin Global Routing ..." << endl;
+    clock_t Start = clock();
+    // 走Dijkstra時，將所有Block都不視為障礙物
+    // 但是使用Flute的時候，並不會讓steiner point 落在 障礙物上
+    InitGraph_SP();
     flute_net flute;
     cout << "Global Routing:" << endl;
     for( auto it = Connection.begin(), end = Connection.end(); it != end;it = Connection.upper_bound(it->first))
@@ -355,6 +529,7 @@ void GlobalRouter::Route()
             cout << endl;
             graph.Dijkstra( translate2D_1D(SGridCoordinate.first, SGridCoordinate.second));
             vector<int> Path  = graph.getPath( translate2D_1D ( TGridCoordinate.first ,TGridCoordinate.second ) );
+            
             printPath(Path);
             cout << endl;
 //            cout << "Grid:" ;
@@ -366,7 +541,10 @@ void GlobalRouter::Route()
         }
         cout << "------------------------------------end------------------------------------" << endl;
     }
-    
+    clock_t End = clock();
+    double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
+    cout << "Global Routing Done" << endl ;
+    cout << "We cost " << duration << "(s)" << endl;
 }
 Point<int> GlobalRouter::getTerminalCoordinate(int x , int y , int target , vector<node> & SteierTree)
 {

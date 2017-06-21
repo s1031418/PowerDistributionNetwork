@@ -19,7 +19,7 @@ void RouterUtil::InitBlockMap()
 {
     for( auto component : ComponentMaps )
     {
-        pair<Point<int>,Point<int>> coordinate = helper.getBlockCoordinate(component.second.STARTPOINT.x, component.second.STARTPOINT.y, MacroMaps[ component.second.MACROTYPE ].WIDTH * UNITS_DISTANCE, MacroMaps[ component.second.MACROTYPE ].LENGTH * UNITS_DISTANCE, component.second.ORIENT);
+        pair<Point<int>,Point<int>> coordinate = this->getBlockCoordinate(component.second.STARTPOINT.x, component.second.STARTPOINT.y, MacroMaps[ component.second.MACROTYPE ].WIDTH * UNITS_DISTANCE, MacroMaps[ component.second.MACROTYPE ].LENGTH * UNITS_DISTANCE, component.second.ORIENT);
         BlockMap.insert(make_pair(component.second.MACROTYPE, coordinate));
     }
 }

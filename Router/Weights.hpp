@@ -23,6 +23,7 @@ class Weights
 public:
     Weights(); // defalut constrctor
     ~Weights();
+    unsigned CostFunction();
     void SetWidth();
     map<string,double> metal_weights ;
     map<string,double> via_weights ;

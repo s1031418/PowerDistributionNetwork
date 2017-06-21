@@ -24,9 +24,32 @@
 // User Define Parameters
 // Define Global Routing Grid Size
 // Grid Size = Scaling * minimal space
-const unsigned Scaling = 500 ;
+const unsigned Scaling = 100 ;
+const unsigned DEFAULT_WIDTH = 10 * UNITS_DISTANCE ; 
 
+enum TwoDGridLocation
+{
+    vertex_leftdown ,
+    vertex_leftup ,
+    vertex_rightdown ,
+    vertex_rightup ,
+    border_left ,
+    border_right ,
+    border_top ,
+    border_bottom ,
+    other_2D
+};
+enum ThreeDGridLocation
+{
+    top ,
+    bottom ,
+    other_3D
+};
 
+struct Edge {
+    int to ;
+    int weight ; 
+};
 class GlobalRouter {
     
     
@@ -36,15 +59,27 @@ public:
     void Route();
     void toGridGraph();
     
-    
+    unsigned defalutPitch ;
+    vector< vector< Grid > > Grids ;
 private:
     // variable:
     RouterUtil RouterHelper; 
     Graph_SP graph;
     set<int> Vertical ;
     set<int> Horizontal ;
-    vector< vector< Grid > > Grids ;
     
+    unsigned lowest ; // lowest metal layer
+    unsigned highest ; // highest metal layer 
+    
+    
+    void printAllGrids();
+    
+        
+    ThreeDGridLocation get3DGridLocation(int z);
+    
+    TwoDGridLocation get2DGridLocation(int x , int y);
+    
+    pair<TwoDGridLocation, ThreeDGridLocation> getGridLocation(int x , int y , int z );
     // key:BlockName , value:那個block的左下及右上座標
     map<string, pair<Point<int>, Point<int>>> BlockMap;
     // -----------------------------------------------------
@@ -56,14 +91,16 @@ private:
     // Cut By Minimal Space ( uniform )
     void CutByUserDefine();
     
-    void initGrids();
+    void InitGrids();
     
-    void initGraph_SP();
+    void InitGraph_SP();
     
     // 轉換2d座標為1d
     int translate2D_1D(int x , int y);
     // 轉換1d座標為2d
     pair<int, int> translate1D_2D(int index);
+    
+    int translate3D_1D(int x , int y , int z);
     
     // 給我一個方塊的左下右上，算出他在哪些Grid裡面
     // 如果這個方塊介於兩個的Grid之間

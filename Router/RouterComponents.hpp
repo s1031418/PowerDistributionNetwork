@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include "Components.h"
 #include <map>
+#include <vector>
 class Border
 {
     std::pair<Point<unsigned>, Point<unsigned>> LeftEdge ;
@@ -29,9 +30,9 @@ class Border
 class GridComponent
 {
     // 上下左右
-    unsigned int capacity = 4 ;
-    bool overflow = false ;
-    Border border ;
+    unsigned int capacity = 0 ;
+    
+    //Border border ;
 };
 
 class Grid
@@ -43,8 +44,10 @@ public:
     //  非block 的 Grid 兩個metal都為0 
     unsigned int lowermetal = 0 ;
     unsigned int uppermetal = 0 ;
+    bool overflow = false ;
+    std::vector<unsigned> capacities ;
     // key為metal層
-    std::map<std::string,GridComponent> layers ;
+    //std::map<std::string,GridComponent> layers ;
 };
 
 
