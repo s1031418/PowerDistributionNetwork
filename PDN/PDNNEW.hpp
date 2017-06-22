@@ -26,6 +26,7 @@ class PDNNEW
         void initDataByBFS();
         void initLineInLayer();
         void getRoutingResource();
+        void freeMem();
     private:
 };
 #endif

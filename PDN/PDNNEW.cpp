@@ -1,6 +1,8 @@
 #include "PDNNEW.hpp"
+#include <stdlib.h>
 #include "../Parsers/defrw.h"
 #include "../Parsers/lefrw.h"
+#include <queue>
 void PDNNEW::pushNetsinMyLineVector( vector <Mylineinfor*> &AllLineFormPin , Nets NET)
 {
     Mylineinfor * ptr = new Mylineinfor ;
@@ -70,13 +72,6 @@ void PDNNEW::getRoutingResource(   )
 
 void PDNNEW::initGraphRootMap()
 {
-    //add PowerPin
-    for(auto PinName : HelpMe.PinNames)
-    {
-
-    }
-    //add BlockPin
-
 }
 void PDNNEW::initLineInLayer()
 {
@@ -95,7 +90,108 @@ void PDNNEW::initLineInLayer()
     }
     for ( int i = 0 ; i < AllLine.size();i++ )
         LinesOfLayer[AllLine[i]->MetalName].push_back(AllLine[i]);
+    //add PowerPin to Line (H wire)
+    for ( auto PinName : HelpMe.PinNames)
+    {
+        if( PinMaps[PinName].PortMaps.size()!=0)
+        {
+        }
+        else 
+        {
+            Mylineinfor * ptr = new Mylineinfor;
+            ptr->MetalName = PinMaps[PinName].METALNAME ;
+            ptr->isPowerPinPseudo = 1 ;
+            pair<Point<int>,Point<int>> getTmpPair;
+            getTmpPair = HelpMe.getPowerPinCoordinate(PinMaps[PinName].STARTPOINT.x ,PinMaps[PinName].STARTPOINT.y , PinMaps[PinName].RELATIVE_POINT1 , PinMaps[PinName].RELATIVE_POINT2 , PinMaps[PinName].ORIENT );
+            ptr->Width = getTmpPair.second.y - getTmpPair.first.y ;
+            ptr->pt1.x = getTmpPair.first.x ;
+            ptr->pt1.y = (getTmpPair.first.y + getTmpPair.second.y) / 2 ;
+            ptr->pt2.x = getTmpPair.second.x;
+            ptr->pt2.y = (getTmpPair.first.y + getTmpPair.second.y) / 2 ;
+            ptr->isHorizontal = 1 ;
+            LinesOfLayer[ptr->MetalName].push_back(ptr);
+            //cout<<ptr->pt1 <<" "<<ptr->pt2 <<" "<<ptr->MetalName <<endl;
+            AllLine.push_back(ptr);
+        }
+    }
+    //add blockPin to Line ( H wire )
+    for (auto it = ComponentMaps.begin(); it != ComponentMaps.end();++it )
+    {
+        for ( auto MacroType_it = MacroMaps[it->second.MACROTYPE].obs.InnerMaps.begin(); MacroType_it != MacroMaps[it->second.MACROTYPE].obs.InnerMaps.end() ; ++ MacroType_it )
+        {
+            pair<Point<int>,Point<int>>getTmpPair;
+            double getLength = MacroMaps[it->second.MACROTYPE].LENGTH;
+            double getWidth  = MacroMaps[it->second.MACROTYPE].WIDTH;
+            getLength *= UNITS_DISTANCE;
+            getWidth  *= UNITS_DISTANCE;
+            getTmpPair = HelpMe.getBlockCoordinate( it->second.STARTPOINT.x ,it->second.STARTPOINT.y , int(getWidth) , int(getLength) , it->second.ORIENT );
+            Mylineinfor * ptr = new Mylineinfor;
+            ptr->isBlockPseudo = 1;
+            ptr->MetalName = MacroType_it->second.NAME;
+            ptr->Width = getTmpPair.second.y - getTmpPair.first.y ;
+            ptr->pt1.x = getTmpPair.first.x ;
+            ptr->pt1.y = (getTmpPair.first.y + getTmpPair.second.y) / 2 ;
+            ptr->pt2.x = getTmpPair.second.x;
+            ptr->pt2.y = (getTmpPair.first.y + getTmpPair.second.y) / 2 ;
+            ptr->isHorizontal = 1 ;
+            LinesOfLayer[ptr->MetalName].push_back(ptr);
+            AllLine.push_back(ptr);
+        }
+    }
+    for (auto it = HelpMe.BlockMaps.begin() ; it != HelpMe.BlockMaps.end();++it)
+    {
+        for(int i = 0 ; i < it->second.size();i++)
+        {
+            for(int j = 0 ; j < it->second[i].Metals.size();j++)
+            {
+                Mylineinfor * ptr = new Mylineinfor;
+                ptr->MetalName = it->second[i].Metals[j];
+                ptr->isBlockPinPseudo = 1 ;
+                ptr->isHorizontal = 1 ;
+                ptr->Width = it->second[i].RightUp.y - it->second[i].LeftDown.y;
+                ptr->pt1.x = it->second[i].LeftDown.x ;
+                ptr->pt1.y = (it->second[i].RightUp.y + it->second[i].LeftDown.y )/2;
+                ptr->pt2.x = it->second[i].RightUp.x;
+                ptr->pt2.y = (it->second[i].RightUp.y + it->second[i].LeftDown.y )/2;
+                LinesOfLayer[ptr->MetalName].push_back(ptr);
+                AllLine.push_back(ptr);
+            }
+        }
+    }
+    //for( int  i = 0 ; i < AllLine.size() ; i++)
+    //{
+        //cout<<AllLine[i]->pt1<<" "<<AllLine[i]->pt2<<" "<<AllLine[i]->MetalName<<" "<<AllLine[i]->Width<<endl;
+    //}
+    for(auto it = LinesOfLayer.begin();it != LinesOfLayer.end();++it)
+    {
+        for(int i = 0 ; i < it->second.size();i++)
+            cout<<it->second[i]->pt1<<" "<<it->second[i]->pt2<<" "<<it->second[i]->MetalName<<endl;
+    }
+}
+void PDNNEW::freeMem()
+{
+    for(int i = AllLine.size()-1 ; i >=0 ; i--)
+        delete AllLine[i];
 }
 void PDNNEW::initDataByBFS()
 {
+    vector<bool>isTrav;
+    isTrav.resize(AllLine.size());
+    for(int i = 0 ; i < isTrav.size();i++)
+    {
+        if(AllLine[i]->isBlockPseudo)
+            isTrav[i] = 1 ;
+        else 
+            isTrav[i] = 0 ;
+    }
+    queue <Mylineinfor*> Queue;
+    for(int i = 0 ; i < AllLine.size();i++)
+    {
+        if(AllLine[i]->isPowerPinPseudo)
+            Queue.push(AllLine[i]);
+    }
+    while(Queue.size() != 0)
+    {
+
+    }
 }
