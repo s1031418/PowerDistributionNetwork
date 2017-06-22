@@ -21,6 +21,7 @@ class PDNNEW
         vector<Mylineinfor* > AllLine;
         map <string , Mylineinfor* >Graph; //hash PinName to Root 
         map <string , vector<Mylineinfor*> > LinesOfLayer;//using metalname to hash that lines of layer ;
+        bool isCross( Mylineinfor* line_1 , Mylineinfor* line_2  );
         void initGraphRootMap();
         void pushNetsinMyLineVector( vector <Mylineinfor*> &AllLineFormPin , Nets NET);
         void initDataByBFS();

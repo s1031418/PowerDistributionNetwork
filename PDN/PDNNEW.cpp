@@ -162,11 +162,11 @@ void PDNNEW::initLineInLayer()
     //{
         //cout<<AllLine[i]->pt1<<" "<<AllLine[i]->pt2<<" "<<AllLine[i]->MetalName<<" "<<AllLine[i]->Width<<endl;
     //}
-    for(auto it = LinesOfLayer.begin();it != LinesOfLayer.end();++it)
-    {
-        for(int i = 0 ; i < it->second.size();i++)
-            cout<<it->second[i]->pt1<<" "<<it->second[i]->pt2<<" "<<it->second[i]->MetalName<<endl;
-    }
+    //for(auto it = LinesOfLayer.begin();it != LinesOfLayer.end();++it)
+    //{
+        //for(int i = 0 ; i < it->second.size();i++)
+            //cout<<it->second[i]->pt1<<" "<<it->second[i]->pt2<<" "<<it->second[i]->MetalName<<endl;
+    //}
 }
 void PDNNEW::freeMem()
 {
@@ -175,23 +175,86 @@ void PDNNEW::freeMem()
 }
 void PDNNEW::initDataByBFS()
 {
-    vector<bool>isTrav;
-    isTrav.resize(AllLine.size());
-    for(int i = 0 ; i < isTrav.size();i++)
-    {
-        if(AllLine[i]->isBlockPseudo)
-            isTrav[i] = 1 ;
-        else 
-            isTrav[i] = 0 ;
-    }
+    //initial is Traversal
+    //Time Complex is O^2
     queue <Mylineinfor*> Queue;
     for(int i = 0 ; i < AllLine.size();i++)
     {
+        if(AllLine[i]->isBlockPseudo)
+            AllLine[i]->isTraversal = 1 ;
+        else 
+            AllLine[i] = 0 ;
         if(AllLine[i]->isPowerPinPseudo)
             Queue.push(AllLine[i]);
     }
     while(Queue.size() != 0)
     {
-
+        if(Queue.front()->isTraversal)
+            Queue.pop();
+        for ( int i = 0 ; i < AllLine.size();i++ )
+        {
+            //if( AllLine[i]-> )
+        }
+        Queue.front()->isTraversal = 1 ;
+        Queue.pop();
     }
+}
+bool PDNNEW::isCross(Mylineinfor* line_1 , Mylineinfor* line_2)
+{
+    Point<int>l_1_mid;
+    Point<int>l_2_mid;
+    if(!line_1->isPsedoLine)
+    {
+        l_1_mid.x = (line_1->pt1.x + line_1->pt2.x ) / 2 ;
+        l_1_mid.y = (line_1->pt1.y + line_1->pt2.y ) / 2 ;
+    }
+    if(!line_2->isPsedoLine)
+    {
+        l_2_mid.x = (line_2->pt1.x + line_2->pt2.x ) / 2 ;
+        l_2_mid.y = (line_2->pt1.y + line_2->pt2.y ) / 2 ;
+    }
+    int l1_x_r;
+    int l1_y_r;
+    int l2_x_r;
+    int l2_y_r;
+    if( line_1->isHorizontal&&!line_1->isPsedoLine ) // line_1 is H wire && != via
+    {
+        l1_x_r = ( line_1->pt2.x - line_1->pt1.x ) / 2 ;
+        l1_y_r = ( line_1->Width ) / 2 ;
+    }
+    else if( !line_1->isHorizontal&&!line_1->isPsedoLine )  //line_1 is V wire && != via
+    {
+        l1_x_r = ( line_1->Width / 2 ) ;
+        l1_y_r = ( line_1->pt2.y - line_1->pt1.y ) / 2 ;
+    }
+    if( line_2->isHorizontal&&!line_2->isPsedoLine ) // line_2 is H wire && != via
+    {
+        l2_x_r = ( line_2->pt2.x - line_2->pt1.x  ) / 2 ;
+        l2_y_r = ( line_2->Width ) / 2 ;
+    }
+    else if( !line_2->isHorizontal&&!line_2->isPsedoLine) //line_2 is V wire
+    {
+        l2_x_r = ( line_2->Width / 2 ) ;
+        l2_y_r = ( line_2->pt2.y - line_2->pt1.y ) / 2 ;
+    }
+    if(line_1->isPsedoLine)
+    {
+        l_1_mid = line_1->pt1 ;
+        l1_x_r = line_1->ViaOutsideWidth;
+        l1_y_r = line_1->ViaOutsideWidth;
+    }
+    if(line_2->isPsedoLine)
+    {
+        l_2_mid = line_2->pt1 ;
+        l2_x_r = line_2->ViaOutsideWidth;
+        l2_y_r = line_2->ViaOutsideWidth;
+    }
+    int V_Distance  = abs(l_2_mid.x - l_1_mid.x);
+    int H_Distance  = abs(l_2_mid.y - l_1_mid.y);
+    int V_Threshold = l1_x_r + l2_x_r;
+    int H_Threshold = l1_y_r + l2_y_r;
+    
+    if (V_Distance > V_Threshold || H_Distance > H_Threshold )
+        return false ;
+    return true ;
 }
