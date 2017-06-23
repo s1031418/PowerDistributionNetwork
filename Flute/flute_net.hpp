@@ -15,6 +15,7 @@
 #include "flute.h"
 #include "Components.h"
 #include <iostream>
+#include <cmath>
 #include <iomanip>
 using namespace std;
 
@@ -25,14 +26,20 @@ public:
     flute_net();
     ~flute_net();
     
-    void getSteinerTree(vector<Point<int>> Points);
+    void getSteinerTree(vector<Point<int>> Point);
+    
     void printSteinerTree();
     void printDebugMeg();
     void Demo();
-    
+    int getShortestPath( Point<int> source , Point<int> target );
     vector<node> SteinerTree ;
     int length ;
-    int length_noRSMT ; 
+    int length_noRSMT ;
+    
+    
+private:
+    pair<unsigned, unsigned> getSourceTargetIdx(Point<int> source , Point<int> target); // ( source index , target index ) in SteinerTree
+    unsigned getManhattanDistance(Point<int> pt1 , Point<int> pt2);
 };
 
 #endif /* flute_net_hpp */

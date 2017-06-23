@@ -31,6 +31,42 @@ void flute_net::printSteinerTree()
     printf("FLUTE wirelength = %d\n", length);
     printf("FLUTE wirelength (without RSMT construction) = %d\n", length_noRSMT);
 }
+int flute_net::getShortestPath( Point<int> source , Point<int> target )
+{
+    printSteinerTree();
+    if( SteinerTree.size() == 2 )
+    {
+        return length ;
+    }
+    else
+    {
+        auto index = getSourceTargetIdx(source, target);
+        
+    }
+    
+    
+    
+    return 1;
+}
+unsigned flute_net::getManhattanDistance(Point<int> pt1 , Point<int> pt2)
+{
+    return abs(pt1.x - pt2.x) + abs(pt1.y - pt2.y) ;
+}
+pair<unsigned, unsigned> flute_net::getSourceTargetIdx(Point<int> source , Point<int> target)
+{
+    int SIdx = 0 ; // Source index
+    int TIdx = 0 ; // Target index
+    int Index = 0 ;
+    for( auto node : SteinerTree )
+    {
+        if( node.x == source.x && node.y == source.y  )
+            SIdx = Index ;
+        if( node.x == target.x && node.y == target.y)
+            TIdx = Index;
+        Index++ ;
+    }
+    return make_pair(SIdx, TIdx);
+}
 void flute_net::getSteinerTree(vector<Point<int>> Points)
 {
     SteinerTree.clear();

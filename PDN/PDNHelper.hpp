@@ -86,6 +86,7 @@ public:
     string NETSMULTIMAPSToString(multimap<string,Nets> & NETSMULTIMAPS);
     
     
+    Point<int> getCenter( Point<int> LeftDown , Point<int> RightUp );
     
 };
 

@@ -430,6 +430,15 @@ class Block {
         DIRECTION Direction;
 };
 
+class Rectangle
+{
+public:
+    Rectangle(){};
+    Point<unsigned> LeftDown ;
+    Point<unsigned> RightUp ;
+};
+
+
 
 
 #endif /* Components_h */

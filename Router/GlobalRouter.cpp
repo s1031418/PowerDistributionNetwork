@@ -10,7 +10,6 @@
 
 
 
-
 GlobalRouter::GlobalRouter()
 {
     
@@ -360,105 +359,6 @@ void GlobalRouter::InitGraph_SP()
         }
     }
     
-    
-//    for(int row = 0 ; row <= RowSize ; row++)
-//    {
-//        for( int col = 0 ; col <= ColSize ; col++ )
-//        {
-//            // 四周端點
-//            if( (row == 0 && col == 0) || (row == RowSize && col == 0 )  || ( row == 0 && col == ColSize ) || ( row == RowSize && col == ColSize ) )
-//            {
-//                // 左下
-//                if( row == 0 && col == 0 )
-//                {
-//                    int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D(col , row), translate2D_1D(col, row + 1) , weight );
-//                    weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D(col , row), translate2D_1D(col+1 , row) , weight );
-//                }
-//                //左上
-//                else if ( row == RowSize && col == 0  )
-//                {
-//                    int weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D(col , row), translate2D_1D(col , row -1 ), weight);
-//                    weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D(col , row), translate2D_1D( col + 1 , row ), weight);
-//                }
-//                //右下
-//                else if (row == 0 && col == ColSize)
-//                {
-//                    int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D(col , row ), translate2D_1D( col  , row + 1 ), weight);
-//                    weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col - 1 , row ), weight);
-//                }
-//                //右上
-//                else
-//                {
-//                    int weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col  , row - 1), weight);
-//                    weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D(col , row ), translate2D_1D( col - 1 , row ), weight);
-//                }
-//            }
-//            // 四周
-//            else if( col == 0 || row == 0 || row == RowSize || col == ColSize )
-//            {
-//                // 下
-//                if( row == 0 )
-//                {
-//                    int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row + 1 ), weight);
-//                    weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col +1 , row ), weight);
-//                    weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col-1 , row ), weight);
-//                }
-//                // 左
-//                else if ( col == 0 )
-//                {
-//                    int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row + 1 ), weight);
-//                    weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col +1 , row ), weight);
-//                    weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row - 1), weight);
-//                }
-//                // 上
-//                else if ( row == RowSize )
-//                {
-//                    int weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row - 1), weight);
-//                    weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col +1 , row ), weight);
-//                    weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col-1 , row ), weight);
-//                }
-//                // 右
-//                else
-//                {
-//                    int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row + 1 ), weight);
-//                    weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col-1 , row ), weight);
-//                    weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-//                    graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row - 1), weight);
-//                }
-//            }
-//            // 四周
-//            else
-//            {
-//                int weight = ( RouterHelper.IsBlock(Grids[row+1][col]) ) ? Max_Distance : 1 ;
-//                graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row + 1 ), weight);
-//                weight = ( RouterHelper.IsBlock(Grids[row-1][col]) ) ? Max_Distance : 1 ;
-//                graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col , row - 1), weight);
-//                weight = ( RouterHelper.IsBlock(Grids[row][col-1]) ) ? Max_Distance : 1 ;
-//                graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col-1 , row ), weight);
-//                weight = ( RouterHelper.IsBlock(Grids[row][col+1]) ) ? Max_Distance : 1 ;
-//                graph.AddEdge(translate2D_1D( col , row ), translate2D_1D(col +1 , row ), weight);
-//            }
-//        }
-//    }
     clock_t End = clock();
     double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
     cout << "3D Shortest Path Graph Done" << endl ;
@@ -554,6 +454,55 @@ pair<int, int> GlobalRouter::ripple(int X , int Y)
 {
     return make_pair(0, 0);
 }
+
+vector<Path> GlobalRouter::getNetOrdering()
+{
+    map<double,Path> orders;
+    vector<Path> criticalOrder;
+    // foreach powerpin
+    for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
+    {
+        vector<Point<int>> points ;
+        vector<pair<string, string>> targets ;
+        Pin pin = PinMaps[it->first];
+        auto source = RouterHelper.getPowerPinCoordinate(pin.STARTPOINT.x, pin.STARTPOINT.y, pin.RELATIVE_POINT1, pin.RELATIVE_POINT2, pin.ORIENT);
+        auto sourceCenter = RouterHelper.getCenter(source.first, source.second);
+        points.push_back(sourceCenter);
+        auto ret = Connection.equal_range(it->first);
+        for (auto i = ret.first; i != ret.second; ++i)
+        {
+            auto block = RouterHelper.getBlock(i->second.BlockName, i->second.BlockPinName);
+            targets.push_back(make_pair(i->second.BlockName, i->second.BlockPinName));
+            points.push_back(RouterHelper.getCenter(block.LeftDown, block.RightUp));
+        }
+        flute_net flute;
+        flute.getSteinerTree(points);
+        for( auto target : targets )
+        {
+            string constraint ;
+            Path path ;
+            auto block = RouterHelper.getBlock(target.first, target.second);
+            auto targetCenter = RouterHelper.getCenter(block.LeftDown, block.RightUp);
+            unsigned shortestLength = flute.getShortestPath(sourceCenter, targetCenter);
+            auto iter = ConstraintMaps.find(target.first) ;
+            auto retu = ConstraintMaps.equal_range(iter->first);
+            for (auto i = retu.first; i != retu.second; ++i)
+                if( i->second.NAME == target.second ) constraint = i->second.CONSTRAINT;
+            double critical = stod(constraint) / shortestLength ;
+            path.source = it->first ;
+            path.target = make_pair(it->second.BlockName, it->second.BlockPinName);
+            orders.insert(make_pair(critical, path));
+        }
+    }
+    for( auto x : orders )
+        criticalOrder.push_back(x.second);
+    return criticalOrder ;
+    
+}
+unsigned GlobalRouter::estimateCritical(vector<Point<int>> & Points)
+{
+    return 0 ;
+}
 void GlobalRouter::Route()
 {
     cout << "Begin Global Routing ..." << endl;
@@ -563,82 +512,87 @@ void GlobalRouter::Route()
     InitGraph_SP();
     flute_net flute;
     cout << "Global Routing:" << endl;
-    for( auto it = Connection.begin(), end = Connection.end(); it != end;it = Connection.upper_bound(it->first))
-    {
-        cout << "PowerPin( Start ) : " << it->first ;
-        // PowerPin( Start )
-        pair< Point<int>, Point<int> > SCoordinate = RouterHelper.getPowerPinCoordinate(PinMaps[it->first].STARTPOINT.x, PinMaps[it->first].STARTPOINT.y, PinMaps[it->first].RELATIVE_POINT1, PinMaps[it->first].RELATIVE_POINT2, PinMaps[it->first].ORIENT);
-        pair<int, int> SGridCoordinate = getGridCoordinate(get<0>(SCoordinate), get<1>(SCoordinate));
-        cout << "( " << get<0>(SGridCoordinate) << " , " << get<1>(SGridCoordinate) << " )" << endl;
-        
-        vector<Point<int>> Points ;
-        Grid SGrid = Grids[SGridCoordinate.second][SGridCoordinate.first] ;
-        Point<int> Middle ( SGrid.startpoint.x +  SGrid.width / 2  , SGrid.startpoint.y + SGrid.length / 2);
-        Points.push_back( Middle);
-        auto beginning = Connection.lower_bound(it->first);
-        auto endding = Connection.upper_bound(it->first);
-        // 儲存所有Source Target的Point，轉換成Grid座標儲存
-        while (beginning != endding)
-        {
-            // BlockPin(Target)
-            Block block = RouterHelper.getBlock(beginning->second.BlockName, beginning->second.BlockPinName);
-            pair<int, int> TGridCoordinate = getGridCoordinate(block.LeftDown, block.RightUp);
-            if( block.Direction == LEFT ) get<0>(TGridCoordinate) -= 1  ;
-            if( block.Direction == RIGHT ) get<0>(TGridCoordinate) += 1 ;
-            if( block.Direction == TOP ) get<1>(TGridCoordinate) += 1;
-            if( block.Direction == DOWN ) get<1>(TGridCoordinate) -= 1;
-            cout << "BlockPin( Target ) : " << beginning->second.BlockName << "_" << beginning->second.BlockPinName;
-            cout << "( " << get<0>(TGridCoordinate) << " , " << get<1>(TGridCoordinate) << " )" << endl;
-            Grid TGrid = Grids[TGridCoordinate.second][TGridCoordinate.first] ;
-            Point<int> Middle ( TGrid.startpoint.x +  TGrid.width / 2  , TGrid.startpoint.y + TGrid.length / 2);
-            Points.push_back(Middle);
-            beginning++;
-        }
-        flute.getSteinerTree(Points);
-        for( int x = 0 ; x < flute.SteinerTree.size() ; x++ )
-        {
-            int X = flute.SteinerTree[x].x ;
-            int Y = flute.SteinerTree[x].y ;
-            int Target = flute.SteinerTree[x].target ;
-            cout << x << ":" << "x=" << X << " y=" << Y ;
-            cout << " e=" << Target << " ";
-            cout << endl;
-        }
-        for( int x = 0 ; x < flute.SteinerTree.size() ; x++ )
-        {
-            int X = flute.SteinerTree[x].x ;
-            int Y = flute.SteinerTree[x].y ;
-            int Target = flute.SteinerTree[x].target ;
-            
-
-            pair<int,int> SGridCoordinate = getGridCoordinate(Point<int>(X,Y));
-            Point<int> terminal = getTerminalCoordinate(X, Y, Target, flute.SteinerTree);
-            pair<int,int> TGridCoordinate = getGridCoordinate(terminal);
-            Grid SGrid = Grids[SGridCoordinate.second][SGridCoordinate.first];
-            if( RouterHelper.IsBlock(SGrid))
-            {
-                //ripple(<#int X#>, <#int Y#>);
-                cout << "Steiner Point is invalid " << endl;
-                assert(0);
-            }
-            if( SGridCoordinate.first == TGridCoordinate.first && SGridCoordinate.second == TGridCoordinate.second ) continue;
-            cout << " START:(" << SGridCoordinate.first << "," << SGridCoordinate.second << ")";
-            cout << " TERMINAL:(" << TGridCoordinate.first << "," << TGridCoordinate.second << ")";
-            cout << endl;
-            graph.Dijkstra( translate2D_1D(SGridCoordinate.first, SGridCoordinate.second));
-            vector<int> Path  = graph.getPath( translate2D_1D ( TGridCoordinate.first ,TGridCoordinate.second ) );
-            
-            printPath(Path);
-            cout << endl;
-//            cout << "Grid:" ;
-//            cout << gridCoordinate.first << "," << gridCoordinate.second << " " ;
-//            if( flute.SteinerTree[x].isSteiner ) cout << "s";
+    // Decide Net Ordering
+    vector<Path> orders = getNetOrdering() ;
+    
+    
+    
+//    for( auto it = Connection.begin(), end = Connection.end(); it != end;it = Connection.upper_bound(it->first))
+//    {
+//        cout << "PowerPin( Start ) : " << it->first ;
+//        // PowerPin( Start )
+//        pair< Point<int>, Point<int> > SCoordinate = RouterHelper.getPowerPinCoordinate(PinMaps[it->first].STARTPOINT.x, PinMaps[it->first].STARTPOINT.y, PinMaps[it->first].RELATIVE_POINT1, PinMaps[it->first].RELATIVE_POINT2, PinMaps[it->first].ORIENT);
+//        pair<int, int> SGridCoordinate = getGridCoordinate(get<0>(SCoordinate), get<1>(SCoordinate));
+//        cout << "( " << get<0>(SGridCoordinate) << " , " << get<1>(SGridCoordinate) << " )" << endl;
+//        
+//        vector<Point<int>> Points ;
+//        Grid SGrid = Grids[SGridCoordinate.second][SGridCoordinate.first] ;
+//        Point<int> Middle ( SGrid.startpoint.x +  SGrid.width / 2  , SGrid.startpoint.y + SGrid.length / 2);
+//        Points.push_back( Middle);
+//        auto beginning = Connection.lower_bound(it->first);
+//        auto endding = Connection.upper_bound(it->first);
+//        // 儲存所有Source Target的Point，轉換成Grid座標儲存
+//        while (beginning != endding)
+//        {
+//            // BlockPin(Target)
+//            Block block = RouterHelper.getBlock(beginning->second.BlockName, beginning->second.BlockPinName);
+//            pair<int, int> TGridCoordinate = getGridCoordinate(block.LeftDown, block.RightUp);
+//            if( block.Direction == LEFT ) get<0>(TGridCoordinate) -= 1  ;
+//            if( block.Direction == RIGHT ) get<0>(TGridCoordinate) += 1 ;
+//            if( block.Direction == TOP ) get<1>(TGridCoordinate) += 1;
+//            if( block.Direction == DOWN ) get<1>(TGridCoordinate) -= 1;
+//            cout << "BlockPin( Target ) : " << beginning->second.BlockName << "_" << beginning->second.BlockPinName;
+//            cout << "( " << get<0>(TGridCoordinate) << " , " << get<1>(TGridCoordinate) << " )" << endl;
+//            Grid TGrid = Grids[TGridCoordinate.second][TGridCoordinate.first] ;
+//            Point<int> Middle ( TGrid.startpoint.x +  TGrid.width / 2  , TGrid.startpoint.y + TGrid.length / 2);
+//            Points.push_back(Middle);
+//            beginning++;
+//        }
+//        flute.getSteinerTree(Points);
+//        for( int x = 0 ; x < flute.SteinerTree.size() ; x++ )
+//        {
+//            int X = flute.SteinerTree[x].x ;
+//            int Y = flute.SteinerTree[x].y ;
+//            int Target = flute.SteinerTree[x].target ;
 //            cout << x << ":" << "x=" << X << " y=" << Y ;
 //            cout << " e=" << Target << " ";
 //            cout << endl;
-        }
-        cout << "------------------------------------end------------------------------------" << endl;
-    }
+//        }
+//        for( int x = 0 ; x < flute.SteinerTree.size() ; x++ )
+//        {
+//            int X = flute.SteinerTree[x].x ;
+//            int Y = flute.SteinerTree[x].y ;
+//            int Target = flute.SteinerTree[x].target ;
+//            
+//
+//            pair<int,int> SGridCoordinate = getGridCoordinate(Point<int>(X,Y));
+//            Point<int> terminal = getTerminalCoordinate(X, Y, Target, flute.SteinerTree);
+//            pair<int,int> TGridCoordinate = getGridCoordinate(terminal);
+//            Grid SGrid = Grids[SGridCoordinate.second][SGridCoordinate.first];
+//            if( RouterHelper.IsBlock(SGrid))
+//            {
+//                //ripple(<#int X#>, <#int Y#>);
+//                cout << "Steiner Point is invalid " << endl;
+//                assert(0);
+//            }
+//            if( SGridCoordinate.first == TGridCoordinate.first && SGridCoordinate.second == TGridCoordinate.second ) continue;
+//            cout << " START:(" << SGridCoordinate.first << "," << SGridCoordinate.second << ")";
+//            cout << " TERMINAL:(" << TGridCoordinate.first << "," << TGridCoordinate.second << ")";
+//            cout << endl;
+//            graph.Dijkstra( translate2D_1D(SGridCoordinate.first, SGridCoordinate.second));
+//            vector<int> Path  = graph.getPath( translate2D_1D ( TGridCoordinate.first ,TGridCoordinate.second ) );
+//            
+//            printPath(Path);
+//            cout << endl;
+////            cout << "Grid:" ;
+////            cout << gridCoordinate.first << "," << gridCoordinate.second << " " ;
+////            if( flute.SteinerTree[x].isSteiner ) cout << "s";
+////            cout << x << ":" << "x=" << X << " y=" << Y ;
+////            cout << " e=" << Target << " ";
+////            cout << endl;
+//        }
+//        cout << "------------------------------------end------------------------------------" << endl;
+//    }
     clock_t End = clock();
     double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
     cout << "Global Routing Done" << endl ;

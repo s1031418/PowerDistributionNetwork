@@ -51,4 +51,21 @@ public:
 };
 
 
+class Coordinate3D {
+    
+public:
+    unsigned x ;
+    unsigned y ;
+    unsigned z ; 
+};
+
+class Path {
+public:
+    Path(){};
+    std::string source ; // PowerPinName
+    std::pair<std::string, std::string> target ;  // ( BlockName , BlockPinName  )
+};
+
+
+
 #endif /* RouterComponents_hpp */

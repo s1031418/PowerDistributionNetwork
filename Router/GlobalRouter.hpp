@@ -14,6 +14,7 @@
 #include "defrw.h"
 #include "Graph_SP.hpp"
 #include "PDNHelper.hpp"
+
 #include "InitialFileParser.hpp"
 #include "verilog.hpp"
 #include "lefrw.h"
@@ -27,6 +28,7 @@
 // Grid Size = Scaling * minimal space
 const unsigned Scaling = 100 ;
 const unsigned DEFAULT_WIDTH = 10 * UNITS_DISTANCE ; 
+
 
 enum TwoDGridLocation
 {
@@ -47,10 +49,13 @@ enum ThreeDGridLocation
     other_3D
 };
 
+
 struct Edge {
     int to ;
-    int weight ; 
+    int weight ;
 };
+
+
 class GlobalRouter {
     
     
@@ -59,6 +64,7 @@ public:
     ~GlobalRouter();
     void Route();
     void toGridGraph();
+    
     
     
     vector< vector< Grid > > Grids ;
@@ -76,6 +82,10 @@ private:
     void printAllGrids();
     
     
+    
+    vector<Path> getNetOrdering();
+    
+    unsigned estimateCritical(vector<Point<int>> & Points);
     
     // cost function for Graph_SP edge weights
     unsigned cost(int z , bool horizontal , Grid & grid);

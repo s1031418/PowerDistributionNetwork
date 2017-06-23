@@ -470,3 +470,7 @@ Block PDNHelper::getBlock( string BlockName , string BlockPinName )
     }
     return Block();
 }
+Point<int> PDNHelper::getCenter( Point<int> LeftDown , Point<int> RightUp )
+{
+    return Point<int>( ( LeftDown.x + RightUp.x ) / 2 , ( LeftDown.y + RightUp.y) / 2 ); 
+}
