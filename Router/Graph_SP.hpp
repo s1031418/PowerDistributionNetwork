@@ -51,7 +51,7 @@ public:
     
     vector<int> getPath( int target );
     
-    
+    int getShortestPath(int target);
     
     void Demo();
     friend class BinaryHeap ;

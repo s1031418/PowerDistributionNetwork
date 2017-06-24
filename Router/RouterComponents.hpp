@@ -54,6 +54,8 @@ public:
 class Coordinate3D {
     
 public:
+    Coordinate3D(){};
+    Coordinate3D(unsigned X , unsigned Y , unsigned Z) :x(X) , y(Y) , z(Z){};
     unsigned x ;
     unsigned y ;
     unsigned z ; 
@@ -64,6 +66,8 @@ public:
     Path(){};
     std::string source ; // PowerPinName
     std::pair<std::string, std::string> target ;  // ( BlockName , BlockPinName  )
+    std::pair<int, int> sourceGrid ;
+    std::pair<int, int> targetGrid ;
 };
 
 

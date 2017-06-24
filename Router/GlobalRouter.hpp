@@ -29,6 +29,11 @@
 const unsigned Scaling = 100 ;
 const unsigned DEFAULT_WIDTH = 10 * UNITS_DISTANCE ; 
 
+enum NetOrder
+{
+    IR_DROP , // use Dijkstra to get steiner point
+    SHORTESTPATH // use flute to get steiner point
+};
 
 enum TwoDGridLocation
 {
@@ -65,7 +70,7 @@ public:
     void Route();
     void toGridGraph();
     
-    
+    int getLength(vector<int> & path);
     
     vector< vector< Grid > > Grids ;
 private:
@@ -83,7 +88,7 @@ private:
     
     
     
-    vector<Path> getNetOrdering();
+    vector<Path> getNetOrdering(NetOrder);
     
     unsigned estimateCritical(vector<Point<int>> & Points);
     

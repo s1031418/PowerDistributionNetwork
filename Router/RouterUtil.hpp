@@ -30,6 +30,8 @@ public:
     pair<bool, string> IsBlock(Point<int> LeftDown , Point<int> RightUp);
     
     
+    int translateMetalNameToInt(string MetalName);
+    
 private:
     
     

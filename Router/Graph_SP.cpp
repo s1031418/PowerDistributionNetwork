@@ -86,6 +86,11 @@ vector<int> Graph_SP::getPath( int target )
 //    cout << setw(4) << target << endl;
     return Paths ;
 }
+int Graph_SP::getShortestPath(int target)
+{
+    
+    return 0;
+}
 void Graph_SP::Demo()
 {
     Graph_SP g9(6);

@@ -177,6 +177,7 @@ tuple<int,int,int> GlobalRouter::translate1D_3D(int index)
 }
 unsigned GlobalRouter::cost(int z , bool horizontal , Grid & grid)
 {
+    
     string key ;
     if( z == 1 ) key = "M1" ;
     if( z == 2 ) key = "M2" ;
@@ -193,9 +194,11 @@ unsigned GlobalRouter::cost(int z , bool horizontal , Grid & grid)
     if( z == 13 ) key = "M13" ;
     if( z == 14 ) key = "M14" ;
     if( z == 15 ) key = "M15" ;
+    
     unsigned weights = stod(WeightsMaps[key]) * 100 ;
-    unsigned area = ( horizontal == true ) ? DEFAULT_WIDTH * grid.width : DEFAULT_WIDTH * grid.length ;
-    return weights * area ;
+    unsigned demand = ( horizontal == true ) ? DEFAULT_WIDTH * grid.width : DEFAULT_WIDTH * grid.length ;
+    if( demand > grid.capacities[z] ) return Max_Distance ;
+    return weights * demand ;
 }
 void GlobalRouter::InitGraph_SP()
 {
@@ -203,15 +206,15 @@ void GlobalRouter::InitGraph_SP()
     clock_t Start = clock();
     int Size = (int)(Grids[0].size() * Grids.size() * highest ) ;
     graph.resize(Size);
-    int RowSize = (int)Grids.size() - 1;
-    int ColSize = (int)Grids[0].size() - 1;
+    int YSize = (int)Grids.size() ;
+    int XSize = (int)Grids[0].size() ;
 //    int weight = 0 ;
     Edge edge ;
     for( int z = lowest ; z <= highest ; z++ )
     {
-        for( int y = 0 ; y <= ColSize ; y++)
+        for( int y = 0 ; y < YSize ; y++)
         {
-            for( int x = 0 ; x <= RowSize ; x++ )
+            for( int x = 0 ; x < XSize ; x++ )
             {
                 int from = translate3D_1D(x, y, z);
                 vector<Edge> edges ;
@@ -454,51 +457,160 @@ pair<int, int> GlobalRouter::ripple(int X , int Y)
 {
     return make_pair(0, 0);
 }
-
-vector<Path> GlobalRouter::getNetOrdering()
+int GlobalRouter::getLength(vector<int> & path)
 {
-    map<double,Path> orders;
-    vector<Path> criticalOrder;
-    // foreach powerpin
-    for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
+    unsigned sum = 0 ;
+    for( int i = 0 ; i < path.size() ; i++ )
     {
-        vector<Point<int>> points ;
-        vector<pair<string, string>> targets ;
-        Pin pin = PinMaps[it->first];
-        auto source = RouterHelper.getPowerPinCoordinate(pin.STARTPOINT.x, pin.STARTPOINT.y, pin.RELATIVE_POINT1, pin.RELATIVE_POINT2, pin.ORIENT);
-        auto sourceCenter = RouterHelper.getCenter(source.first, source.second);
-        points.push_back(sourceCenter);
-        auto ret = Connection.equal_range(it->first);
-        for (auto i = ret.first; i != ret.second; ++i)
-        {
-            auto block = RouterHelper.getBlock(i->second.BlockName, i->second.BlockPinName);
-            targets.push_back(make_pair(i->second.BlockName, i->second.BlockPinName));
-            points.push_back(RouterHelper.getCenter(block.LeftDown, block.RightUp));
-        }
-        flute_net flute;
-        flute.getSteinerTree(points);
-        for( auto target : targets )
-        {
-            string constraint ;
-            Path path ;
-            auto block = RouterHelper.getBlock(target.first, target.second);
-            auto targetCenter = RouterHelper.getCenter(block.LeftDown, block.RightUp);
-            unsigned shortestLength = flute.getShortestPath(sourceCenter, targetCenter);
-            auto iter = ConstraintMaps.find(target.first) ;
-            auto retu = ConstraintMaps.equal_range(iter->first);
-            for (auto i = retu.first; i != retu.second; ++i)
-                if( i->second.NAME == target.second ) constraint = i->second.CONSTRAINT;
-            double critical = stod(constraint) / shortestLength ;
-            path.source = it->first ;
-            path.target = make_pair(it->second.BlockName, it->second.BlockPinName);
-            orders.insert(make_pair(critical, path));
-        }
+        auto currentCoorindate3d = translate1D_3D(path[i]);
+        cout << "x:" << get<0>(currentCoorindate3d) << ", y:" << get<1>(currentCoorindate3d) << ", z:" << get<2>(currentCoorindate3d) << endl;
     }
-    for( auto x : orders )
-        criticalOrder.push_back(x.second);
-    return criticalOrder ;
-    
+    for( int i = 0 ; i < path.size() - 1  ; i++ )
+    {
+        bool horizontal = false, vertical = false ;
+        auto currentCoorindate3d = translate1D_3D(path[i]);
+        auto nextCoorindate3d = translate1D_3D(path[i+1]);
+        // grid coordinate
+        int currentXCoordinate = get<0>(currentCoorindate3d) ;
+        int currentYCoordinate = get<1>(currentCoorindate3d) ;
+        int nextXCoordinate = get<0>(nextCoorindate3d) ;
+        int nextYCoordinate = get<1>(nextCoorindate3d) ;
+        // if x the same means this is vertical line
+        if( get<0>(currentCoorindate3d) == get<0>(nextCoorindate3d) ) vertical = true ;
+        // if y the same means this is horizontal line
+        if( get<1>(currentCoorindate3d) == get<1>(nextCoorindate3d) ) horizontal = true ;
+        
+        if( horizontal )
+        {
+            // absolute coordinate
+            int currentCenterX = Grids[currentYCoordinate][currentXCoordinate].startpoint.x + ( Grids[currentYCoordinate][currentXCoordinate].width / 2 ) ;
+            int nextCenterX = Grids[nextYCoordinate][nextXCoordinate].startpoint.x + ( Grids[nextYCoordinate][nextXCoordinate].width / 2 ) ;
+            int diff = nextCenterX - currentCenterX ;
+            sum += abs(diff) ;
+        }
+        if( vertical )
+        {
+            // absolute coordinate
+            int currentCenterY = Grids[currentYCoordinate][currentXCoordinate].startpoint.y + ( Grids[currentYCoordinate][currentXCoordinate].length / 2 ) ;
+            int nextCenterY = Grids[nextYCoordinate][nextXCoordinate].startpoint.y + ( Grids[nextYCoordinate][nextXCoordinate].length / 2 ) ;
+            int diff = nextCenterY - currentCenterY ;
+            sum += abs(diff) ;
+        }
+
+    }
+    return sum ;
 }
+vector<Path> GlobalRouter::getNetOrdering(NetOrder netOrder)
+{
+    if( netOrder == SHORTESTPATH )
+    {
+        
+    }
+    else if ( netOrder == IR_DROP )
+    {
+        map<double,Path> orders;
+        vector<Path> criticalOrder;
+        for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
+        {
+            Pin pin = PinMaps[it->first];
+            // source absoult coordinate
+            auto source = RouterHelper.getPowerPinCoordinate(pin.STARTPOINT.x, pin.STARTPOINT.y, pin.RELATIVE_POINT1, pin.RELATIVE_POINT2, pin.ORIENT);
+            auto sourceCenter = RouterHelper.getCenter(source.first, source.second);
+            // source grid coordinate 
+            auto sourceGrid = getGridCoordinate(sourceCenter);
+            Coordinate3D SGridCoodinate(sourceGrid.first , sourceGrid.second , RouterHelper.translateMetalNameToInt(pin.METALNAME) );
+            auto ret = Connection.equal_range(it->first);
+            for (auto i = ret.first; i != ret.second; ++i)
+            {
+                string constraint ;
+                cout << i->first << " " << i->second.BlockName << " " << i->second.BlockPinName << endl;
+                auto target = RouterHelper.getBlock(i->second.BlockName, i->second.BlockPinName);
+                int topLayer = RouterHelper.translateMetalNameToInt( target.Metals[target.Metals.size()-1] );
+                auto targetCenter = RouterHelper.getCenter(target.LeftDown,target.RightUp);
+                auto targetGrid = getGridCoordinate(targetCenter);
+                if( target.Direction == LEFT ) get<0>(targetGrid) -= 1 ;
+                if( target.Direction == RIGHT ) get<0>(targetGrid) += 1 ;
+                if( target.Direction == TOP ) get<1>(targetGrid) += 1 ;
+                if( target.Direction == DOWN ) get<1>(targetGrid) -= 1 ;
+                Coordinate3D TGridCoodinate(targetGrid.first , targetGrid.second , topLayer );
+                graph.Dijkstra(translate3D_1D(SGridCoodinate.x, SGridCoodinate.y, SGridCoodinate.z));
+                vector<int> path = graph.getPath(translate3D_1D(targetGrid.first, targetGrid.second, topLayer));
+                int length = getLength(path);
+                auto iter = ConstraintMaps.find(i->second.BlockName) ;
+                auto retu = ConstraintMaps.equal_range(iter->first);
+                for (auto t = retu.first; t != retu.second; ++t)
+                    if( t->second.NAME == i->second.BlockPinName ) constraint = t->second.CONSTRAINT;
+                double critical = stod(constraint) / length ;
+                // initialize path object
+                Path p ;
+                p.source = i->first ;
+                p.target = make_pair(i->second.BlockName, i->second.BlockPinName);
+                p.sourceGrid = make_pair(sourceGrid.first, sourceGrid.second);
+                p.targetGrid = make_pair(targetGrid.first, targetGrid.second);
+                // sorting by critical
+                orders.insert(make_pair(critical,p));
+            }
+        }
+        for( auto o : orders )
+        {
+            cout << o.first << " " << o.second.source << " " << o.second.target.first << " " << o.second.target.second << endl;
+        }
+        for( auto x : orders )
+            criticalOrder.push_back(x.second);
+        
+        return criticalOrder ;
+    }
+    assert(0);
+    return vector<Path>();
+}
+//vector<Path> GlobalRouter::getNetOrdering()
+//{
+//    map<double,Path> orders;
+//    vector<Path> criticalOrder;
+//    // foreach powerpin
+//    for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
+//    {
+//        vector<Point<int>> points ;
+//        vector<pair<string, string>> targets ;
+//        Pin pin = PinMaps[it->first];
+//        auto source = RouterHelper.getPowerPinCoordinate(pin.STARTPOINT.x, pin.STARTPOINT.y, pin.RELATIVE_POINT1, pin.RELATIVE_POINT2, pin.ORIENT);
+//        Point<int> sourcePoint;
+//        auto sourceCenter = RouterHelper.getCenter(source.first, source.second);
+//        points.push_back(sourceCenter);
+//        auto ret = Connection.equal_range(it->first);
+//        for (auto i = ret.first; i != ret.second; ++i)
+//        {
+//            auto block = RouterHelper.getBlock(i->second.BlockName, i->second.BlockPinName);
+//            targets.push_back(make_pair(i->second.BlockName, i->second.BlockPinName));
+//            points.push_back(RouterHelper.getCenter(block.LeftDown, block.RightUp));
+//        }
+//
+//        flute_net flute;
+//        flute.getSteinerTree(points);
+//        for( auto target : targets )
+//        {
+//            string constraint ;
+//            Path path ;
+//            auto block = RouterHelper.getBlock(target.first, target.second);
+//            auto targetCenter = RouterHelper.getCenter(block.LeftDown, block.RightUp);
+//            vector<Point<int>> pathOrder = flute.getShortestPathOrder(sourceCenter, targetCenter);
+//            unsigned shortestLength = flute.getShortestPathLength(pathOrder);
+//            auto iter = ConstraintMaps.find(target.first) ;
+//            auto retu = ConstraintMaps.equal_range(iter->first);
+//            for (auto i = retu.first; i != retu.second; ++i)
+//                if( i->second.NAME == target.second ) constraint = i->second.CONSTRAINT;
+//            double critical = stod(constraint) / shortestLength ;
+//            path.source = it->first ;
+//            path.target = make_pair(it->second.BlockName, it->second.BlockPinName);
+//            orders.insert(make_pair(critical, path));
+//        }
+//    }
+//    
+//    for( auto x : orders )
+//        criticalOrder.push_back(x.second);
+//    return criticalOrder ;
+//    
+//}
 unsigned GlobalRouter::estimateCritical(vector<Point<int>> & Points)
 {
     return 0 ;
@@ -507,14 +619,23 @@ void GlobalRouter::Route()
 {
     cout << "Begin Global Routing ..." << endl;
     clock_t Start = clock();
-    // 走Dijkstra時，將所有Block都不視為障礙物
-    // 但是使用Flute的時候，並不會讓steiner point 落在 障礙物上
+    
+    
     InitGraph_SP();
-    flute_net flute;
     cout << "Global Routing:" << endl;
     // Decide Net Ordering
-    vector<Path> orders = getNetOrdering() ;
+    vector<Path> orders = getNetOrdering(IR_DROP) ;
     
+    cout << "Net Order List " << endl;
+//    for(auto path : orders)
+//        cout << "source:" << path.source << " target: ( " << path.target.first << " , " << path.target.second << " )" << endl;
+//    
+    for( auto path : orders )
+    {
+        pair< Point<int>, Point<int> > SCoordinate = RouterHelper.getPowerPinCoordinate(PinMaps[path.source].STARTPOINT.x, PinMaps[path.source].STARTPOINT.y, PinMaps[path.source].RELATIVE_POINT1, PinMaps[path.source].RELATIVE_POINT2, PinMaps[path.source].ORIENT);
+        pair<int, int> SGridCoordinate = getGridCoordinate(SCoordinate.first, SCoordinate.second );
+        
+    }
     
     
 //    for( auto it = Connection.begin(), end = Connection.end(); it != end;it = Connection.upper_bound(it->first))

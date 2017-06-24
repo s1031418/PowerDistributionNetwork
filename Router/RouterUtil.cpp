@@ -36,7 +36,20 @@ bool RouterUtil::IsBlock(Grid grid)
     else
         return true ;
 }
-
+int RouterUtil::translateMetalNameToInt(string MetalName)
+{
+    if( MetalName == "METAL10" ) return 10;
+    if( MetalName == "METAL9" ) return 9;
+    if( MetalName == "METAL8" ) return 8;
+    if( MetalName == "METAL7" ) return 7;
+    if( MetalName == "METAL6" ) return 6;
+    if( MetalName == "METAL5" ) return 5;
+    if( MetalName == "METAL4" ) return 4;
+    if( MetalName == "METAL3" ) return 3;
+    if( MetalName == "METAL2" ) return 2;
+    if( MetalName == "METAL1" ) return 1;
+    assert(0);
+}
 pair<bool, string> RouterUtil::IsBlock(Point<int> LeftDown , Point<int> RightUp)
 {
     pair<bool, string> result ;

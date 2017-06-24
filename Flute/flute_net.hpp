@@ -17,6 +17,7 @@
 #include <iostream>
 #include <cmath>
 #include <iomanip>
+#include "Graph_SP.hpp"
 using namespace std;
 
 class flute_net {
@@ -31,7 +32,8 @@ public:
     void printSteinerTree();
     void printDebugMeg();
     void Demo();
-    int getShortestPath( Point<int> source , Point<int> target );
+    vector<Point<int>> getShortestPathOrder( Point<int> source , Point<int> target );
+    int getShortestPathLength(vector<Point<int>> & orders);
     vector<node> SteinerTree ;
     int length ;
     int length_noRSMT ;
