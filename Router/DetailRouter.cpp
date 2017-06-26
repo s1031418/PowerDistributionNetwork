@@ -107,6 +107,7 @@ void DetailRouter::XY_Route(vector<Coordinate3D> paths , pair<Point<int>, Point<
 {
     vector<segment> progress ;
     segment s ;
+    
     int up = 0 , down = 0, left = 0 ,right =0 ;
     // h->true , v->false
     bool initDirection = (paths[0].x != paths[1].x) ? true : false ;
