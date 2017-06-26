@@ -73,6 +73,8 @@ void GlobalRouter::InitGrids()
             grid.width = CrossPoint.x - startpoint.x ;
             grid.length = CrossPoint.y - startpoint.y ;
             grid.startpoint = startpoint ;
+            if( startpoint.x == 1086000 && startpoint.y == 442700 )
+                cout << "d";
             pair<bool, string> result = RouterHelper.IsBlock(startpoint, Point<int>( startpoint.x + grid.width , startpoint.y + grid.length ) );
             if( get<0>(result) )
             {
@@ -85,7 +87,10 @@ void GlobalRouter::InitGrids()
             if( grid.lowermetal == 0 && grid.uppermetal  == 0)
             {
                 for( int i = lowest ; i <= highest ; i++ )
-                    grid.capacities[i] = grid.width * grid.length ;
+                {
+                    unsigned capacity = grid.width / UNITS_DISTANCE * grid.length  / UNITS_DISTANCE;
+                    grid.capacities[i] = capacity;
+                }
             }
             else
             {
@@ -94,7 +99,7 @@ void GlobalRouter::InitGrids()
                     if( i >= grid.lowermetal && i <= grid.uppermetal )
                         grid.capacities[i] = 0 ;
                     else
-                        grid.capacities[i] = grid.width * grid.length ;
+                        grid.capacities[i] = grid.width / UNITS_DISTANCE * grid.length  / UNITS_DISTANCE ;
                 }
             }
             
@@ -195,10 +200,11 @@ unsigned GlobalRouter::cost(int z , bool horizontal , Grid & grid)
     if( z == 14 ) key = "M14" ;
     if( z == 15 ) key = "M15" ;
     
-    unsigned weights = stod(WeightsMaps[key]) * 100 ;
-    unsigned demand = ( horizontal == true ) ? DEFAULT_WIDTH * grid.width : DEFAULT_WIDTH * grid.length ;
-    if( demand > grid.capacities[z] ) return Max_Distance ;
-    return weights * demand ;
+    unsigned weights = stod(WeightsMaps[key])*100;
+    unsigned demand = ( horizontal == true ) ?   grid.width / UNITS_DISTANCE :   grid.length  / UNITS_DISTANCE ;
+    unsigned scalingDemand = demand * DEFAULT_WIDTH  ;
+    if( scalingDemand > grid.capacities[z] ) return Max_Distance ;
+    return weights * demand  ;
 }
 void GlobalRouter::InitGraph_SP()
 {
@@ -216,9 +222,11 @@ void GlobalRouter::InitGraph_SP()
         {
             for( int x = 0 ; x < XSize ; x++ )
             {
+                if (Grids[y][x].capacities[z] == 0) continue;
                 int from = translate3D_1D(x, y, z);
                 vector<Edge> edges ;
                 auto location = getGridLocation(x, y, z);
+                
                 switch (location.first)
                 {
                     case vertex_rightup:
@@ -361,9 +369,11 @@ void GlobalRouter::InitGraph_SP()
             }
         }
     }
+    cout << translate3D_1D(10, 6, 6);
     
     clock_t End = clock();
     double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
+//    printAllGrids();
     cout << "3D Shortest Path Graph Done" << endl ;
     cout << "We cost " << duration << "(s)" << endl;
 }
@@ -437,18 +447,19 @@ pair<int, int> GlobalRouter::getGridCoordinate( Point<int> pt )
     for( int i = 0 ; i < Grids[0].size() ; i++)
     {
         CurrentX = LastX + Grids[0][i].width;
-        if( pt.x >= LastX && pt.x <= CurrentX  )
+        if( pt.x >= LastX && pt.x < CurrentX  )
             X = i;
         LastX = CurrentX ;
     }
     // find Y coordinate of LeftDownY and RightUpY
     int LastY = 0 , CurrentY = 0 ;
-    int Y = 0 ;
+    int Y = 0  ;
+
     for( int i = 0 ; i < Grids.size() ; i++)
     {
         CurrentY = LastY + Grids[i][0].length;
-        if( pt.y >= LastY && pt.y <= CurrentY  )
-            Y = i;
+        if( pt.y >= LastY && pt.y < CurrentY  )
+            Y = i  ;
         LastY = CurrentY ;
     }
     return make_pair(X, Y);
@@ -460,11 +471,11 @@ pair<int, int> GlobalRouter::ripple(int X , int Y)
 int GlobalRouter::getLength(vector<int> & path)
 {
     unsigned sum = 0 ;
-    for( int i = 0 ; i < path.size() ; i++ )
-    {
-        auto currentCoorindate3d = translate1D_3D(path[i]);
-        cout << "x:" << get<0>(currentCoorindate3d) << ", y:" << get<1>(currentCoorindate3d) << ", z:" << get<2>(currentCoorindate3d) << endl;
-    }
+//    for( int i = 0 ; i < path.size() ; i++ )
+//    {
+//        auto currentCoorindate3d = translate1D_3D(path[i]);
+//        cout << "x:" << get<0>(currentCoorindate3d) << ", y:" << get<1>(currentCoorindate3d) << ", z:" << get<2>(currentCoorindate3d) << endl;
+//    }
     for( int i = 0 ; i < path.size() - 1  ; i++ )
     {
         bool horizontal = false, vertical = false ;
@@ -500,7 +511,7 @@ int GlobalRouter::getLength(vector<int> & path)
     }
     return sum ;
 }
-vector<Path> GlobalRouter::getNetOrdering(NetOrder netOrder)
+map<double,map<double,Path>> GlobalRouter::getNetOrdering(NetOrder netOrder)
 {
     if( netOrder == SHORTESTPATH )
     {
@@ -508,10 +519,17 @@ vector<Path> GlobalRouter::getNetOrdering(NetOrder netOrder)
     }
     else if ( netOrder == IR_DROP )
     {
-        map<double,Path> orders;
-        vector<Path> criticalOrder;
+        
+        // key:PowerSourceName , value: criticalMap
+        // In order to for global routing , multiterminal must be consider together .
+        // if source is the same  , we use the same key to map different value 
+        map<double,map<double,Path>> orders ;
         for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
         {
+            // key:critical value( the smaller is more critical ) , value : Path( Define in RouteComponents )
+            map<double,Path> criticalMap;
+            int index = 0 ;
+            double sumCritical = 0 ;
             Pin pin = PinMaps[it->first];
             // source absoult coordinate
             auto source = RouterHelper.getPowerPinCoordinate(pin.STARTPOINT.x, pin.STARTPOINT.y, pin.RELATIVE_POINT1, pin.RELATIVE_POINT2, pin.ORIENT);
@@ -522,8 +540,9 @@ vector<Path> GlobalRouter::getNetOrdering(NetOrder netOrder)
             auto ret = Connection.equal_range(it->first);
             for (auto i = ret.first; i != ret.second; ++i)
             {
+                index++;
                 string constraint ;
-                cout << i->first << " " << i->second.BlockName << " " << i->second.BlockPinName << endl;
+//                cout << i->first << " " << i->second.BlockName << " " << i->second.BlockPinName << endl;
                 auto target = RouterHelper.getBlock(i->second.BlockName, i->second.BlockPinName);
                 int topLayer = RouterHelper.translateMetalNameToInt( target.Metals[target.Metals.size()-1] );
                 auto targetCenter = RouterHelper.getCenter(target.LeftDown,target.RightUp);
@@ -541,27 +560,46 @@ vector<Path> GlobalRouter::getNetOrdering(NetOrder netOrder)
                 for (auto t = retu.first; t != retu.second; ++t)
                     if( t->second.NAME == i->second.BlockPinName ) constraint = t->second.CONSTRAINT;
                 double critical = stod(constraint) / length ;
+                sumCritical += critical ;
                 // initialize path object
                 Path p ;
                 p.source = i->first ;
                 p.target = make_pair(i->second.BlockName, i->second.BlockPinName);
-                p.sourceGrid = make_pair(sourceGrid.first, sourceGrid.second);
-                p.targetGrid = make_pair(targetGrid.first, targetGrid.second);
+                p.sourceGrid = SGridCoodinate ;
+                p.targetGrid = TGridCoodinate ;
                 // sorting by critical
-                orders.insert(make_pair(critical,p));
+                criticalMap.insert(make_pair(critical,p));
             }
+            double averageCritical = sumCritical / index ;
+            orders.insert(make_pair(averageCritical, criticalMap));
         }
-        for( auto o : orders )
-        {
-            cout << o.first << " " << o.second.source << " " << o.second.target.first << " " << o.second.target.second << endl;
-        }
-        for( auto x : orders )
-            criticalOrder.push_back(x.second);
+        // print crtical map
+//        for( auto o : criticalMap )
+//        {
+//            cout << o.first << " " << o.second.source << " " << o.second.target.first << " " << o.second.target.second << endl;
+//        }
+        // assign critical map to the value of orders
+//        for( auto x : criticalMap )
+//        {
+//            if( orders.find(x.second.source) == orders.end())
+//            {
+//                orders.insert(make_pair(x.second.source, map<double,Path>()));
+//            }
+//            orders[x.second.source].insert(make_pair(x.first, x.second));
+//        }
         
-        return criticalOrder ;
+        // print orders
+//        for( auto x : orders )
+//        {
+//            cout << x.first << " " ;
+//            for( auto y : x.second )
+//                cout << y.first << " " << y.second.source << " " << y.second.target.first << " " << y.second.target.second << endl;
+//            
+//        }
+        return orders ;
     }
     assert(0);
-    return vector<Path>();
+    return map<double,map<double,Path>>();
 }
 //vector<Path> GlobalRouter::getNetOrdering()
 //{
@@ -615,6 +653,54 @@ unsigned GlobalRouter::estimateCritical(vector<Point<int>> & Points)
 {
     return 0 ;
 }
+
+void GlobalRouter::updateGraph_SP(set<int> & UpdateGrids , map<int,int> & hvTable)
+{
+    int x , y , z ;
+    for( auto index : UpdateGrids )
+    {
+        auto index3D = translate1D_3D(index);
+        x = get<0>(index3D);
+        y = get<1>(index3D);
+        z = get<2>(index3D);
+        int demand = 0 ;
+        double spacing = LayerMaps[RouterHelper.translateIntToMetalName(z)].SPACING ;
+        if( hvTable[index] == 0 ) demand = ( DEFAULT_WIDTH + 2 * spacing ) * Grids[y][x].length / UNITS_DISTANCE ;
+        if( hvTable[index] == 1 ) demand = ( DEFAULT_WIDTH + 2 * spacing )  * Grids[y][x].width / UNITS_DISTANCE ;
+        if( hvTable[index] == 2 ) demand = ( Grids[y][x].length > Grids[y][x].width ) ? Grids[y][x].length * ( DEFAULT_WIDTH + 2 * spacing )  / UNITS_DISTANCE : Grids[y][x].width * ( DEFAULT_WIDTH + 2 * spacing )  / UNITS_DISTANCE ;
+        Grids[y][x].capacities[z] -= demand ;
+        int up = ( y + 1 < Grids.size() ) ? y + 1 : -1 ;
+        int down = ( y - 1 > 0 ) ? y - 1 : -1 ;
+        int right = ( x + 1 < Grids[0].size() ) ? x + 1 : -1 ;
+        int left = ( x - 1 > 0 ) ? x - 1 : -1 ;
+        if( up != -1 )
+        {
+            int demand = DEFAULT_WIDTH * Grids[y][x].length / UNITS_DISTANCE ;
+            if( demand > Grids[y][x].capacities[z] )
+                graph.UpdateWeight(translate3D_1D(x, up, z), index, Max_Distance);
+        }
+        if( right != -1 )
+        {
+            int demand = DEFAULT_WIDTH * Grids[y][x].width / UNITS_DISTANCE ;
+            if( demand > Grids[y][x].capacities[z] )
+                graph.UpdateWeight(translate3D_1D(right, y, z), index, Max_Distance);
+        }
+        if( left != -1 )
+        {
+            int demand = DEFAULT_WIDTH * Grids[y][x].width / UNITS_DISTANCE ;
+            if( demand > Grids[y][x].capacities[z] )
+                graph.UpdateWeight(translate3D_1D(left, y, z), index, Max_Distance);
+        }
+        if( down != -1 )
+        {
+            int demand = DEFAULT_WIDTH * Grids[y][x].length / UNITS_DISTANCE ;
+            if( demand > Grids[y][x].capacities[z] )
+                graph.UpdateWeight(translate3D_1D(x, down, z), index, Max_Distance);
+        }
+    }
+    
+}
+
 void GlobalRouter::Route()
 {
     cout << "Begin Global Routing ..." << endl;
@@ -624,17 +710,76 @@ void GlobalRouter::Route()
     InitGraph_SP();
     cout << "Global Routing:" << endl;
     // Decide Net Ordering
-    vector<Path> orders = getNetOrdering(IR_DROP) ;
+    // Net order 是用 PowerSoure crtical 的平均 做排序 , 以 PowerSource 為單位
+    // 將來或許可以以線為單位，但是不好實作（所以目前先以VDD為考量）
+    map<double,map<double,Path>> orders = getNetOrdering(IR_DROP) ;
+    
+    
     
     cout << "Net Order List " << endl;
-//    for(auto path : orders)
-//        cout << "source:" << path.source << " target: ( " << path.target.first << " , " << path.target.second << " )" << endl;
-//    
-    for( auto path : orders )
+    for( auto o : orders )
     {
-        pair< Point<int>, Point<int> > SCoordinate = RouterHelper.getPowerPinCoordinate(PinMaps[path.source].STARTPOINT.x, PinMaps[path.source].STARTPOINT.y, PinMaps[path.source].RELATIVE_POINT1, PinMaps[path.source].RELATIVE_POINT2, PinMaps[path.source].ORIENT);
-        pair<int, int> SGridCoordinate = getGridCoordinate(SCoordinate.first, SCoordinate.second );
+        cout << "Average Critical:" << o.first * 1000000 << endl ;
+        for( auto p : o.second )
+        {
+            cout << p.second.source << " " << p.second.target.first << " " << p.second.target.second << " " << p.first * 1000000 << endl;
+        }
+    }
+    cout << "-----------------------------------------------------" << endl;
+    for( auto source : orders )
+    {
+
+        set<int> updateGrids ;
+        // vertical 0  , horizontal 1 , crossroad 2
+        map<int,int> hvTable ; // look for the grid is horizontal or vertical
         
+        for( auto target : source.second )
+        {
+            cout << target.second.source << " " << target.second.target.first << " " << target.second.target.second << " " << target.first * 1000000 << endl;
+            auto sourceGridCoordinate = target.second.sourceGrid ;
+            auto targetGridCoordinate = target.second.targetGrid ;
+            GlobalSolution gsol ;
+            gsol.PowerSourceName = target.second.source ;
+            gsol.source = sourceGridCoordinate ;
+            gsol.targets.push_back(targetGridCoordinate);
+            graph.Dijkstra(translate3D_1D(sourceGridCoordinate.x, sourceGridCoordinate.y, sourceGridCoordinate.z));
+            vector<int> paths = graph.getPath(translate3D_1D(targetGridCoordinate.x,targetGridCoordinate.y,targetGridCoordinate.z));
+            for(int i = (int)paths.size() -1 ; i >= 0   ; i--)
+            {
+                bool horizontal = false, vertical = false ;
+                auto currentCoorindate3d = translate1D_3D(paths[i]);
+                auto nextCoorindate3d = translate1D_3D(paths[i+1]);
+                // if x the same means this is vertical line
+                if( get<0>(currentCoorindate3d) == get<0>(nextCoorindate3d) ) vertical = true ;
+                // if y the same means this is horizontal line
+                if( get<1>(currentCoorindate3d) == get<1>(nextCoorindate3d) ) horizontal = true ;
+                // if find
+                if( hvTable.find(paths[i]) != hvTable.end() )
+                {
+                    if( vertical && hvTable[paths[i]] == 1)
+                        hvTable[paths[i]] = 2 ;
+                    if( horizontal && hvTable[paths[i]] == 0)
+                        hvTable[paths[i]] = 2 ;
+                }
+                else
+                {
+                    if( vertical ) hvTable.insert(make_pair(paths[i], 0));
+                    if( horizontal ) hvTable.insert(make_pair(paths[i], 1));
+                }
+                updateGrids.insert(paths[i]);
+            }
+            for( auto grid : updateGrids)
+            {
+                auto index3D = translate1D_3D(grid);
+                Coordinate3D coordinate3d(get<0>(index3D) ,get<1>(index3D),get<2>(index3D));
+                gsol.paths.push_back(coordinate3d);
+            }
+            //gsol.paths.assign(updateGrids.begin(), updateGrids.end());
+            GlobalSolutions.push_back(gsol);
+//            for( auto s : sol )
+//                cout << s.x << "," << s.y << ","<< s.z << endl;
+        }
+        updateGraph_SP(updateGrids, hvTable);
     }
     
     

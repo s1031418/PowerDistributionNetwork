@@ -15,7 +15,7 @@
 #include <climits>
 #include <queue>
 #include <map>
-const int Max_Distance = 100000 ;
+const int Max_Distance = 10000000 ;
 
 //struct Node
 //{
@@ -54,6 +54,9 @@ public:
     int getShortestPath(int target);
     
     void Demo();
+    
+    void UpdateWeight( int from , int to , int newWeight );
+    
     friend class BinaryHeap ;
     
 private:

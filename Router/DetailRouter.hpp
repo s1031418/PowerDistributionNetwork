@@ -45,7 +45,7 @@ public:
     // 依照Pitch切uniform的Grid
     void CutByPitch(double pitch , set<int> & Horizontal , set<int> & Vertical );
     
-    void NetOrder();
+    void printGlobalSols();
 private:
     map<string ,vector< vector< Grid > >> MLGrids ; // MutiLayer Grids
     RouterUtil RouteHelper ; 

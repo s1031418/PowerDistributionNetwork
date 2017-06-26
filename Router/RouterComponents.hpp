@@ -46,6 +46,7 @@ public:
     unsigned int uppermetal = 0 ;
     bool overflow = false ;
     std::vector<unsigned> capacities ;
+    
     // key為metal層
     //std::map<std::string,GridComponent> layers ;
 };
@@ -66,10 +67,20 @@ public:
     Path(){};
     std::string source ; // PowerPinName
     std::pair<std::string, std::string> target ;  // ( BlockName , BlockPinName  )
-    std::pair<int, int> sourceGrid ;
-    std::pair<int, int> targetGrid ;
+    Coordinate3D sourceGrid ;
+    Coordinate3D targetGrid ;
 };
 
+
+class GlobalSolution
+{
+public:
+    std::string PowerSourceName ;
+    std::pair<std::string, std::string> TargetName ; 
+    Coordinate3D source ;
+    std::vector<Coordinate3D> targets ;
+    std::vector<Coordinate3D> paths ;
+};
 
 
 #endif /* RouterComponents_hpp */

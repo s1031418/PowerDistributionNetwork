@@ -27,7 +27,7 @@
 // Define Global Routing Grid Size
 // Grid Size = Scaling * minimal space
 const unsigned Scaling = 100 ;
-const unsigned DEFAULT_WIDTH = 10 * UNITS_DISTANCE ; 
+const unsigned DEFAULT_WIDTH = 10 ;
 
 enum NetOrder
 {
@@ -72,6 +72,12 @@ public:
     
     int getLength(vector<int> & path);
     
+    map<string,string> LCSTable ;
+    
+    vector<GlobalSolution> GlobalSolutions ;
+
+    //vector<vector<Coordinate3D>> GlobalSolutions;
+    
     vector< vector< Grid > > Grids ;
 private:
     // variable:
@@ -86,9 +92,13 @@ private:
     
     void printAllGrids();
     
+    bool hasCommonGrid( );
+    
+    void updateGraph_SP(set<int> & UpdateGrids , map<int,int> & hvTable);
     
     
-    vector<Path> getNetOrdering(NetOrder);
+    
+    map<double,map<double,Path>> getNetOrdering(NetOrder);
     
     unsigned estimateCritical(vector<Point<int>> & Points);
     

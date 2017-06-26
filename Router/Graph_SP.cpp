@@ -62,6 +62,7 @@ void Graph_SP::Relax(int from , int to , int weight)
     }
     
 }
+
 vector<int> Graph_SP::getPath( int target )
 {
     
@@ -107,6 +108,14 @@ void Graph_SP::resize(int n )
 {
     num_vertex = n ;
     AdjList.resize(num_vertex);
+}
+void Graph_SP::UpdateWeight( int from , int to , int newWeight )
+{
+    for(auto it = AdjList[from].begin() ; it != AdjList[from].end() ; it++)
+    {
+        if( it->first == to )
+            it->second = newWeight ; 
+    }
 }
 void Graph_SP::Dijkstra(int Start )
 {

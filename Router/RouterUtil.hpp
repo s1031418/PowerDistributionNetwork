@@ -30,7 +30,12 @@ public:
     pair<bool, string> IsBlock(Point<int> LeftDown , Point<int> RightUp);
     
     
+    string getLCS(string s1,string s2);
+    
     int translateMetalNameToInt(string MetalName);
+    
+    string translateIntToMetalName(int layer);
+    
     
 private:
     

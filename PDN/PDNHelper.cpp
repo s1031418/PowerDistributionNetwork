@@ -88,6 +88,7 @@ void PDNHelper::InitBlockMaps()
 {
     for( auto component : ComponentMaps )
     {
+//        auto blockCoordinate = getBlockCoordinate(component.second.STARTPOINT.x, component.second.STARTPOINT.y, MacroMaps[component.second.MACROTYPE].WIDTH * UNITS_DISTANCE, MacroMaps[component.second.MACROTYPE].LENGTH * UNITS_DISTANCE, component.second.ORIENT);
         Point<int> BlockLeftDown = component.second.STARTPOINT ;
         Point<int> BlockRightUp ;
         BlockRightUp.x = BlockLeftDown.x + (MacroMaps[component.second.MACROTYPE].WIDTH * UNITS_DISTANCE);
@@ -107,20 +108,25 @@ void PDNHelper::InitBlockMaps()
             Point<float> LeftDownScaling = (blockpin.second.InnerMaps[block.Metals[0]].pt1) * UNITS_DISTANCE ;
             Point<float> RightUpScaling = (blockpin.second.InnerMaps[block.Metals[0]].pt2) * UNITS_DISTANCE ;
             Point<int> BlockPinLeftDown , BlockPinRightUp;
+            // non-rotate block
             BlockPinLeftDown.x = BlockLeftDown.x + LeftDownScaling.x ;
             BlockPinLeftDown.y = BlockLeftDown.y + LeftDownScaling.y ;
             BlockPinRightUp.x = BlockLeftDown.x + RightUpScaling.x ;
             BlockPinRightUp.y = BlockLeftDown.y + RightUpScaling.y ;
+            
             pair<Point<int>, Point<int>> RotatePoint = getBlockPinCoordinate(BlockLeftDown , BlockRightUp , BlockPinLeftDown, BlockPinRightUp, orient);
             block.LeftDown = get<0>(RotatePoint) ;
             block.RightUp = get<1>(RotatePoint);
             block.BlockPinName = blockpin.second.Name;
+            
+            // rotate block
+            auto rotateblockCoordinate = getBlockCoordinate(component.second.STARTPOINT.x, component.second.STARTPOINT.y, MacroMaps[component.second.MACROTYPE].WIDTH * UNITS_DISTANCE, MacroMaps[component.second.MACROTYPE].LENGTH * UNITS_DISTANCE, orient);
             // 不考慮BlockPin有在端點
             // 如果需要考慮判斷對哪邊開口比較大，DIRECTION就為哪個方向
-            if( block.LeftDown.x == BlockLeftDown.x ) block.Direction = LEFT ;
-            if( block.RightUp.x == BlockRightUp.x ) block.Direction = RIGHT ;
-            if( block.LeftDown.y == BlockLeftDown.y ) block.Direction = DOWN ;
-            if( block.RightUp.y == BlockRightUp.y ) block.Direction = TOP ;
+            if( block.LeftDown.x == rotateblockCoordinate.first.x ) block.Direction = LEFT ;
+            if( block.RightUp.x == rotateblockCoordinate.second.x ) block.Direction = RIGHT ;
+            if( block.LeftDown.y == rotateblockCoordinate.first.y ) block.Direction = DOWN ;
+            if( block.RightUp.y == rotateblockCoordinate.second.y ) block.Direction = TOP ;
             BlockMaps[component.first].push_back(block);
         }
         
@@ -132,7 +138,12 @@ void PDNHelper::InitBlockMaps()
 //        for( auto y : x.second )
 //        {
 //            cout << x.first << " " ;
-//            cout << y.BlockPinName << endl;
+//            cout << y.BlockPinName << " " ;
+//            if( y.Direction == 0 ) cout << "TOP";
+//            if( y.Direction == 1 ) cout << "DOWN";
+//            if( y.Direction == 2 ) cout << "RIGHT";
+//            if( y.Direction == 3 ) cout << "LEFT";
+//            cout << endl;
 //        }
 //    }
 }
