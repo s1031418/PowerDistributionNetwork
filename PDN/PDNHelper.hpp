@@ -76,6 +76,8 @@ public:
     // 回傳 PowerPin Name
     string getPowerPinMsg(Point<int> pt);
     
+    pair<Point<int>, Point<int>> getPowerPinCoordinate(string powerPinName);
+    
     //給Block左下跟右上角，BlockPin左下跟右上角，還有方向
     //回傳旋轉完的左下跟右上
     pair<Point<int>, Point<int>> getBlockPinCoordinate(Point<int> BlcokLeftDown , Point<int> BlcokRightUp , Point<int> BlockPinLeftDown , Point<int> BlockPinRightUp , string orient);

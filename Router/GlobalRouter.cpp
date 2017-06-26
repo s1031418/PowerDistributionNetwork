@@ -369,7 +369,6 @@ void GlobalRouter::InitGraph_SP()
             }
         }
     }
-    cout << translate3D_1D(10, 6, 6);
     
     clock_t End = clock();
     double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
@@ -740,6 +739,7 @@ void GlobalRouter::Route()
             auto targetGridCoordinate = target.second.targetGrid ;
             GlobalSolution gsol ;
             gsol.PowerSourceName = target.second.source ;
+            gsol.TargetName = make_pair(target.second.target.first, target.second.target.second);
             gsol.source = sourceGridCoordinate ;
             gsol.targets.push_back(targetGridCoordinate);
             graph.Dijkstra(translate3D_1D(sourceGridCoordinate.x, sourceGridCoordinate.y, sourceGridCoordinate.z));

@@ -46,6 +46,8 @@ public:
     void CutByPitch(double pitch , set<int> & Horizontal , set<int> & Vertical );
     
     void printGlobalSols();
+    
+    void XY_Route(vector<Coordinate3D> paths , pair<Point<int>, Point<int>> source , pair<Point<int>, Point<int>> target);
 private:
     map<string ,vector< vector< Grid > >> MLGrids ; // MutiLayer Grids
     RouterUtil RouteHelper ; 

@@ -429,7 +429,10 @@ Point<int> PDNHelper::FlipX(float y_axis , Point<int> pt , DIRECTION orientation
     return Point<int>(x,y);
     
 }
-
+pair<Point<int>, Point<int>> PDNHelper::getPowerPinCoordinate(string powerPinName)
+{
+    return make_pair(PowerMaps[powerPinName].LeftDown, PowerMaps[powerPinName].RightUp);
+}
 void PDNHelper::InitPowerMaps()
 {
     // key pinName , value block

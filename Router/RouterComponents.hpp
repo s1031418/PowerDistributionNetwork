@@ -82,5 +82,12 @@ public:
     std::vector<Coordinate3D> paths ;
 };
 
+class segment {
+    
+public:
+    std::string direction ;
+    int progress ; 
+};
+
 
 #endif /* RouterComponents_hpp */
