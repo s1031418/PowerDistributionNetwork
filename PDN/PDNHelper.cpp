@@ -443,6 +443,7 @@ void PDNHelper::InitPowerMaps()
         pair< Point<int>, Point<int> > PowerPinCoordinate = getPowerPinCoordinate(pin.second.STARTPOINT.x, pin.second.STARTPOINT.y, pin.second.RELATIVE_POINT1 , pin.second.RELATIVE_POINT2, orient);
         block.LeftDown = get<0>(PowerPinCoordinate);
         block.RightUp = get<1>(PowerPinCoordinate);
+        
         PowerMaps.insert(make_pair(pin.first, block));
     }
 }

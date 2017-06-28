@@ -23,7 +23,7 @@ GlobalRouter::GlobalRouter()
     lowest = stoi(metals[0].substr(5));
     highest = stoi(metals[metals.size()-1].substr(5));
     InitGrids();
-//    toGridGraph();
+    toGridGraph();
 }
 
 
@@ -59,8 +59,8 @@ void GlobalRouter::InitGrids()
 {
     cout << "Begin Initialize Global Grid Graph ..." << endl;
     clock_t Start = clock();
-    CutByBlockBoundary();
-//    CutByUserDefine();
+//    CutByBlockBoundary();
+    CutByUserDefine();
     Point<int> startpoint(0,0) ;
     for( auto h : Horizontal )
     {
@@ -73,8 +73,6 @@ void GlobalRouter::InitGrids()
             grid.width = CrossPoint.x - startpoint.x ;
             grid.length = CrossPoint.y - startpoint.y ;
             grid.startpoint = startpoint ;
-            if( startpoint.x == 1086000 && startpoint.y == 442700 )
-                cout << "d";
             pair<bool, string> result = RouterHelper.IsBlock(startpoint, Point<int>( startpoint.x + grid.width , startpoint.y + grid.length ) );
             if( get<0>(result) )
             {
@@ -127,7 +125,7 @@ void GlobalRouter::printAllGrids()
             Point<int> rightup(b.startpoint.x+b.width , b.startpoint.y + b.length);
             cout << "LeftDown:" << b.startpoint << " RightUp:" <<  rightup;
             cout << "[ " << b.lowermetal << "," << b.uppermetal << " ]" << endl;
-            cout << "OverFlow:" << boolalpha << b.overflow << endl;
+            
             cout << "Capacities:" << endl ;
             for( int i = 0 ; i < b.capacities.size() ; i++ )
                 cout << "Layer" << i << ":" << b.capacities[i] << endl;
@@ -910,8 +908,8 @@ void GlobalRouter::CutByUserDefine()
 {
     int x_diff = DIEAREA.pt2.x - DIEAREA.pt1.x ;
     int y_diff = DIEAREA.pt2.y - DIEAREA.pt1.y ;
-    int default_length = 1 * UNITS_DISTANCE ;
-    int scaling_length = default_length * Scaling ;
+    int default_length = 12 * UNITS_DISTANCE ;
+    int scaling_length = default_length  ;
     
     // Set Vertical Line
     for( int i = scaling_length ; i <= x_diff ; i += scaling_length )

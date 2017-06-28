@@ -13,12 +13,21 @@
 #include "Components.h"
 #include <map>
 #include <vector>
+
+
+const unsigned DEFAULT_WIDTH = 10 ;
+const unsigned DEFAULT_PITCH = 12 ;
 class Border
 {
-    std::pair<Point<unsigned>, Point<unsigned>> LeftEdge ;
-    std::pair<Point<unsigned>, Point<unsigned>> RightEdge ;
-    std::pair<Point<unsigned>, Point<unsigned>> TopEdge ;
-    std::pair<Point<unsigned>, Point<unsigned>> BottomEdge ;
+public:
+    bool leftEdge ;
+    bool rightEdge ;
+    bool upEdge ;
+    bool downEdge ;
+//    std::pair<Point<unsigned>, Point<unsigned>> LeftEdge ;
+//    std::pair<Point<unsigned>, Point<unsigned>> RightEdge ;
+//    std::pair<Point<unsigned>, Point<unsigned>> TopEdge ;
+//    std::pair<Point<unsigned>, Point<unsigned>> BottomEdge ;
 //    Point<unsigned> leftdown ;
 //    Point<unsigned> rightdown ;
 //    Point<unsigned> leftup ;
@@ -44,7 +53,8 @@ public:
     //  非block 的 Grid 兩個metal都為0 
     unsigned int lowermetal = 0 ;
     unsigned int uppermetal = 0 ;
-    bool overflow = false ;
+    std::vector<Border> Edges ; 
+    std::vector<Rectangle> obstacles;  
     std::vector<unsigned> capacities ;
     
     // key為metal層
@@ -82,12 +92,6 @@ public:
     std::vector<Coordinate3D> paths ;
 };
 
-class segment {
-    
-public:
-    std::string direction ;
-    int progress ; 
-};
 
 
 #endif /* RouterComponents_hpp */

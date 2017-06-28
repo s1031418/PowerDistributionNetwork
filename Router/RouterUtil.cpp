@@ -19,13 +19,217 @@ void RouterUtil::InitBlockMap()
 {
     for( auto component : ComponentMaps )
     {
+        BlockCoordinate blockCoordinate ;
         pair<Point<int>,Point<int>> coordinate = this->getBlockCoordinate(component.second.STARTPOINT.x, component.second.STARTPOINT.y, MacroMaps[ component.second.MACROTYPE ].WIDTH * UNITS_DISTANCE, MacroMaps[ component.second.MACROTYPE ].LENGTH * UNITS_DISTANCE, component.second.ORIENT);
-        BlockMap.insert(make_pair(component.first, coordinate));
+        blockCoordinate.LeftDown = coordinate.first ;
+        blockCoordinate.RightUp = coordinate.second ;
+        auto firstLayer = MacroMaps[ component.second.MACROTYPE ].obs.InnerMaps.begin();
+        auto lastLayer = --MacroMaps[ component.second.MACROTYPE ].obs.InnerMaps.end();
+        int lower = stoi(firstLayer->first.substr(5));
+        int upper = stoi(lastLayer->first.substr(5));
+        blockCoordinate.lowerMetal = lower ;
+        blockCoordinate.upperMetal = upper ;
+        BlockMap.insert(make_pair(component.first, blockCoordinate));
     }
 }
 
 RouterUtil::~RouterUtil()
 {
+    
+}
+int RouterUtil::getRectArea(Rectangle rect1)
+{
+    int X = rect1.RightUp.x - rect1.LeftDown.x ;
+    int Y = rect1.RightUp.y - rect1.LeftDown.y ;
+    return X * Y ;
+}
+CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1 )
+{
+    for(auto block : BlockMap)
+    {
+        Rectangle rect2 ;
+        rect2.LeftDown = block.second.LeftDown ;
+        rect2.RightUp = block.second.RightUp ;
+        if( isCross(rect1, rect2) )
+        {
+            CrossInfo crossinfo ;
+            crossinfo.isCross = true ;
+            crossinfo.lowerMetal = block.second.lowerMetal ;
+            crossinfo.upperMetal = block.second.upperMetal ;
+            // 原本的rect 在 block 裡面
+            if ( rect1.LeftDown.x >= rect2.LeftDown.x && rect1.LeftDown.x <= rect2.RightUp.x
+                && rect1.RightUp.x >= rect2.LeftDown.x && rect1.RightUp.x <= rect2.RightUp.x
+                 && rect1.LeftDown.y >= rect2.LeftDown.y && rect1.LeftDown.y <= rect2.RightUp.y
+                   && rect1.RightUp.y >= rect2.LeftDown.y && rect1.RightUp.y <= rect2.RightUp.y )
+            {
+                crossinfo.isUpEdgeBlock = true ;
+                crossinfo.isDownEdgeBlock = true ;
+                crossinfo.isLeftEdgeBlock = true ;
+                crossinfo.isRightEdgeBlock = true ;
+            }
+            
+            // 上面
+            // 左右邊都在裡面
+            if( rect1.LeftDown.y >= rect2.LeftDown.y && rect1.LeftDown.y <= rect2.RightUp.y
+               && rect1.LeftDown.x >= rect2.LeftDown.x && rect1.LeftDown.x <= rect2.RightUp.x
+               && rect1.RightUp.x >= rect2.LeftDown.x && rect1.RightUp.x <= rect2.RightUp.x )
+            {
+                crossinfo.isLeftEdgeBlock = true ;
+                crossinfo.isRightEdgeBlock = true ;
+                crossinfo.isDownEdgeBlock = true ;
+            }
+            // 左邊還在裡面，右邊超過了
+            else if( rect1.LeftDown.y >= rect2.LeftDown.y && rect1.LeftDown.y <= rect2.RightUp.y
+                    && rect1.LeftDown.x >= rect2.LeftDown.x && rect1.LeftDown.x <= rect2.RightUp.x
+                    && rect1.RightUp.x > rect2.RightUp.x  )
+            {
+                crossinfo.isLeftEdgeBlock = true ;
+                crossinfo.isDownEdgeBlock = true ;
+            }
+            // 右邊還在裡面，左邊超過了
+            else if( rect1.LeftDown.y >= rect2.LeftDown.y && rect1.LeftDown.y <= rect2.RightUp.y
+                    && rect1.RightUp.x >= rect2.LeftDown.x && rect1.RightUp.x <= rect2.RightUp.x
+                    && rect1.LeftDown.x < rect2.LeftDown.x )
+            {
+                crossinfo.isRightEdgeBlock = true ;
+                crossinfo.isDownEdgeBlock = true ;
+            }
+            // 下面
+            // 左右邊都在裡面
+            
+            else if( rect1.RightUp.y >= rect2.LeftDown.y && rect1.RightUp.y <= rect2.RightUp.y
+                    && rect1.LeftDown.x >= rect2.LeftDown.x && rect1.LeftDown.x <= rect2.RightUp.x
+                    && rect1.RightUp.x >= rect2.LeftDown.x && rect1.RightUp.x <= rect2.RightUp.x )
+            {
+                crossinfo.isLeftEdgeBlock = true ;
+                crossinfo.isRightEdgeBlock = true ;
+                crossinfo.isDownEdgeBlock = true ;
+            }
+            // 左邊還在裡面，右邊超過了
+            else if( rect1.RightUp.y >= rect2.LeftDown.y && rect1.RightUp.y <= rect2.RightUp.y
+                    && rect1.LeftDown.x >= rect2.LeftDown.x && rect1.LeftDown.x <= rect2.RightUp.x
+                    && rect1.RightUp.x > rect2.RightUp.x  )
+            {
+                crossinfo.isLeftEdgeBlock = true ;
+                crossinfo.isDownEdgeBlock = true ;
+            }
+            // 右邊還在裡面，左邊超過了
+            else if( rect1.RightUp.y >= rect2.LeftDown.y && rect1.RightUp.y <= rect2.RightUp.y
+                    && rect1.RightUp.x >= rect2.LeftDown.x && rect1.RightUp.x <= rect2.RightUp.x
+                    && rect1.LeftDown.x < rect2.LeftDown.x )
+            {
+                crossinfo.isRightEdgeBlock = true ;
+                crossinfo.isDownEdgeBlock = true ;
+            }
+            // 左面
+            
+            // 上下邊都在裡面
+            else if( rect1.RightUp.x >= rect2.LeftDown.x && rect1.RightUp.x <= rect2.RightUp.x
+                    && rect1.LeftDown.y >= rect2.LeftDown.y && rect1.LeftDown.y <= rect2.RightUp.y
+                    && rect1.RightUp.y >= rect2.LeftDown.y && rect1.RightUp.y <= rect2.RightUp.y )
+            {
+                crossinfo.isUpEdgeBlock = true ;
+                crossinfo.isDownEdgeBlock = true ;
+                crossinfo.isRightEdgeBlock = true ;
+            }
+            // 上邊還在裡面，下邊超過了
+            else if( rect1.RightUp.x >= rect2.LeftDown.x && rect1.RightUp.x <= rect2.RightUp.x
+                    && rect1.RightUp.y >= rect2.LeftDown.y && rect1.RightUp.y <= rect2.RightUp.y
+                    && rect1.LeftDown.y < rect2.LeftDown.y  )
+            {
+                crossinfo.isRightEdgeBlock = true ;
+                crossinfo.isUpEdgeBlock = true ;
+            }
+            // 下邊還在裡面，上邊超過了
+            else if( rect1.RightUp.x >= rect2.LeftDown.x && rect1.RightUp.x <= rect2.RightUp.x
+                    && rect1.LeftDown.y >= rect2.LeftDown.y && rect1.LeftDown.y <= rect2.RightUp.y
+                    && rect1.RightUp.y > rect2.RightUp.y )
+            {
+                crossinfo.isRightEdgeBlock = true ;
+                crossinfo.isDownEdgeBlock = true ;
+            }
+            // 右面
+            
+            // 上下邊都在裡面
+            else if( rect1.LeftDown.x >= rect2.LeftDown.x && rect1.LeftDown.x <= rect2.RightUp.x
+                    && rect1.LeftDown.y >= rect2.LeftDown.y && rect1.LeftDown.y <= rect2.RightUp.y
+                    && rect1.RightUp.y >= rect2.LeftDown.y && rect1.RightUp.y <= rect2.RightUp.y )
+            {
+                crossinfo.isUpEdgeBlock = true ;
+                crossinfo.isDownEdgeBlock = true ;
+                crossinfo.isLeftEdgeBlock = true ;
+            }
+            // 上邊還在裡面，下邊超過了
+            else if( rect1.LeftDown.x >= rect2.LeftDown.x && rect1.LeftDown.x <= rect2.RightUp.x
+                    && rect1.RightUp.y >= rect2.LeftDown.y && rect1.RightUp.y <= rect2.RightUp.y
+                    && rect1.LeftDown.y < rect2.LeftDown.y  )
+            {
+                crossinfo.isLeftEdgeBlock = true ;
+                crossinfo.isUpEdgeBlock = true ;
+            }
+            // 下邊還在裡面，上邊超過了
+            else if( rect1.LeftDown.x >= rect2.LeftDown.x && rect1.LeftDown.x <= rect2.RightUp.x
+                    && rect1.LeftDown.y >= rect2.LeftDown.y && rect1.LeftDown.y <= rect2.RightUp.y
+                    && rect1.RightUp.y > rect2.RightUp.y )
+            {
+                crossinfo.isLeftEdgeBlock = true ;
+                crossinfo.isDownEdgeBlock = true ;
+            }
+            return crossinfo ;
+            
+        }
+    }
+    return CrossInfo();
+}
+int RouterUtil::getCrossArea(Rectangle rect1 , Rectangle rect2)
+{
+    
+    int innerLeft = rect1.LeftDown.x > rect2.LeftDown.x ? rect1.LeftDown.x : rect2.LeftDown.x ;
+    int innerRight = rect1.RightUp.x < rect2.RightUp.x ? rect1.RightUp.x : rect2.RightUp.x ;
+    int innerTop = rect1.RightUp.y < rect2.RightUp.y ? rect1.RightUp.y : rect2.RightUp.y;
+    int innerBottom = rect1.LeftDown.y > rect2.LeftDown.y ? rect1.LeftDown.y : rect2.LeftDown.y;
+    
+    
+    int innerWidth = innerTop > innerBottom ? (innerTop - innerBottom) : 0;
+    int innerHeight = innerRight > innerLeft ? (innerRight - innerLeft) : 0;
+    int innerArea = innerWidth * innerHeight;
+    return innerArea ;
+//    return (rect1.RightUp.x - rect1.LeftDown.x) * (rect1.RightUp.y - rect1.LeftDown.y) + (rect2.RightUp.x - rect2.LeftDown.x) * (rect2.RightUp.y - rect2.LeftDown.y) - innerArea;
+}
+Rectangle RouterUtil::getCrossRect(Rectangle rect1 , Rectangle rect2)
+{
+    if( !isCross(rect1, rect2) )
+        return Rectangle( Point<int>(-1,-1)  , Point<int>(-1,-1) );
+    
+    
+    int innerLeft = rect1.LeftDown.x > rect2.LeftDown.x ? rect1.LeftDown.x : rect2.LeftDown.x ;
+    int innerRight = rect1.RightUp.x < rect2.RightUp.x ? rect1.RightUp.x : rect2.RightUp.x ;
+    int innerTop = rect1.RightUp.y < rect2.RightUp.y ? rect1.RightUp.y : rect2.RightUp.y;
+    int innerBottom = rect1.LeftDown.y > rect2.LeftDown.y ? rect1.LeftDown.y : rect2.LeftDown.y;
+    
+    return Rectangle( Point<int>( innerLeft , innerBottom ) , Point<int>( innerRight , innerTop ) );
+//    int innerHeight = innerTop > innerBottom ? (innerTop - innerBottom) : 0;
+//    int innerWidth = innerRight > innerLeft ? (innerRight - innerLeft) : 0;
+//    int innerArea = innerWidth * innerHeight;
+    
+    
+}
+bool RouterUtil::isCross(Rectangle rect1 , Rectangle rect2)
+{
+    
+    pair<int, int> rect1Center = make_pair( ( rect1.LeftDown.x + rect1.RightUp.x ) / 2 , ( rect1.LeftDown.y + rect1.RightUp.y ) / 2 );
+    pair<int, int> rect2Center = make_pair( ( rect2.LeftDown.x + rect2.RightUp.x ) / 2 , ( rect2.LeftDown.y + rect2.RightUp.y ) / 2 );
+    int verticalDistance = abs(rect1Center.second - rect2Center.second);
+    int horizontalDistance = abs(rect1Center.first - rect2Center.first);
+    int rect1Width = rect1.RightUp.x - rect1.LeftDown.x ;
+    int rect1Height = rect1.RightUp.y - rect1.LeftDown.y ;
+    int rect2Width = rect2.RightUp.x - rect2.LeftDown.x ;
+    int rect2Height = rect2.RightUp.y - rect2.LeftDown.y ;
+    int verticalThreshold = (rect1Height + rect2Height)/2 ;
+    int horizontalThreshold = (rect1Width + rect2Width)/2 ;
+    if( verticalDistance > verticalThreshold || horizontalDistance > horizontalThreshold )
+        return false ; 
+    return true ; 
     
 }
 bool RouterUtil::IsBlock(Grid grid)
@@ -68,19 +272,19 @@ string RouterUtil::translateIntToMetalName(int layer)
 pair<bool, string> RouterUtil::IsBlock(Point<int> LeftDown , Point<int> RightUp)
 {
     pair<bool, string> result ;
-    get<0>(result) = false;
-    get<1>(result) = "";
-    for(auto block : BlockMap)
-    {
-        if( LeftDown.x >= block.second.first.x
-           && RightUp.x <= block.second.second.x
-           && LeftDown.y >= block.second.first.y
-           && RightUp.y <= block.second.second.y )
-        {
-            get<0>(result) = true;
-            get<1>(result) = ComponentMaps[block.first].MACROTYPE;
-        }
-    }
+//    get<0>(result) = false;
+//    get<1>(result) = "";
+//    for(auto block : BlockMap)
+//    {
+//        if( LeftDown.x >= block.second.first.x
+//           && RightUp.x <= block.second.second.x
+//           && LeftDown.y >= block.second.first.y
+//           && RightUp.y <= block.second.second.y )
+//        {
+//            get<0>(result) = true;
+//            get<1>(result) = ComponentMaps[block.first].MACROTYPE;
+//        }
+//    }
     return result;
 }
 string RouterUtil::getLCS(string s1,string s2)
@@ -132,4 +336,19 @@ string RouterUtil::getLCS(string s1,string s2)
     }
     reverse(ss.begin(),ss.end());
     return ss ;
+}
+vector<int> RouterUtil::getPowerPinGridCandidate(Rectangle rect)
+{
+    vector<int> candidates ;
+    int xLowerBound = rect.LeftDown.x / DEFAULT_PITCH ;
+    int xUpperBound = rect.RightUp.x / DEFAULT_PITCH;
+    vector<int> xCandidates ;
+    for( int i = xLowerBound + 1 ; i <= xUpperBound ; i += DEFAULT_PITCH )
+        xCandidates.push_back(i);
+    int yLowerBound = rect.LeftDown.y / DEFAULT_PITCH ;
+    int yUpperBound = rect.RightUp.y / DEFAULT_PITCH;
+    vector<int> yCandidates ;
+    for( int i = yLowerBound + 1 ; i <= yUpperBound ; i += DEFAULT_PITCH )
+        yCandidates.push_back(i);
+    
 }

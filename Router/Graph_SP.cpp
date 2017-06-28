@@ -22,6 +22,14 @@ Graph_SP::Graph_SP(int n)
 }
 void Graph_SP::AddEdge(int from , int to , int weight)
 {
+    for( int i = 0 ; i < AdjList[from].size() ; i++ )
+    {
+        for( auto list : AdjList[i] )
+        {
+            if( list.first == to )
+                return ;
+        }
+    }
     AdjList[from].push_back(make_pair(to, weight));
 }
 void Graph_SP::PrintDataArray(vector<int> array)

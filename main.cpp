@@ -16,11 +16,12 @@
 #include "InitialFileParser.hpp"
 #include <cstdio>
 #include "Converter.hpp"
-#include "DetailRouter.hpp"
+//#include "DetailRouter.hpp"
 #include <memory>
 #include "PDN.hpp"
 #include <stdexcept>
 #include "verilog.hpp"
+#include "Router.hpp"
 #include <array>
 using namespace std ;
 
@@ -54,10 +55,28 @@ int main(int argc,  char * argv[])
 //    Graph_SP g ;
 //    g.Demo();
     
+//    RouterUtil rutil ;
+//    Rectangle rect1( Point<int>( 0 , 0 ) , Point<int>(  5 , 5 ) ) ;
+//    Rectangle rect2( Point<int>( 3, 5 ) , Point<int>(  10 , 10 ) ) ;
+//    cout << boolalpha << rutil.isCross(rect1, rect2) << endl;
+//    cout << "Cross Area:" << rutil.getCrossArea(rect1, rect2) << endl;
+//    auto Rectangle = rutil.getCrossRect(rect1, rect2) ;
+//    cout << "Cross Rect:" << Rectangle.LeftDown << "," << Rectangle.RightUp << endl;
+    
+    Router router ;
+    router.Route();
+//    Graph_SP g9(4);
+//    //    Graph_SP g9;
+//    g9.AddEdge(0, 1, 1);
+//    g9.AddEdge(0, 1, 1);
+//    g9.AddEdge(0, 2, 1);
+//    g9.AddEdge(1, 3, 1);
+//    g9.AddEdge(2, 3, 1);
+//    g9.Dijkstra(0);
 //    GlobalRouter gr ;
 //    gr.Route();
-    DetailRouter dr ;
-    dr.DetailRoute();
+//    DetailRouter dr ;
+//    dr.DetailRoute();
     //GlobalRouter gr ;
     //gr.Route();
 //    int x = 1;

@@ -434,8 +434,9 @@ class Rectangle
 {
 public:
     Rectangle(){};
-    Point<unsigned> LeftDown ;
-    Point<unsigned> RightUp ;
+    Rectangle(Point<int> leftdown , Point<int> rightup) :LeftDown(leftdown),RightUp(rightup) {};
+    Point<int> LeftDown ;
+    Point<int> RightUp ;
 };
 
 

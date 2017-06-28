@@ -27,7 +27,7 @@
 // Define Global Routing Grid Size
 // Grid Size = Scaling * minimal space
 const unsigned Scaling = 100 ;
-const unsigned DEFAULT_WIDTH = 10 ;
+
 
 enum NetOrder
 {

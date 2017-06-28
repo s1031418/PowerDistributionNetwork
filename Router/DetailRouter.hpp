@@ -28,26 +28,29 @@ public:
     vector<DIRECTION> AllowDirections ;
     
 };
-
-
 class DetailRouter
 {
     
 public:
     DetailRouter();
     ~DetailRouter();
-    // Model為3D的Graph 
+    // Model為3D的Graph
     void InitGrids();
     
-    void InitGraph_SP(RouteConstraint constraint);
+    
+    
+    
+    void InitGraph_SP( Graph_SP & graph_sp );
+    
     void DetailRoute();
     
     // 依照Pitch切uniform的Grid
     void CutByPitch(double pitch , set<int> & Horizontal , set<int> & Vertical );
     
+    
     void printGlobalSols();
     
-    void XY_Route(vector<Coordinate3D> paths , pair<Point<int>, Point<int>> source , pair<Point<int>, Point<int>> target);
+    
 private:
     map<string ,vector< vector< Grid > >> MLGrids ; // MutiLayer Grids
     RouterUtil RouteHelper ; 
