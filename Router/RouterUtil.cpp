@@ -350,5 +350,5 @@ vector<int> RouterUtil::getPowerPinGridCandidate(Rectangle rect)
     vector<int> yCandidates ;
     for( int i = yLowerBound + 1 ; i <= yUpperBound ; i += DEFAULT_PITCH )
         yCandidates.push_back(i);
-    
+    return vector<int>();
 }

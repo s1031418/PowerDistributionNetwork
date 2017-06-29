@@ -95,14 +95,14 @@ void DetailRouter::DetailRoute()
     for( auto g : gr.GlobalSolutions )
     {
         
-        auto powerPinCoordindate = RouteHelper.getPowerPinCoordinate(g.PowerSourceName);
-        auto targetBlock = RouteHelper.getBlock(g.TargetName.first, g.TargetName.second);
-        pair<Point<int>, Point<int>> targetPinCoordinate = make_pair(targetBlock.LeftDown, targetBlock.RightUp);
-        int X = (powerPinCoordindate.first.x + powerPinCoordindate.second.x)/2;
-        int Y = (targetPinCoordinate.first.y + targetPinCoordinate.second.y)/2;
-        cout << "source:"<< X << " "<< powerPinCoordindate.first.y << endl;
-        cout << "target:"<< targetPinCoordinate.second.x << " " << Y << endl;
-        cout << "cross point:" << X << " " << Y << endl;
+//        auto powerPinCoordindate = RouteHelper.getPowerPinCoordinate(g.PowerSourceName);
+//        auto targetBlock = RouteHelper.getBlock(g.TargetName.first, g.TargetName.second);
+//        pair<Point<int>, Point<int>> targetPinCoordinate = make_pair(targetBlock.LeftDown, targetBlock.RightUp);
+//        int X = (powerPinCoordindate.first.x + powerPinCoordindate.second.x)/2;
+//        int Y = (targetPinCoordinate.first.y + targetPinCoordinate.second.y)/2;
+//        cout << "source:"<< X << " "<< powerPinCoordindate.first.y << endl;
+//        cout << "target:"<< targetPinCoordinate.second.x << " " << Y << endl;
+//        cout << "cross point:" << X << " " << Y << endl;
 //        set<int> horizontal , vertical ;
 //        Diearea diearea ;
 //        diearea.pt1 = gr.Grids[g.source.y][g.source.x].startpoint ;

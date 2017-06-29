@@ -91,6 +91,15 @@ public:
     std::vector<Coordinate3D> targets ;
     std::vector<Coordinate3D> paths ;
 };
+enum Direction3D
+{
+    upOrient ,
+    downOrient ,
+    leftOrient ,
+    rightOrient ,
+    topOrient ,
+    bottomOrient
+};
 
 
 

@@ -58,6 +58,10 @@ public:
     void Route();
     vector< vector< Grid > > Grids ;
     set<int> boundList ;
+    
+    vector<pair<Direction3D, int>> translateToFriendlyForm( vector<Coordinate3D> & Paths );
+    
+    void TestToOutoutDef( vector<Coordinate3D> & paths );
 private:
     // variable:
     RouterUtil RouterHelper;
@@ -73,6 +77,7 @@ private:
     
     Coordinate3D translate1D_3D(int index);
     void toGridGraph();
+    
     
     
     int translate3D_1D(Coordinate3D coordinate3d);

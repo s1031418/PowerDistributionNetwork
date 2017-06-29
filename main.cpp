@@ -62,9 +62,27 @@ int main(int argc,  char * argv[])
 //    cout << "Cross Area:" << rutil.getCrossArea(rect1, rect2) << endl;
 //    auto Rectangle = rutil.getCrossRect(rect1, rect2) ;
 //    cout << "Cross Rect:" << Rectangle.LeftDown << "," << Rectangle.RightUp << endl;
-    
     Router router ;
-    router.Route();
+//    router.Route();
+    vector<Coordinate3D> Paths ;
+    Paths.push_back(Coordinate3D(2,2,2));
+    Paths.push_back(Coordinate3D(2,3,2));
+    Paths.push_back(Coordinate3D(2,3,1));
+    Paths.push_back(Coordinate3D(2,4,1));
+    Paths.push_back(Coordinate3D(3,4,1));
+    Paths.push_back(Coordinate3D(4,3,1));
+    Paths.push_back(Coordinate3D(5,3,1));
+    Paths.push_back(Coordinate3D(6,3,1));
+    Paths.push_back(Coordinate3D(7,3,1));
+    Paths.push_back(Coordinate3D(8,3,1));
+    Paths.push_back(Coordinate3D(9,3,1));
+    Paths.push_back(Coordinate3D(10,3,1));
+    Paths.push_back(Coordinate3D(10,4,1));
+    Paths.push_back(Coordinate3D(10,5,1));
+    Paths.push_back(Coordinate3D(10,6,1));
+    Paths.push_back(Coordinate3D(10,7,1));
+    router.TestToOutoutDef(Paths);
+    
 //    Graph_SP g9(4);
 //    //    Graph_SP g9;
 //    g9.AddEdge(0, 1, 1);

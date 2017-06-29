@@ -66,14 +66,14 @@ void Router::Route()
     
     // 先不決定ordering
     
-//    for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
-//    {
-//        cout << it->first << " " << it->second.BlockName << " " << it->second.BlockPinName << endl;
-//        auto powerPinCoordinate = RouterHelper.getPowerPinCoordinate(it->first);
-//        auto BlockPinCoordinate = RouterHelper.getBlock(it->second.BlockName, it->second.BlockPinName);
-//        cout << "Source Absolute Coordinate:" << powerPinCoordinate.first << "," << powerPinCoordinate.second << endl;
-//        cout << "PowerPin Absolute Coordinate:" << BlockPinCoordinate.LeftDown << ","  << BlockPinCoordinate.RightUp << endl;
-//    }
+    for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
+    {
+        cout << it->first << " " << it->second.BlockName << " " << it->second.BlockPinName << endl;
+        auto powerPinCoordinate = RouterHelper.getPowerPinCoordinate(it->first);
+        auto BlockPinCoordinate = RouterHelper.getBlock(it->second.BlockName, it->second.BlockPinName);
+        cout << "Source Absolute Coordinate:" << powerPinCoordinate.LeftDown << "," << powerPinCoordinate.RightUp << endl;
+        cout << "PowerPin Absolute Coordinate:" << BlockPinCoordinate.LeftDown << ","  << BlockPinCoordinate.RightUp << endl;
+    }
     
     clock_t End = clock();
     double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
@@ -102,6 +102,125 @@ int Router::translate3D_1D(Coordinate3D coordinate3d)
     int y = coordinate3d.y ;
     int z = coordinate3d.z ;
     return (z-1)*total + x + y * XSize ;
+}
+vector<pair<Direction3D, int>> Router::translateToFriendlyForm( vector<Coordinate3D> & Paths )
+{
+    int cnt = 1 ;
+    Direction3D initDirection = topOrient ;
+    if( (int)(Paths[1].x - Paths[0].x) > 0) initDirection = rightOrient ;
+    if( (int)(Paths[1].x - Paths[0].x) < 0) initDirection = leftOrient ;
+    if( (int)(Paths[1].y - Paths[0].y) > 0) initDirection = upOrient ;
+    if( (int)(Paths[1].y - Paths[0].y) < 0) initDirection = downOrient ;
+    if( (int)(Paths[1].z - Paths[0].z) > 0) initDirection = topOrient ;
+    if( (int)(Paths[1].z - Paths[0].z) < 0) initDirection = bottomOrient ;
+    vector<pair<Direction3D, int>> paths ;
+    for( int i = 1 ; i < Paths.size()-1 ; i++ )
+    {
+        Direction3D direction = topOrient ;
+        if( (int)(Paths[i+1].x - Paths[i].x) > 0) direction = rightOrient ;
+        if( (int)(Paths[i+1].x - Paths[i].x) < 0) direction = leftOrient ;
+        if( (int)(Paths[i+1].y - Paths[i].y) > 0) direction = upOrient ;
+        if( (int)(Paths[i+1].y - Paths[i].y) < 0) direction = downOrient ;
+        if( (int)(Paths[i+1].z - Paths[i].z) > 0) direction = topOrient ;
+        if( (int)(Paths[i+1].z - Paths[i].z) < 0) direction = bottomOrient ;
+        
+        if( direction != initDirection )
+        {
+            paths.push_back(make_pair(initDirection, cnt));
+            cnt = 0 ;
+            initDirection = direction;
+        }
+        cnt++;
+    }
+    paths.push_back(make_pair(initDirection, cnt));
+    for( auto p : paths )
+    {
+        if( p.first == 0 )  cout << "UP";
+        if( p.first == 1 )  cout << "DOWN";
+        if( p.first == 2 )  cout << "LEFT";
+        if( p.first == 3 )  cout << "RIGHT";
+        if( p.first == 4 )  cout << "TOP";
+        if( p.first == 5 )  cout << "BOTTOM";
+        cout << " " << p.second << endl;
+    }
+    return paths;
+}
+void Router::TestToOutoutDef(  vector<Coordinate3D> & paths )
+{
+    auto source = paths[0];
+    auto startPoint = Grids[source.y][source.x].startpoint ;
+    Point<int> oringinTargetPoint = startPoint;
+    Point<int> targetPoint = startPoint;
+    auto friendlyForm = translateToFriendlyForm(paths);
+    for( int i = 0 ; i < friendlyForm.size() ; i++ )
+    {
+        
+        Direction3D diection = friendlyForm[i].first ;
+        Direction3D nextDirection = friendlyForm[i+1].first ;
+        int progress = friendlyForm[i].second ;
+        if( diection == upOrient )
+        {
+            oringinTargetPoint = Point<int>( oringinTargetPoint.x , oringinTargetPoint.y + (progress * DEFAULT_PITCH * UNITS_DISTANCE));
+            targetPoint = oringinTargetPoint ;
+            targetPoint.y += (DEFAULT_WIDTH * UNITS_DISTANCE / 2) ;
+            
+            cout  << startPoint << " " << targetPoint << endl;
+        }
+        else if( diection == downOrient )
+        {
+            oringinTargetPoint = Point<int>( oringinTargetPoint.x , oringinTargetPoint.y - (progress * DEFAULT_PITCH * UNITS_DISTANCE));
+            targetPoint = oringinTargetPoint ;
+            targetPoint.y -= (DEFAULT_WIDTH * UNITS_DISTANCE / 2) ;
+            cout  << startPoint << " " << targetPoint << endl;
+        }
+        else if( diection == leftOrient )
+        {
+            oringinTargetPoint = Point<int>( oringinTargetPoint.x - (progress * DEFAULT_PITCH * UNITS_DISTANCE), oringinTargetPoint.y );
+            targetPoint = oringinTargetPoint ;
+            targetPoint.x -= (DEFAULT_WIDTH * UNITS_DISTANCE / 2) ;
+            cout  << startPoint << " " << targetPoint << endl;
+        }
+        else if( diection == rightOrient )
+        {
+            oringinTargetPoint = Point<int>( oringinTargetPoint.x + (progress * DEFAULT_PITCH * UNITS_DISTANCE), oringinTargetPoint.y );
+            targetPoint = oringinTargetPoint ;
+            targetPoint.x += (DEFAULT_WIDTH * UNITS_DISTANCE / 2) ;
+            cout  << startPoint << " " << targetPoint << endl;
+        }
+        else if( diection == topOrient )
+        {
+            for( int i = 0 ; i < progress ; i++ )
+                cout << oringinTargetPoint << " " << "via" << endl;
+            
+        }
+        else if( diection == bottomOrient )
+        {
+            for( int i = 0 ; i < progress ; i++ )
+                cout << oringinTargetPoint << " " << "via" << endl;
+            
+        }
+        //-------------------------------//
+        //update source point
+        startPoint = oringinTargetPoint ;
+        if( nextDirection == upOrient )
+        {
+            startPoint.y -= DEFAULT_WIDTH / 2 * UNITS_DISTANCE;
+            
+        }
+        if( nextDirection == downOrient )
+        {
+            startPoint.y += DEFAULT_WIDTH / 2 * UNITS_DISTANCE;
+        }
+        if( nextDirection == leftOrient )
+        {
+            startPoint.x += DEFAULT_WIDTH / 2 * UNITS_DISTANCE;
+        }
+        if( nextDirection == rightOrient )
+        {
+            startPoint.x -= DEFAULT_WIDTH / 2 * UNITS_DISTANCE;
+        }
+    }
+    
 }
 void Router::InitGraph_SP( Graph_SP & graph_sp )
 {

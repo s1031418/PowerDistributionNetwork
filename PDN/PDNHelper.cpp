@@ -429,9 +429,9 @@ Point<int> PDNHelper::FlipX(float y_axis , Point<int> pt , DIRECTION orientation
     return Point<int>(x,y);
     
 }
-pair<Point<int>, Point<int>> PDNHelper::getPowerPinCoordinate(string powerPinName)
+Block PDNHelper::getPowerPinCoordinate(string powerPinName)
 {
-    return make_pair(PowerMaps[powerPinName].LeftDown, PowerMaps[powerPinName].RightUp);
+    return PowerMaps[powerPinName] ;
 }
 void PDNHelper::InitPowerMaps()
 {
@@ -443,7 +443,11 @@ void PDNHelper::InitPowerMaps()
         pair< Point<int>, Point<int> > PowerPinCoordinate = getPowerPinCoordinate(pin.second.STARTPOINT.x, pin.second.STARTPOINT.y, pin.second.RELATIVE_POINT1 , pin.second.RELATIVE_POINT2, orient);
         block.LeftDown = get<0>(PowerPinCoordinate);
         block.RightUp = get<1>(PowerPinCoordinate);
-        
+        block.Metals.push_back(pin.second.METALNAME);
+        if( block.LeftDown.y == DIEAREA.pt1.y ) block.Direction = TOP ;
+        if( block.LeftDown.x == DIEAREA.pt1.x ) block.Direction = RIGHT ;
+        if( block.RightUp.y == DIEAREA.pt2.y ) block.Direction = DOWN ;
+        if( block.RightUp.x == DIEAREA.pt2.x ) block.Direction = LEFT ;
         PowerMaps.insert(make_pair(pin.first, block));
     }
 }
