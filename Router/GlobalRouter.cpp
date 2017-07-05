@@ -23,7 +23,7 @@ GlobalRouter::GlobalRouter()
     lowest = stoi(metals[0].substr(5));
     highest = stoi(metals[metals.size()-1].substr(5));
     InitGrids();
-    toGridGraph();
+//    toGridGraph();
 }
 
 
@@ -59,8 +59,8 @@ void GlobalRouter::InitGrids()
 {
     cout << "Begin Initialize Global Grid Graph ..." << endl;
     clock_t Start = clock();
-//    CutByBlockBoundary();
-    CutByUserDefine();
+    CutByBlockBoundary();
+//    CutByUserDefine();
     Point<int> startpoint(0,0) ;
     for( auto h : Horizontal )
     {
@@ -508,23 +508,26 @@ int GlobalRouter::getLength(vector<int> & path)
     }
     return sum ;
 }
-map<double,map<double,Path>> GlobalRouter::getNetOrdering(NetOrder netOrder)
+map<double,Path> GlobalRouter::getNetOrdering()
 {
-    if( netOrder == SHORTESTPATH )
-    {
-        
-    }
-    else if ( netOrder == IR_DROP )
-    {
-        
+    InitGraph_SP();
+//    if( netOrder == SHORTESTPATH )
+//    {
+//        
+//    }
+//    else if ( netOrder == IR_DROP )
+//    {
+    
         // key:PowerSourceName , value: criticalMap
         // In order to for global routing , multiterminal must be consider together .
         // if source is the same  , we use the same key to map different value 
         map<double,map<double,Path>> orders ;
+        
+        map<double,Path> criticalMap;
         for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
         {
             // key:critical value( the smaller is more critical ) , value : Path( Define in RouteComponents )
-            map<double,Path> criticalMap;
+            
             int index = 0 ;
             double sumCritical = 0 ;
             Pin pin = PinMaps[it->first];
@@ -567,9 +570,9 @@ map<double,map<double,Path>> GlobalRouter::getNetOrdering(NetOrder netOrder)
                 // sorting by critical
                 criticalMap.insert(make_pair(critical,p));
             }
-            double averageCritical = sumCritical / index ;
-            orders.insert(make_pair(averageCritical, criticalMap));
-        }
+//            double averageCritical = sumCritical / index ;
+//            orders.insert(make_pair(averageCritical, criticalMap));
+//        }
         // print crtical map
 //        for( auto o : criticalMap )
 //        {
@@ -593,10 +596,11 @@ map<double,map<double,Path>> GlobalRouter::getNetOrdering(NetOrder netOrder)
 //                cout << y.first << " " << y.second.source << " " << y.second.target.first << " " << y.second.target.second << endl;
 //            
 //        }
-        return orders ;
+//        return orders ;
     }
+    return criticalMap;
     assert(0);
-    return map<double,map<double,Path>>();
+//    return map<double,map<double,Path>>();
 }
 //vector<Path> GlobalRouter::getNetOrdering()
 //{
@@ -709,76 +713,79 @@ void GlobalRouter::Route()
     // Decide Net Ordering
     // Net order 是用 PowerSoure crtical 的平均 做排序 , 以 PowerSource 為單位
     // 將來或許可以以線為單位，但是不好實作（所以目前先以VDD為考量）
-    map<double,map<double,Path>> orders = getNetOrdering(IR_DROP) ;
+//    auto orders = getNetOrdering(IR_DROP) ;
     
     
-    
-    cout << "Net Order List " << endl;
-    for( auto o : orders )
-    {
-        cout << "Average Critical:" << o.first * 1000000 << endl ;
-        for( auto p : o.second )
-        {
-            cout << p.second.source << " " << p.second.target.first << " " << p.second.target.second << " " << p.first * 1000000 << endl;
-        }
-    }
-    cout << "-----------------------------------------------------" << endl;
-    for( auto source : orders )
-    {
-
-        set<int> updateGrids ;
-        // vertical 0  , horizontal 1 , crossroad 2
-        map<int,int> hvTable ; // look for the grid is horizontal or vertical
-        
-        for( auto target : source.second )
-        {
-            cout << target.second.source << " " << target.second.target.first << " " << target.second.target.second << " " << target.first * 1000000 << endl;
-            auto sourceGridCoordinate = target.second.sourceGrid ;
-            auto targetGridCoordinate = target.second.targetGrid ;
-            GlobalSolution gsol ;
-            gsol.PowerSourceName = target.second.source ;
-            gsol.TargetName = make_pair(target.second.target.first, target.second.target.second);
-            gsol.source = sourceGridCoordinate ;
-            gsol.targets.push_back(targetGridCoordinate);
-            graph.Dijkstra(translate3D_1D(sourceGridCoordinate.x, sourceGridCoordinate.y, sourceGridCoordinate.z));
-            vector<int> paths = graph.getPath(translate3D_1D(targetGridCoordinate.x,targetGridCoordinate.y,targetGridCoordinate.z));
-            for(int i = (int)paths.size() -1 ; i >= 0   ; i--)
-            {
-                bool horizontal = false, vertical = false ;
-                auto currentCoorindate3d = translate1D_3D(paths[i]);
-                auto nextCoorindate3d = translate1D_3D(paths[i+1]);
-                // if x the same means this is vertical line
-                if( get<0>(currentCoorindate3d) == get<0>(nextCoorindate3d) ) vertical = true ;
-                // if y the same means this is horizontal line
-                if( get<1>(currentCoorindate3d) == get<1>(nextCoorindate3d) ) horizontal = true ;
-                // if find
-                if( hvTable.find(paths[i]) != hvTable.end() )
-                {
-                    if( vertical && hvTable[paths[i]] == 1)
-                        hvTable[paths[i]] = 2 ;
-                    if( horizontal && hvTable[paths[i]] == 0)
-                        hvTable[paths[i]] = 2 ;
-                }
-                else
-                {
-                    if( vertical ) hvTable.insert(make_pair(paths[i], 0));
-                    if( horizontal ) hvTable.insert(make_pair(paths[i], 1));
-                }
-                updateGrids.insert(paths[i]);
-            }
-            for( auto grid : updateGrids)
-            {
-                auto index3D = translate1D_3D(grid);
-                Coordinate3D coordinate3d(get<0>(index3D) ,get<1>(index3D),get<2>(index3D));
-                gsol.paths.push_back(coordinate3d);
-            }
-            //gsol.paths.assign(updateGrids.begin(), updateGrids.end());
-            GlobalSolutions.push_back(gsol);
-//            for( auto s : sol )
-//                cout << s.x << "," << s.y << ","<< s.z << endl;
-        }
-        updateGraph_SP(updateGrids, hvTable);
-    }
+//    for(auto o : orders)
+//    {
+//        cout << o.first << " " << o.second.source << " " << o.second.target.first << " " << o.second.target.second << endl;
+//    }
+//    cout << "Net Order List " << endl;
+//    for( auto o : orders )
+//    {
+//        cout << "Average Critical:" << o.first * 1000000 << endl ;
+//        for( auto p : o.second )
+//        {
+//            cout << p.second.source << " " << p.second.target.first << " " << p.second.target.second << " " << p.first * 1000000 << endl;
+//        }
+//    }
+//    cout << "-----------------------------------------------------" << endl;
+//    for( auto source : orders )
+//    {
+//
+//        set<int> updateGrids ;
+//        // vertical 0  , horizontal 1 , crossroad 2
+//        map<int,int> hvTable ; // look for the grid is horizontal or vertical
+//        
+//        for( auto target : source.second )
+//        {
+//            cout << target.second.source << " " << target.second.target.first << " " << target.second.target.second << " " << target.first * 1000000 << endl;
+//            auto sourceGridCoordinate = target.second.sourceGrid ;
+//            auto targetGridCoordinate = target.second.targetGrid ;
+//            GlobalSolution gsol ;
+//            gsol.PowerSourceName = target.second.source ;
+//            gsol.TargetName = make_pair(target.second.target.first, target.second.target.second);
+//            gsol.source = sourceGridCoordinate ;
+//            gsol.targets.push_back(targetGridCoordinate);
+//            graph.Dijkstra(translate3D_1D(sourceGridCoordinate.x, sourceGridCoordinate.y, sourceGridCoordinate.z));
+//            vector<int> paths = graph.getPath(translate3D_1D(targetGridCoordinate.x,targetGridCoordinate.y,targetGridCoordinate.z));
+//            for(int i = (int)paths.size() -1 ; i >= 0   ; i--)
+//            {
+//                bool horizontal = false, vertical = false ;
+//                auto currentCoorindate3d = translate1D_3D(paths[i]);
+//                auto nextCoorindate3d = translate1D_3D(paths[i+1]);
+//                // if x the same means this is vertical line
+//                if( get<0>(currentCoorindate3d) == get<0>(nextCoorindate3d) ) vertical = true ;
+//                // if y the same means this is horizontal line
+//                if( get<1>(currentCoorindate3d) == get<1>(nextCoorindate3d) ) horizontal = true ;
+//                // if find
+//                if( hvTable.find(paths[i]) != hvTable.end() )
+//                {
+//                    if( vertical && hvTable[paths[i]] == 1)
+//                        hvTable[paths[i]] = 2 ;
+//                    if( horizontal && hvTable[paths[i]] == 0)
+//                        hvTable[paths[i]] = 2 ;
+//                }
+//                else
+//                {
+//                    if( vertical ) hvTable.insert(make_pair(paths[i], 0));
+//                    if( horizontal ) hvTable.insert(make_pair(paths[i], 1));
+//                }
+//                updateGrids.insert(paths[i]);
+//            }
+//            for( auto grid : updateGrids)
+//            {
+//                auto index3D = translate1D_3D(grid);
+//                Coordinate3D coordinate3d(get<0>(index3D) ,get<1>(index3D),get<2>(index3D));
+//                gsol.paths.push_back(coordinate3d);
+//            }
+//            //gsol.paths.assign(updateGrids.begin(), updateGrids.end());
+//            GlobalSolutions.push_back(gsol);
+////            for( auto s : sol )
+////                cout << s.x << "," << s.y << ","<< s.z << endl;
+//        }
+//        updateGraph_SP(updateGrids, hvTable);
+//    }
     
     
 //    for( auto it = Connection.begin(), end = Connection.end(); it != end;it = Connection.upper_bound(it->first))

@@ -83,7 +83,25 @@ string PDNHelper::DestinationMapToString(multimap<string,string> & DestinationMa
     }
     return line ; 
 }
-
+vector<Block> PDNHelper::getPowerPinInfo()
+{
+    vector<Block> temp ;
+    for(auto powerpin : PowerMaps)
+        temp.push_back(powerpin.second);
+    return temp ;
+}
+vector<Block> PDNHelper::getBlockPinInfo()
+{
+    vector<Block> temp ;
+    for(auto Blocks : BlockMaps)
+    {
+        for( auto block : Blocks.second )
+        {
+            temp.push_back(block);
+        }
+    }
+    return temp ;
+}
 void PDNHelper::InitBlockMaps()
 {
     for( auto component : ComponentMaps )
@@ -444,6 +462,7 @@ void PDNHelper::InitPowerMaps()
         block.LeftDown = get<0>(PowerPinCoordinate);
         block.RightUp = get<1>(PowerPinCoordinate);
         block.Metals.push_back(pin.second.METALNAME);
+        
         if( block.LeftDown.y == DIEAREA.pt1.y ) block.Direction = TOP ;
         if( block.LeftDown.x == DIEAREA.pt1.x ) block.Direction = RIGHT ;
         if( block.RightUp.y == DIEAREA.pt2.y ) block.Direction = DOWN ;

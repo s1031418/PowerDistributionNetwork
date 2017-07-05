@@ -79,6 +79,8 @@ public:
     //vector<vector<Coordinate3D>> GlobalSolutions;
     
     vector< vector< Grid > > Grids ;
+    
+    map<double,Path> getNetOrdering();
 private:
     // variable:
     RouterUtil RouterHelper; 
@@ -98,7 +100,7 @@ private:
     
     
     
-    map<double,map<double,Path>> getNetOrdering(NetOrder);
+    
     
     unsigned estimateCritical(vector<Point<int>> & Points);
     

@@ -57,12 +57,14 @@ public:
     
     void UpdateWeight( int from , int to , int newWeight );
     
+    vector<list<pair<int, int>>> AdjList ;
+    
     friend class BinaryHeap ;
     
 private:
     int num_vertex ;
-     
-    vector<list<pair<int, int>>> AdjList ;
+    
+    
     vector<int> predecessor , distance ;
     
 };

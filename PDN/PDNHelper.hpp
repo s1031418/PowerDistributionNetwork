@@ -30,6 +30,10 @@ public:
     // Key: BlockName , value : BlockPin的詳細資訊 (包含BlockPinName , Blockpin 座標 , Blockpin 包含的Metal層)
     map<string , vector<Block> > BlockMaps ;
     
+    vector<Block> getPowerPinInfo();
+    
+    vector<Block> getBlockPinInfo();
+    
     pair< Point<int>, Point<int> > getPowerPinCoordinate(int x , int y , Point<int> r_pt1, Point<int> r_pt2  , string orient);
     
     // 對Ｘ軸做鏡射

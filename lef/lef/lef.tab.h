@@ -1,23 +1,24 @@
-
-/* A Bison parser, made by GNU Bison 2.4.1.  */
+/* A Bison parser, made by GNU Bison 2.3.  */
 
 /* Skeleton interface for Bison's Yacc-like parsers in C
-   
-      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+
+   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
-   
-   This program is free software: you can redistribute it and/or modify
+
+   This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-   
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street, Fifth Floor,
+   Boston, MA 02110-1301, USA.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -28,10 +29,9 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
-
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -466,31 +466,452 @@
      UMINUS = 682
    };
 #endif
+/* Tokens.  */
+#define K_HISTORY 258
+#define K_ABUT 259
+#define K_ABUTMENT 260
+#define K_ACTIVE 261
+#define K_ANALOG 262
+#define K_ARRAY 263
+#define K_AREA 264
+#define K_BLOCK 265
+#define K_BOTTOMLEFT 266
+#define K_BOTTOMRIGHT 267
+#define K_BY 268
+#define K_CAPACITANCE 269
+#define K_CAPMULTIPLIER 270
+#define K_CLASS 271
+#define K_CLOCK 272
+#define K_CLOCKTYPE 273
+#define K_COLUMNMAJOR 274
+#define K_DESIGNRULEWIDTH 275
+#define K_INFLUENCE 276
+#define K_CORE 277
+#define K_CORNER 278
+#define K_COVER 279
+#define K_CPERSQDIST 280
+#define K_CURRENT 281
+#define K_CURRENTSOURCE 282
+#define K_CUT 283
+#define K_DEFAULT 284
+#define K_DATABASE 285
+#define K_DATA 286
+#define K_DIELECTRIC 287
+#define K_DIRECTION 288
+#define K_DO 289
+#define K_EDGECAPACITANCE 290
+#define K_EEQ 291
+#define K_END 292
+#define K_ENDCAP 293
+#define K_FALL 294
+#define K_FALLCS 295
+#define K_FALLT0 296
+#define K_FALLSATT1 297
+#define K_FALLRS 298
+#define K_FALLSATCUR 299
+#define K_FALLTHRESH 300
+#define K_FEEDTHRU 301
+#define K_FIXED 302
+#define K_FOREIGN 303
+#define K_FROMPIN 304
+#define K_GENERATE 305
+#define K_GENERATOR 306
+#define K_GROUND 307
+#define K_HEIGHT 308
+#define K_HORIZONTAL 309
+#define K_INOUT 310
+#define K_INPUT 311
+#define K_INPUTNOISEMARGIN 312
+#define K_COMPONENTPIN 313
+#define K_INTRINSIC 314
+#define K_INVERT 315
+#define K_IRDROP 316
+#define K_ITERATE 317
+#define K_IV_TABLES 318
+#define K_LAYER 319
+#define K_LEAKAGE 320
+#define K_LEQ 321
+#define K_LIBRARY 322
+#define K_MACRO 323
+#define K_MATCH 324
+#define K_MAXDELAY 325
+#define K_MAXLOAD 326
+#define K_METALOVERHANG 327
+#define K_MILLIAMPS 328
+#define K_MILLIWATTS 329
+#define K_MINFEATURE 330
+#define K_MUSTJOIN 331
+#define K_NAMESCASESENSITIVE 332
+#define K_NANOSECONDS 333
+#define K_NETS 334
+#define K_NEW 335
+#define K_NONDEFAULTRULE 336
+#define K_NONINVERT 337
+#define K_NONUNATE 338
+#define K_OBS 339
+#define K_OHMS 340
+#define K_OFFSET 341
+#define K_ORIENTATION 342
+#define K_ORIGIN 343
+#define K_OUTPUT 344
+#define K_OUTPUTNOISEMARGIN 345
+#define K_OVERHANG 346
+#define K_OVERLAP 347
+#define K_OFF 348
+#define K_ON 349
+#define K_OVERLAPS 350
+#define K_PAD 351
+#define K_PATH 352
+#define K_PATTERN 353
+#define K_PICOFARADS 354
+#define K_PIN 355
+#define K_PITCH 356
+#define K_PLACED 357
+#define K_POLYGON 358
+#define K_PORT 359
+#define K_POST 360
+#define K_POWER 361
+#define K_PRE 362
+#define K_PULLDOWNRES 363
+#define K_RECT 364
+#define K_RESISTANCE 365
+#define K_RESISTIVE 366
+#define K_RING 367
+#define K_RISE 368
+#define K_RISECS 369
+#define K_RISERS 370
+#define K_RISESATCUR 371
+#define K_RISETHRESH 372
+#define K_RISESATT1 373
+#define K_RISET0 374
+#define K_RISEVOLTAGETHRESHOLD 375
+#define K_FALLVOLTAGETHRESHOLD 376
+#define K_ROUTING 377
+#define K_ROWMAJOR 378
+#define K_RPERSQ 379
+#define K_SAMENET 380
+#define K_SCANUSE 381
+#define K_SHAPE 382
+#define K_SHRINKAGE 383
+#define K_SIGNAL 384
+#define K_SITE 385
+#define K_SIZE 386
+#define K_SOURCE 387
+#define K_SPACER 388
+#define K_SPACING 389
+#define K_SPECIALNETS 390
+#define K_STACK 391
+#define K_START 392
+#define K_STEP 393
+#define K_STOP 394
+#define K_STRUCTURE 395
+#define K_SYMMETRY 396
+#define K_TABLE 397
+#define K_THICKNESS 398
+#define K_TIEHIGH 399
+#define K_TIELOW 400
+#define K_TIEOFFR 401
+#define K_TIME 402
+#define K_TIMING 403
+#define K_TO 404
+#define K_TOPIN 405
+#define K_TOPLEFT 406
+#define K_TOPRIGHT 407
+#define K_TOPOFSTACKONLY 408
+#define K_TRISTATE 409
+#define K_TYPE 410
+#define K_UNATENESS 411
+#define K_UNITS 412
+#define K_USE 413
+#define K_VARIABLE 414
+#define K_VERTICAL 415
+#define K_VHI 416
+#define K_VIA 417
+#define K_VIARULE 418
+#define K_VLO 419
+#define K_VOLTAGE 420
+#define K_VOLTS 421
+#define K_WIDTH 422
+#define K_X 423
+#define K_Y 424
+#define T_STRING 425
+#define QSTRING 426
+#define NUMBER 427
+#define K_N 428
+#define K_S 429
+#define K_E 430
+#define K_W 431
+#define K_FN 432
+#define K_FS 433
+#define K_FE 434
+#define K_FW 435
+#define K_R0 436
+#define K_R90 437
+#define K_R180 438
+#define K_R270 439
+#define K_MX 440
+#define K_MY 441
+#define K_MXR90 442
+#define K_MYR90 443
+#define K_USER 444
+#define K_MASTERSLICE 445
+#define K_ENDMACRO 446
+#define K_ENDMACROPIN 447
+#define K_ENDVIARULE 448
+#define K_ENDVIA 449
+#define K_ENDLAYER 450
+#define K_ENDSITE 451
+#define K_CANPLACE 452
+#define K_CANNOTOCCUPY 453
+#define K_TRACKS 454
+#define K_FLOORPLAN 455
+#define K_GCELLGRID 456
+#define K_DEFAULTCAP 457
+#define K_MINPINS 458
+#define K_WIRECAP 459
+#define K_STABLE 460
+#define K_SETUP 461
+#define K_HOLD 462
+#define K_DEFINE 463
+#define K_DEFINES 464
+#define K_DEFINEB 465
+#define K_IF 466
+#define K_THEN 467
+#define K_ELSE 468
+#define K_FALSE 469
+#define K_TRUE 470
+#define K_EQ 471
+#define K_NE 472
+#define K_LE 473
+#define K_LT 474
+#define K_GE 475
+#define K_GT 476
+#define K_OR 477
+#define K_AND 478
+#define K_NOT 479
+#define K_DELAY 480
+#define K_TABLEDIMENSION 481
+#define K_TABLEAXIS 482
+#define K_TABLEENTRIES 483
+#define K_TRANSITIONTIME 484
+#define K_EXTENSION 485
+#define K_PROPDEF 486
+#define K_STRING 487
+#define K_INTEGER 488
+#define K_REAL 489
+#define K_RANGE 490
+#define K_PROPERTY 491
+#define K_VIRTUAL 492
+#define K_BUSBITCHARS 493
+#define K_VERSION 494
+#define K_BEGINEXT 495
+#define K_ENDEXT 496
+#define K_UNIVERSALNOISEMARGIN 497
+#define K_EDGERATETHRESHOLD1 498
+#define K_CORRECTIONTABLE 499
+#define K_EDGERATESCALEFACTOR 500
+#define K_EDGERATETHRESHOLD2 501
+#define K_VICTIMNOISE 502
+#define K_NOISETABLE 503
+#define K_EDGERATE 504
+#define K_OUTPUTRESISTANCE 505
+#define K_VICTIMLENGTH 506
+#define K_CORRECTIONFACTOR 507
+#define K_OUTPUTPINANTENNASIZE 508
+#define K_INPUTPINANTENNASIZE 509
+#define K_INOUTPINANTENNASIZE 510
+#define K_CURRENTDEN 511
+#define K_PWL 512
+#define K_ANTENNALENGTHFACTOR 513
+#define K_TAPERRULE 514
+#define K_DIVIDERCHAR 515
+#define K_ANTENNASIZE 516
+#define K_ANTENNAMETALLENGTH 517
+#define K_ANTENNAMETALAREA 518
+#define K_RISESLEWLIMIT 519
+#define K_FALLSLEWLIMIT 520
+#define K_FUNCTION 521
+#define K_BUFFER 522
+#define K_INVERTER 523
+#define K_NAMEMAPSTRING 524
+#define K_NOWIREEXTENSIONATPIN 525
+#define K_WIREEXTENSION 526
+#define K_MESSAGE 527
+#define K_CREATEFILE 528
+#define K_OPENFILE 529
+#define K_CLOSEFILE 530
+#define K_WARNING 531
+#define K_ERROR 532
+#define K_FATALERROR 533
+#define K_RECOVERY 534
+#define K_SKEW 535
+#define K_ANYEDGE 536
+#define K_POSEDGE 537
+#define K_NEGEDGE 538
+#define K_SDFCONDSTART 539
+#define K_SDFCONDEND 540
+#define K_SDFCOND 541
+#define K_MPWH 542
+#define K_MPWL 543
+#define K_PERIOD 544
+#define K_ACCURRENTDENSITY 545
+#define K_DCCURRENTDENSITY 546
+#define K_AVERAGE 547
+#define K_PEAK 548
+#define K_RMS 549
+#define K_FREQUENCY 550
+#define K_CUTAREA 551
+#define K_MEGAHERTZ 552
+#define K_USELENGTHTHRESHOLD 553
+#define K_LENGTHTHRESHOLD 554
+#define K_ANTENNAINPUTGATEAREA 555
+#define K_ANTENNAINOUTDIFFAREA 556
+#define K_ANTENNAOUTPUTDIFFAREA 557
+#define K_ANTENNAAREARATIO 558
+#define K_ANTENNADIFFAREARATIO 559
+#define K_ANTENNACUMAREARATIO 560
+#define K_ANTENNACUMDIFFAREARATIO 561
+#define K_ANTENNAAREAFACTOR 562
+#define K_ANTENNASIDEAREARATIO 563
+#define K_ANTENNADIFFSIDEAREARATIO 564
+#define K_ANTENNACUMSIDEAREARATIO 565
+#define K_ANTENNACUMDIFFSIDEAREARATIO 566
+#define K_ANTENNASIDEAREAFACTOR 567
+#define K_DIFFUSEONLY 568
+#define K_MANUFACTURINGGRID 569
+#define K_FIXEDMASK 570
+#define K_ANTENNACELL 571
+#define K_CLEARANCEMEASURE 572
+#define K_EUCLIDEAN 573
+#define K_MAXXY 574
+#define K_USEMINSPACING 575
+#define K_ROWMINSPACING 576
+#define K_ROWABUTSPACING 577
+#define K_FLIP 578
+#define K_NONE 579
+#define K_ANTENNAPARTIALMETALAREA 580
+#define K_ANTENNAPARTIALMETALSIDEAREA 581
+#define K_ANTENNAGATEAREA 582
+#define K_ANTENNADIFFAREA 583
+#define K_ANTENNAMAXAREACAR 584
+#define K_ANTENNAMAXSIDEAREACAR 585
+#define K_ANTENNAPARTIALCUTAREA 586
+#define K_ANTENNAMAXCUTCAR 587
+#define K_SLOTWIREWIDTH 588
+#define K_SLOTWIRELENGTH 589
+#define K_SLOTWIDTH 590
+#define K_SLOTLENGTH 591
+#define K_MAXADJACENTSLOTSPACING 592
+#define K_MAXCOAXIALSLOTSPACING 593
+#define K_MAXEDGESLOTSPACING 594
+#define K_SPLITWIREWIDTH 595
+#define K_MINIMUMDENSITY 596
+#define K_MAXIMUMDENSITY 597
+#define K_DENSITYCHECKWINDOW 598
+#define K_DENSITYCHECKSTEP 599
+#define K_FILLACTIVESPACING 600
+#define K_MINIMUMCUT 601
+#define K_ADJACENTCUTS 602
+#define K_ANTENNAMODEL 603
+#define K_BUMP 604
+#define K_ENCLOSURE 605
+#define K_FROMABOVE 606
+#define K_FROMBELOW 607
+#define K_IMPLANT 608
+#define K_LENGTH 609
+#define K_MAXVIASTACK 610
+#define K_AREAIO 611
+#define K_BLACKBOX 612
+#define K_MAXWIDTH 613
+#define K_MINENCLOSEDAREA 614
+#define K_MINSTEP 615
+#define K_ORIENT 616
+#define K_OXIDE1 617
+#define K_OXIDE2 618
+#define K_OXIDE3 619
+#define K_OXIDE4 620
+#define K_PARALLELRUNLENGTH 621
+#define K_MINWIDTH 622
+#define K_PROTRUSIONWIDTH 623
+#define K_SPACINGTABLE 624
+#define K_WITHIN 625
+#define K_ABOVE 626
+#define K_BELOW 627
+#define K_CENTERTOCENTER 628
+#define K_CUTSIZE 629
+#define K_CUTSPACING 630
+#define K_DENSITY 631
+#define K_DIAG45 632
+#define K_DIAG135 633
+#define K_MASK 634
+#define K_DIAGMINEDGELENGTH 635
+#define K_DIAGSPACING 636
+#define K_DIAGPITCH 637
+#define K_DIAGWIDTH 638
+#define K_GENERATED 639
+#define K_GROUNDSENSITIVITY 640
+#define K_HARDSPACING 641
+#define K_INSIDECORNER 642
+#define K_LAYERS 643
+#define K_LENGTHSUM 644
+#define K_MICRONS 645
+#define K_MINCUTS 646
+#define K_MINSIZE 647
+#define K_NETEXPR 648
+#define K_OUTSIDECORNER 649
+#define K_PREFERENCLOSURE 650
+#define K_ROWCOL 651
+#define K_ROWPATTERN 652
+#define K_SOFT 653
+#define K_SUPPLYSENSITIVITY 654
+#define K_USEVIA 655
+#define K_USEVIARULE 656
+#define K_WELLTAP 657
+#define K_ARRAYCUTS 658
+#define K_ARRAYSPACING 659
+#define K_ANTENNAAREADIFFREDUCEPWL 660
+#define K_ANTENNAAREAMINUSDIFF 661
+#define K_ANTENNACUMROUTINGPLUSCUT 662
+#define K_ANTENNAGATEPLUSDIFF 663
+#define K_ENDOFLINE 664
+#define K_ENDOFNOTCHWIDTH 665
+#define K_EXCEPTEXTRACUT 666
+#define K_EXCEPTSAMEPGNET 667
+#define K_EXCEPTPGNET 668
+#define K_LONGARRAY 669
+#define K_MAXEDGES 670
+#define K_NOTCHLENGTH 671
+#define K_NOTCHSPACING 672
+#define K_ORTHOGONAL 673
+#define K_PARALLELEDGE 674
+#define K_PARALLELOVERLAP 675
+#define K_PGONLY 676
+#define K_PRL 677
+#define K_TWOEDGES 678
+#define K_TWOWIDTHS 679
+#define IF 680
+#define LNOT 681
+#define UMINUS 682
+
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-{
-
-/* Line 1676 of yacc.c  */
 #line 194 "lef.y"
-
+{
         double    dval ;
         int       integer ;
         char *    string ;
         LefDefParser::lefPOINT  pt;
-
-
-
-/* Line 1676 of yacc.c  */
-#line 488 "lef.tab.h"
-} YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
+}
+/* Line 1529 of yacc.c.  */
+#line 910 "lef.tab.h"
+	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
+# define YYSTYPE_IS_TRIVIAL 1
 #endif
 
 extern YYSTYPE lefyylval;
-
 

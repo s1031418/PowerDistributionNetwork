@@ -20,18 +20,11 @@ const unsigned DEFAULT_PITCH = 12 ;
 class Border
 {
 public:
-    bool leftEdge ;
-    bool rightEdge ;
-    bool upEdge ;
-    bool downEdge ;
-//    std::pair<Point<unsigned>, Point<unsigned>> LeftEdge ;
-//    std::pair<Point<unsigned>, Point<unsigned>> RightEdge ;
-//    std::pair<Point<unsigned>, Point<unsigned>> TopEdge ;
-//    std::pair<Point<unsigned>, Point<unsigned>> BottomEdge ;
-//    Point<unsigned> leftdown ;
-//    Point<unsigned> rightdown ;
-//    Point<unsigned> leftup ;
-//    Point<unsigned> rightup ;
+    // edge avaiable
+    bool leftEdge = true;
+    bool rightEdge = true ;
+    bool upEdge = true  ;
+    bool downEdge = true ;
 };
 
 
@@ -54,7 +47,7 @@ public:
     unsigned int lowermetal = 0 ;
     unsigned int uppermetal = 0 ;
     std::vector<Border> Edges ; 
-    std::vector<Rectangle> obstacles;  
+    std::vector<Rectangle> obstacles;
     std::vector<unsigned> capacities ;
     
     // key為metal層
@@ -69,7 +62,11 @@ public:
     Coordinate3D(unsigned X , unsigned Y , unsigned Z) :x(X) , y(Y) , z(Z){};
     unsigned x ;
     unsigned y ;
-    unsigned z ; 
+    unsigned z ;
+    bool operator==(const Coordinate3D & right)
+    {
+        return (this->x == right.x && this->y == right.y && this->z == right.z);
+    }
 };
 
 class Path {

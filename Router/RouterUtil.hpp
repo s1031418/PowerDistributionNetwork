@@ -10,6 +10,7 @@
 #define RouterUtil_hpp
 
 #include <stdio.h>
+#include "InitialFileParser.hpp"
 #include "RouterComponents.hpp"
 #include <string>
 #include "lefrw.h"
@@ -66,6 +67,8 @@ public:
     
     string getLCS(string s1,string s2);
     
+    string getAlias(string MetalName);
+    
     int translateMetalNameToInt(string MetalName);
     
     string translateIntToMetalName(int layer);
@@ -74,6 +77,10 @@ public:
     
     tuple<bool,bool,bool,bool> getCrossEdge();
     
+    int getWeights(int layer);
+    
+    vector<Rectangle> getBlockRectangle();
+
 private:
     
     
