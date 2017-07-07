@@ -15,6 +15,7 @@
 #include <string>
 #include "lefrw.h"
 #include "defrw.h"
+#include "verilog.hpp"
 #include "PDNHelper.hpp"
 using namespace std;
 
@@ -53,6 +54,8 @@ public:
     // second: if cross , the lower metal of this block
     // thrid: if cross , the upper metal of this block 
     CrossInfo isCrossWithBlock(Rectangle rect1 );
+    
+    CrossInfo isCrossWithObstacle( Rectangle rect1  , string source , map<string,vector<BlockCoordinate>> & obstacles );
     
     int getCrossArea(Rectangle rect1 , Rectangle rect2);
     

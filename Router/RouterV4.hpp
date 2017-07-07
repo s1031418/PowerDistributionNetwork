@@ -49,7 +49,10 @@ private:
     int WIDTH = 10 ;
     int SPACING = 2 ;
     set<int> boundList ;
-    std::vector<Rectangle> obstacles;
+    
+    // key: vdd_source 
+    map<string,vector<BlockCoordinate>> obstacles;
+    
     RouterUtil RouterHelper;
     
     void fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo );
@@ -62,9 +65,11 @@ private:
     
     void InitState();
     
+    void updateGrid(CrossInfo result , Grid  & grid );
+    
     void CutGrid(int width , int spacing);
     
-    void InitGrids();
+    void InitGrids(string source );
     
     Graph_SP * InitGraph_SP();
     
