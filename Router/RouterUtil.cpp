@@ -206,6 +206,8 @@ CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1 )
 {
     for(auto block : BlockMap)
     {
+        if( block.first == "B2_01" )
+            cout << "";
         Rectangle rect2 ;
         // block 增加boundary的寬度( 1/2 * Width + minimal space )
         rect2.LeftDown = block.second.LeftDown ;
@@ -215,9 +217,14 @@ CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1 )
 //        rect2.LeftDown.y -= ((0.5*DEFAULT_WIDTH + 2 )*UNITS_DISTANCE);
 //        rect2.RightUp.x += ((0.5*DEFAULT_WIDTH + 2 )*UNITS_DISTANCE);
 //        rect2.RightUp.y += ((0.5*DEFAULT_WIDTH + 2 )*UNITS_DISTANCE);
+        
         if( isCross(rect1, rect2) )
         {
             
+            if( rect1.RightUp.y > rect2.RightUp.y  && rect1.LeftDown.x < rect1.LeftDown.x )
+                assert(0);
+            if( rect1.LeftDown.x < rect2.LeftDown.x && rect1.RightUp.x > rect2.RightUp.x )
+                assert(0);
             CrossInfo crossinfo ;
             crossinfo.isCross = true ;
             crossinfo.lowerMetal = block.second.lowerMetal ;

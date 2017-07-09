@@ -7,6 +7,8 @@
 //
 
 #include "RouterV4.hpp"
+// bug: block 還是要加大在判斷 + minmal space + 1/2 *width 不然會short
+// legalize target pin 不能只加一個單位，要判斷加到超過 1/2 *width+ minmal space
 
 
 
@@ -429,6 +431,7 @@ void RouterV4::Route()
         Block powerPinCoordinate = RouterHelper.getPowerPinCoordinate(powerpin);
         Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
         InitGrids(powerpin);
+//        toGridGraph();
         Graph_SP * graph_sp = InitGraph_SP();
         LegalizeTargetEdge(BlockPinCoordinate , graph_sp);
         int source = translate3D_1D(getGridCoordinate(powerPinCoordinate));
@@ -628,13 +631,6 @@ void RouterV4::updateGrid(CrossInfo result , Grid & grid)
                 if( result.isLeftEdgeBlock ) grid.Edges[z].leftEdge = false ;
                 if( result.isRightEdgeBlock ) grid.Edges[z].rightEdge = false ;
             }
-        }
-        else
-        {
-            grid.Edges[z].upEdge = true ;
-            grid.Edges[z].downEdge = true ;
-            grid.Edges[z].leftEdge = true ;
-            grid.Edges[z].rightEdge = true ;
         }
     }
 }
