@@ -175,6 +175,14 @@ Graph_SP * RouterV4::InitGraph_SP()
     cout << "We cost " << duration << "(s)" << endl;
     return graph_sp ;
 }
+Point<int> RouterV4::getAbsolutePoint( Coordinate3D coordinate3d )
+{
+    int x = coordinate3d.x ;
+    int y = coordinate3d.y ;
+    int X = ( x != 0 ) ? *std::next(Vertical.begin(), x-1) : 0 ;
+    int Y = ( y != 0 ) ? *std::next(Horizontal.begin(), y-1) : 0 ;
+    return Point<int>(X,Y);
+}
 void RouterV4::LegalizeTargetEdge(Block coordinate ,Graph_SP * graph_sp )
 {
     auto target3D = getGridCoordinate(coordinate) ;
@@ -187,20 +195,57 @@ void RouterV4::LegalizeTargetEdge(Block coordinate ,Graph_SP * graph_sp )
     
     if( coordinate.Direction == TOP )
     {
-        graph_sp->UpdateWeight(currentIndex+Up, currentIndex, Grids[target3D.y][target3D.x].length);
+        int cnt = 1 ;
+        int currentY = getAbsolutePoint(translate1D_3D(currentIndex)).y ;
+        int nextY = getAbsolutePoint(translate1D_3D(currentIndex+Up)).y ;
+        while( nextY - currentY <= 0.5 * WIDTH + SPACING )
+        {
+            cnt++ ;
+            nextY = getAbsolutePoint(translate1D_3D(currentIndex + (cnt * Up))).y ;
+        }
+        for( int i = 0 ; i < cnt ; i++ )
+            graph_sp->UpdateWeight(currentIndex+Up, currentIndex, Grids[target3D.y][target3D.x].length);
     }
     else if(coordinate.Direction == DOWN)
     {
-        graph_sp->UpdateWeight(currentIndex-Up, currentIndex, Grids[target3D.y-1][target3D.x].length);
+        int cnt = 1 ;
+        int currentY = getAbsolutePoint(translate1D_3D(currentIndex)).y ;
+        int nextY = getAbsolutePoint(translate1D_3D(currentIndex-Up)).y ;
+        while( currentY - nextY <= 0.5 * WIDTH + SPACING )
+        {
+            cnt++ ;
+            nextY = getAbsolutePoint(translate1D_3D(currentIndex - (cnt * Up))).y ;
+        }
+        for( int i = 0 ; i < cnt ; i++ )
+            graph_sp->UpdateWeight(currentIndex-Up, currentIndex, Grids[target3D.y-1][target3D.x].length);
     }
     else if( coordinate.Direction == RIGHT )
     {
-        graph_sp->UpdateWeight(currentIndex+Right, currentIndex, Grids[target3D.y][target3D.x].width);
+        int cnt = 1 ;
+        int currentX = getAbsolutePoint(translate1D_3D(currentIndex)).x ;
+        int nextX = getAbsolutePoint(translate1D_3D(currentIndex+Right)).x ;
+        while( nextX - currentX <= 0.5 * WIDTH + SPACING )
+        {
+            cnt++ ;
+            nextX = getAbsolutePoint(translate1D_3D(currentIndex + (cnt * Right))).y ;
+        }
+        for( int i = 0 ; i < cnt ; i++ )
+            graph_sp->UpdateWeight(currentIndex+Right, currentIndex, Grids[target3D.y][target3D.x].width);
     }
     else if( coordinate.Direction == LEFT )
     {
-        graph_sp->UpdateWeight(currentIndex-Right, currentIndex, Grids[target3D.y][target3D.x-1].width);
+        int cnt = 1 ;
+        int currentX = getAbsolutePoint(translate1D_3D(currentIndex)).x ;
+        int nextX = getAbsolutePoint(translate1D_3D(currentIndex-Right)).x ;
+        while( currentX - nextX <= 0.5 * WIDTH + SPACING )
+        {
+            cnt++ ;
+            nextX = getAbsolutePoint(translate1D_3D(currentIndex - (cnt * Right ) )).y ;
+        }
+        for( int i = 0 ; i < cnt ; i++ )
+            graph_sp->UpdateWeight(currentIndex-Right, currentIndex, Grids[target3D.y][target3D.x-1].width);
     }
+    // target point is not allow use via
     if(target3D.z == highestMetal)
     {
         graph_sp->UpdateWeight(currentIndex-Top, currentIndex, Max_Distance);
@@ -427,28 +472,45 @@ void RouterV4::Route()
         string powerpin = order.second.source ;
         blockinfo.BlockName = order.second.target.first ;
         blockinfo.BlockPinName = order.second.target.second ;
-        cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
+        
+        
         Block powerPinCoordinate = RouterHelper.getPowerPinCoordinate(powerpin);
         Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
+        
         InitGrids(powerpin);
-//        toGridGraph();
+        toGridGraph();
         Graph_SP * graph_sp = InitGraph_SP();
         LegalizeTargetEdge(BlockPinCoordinate , graph_sp);
         int source = translate3D_1D(getGridCoordinate(powerPinCoordinate));
         int target = translate3D_1D(getGridCoordinate(BlockPinCoordinate));
-        Coordinate3D a = translate1D_3D(source);
-        Coordinate3D b = translate1D_3D(target);
-        cout << a.x << " " << a.y << " " << a.z << endl;
-        cout << b.x << " " << b.y << " " << b.z << endl;
+        
         Grids.begin();
-        cout << translate3D_1D(Coordinate3D(6,4,6)) << endl;
-        cout << translate3D_1D(Coordinate3D(5,4,6)) << endl;
+        
+        
         graph_sp->Dijkstra(source);
         auto paths = graph_sp->getPath(target);
         if(paths.empty())
         {
-            cout << "Source:" << powerPinCoordinate.LeftDown << " " << powerPinCoordinate.RightUp << endl ;
-            cout << "Target:" << BlockPinCoordinate.LeftDown << " " << BlockPinCoordinate.RightUp << endl;
+            cout << "Path" << endl;
+            cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
+            cout << "-------------------------------Source Info-------------------------------" << endl;
+            if( powerPinCoordinate.Direction == 0 ) cout << "Direction:UP" << endl;
+            if( powerPinCoordinate.Direction == 1 ) cout << "Direction:DOWN" << endl;
+            if( powerPinCoordinate.Direction == 2 ) cout << "Direction:RIGHT" << endl;
+            if( powerPinCoordinate.Direction == 3 ) cout << "Direction:LEFT" << endl;
+            cout << "Source Absolute:" << powerPinCoordinate.LeftDown << " " << powerPinCoordinate.RightUp << endl ;
+            Coordinate3D source3D = translate1D_3D(source);
+            cout << "Source 3D:"<< source3D.x << " " << source3D.y << " " << source3D.z << endl;
+            cout << "Source 1D:" << translate3D_1D(source3D) << endl;
+            cout << "-------------------------------Target Info-------------------------------" << endl;
+            if( BlockPinCoordinate.Direction == 0 ) cout << "Direction:UP" << endl;
+            if( BlockPinCoordinate.Direction == 1 ) cout << "Direction:DOWN" << endl;
+            if( BlockPinCoordinate.Direction == 2 ) cout << "Direction:RIGHT" << endl;
+            if( BlockPinCoordinate.Direction == 3 ) cout << "Direction:LEFT" << endl ;
+            cout << "Target Absolute:" << BlockPinCoordinate.LeftDown << " " << BlockPinCoordinate.RightUp << endl;
+            Coordinate3D target3D = translate1D_3D(target);
+            cout << "Target 3D:" << target3D.x << " " << target3D.y << " " << target3D.z << endl;
+            cout << "Target 1D:" << translate3D_1D(target3D) << endl;
             assert(0);
         }
         vector<Coordinate3D> temp ;

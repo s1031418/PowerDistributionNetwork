@@ -213,10 +213,10 @@ CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1 )
         rect2.LeftDown = block.second.LeftDown ;
         rect2.RightUp = block.second.RightUp ;
         // 目前minimal space 先 hardcode 2 ，不同層有不同spacing，會浪費resource 
-//        rect2.LeftDown.x -= ((0.5*DEFAULT_WIDTH + 2 )*UNITS_DISTANCE);
-//        rect2.LeftDown.y -= ((0.5*DEFAULT_WIDTH + 2 )*UNITS_DISTANCE);
-//        rect2.RightUp.x += ((0.5*DEFAULT_WIDTH + 2 )*UNITS_DISTANCE);
-//        rect2.RightUp.y += ((0.5*DEFAULT_WIDTH + 2 )*UNITS_DISTANCE);
+        rect2.LeftDown.x -= ((0.5*DEFAULT_WIDTH + 2 )*UNITS_DISTANCE);
+        rect2.LeftDown.y -= ((0.5*DEFAULT_WIDTH + 2 )*UNITS_DISTANCE);
+        rect2.RightUp.x += ((0.5*DEFAULT_WIDTH + 2 )*UNITS_DISTANCE);
+        rect2.RightUp.y += ((0.5*DEFAULT_WIDTH + 2 )*UNITS_DISTANCE);
         
         if( isCross(rect1, rect2) )
         {

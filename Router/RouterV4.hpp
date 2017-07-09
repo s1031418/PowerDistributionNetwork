@@ -59,6 +59,8 @@ private:
     
     void LegalizeTargetEdge(Block coordinate , Graph_SP * graph_sp);
     
+    Point<int> getAbsolutePoint( Coordinate3D coordinate3d );
+    
     Coordinate3D getGridCoordinate( Block block );
     
     void InitBoundList();

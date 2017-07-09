@@ -28,7 +28,7 @@ public:
     // value 應該要vector<Block> 暫時先只有block 
     map<string , Block > PowerMaps ;
     // Key: BlockName , value : BlockPin的詳細資訊 (包含BlockPinName , Blockpin 座標 , Blockpin 包含的Metal層)
-    map<string , vector<Block> > BlockMaps ;
+    map<string , vector<Block> > BlockPinMaps ;
     
     vector<Block> getPowerPinInfo();
     
