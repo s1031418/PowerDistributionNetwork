@@ -50,12 +50,14 @@ public:
     // 第一個為是不是屬於這個Block，第二個這個Block Name
     pair<bool, string> IsBlock(Point<int> LeftDown , Point<int> RightUp);
     
+    CrossInfo isCrossWithBlock(Rectangle rect1 , BlockCoordinate & block);
+    
     // first : whether cross with block
     // second: if cross , the lower metal of this block
     // thrid: if cross , the upper metal of this block 
     CrossInfo isCrossWithBlock(Rectangle rect1 );
     
-    CrossInfo isCrossWithObstacle( Rectangle rect1  , string source , map<string,vector<BlockCoordinate>> & obstacles );
+    CrossInfo isCrossWithObstacle( Rectangle rect1  , string source , map<string,vector<BlockCoordinate>> & obstacles);
     
     int getCrossArea(Rectangle rect1 , Rectangle rect2);
     
@@ -84,12 +86,14 @@ public:
     
     vector<Rectangle> getBlockRectangle();
 
+    map<string, BlockCoordinate > BlockMap;
+    
 private:
     
     
     void InitBlockMap();
     // key:BlockName , value:那個block的左下及右上座標
-    map<string, BlockCoordinate > BlockMap;
+    
 };
 
 

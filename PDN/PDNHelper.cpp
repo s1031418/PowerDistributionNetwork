@@ -93,7 +93,7 @@ vector<Block> PDNHelper::getPowerPinInfo()
 vector<Block> PDNHelper::getBlockPinInfo()
 {
     vector<Block> temp ;
-    for(auto Blocks : BlockMaps)
+    for(auto Blocks : BlockPinMaps)
     {
         for( auto block : Blocks.second )
         {
@@ -114,7 +114,7 @@ void PDNHelper::InitBlockMaps()
         string orient = component.second.ORIENT ;
         vector<Block> temp ;
         // init BlockMap ， 把每個key都塞一個空的vector
-        BlockMaps.insert(make_pair(component.first,temp));
+        BlockPinMaps.insert(make_pair(component.first,temp));
         for( auto blockpin : MacroMaps[component.second.MACROTYPE].BlockPinMaps)
         {
             
@@ -145,7 +145,7 @@ void PDNHelper::InitBlockMaps()
             if( block.RightUp.x == rotateblockCoordinate.second.x ) block.Direction = RIGHT ;
             if( block.LeftDown.y == rotateblockCoordinate.first.y ) block.Direction = DOWN ;
             if( block.RightUp.y == rotateblockCoordinate.second.y ) block.Direction = TOP ;
-            BlockMaps[component.first].push_back(block);
+            BlockPinMaps[component.first].push_back(block);
         }
         
     }
@@ -383,7 +383,7 @@ Point<int> PDNHelper::getCrossPoint(Line line1 , Line line2)
 Point<int> PDNHelper::getEndPoint(Point<int> pt1  , Point<int> pt2 )
 {
     Point<int> temp ;
-    for(auto Blocks : BlockMaps)
+    for(auto Blocks : BlockPinMaps)
     {
         for(auto block : Blocks.second)
         {
@@ -401,7 +401,7 @@ double PDNHelper::calculateResistance(double rpsq , int width , double length )
 }
 pair<string, string> PDNHelper::getBlockMsg(Point<int> pt)
 {
-    for(auto block : BlockMaps)
+    for(auto block : BlockPinMaps)
     {
         for(auto blockpin : block.second)
         {
@@ -501,7 +501,7 @@ Point<int> PDNHelper::getStartPoint(Point<int> pt1 , Point<int> pt2 )
 }
 Block PDNHelper::getBlock( string BlockName , string BlockPinName )
 {
-    for(auto x : BlockMaps[BlockName])
+    for(auto x : BlockPinMaps[BlockName])
     {
         if( x.BlockPinName == BlockPinName )
             return x ;

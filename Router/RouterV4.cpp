@@ -105,8 +105,6 @@ Graph_SP * RouterV4::InitGraph_SP()
         {
             for( int x = 0 ; x < XSize ; x++ )
             {
-                if(x == 4 && y == 4 && z == 6)
-                    cout << "";
                 int index = translate3D_1D(Coordinate3D(x,y,z));
                 int weights = RouterHelper.getWeights(z);
                 if( boundList.find(index) == boundList.end() )
@@ -478,12 +476,12 @@ void RouterV4::Route()
         Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
         
         InitGrids(powerpin);
-        toGridGraph();
+        
         Graph_SP * graph_sp = InitGraph_SP();
         LegalizeTargetEdge(BlockPinCoordinate , graph_sp);
         int source = translate3D_1D(getGridCoordinate(powerPinCoordinate));
         int target = translate3D_1D(getGridCoordinate(BlockPinCoordinate));
-        
+                               
         Grids.begin();
         
         
@@ -721,11 +719,25 @@ void RouterV4::InitGrids(string source)
             grid.startpoint = startpoint ;
             // 判斷有沒有跟block有交叉
             Rectangle rect(grid.startpoint , Point<int>( grid.startpoint.x + grid.width , grid.startpoint.y + grid.length ));
-            auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect);
-            updateGrid(crosssWithBlockResult, grid);
+            for(auto block : RouterHelper.BlockMap)
+            {
+                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, block.second);
+                updateGrid(crosssWithBlockResult, grid);
+            }
+            for( auto obstacle : obstacles )
+            {
+                if( source == obstacle.first ) continue ;
+                for( auto o : obstacle.second )
+                {
+                    auto crosssWithObstacleResult = RouterHelper.isCrossWithBlock(rect,o);
+                    updateGrid(crosssWithObstacleResult, grid);
+                }
+            }
+//            auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect , grid );
+//            updateGrid(crosssWithBlockResult, grid);
             // 判斷有沒有跟線有交叉
-            auto crosssWithObstacleResult = RouterHelper.isCrossWithObstacle(rect, source, obstacles);
-            updateGrid(crosssWithObstacleResult, grid);
+//            auto crosssWithObstacleResult = RouterHelper.isCrossWithObstacle(rect, source, obstacles , grid );
+//            updateGrid(crosssWithObstacleResult, grid);
             startpoint.x += (CrossPoint.x - startpoint.x) ;
             temp.push_back(grid);
         }
