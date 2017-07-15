@@ -46,7 +46,11 @@ public:
     //  非block 的 Grid 兩個metal都為0 
     unsigned int lowermetal = 0 ;
     unsigned int uppermetal = 0 ;
-    std::vector<Border> Edges ; 
+    std::vector<Border> Edges ;
+    bool LeftDown ;
+    bool LeftUp ;
+    bool RightDown ;
+    bool RightUp ;
     std::vector<Rectangle> obstacles;
     std::vector<unsigned> capacities ;
     
@@ -66,6 +70,16 @@ public:
     bool operator==(const Coordinate3D & right)
     {
         return (this->x == right.x && this->y == right.y && this->z == right.z);
+    }
+    const Coordinate3D & operator=(const Coordinate3D & right  )
+    {
+        if( this != &right )
+        {
+            this->x = right.x ;
+            this->y = right.y ;
+            this->z = right.z ;
+        }
+        return *this ;
     }
 };
 

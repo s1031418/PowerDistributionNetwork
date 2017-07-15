@@ -7,8 +7,10 @@
 //
 
 #include "RouterV4.hpp"
-// bug: block 還是要加大在判斷 + minmal space + 1/2 *width 不然會short
-// legalize target pin 不能只加一個單位，要判斷加到超過 1/2 *width+ minmal space
+
+// bug list:
+// 上下不能走
+// 拉皮(wiring)
 
 
 
@@ -34,10 +36,7 @@ void RouterV4::InitState()
     }
     lowestMetal = stoi(metals[0].substr(5));
     highestMetal = stoi(metals[metals.size()-1].substr(5));
-    
-    
     SpecialNetsMaps.clear();
-    cout << "";
 }
 int RouterV4::translate3D_1D(Coordinate3D coordinate3d)
 {
@@ -99,6 +98,10 @@ Graph_SP * RouterV4::InitGraph_SP()
     int Down = -1 * Up ;
     int Bottom = -1 * Top ;
     graph_sp->resize(XSize * YSize * highestMetal);
+    graph_sp->SetRight(Right);
+    graph_sp->SetUp(Up);
+    graph_sp->SetTop(Top);
+    graph_sp->SetDirectionMode(false);
     for( int z = lowestMetal ; z <= highestMetal ; z++ )
     {
         for( int y = 0 ; y < YSize ; y++ )
@@ -111,8 +114,8 @@ Graph_SP * RouterV4::InitGraph_SP()
                 {
                     if( Grids[y][x].Edges[z].downEdge )
                     {
-                        graph_sp->AddEdge(index, index+Right, Grids[y][x].width / UNITS_DISTANCE * weights );
-                        graph_sp->AddEdge(index+Right, index, Grids[y][x].width / UNITS_DISTANCE* weights ) ;
+                        graph_sp->AddEdge(index, index+Right, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x].width) * 10000  );
+                        graph_sp->AddEdge(index+Right, index, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x].width) * 10000 ) ;
                     }
                     else
                     {
@@ -121,8 +124,9 @@ Graph_SP * RouterV4::InitGraph_SP()
                     }
                     if( Grids[y][x-1].Edges[z].downEdge )
                     {
-                        graph_sp->AddEdge(index, index+Left, Grids[y][x-1].width/ UNITS_DISTANCE* weights );
-                        graph_sp->AddEdge(index+Left, index, Grids[y][x-1].width/ UNITS_DISTANCE* weights);
+                        
+                        graph_sp->AddEdge(index, index+Left, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x-1].width)* 10000 );
+                        graph_sp->AddEdge(index+Left, index, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x-1].width)* 10000 );
                     }
                     else
                     {
@@ -131,8 +135,8 @@ Graph_SP * RouterV4::InitGraph_SP()
                     }
                     if( Grids[y][x].Edges[z].leftEdge )
                     {
-                        graph_sp->AddEdge(index, index+Up, Grids[y][x].length/ UNITS_DISTANCE* weights);
-                        graph_sp->AddEdge(index+Up, index, Grids[y][x].length/ UNITS_DISTANCE* weights);
+                        graph_sp->AddEdge(index, index+Up, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x].length) * 10000);
+                        graph_sp->AddEdge(index+Up, index, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x].length) * 10000);
                     }
                     else
                     {
@@ -141,8 +145,9 @@ Graph_SP * RouterV4::InitGraph_SP()
                     }
                     if( Grids[y-1][x].Edges[z].leftEdge )
                     {
-                        graph_sp->AddEdge(index, index+Down, Grids[y-1][x].length/ UNITS_DISTANCE* weights);
-                        graph_sp->AddEdge(index+Down, index, Grids[y-1][x].length/ UNITS_DISTANCE* weights);
+                        
+                        graph_sp->AddEdge(index, index+Down, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y-1][x].length)* 10000 );
+                        graph_sp->AddEdge(index+Down, index, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y-1][x].length) * 10000);
                     }
                     else
                     {
@@ -151,16 +156,16 @@ Graph_SP * RouterV4::InitGraph_SP()
                     }
                     if( z == lowestMetal )
                     {
-                        graph_sp->AddEdge(index, index+Top, 1);
+                        graph_sp->AddEdge(index, index+Top, 1* 10000);
                     }
                     else if (z == highestMetal)
                     {
-                        graph_sp->AddEdge(index, index+Bottom, 1);
+                        graph_sp->AddEdge(index, index+Bottom, 1* 10000);
                     }
                     else
                     {
-                        graph_sp->AddEdge(index, index+Top, 1);
-                        graph_sp->AddEdge(index, index+Bottom, 1);
+                        graph_sp->AddEdge(index, index+Top, 1* 10000);
+                        graph_sp->AddEdge(index, index+Bottom, 1* 10000);
                     }
                 }
             }
@@ -181,86 +186,108 @@ Point<int> RouterV4::getAbsolutePoint( Coordinate3D coordinate3d )
     int Y = ( y != 0 ) ? *std::next(Horizontal.begin(), y-1) : 0 ;
     return Point<int>(X,Y);
 }
-void RouterV4::LegalizeTargetEdge(Block coordinate ,Graph_SP * graph_sp )
+Coordinate3D RouterV4::LegalizeTargetEdge(Block block ,Graph_SP * graph_sp )
 {
-    auto target3D = getGridCoordinate(coordinate) ;
-    int currentIndex = translate3D_1D(Coordinate3D(target3D.x,target3D.y,target3D.z));
-    int YSize = (int)Grids.size()+1 ;
-    int XSize = (int)Grids[0].size()+1;
-    int Up = XSize ;
-    int Right = 1 ;
-    int Top = (XSize) * (YSize);
-    
-    if( coordinate.Direction == TOP )
+    vector<Coordinate3D> paths ;
+    auto sourceGrid = getGridCoordinate(block);
+    Coordinate3D targetGrid = sourceGrid ;
+    if( block.Direction == TOP )
     {
-        int cnt = 1 ;
-        int currentY = getAbsolutePoint(translate1D_3D(currentIndex)).y ;
-        int nextY = getAbsolutePoint(translate1D_3D(currentIndex+Up)).y ;
-        while( nextY - currentY <= 0.5 * WIDTH + SPACING )
+        int blockLength = block.RightUp.y - block.LeftDown.y ;
+        
+        int currentY = getAbsolutePoint(sourceGrid).y ;
+        paths.push_back(sourceGrid);
+        targetGrid.y += 1 ;
+        int nextY = getAbsolutePoint(targetGrid).y ;
+        paths.push_back(targetGrid);
+        // get how many counts should be calcaulated.
+        while( nextY - currentY !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockLength )
         {
-            cnt++ ;
-            nextY = getAbsolutePoint(translate1D_3D(currentIndex + (cnt * Up))).y ;
+            targetGrid.y += 1 ;
+            paths.push_back(targetGrid);
+            nextY = getAbsolutePoint(targetGrid).y ;
         }
-        for( int i = 0 ; i < cnt ; i++ )
-            graph_sp->UpdateWeight(currentIndex+Up, currentIndex, Grids[target3D.y][target3D.x].length);
-    }
-    else if(coordinate.Direction == DOWN)
-    {
-        int cnt = 1 ;
-        int currentY = getAbsolutePoint(translate1D_3D(currentIndex)).y ;
-        int nextY = getAbsolutePoint(translate1D_3D(currentIndex-Up)).y ;
-        while( currentY - nextY <= 0.5 * WIDTH + SPACING )
+        for(int i = 0 ; i < paths.size() - 1 ; i++)
         {
-            cnt++ ;
-            nextY = getAbsolutePoint(translate1D_3D(currentIndex - (cnt * Up))).y ;
+            int current = translate3D_1D(paths[i]);
+            int next = translate3D_1D(paths[i+1]);
+            graph_sp->UpdateWeight(next, current, Grids[paths[i].y][paths[i].x].length);
         }
-        for( int i = 0 ; i < cnt ; i++ )
-            graph_sp->UpdateWeight(currentIndex-Up, currentIndex, Grids[target3D.y-1][target3D.x].length);
     }
-    else if( coordinate.Direction == RIGHT )
+    else if(block.Direction == DOWN)
     {
-        int cnt = 1 ;
-        int currentX = getAbsolutePoint(translate1D_3D(currentIndex)).x ;
-        int nextX = getAbsolutePoint(translate1D_3D(currentIndex+Right)).x ;
-        while( nextX - currentX <= 0.5 * WIDTH + SPACING )
+        int blockLength = block.RightUp.y - block.LeftDown.y ;
+        int currentY = getAbsolutePoint(sourceGrid).y ;
+        paths.push_back(sourceGrid);
+        targetGrid.y -= 1 ;
+        paths.push_back(targetGrid);
+        int nextY = getAbsolutePoint(targetGrid).y ;
+        // get how many counts should be calcaulated.
+        while( currentY - nextY !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockLength )
         {
-            cnt++ ;
-            nextX = getAbsolutePoint(translate1D_3D(currentIndex + (cnt * Right))).y ;
+            targetGrid.y -= 1 ;
+            paths.push_back(targetGrid);
+            nextY = getAbsolutePoint(targetGrid).y ;
         }
-        for( int i = 0 ; i < cnt ; i++ )
-            graph_sp->UpdateWeight(currentIndex+Right, currentIndex, Grids[target3D.y][target3D.x].width);
-    }
-    else if( coordinate.Direction == LEFT )
-    {
-        int cnt = 1 ;
-        int currentX = getAbsolutePoint(translate1D_3D(currentIndex)).x ;
-        int nextX = getAbsolutePoint(translate1D_3D(currentIndex-Right)).x ;
-        while( currentX - nextX <= 0.5 * WIDTH + SPACING )
+        for(int i = 0 ; i < paths.size() - 1 ; i++)
         {
-            cnt++ ;
-            nextX = getAbsolutePoint(translate1D_3D(currentIndex - (cnt * Right ) )).y ;
+            int current = translate3D_1D(paths[i]);
+            int next = translate3D_1D(paths[i+1]);
+            graph_sp->UpdateWeight(next, current, Grids[paths[i].y-1][paths[i].x].length);
         }
-        for( int i = 0 ; i < cnt ; i++ )
-            graph_sp->UpdateWeight(currentIndex-Right, currentIndex, Grids[target3D.y][target3D.x-1].width);
     }
-    // target point is not allow use via
-    if(target3D.z == highestMetal)
+    else if(block.Direction == RIGHT )
     {
-        graph_sp->UpdateWeight(currentIndex-Top, currentIndex, Max_Distance);
+        int blockWidth = block.RightUp.x - block.LeftDown.x ;
+        int currentX = getAbsolutePoint(sourceGrid).x ;
+        paths.push_back(sourceGrid);
+        targetGrid.x += 1 ;
+        paths.push_back(targetGrid);
+        int nextX = getAbsolutePoint(targetGrid).x ;
+        // get how many counts should be calcaulated.
+        while( nextX - currentX !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockWidth )
+        {
+            targetGrid.x += 1 ;
+            paths.push_back(targetGrid);
+            nextX = getAbsolutePoint(targetGrid).x ;
+        }
+        for(int i = 0 ; i < paths.size() - 1 ; i++)
+        {
+            int current = translate3D_1D(paths[i]);
+            int next = translate3D_1D(paths[i+1]);
+            graph_sp->UpdateWeight(next, current, Grids[paths[i].y][paths[i].x].width);
+        }
+        
     }
-    else if (target3D.z == lowestMetal)
+    else if(block.Direction == LEFT)
     {
-        graph_sp->UpdateWeight(currentIndex+Top, currentIndex, Max_Distance);
+        int blockWidth = block.RightUp.x - block.LeftDown.x ;
+        paths.push_back(sourceGrid);
+        int currentX = getAbsolutePoint(sourceGrid).x ;
+        targetGrid.x -= 1 ;
+        paths.push_back(targetGrid);
+        int nextX = getAbsolutePoint(targetGrid).x ;
+        // get how many counts should be calcaulated.
+        while( currentX - nextX !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockWidth )
+        {
+            targetGrid.x -= 1 ;
+            paths.push_back(targetGrid);
+            nextX = getAbsolutePoint(targetGrid).x ;
+        }
+        for(int i = 0 ; i < paths.size() - 1 ; i++)
+        {
+            int current = translate3D_1D(paths[i]);
+            int next = translate3D_1D(paths[i+1]);
+            graph_sp->UpdateWeight(next, current, Grids[paths[i].y][paths[i].x-1].width);
+        }
     }
-    else
-    {
-        graph_sp->UpdateWeight(currentIndex+Top, currentIndex, Max_Distance);
-        graph_sp->UpdateWeight(currentIndex-Top, currentIndex, Max_Distance);
-    }
-    
+    return targetGrid ;
 }
 void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo )
 {
+//    for(auto p : paths)
+//        cout << p.x << " " << p.y << " " << p.z << endl;
+//    cout << "--------------------------------" << endl;
     // find
     auto iter = SpecialNetsMaps.find(powerPinName) ;
     bool create = ( iter != SpecialNetsMaps.end() ) ? false : true ;
@@ -286,11 +313,24 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
     Point<int> oringinTargetPoint = startPoint;
     Point<int> targetPoint = startPoint;
     auto friendlyForm = translateToFriendlyForm(paths);
+//    for( auto p : friendlyForm )
+//    {
+//        if( p.first == 0 )  cout << "UP";
+//        if( p.first == 1 )  cout << "DOWN";
+//        if( p.first == 2 )  cout << "LEFT";
+//        if( p.first == 3 )  cout << "RIGHT";
+//        if( p.first == 4 )  cout << "TOP";
+//        if( p.first == 5 )  cout << "BOTTOM";
+//        cout << " " << p.second << endl;
+//    }
+//    cout << endl;
+    
     auto Distance = getAbsoluteDistance(friendlyForm, Point<int>(source.x,source.y));
-    for(auto d : Distance)
-        cout << d << endl;
+//    for(auto d : Distance)
+//        cout << d << endl;
     for( int i = 0 ; i < friendlyForm.size() ; i++ )
     {
+        vector<Nets> nets;
         Direction3D diection = friendlyForm[i].first ;
         Direction3D nextDirection = friendlyForm[i+1].first ;
         int progress = friendlyForm[i].second ;
@@ -298,12 +338,14 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
         {
             oringinTargetPoint = Point<int>( oringinTargetPoint.x , oringinTargetPoint.y + Distance[i]);
             targetPoint = oringinTargetPoint ;
-            if( i != friendlyForm.size() -1 )targetPoint.y += (DEFAULT_WIDTH * UNITS_DISTANCE / 2) ;
+//            if( i != friendlyForm.size() -1 )targetPoint.y += (WIDTH * UNITS_DISTANCE / 2) ;
+            targetPoint.y += (WIDTH * UNITS_DISTANCE / 2) ;
             net.METALNAME = RouterHelper.translateIntToMetalName(layer);
-            net.ROUNTWIDTH = DEFAULT_WIDTH * UNITS_DISTANCE ;
+            net.ROUNTWIDTH = WIDTH * UNITS_DISTANCE ;
             net.SHAPE = "STRIPE";
             net.ABSOLUTE_POINT1 = startPoint ;
             net.ABSOLUTE_POINT2 = targetPoint ;
+            nets.push_back(net);
             BlockCoordinate blockCoordinate ;
             blockCoordinate.LeftDown = startPoint ;
             blockCoordinate.LeftDown.x -= net.ROUNTWIDTH / 2 ;
@@ -313,18 +355,20 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
             blockCoordinate.upperMetal = layer ;
             if( obstacles.find(powerPinName) == obstacles.end() ) obstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
             obstacles[powerPinName].push_back(blockCoordinate);
-            cout << layer << " " << startPoint << " " << targetPoint << endl;
+//            cout << layer << " " << startPoint << " " << targetPoint << endl;
         }
         else if( diection == downOrient )
         {
             oringinTargetPoint = Point<int>( oringinTargetPoint.x , oringinTargetPoint.y - Distance[i]);
             targetPoint = oringinTargetPoint ;
-            if( i != friendlyForm.size() -1 )targetPoint.y -= (DEFAULT_WIDTH * UNITS_DISTANCE / 2) ;
+//            if( i != friendlyForm.size() -1 )targetPoint.y -= (WIDTH * UNITS_DISTANCE / 2) ;
+            targetPoint.y -= (WIDTH * UNITS_DISTANCE / 2) ;
             net.METALNAME = RouterHelper.translateIntToMetalName(layer);
-            net.ROUNTWIDTH = DEFAULT_WIDTH * UNITS_DISTANCE ;
+            net.ROUNTWIDTH = WIDTH * UNITS_DISTANCE ;
             net.ABSOLUTE_POINT1 = startPoint ;
             net.ABSOLUTE_POINT2 = targetPoint ;
             net.SHAPE = "STRIPE";
+            nets.push_back(net);
             BlockCoordinate blockCoordinate ;
             blockCoordinate.RightUp = startPoint ;
             blockCoordinate.RightUp.x += net.ROUNTWIDTH / 2 ;
@@ -334,18 +378,20 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
             blockCoordinate.upperMetal = layer ;
             if( obstacles.find(powerPinName) == obstacles.end() ) obstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
             obstacles[powerPinName].push_back(blockCoordinate);
-            cout << layer << " " << startPoint << " " << targetPoint << endl;
+//            cout << layer << " " << startPoint << " " << targetPoint << endl;
         }
         else if( diection == leftOrient )
         {
             oringinTargetPoint = Point<int>( oringinTargetPoint.x - Distance[i], oringinTargetPoint.y );
             targetPoint = oringinTargetPoint ;
-            if( i != friendlyForm.size() -1 )targetPoint.x -= (DEFAULT_WIDTH * UNITS_DISTANCE / 2) ;
+//            if( i != friendlyForm.size() -1 ) targetPoint.x -= (WIDTH * UNITS_DISTANCE / 2) ;
+            targetPoint.x -= (WIDTH * UNITS_DISTANCE / 2) ;
             net.METALNAME = RouterHelper.translateIntToMetalName(layer);
-            net.ROUNTWIDTH = DEFAULT_WIDTH * UNITS_DISTANCE ;
+            net.ROUNTWIDTH = WIDTH * UNITS_DISTANCE ;
             net.ABSOLUTE_POINT1 = startPoint ;
             net.ABSOLUTE_POINT2 = targetPoint ;
             net.SHAPE = "STRIPE";
+            nets.push_back(net);
             BlockCoordinate blockCoordinate ;
             blockCoordinate.RightUp = startPoint ;
             blockCoordinate.RightUp.y += net.ROUNTWIDTH / 2 ;
@@ -355,18 +401,20 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
             blockCoordinate.upperMetal = layer ;
             if( obstacles.find(powerPinName) == obstacles.end() ) obstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
             obstacles[powerPinName].push_back(blockCoordinate);
-            cout << layer << " " << startPoint << " " << targetPoint << endl;
+//            cout << layer << " " << startPoint << " " << targetPoint << endl;
         }
         else if( diection == rightOrient )
         {
             oringinTargetPoint = Point<int>( oringinTargetPoint.x + Distance[i], oringinTargetPoint.y );
             targetPoint = oringinTargetPoint ;
-            if( i != friendlyForm.size() -1 )targetPoint.x += (DEFAULT_WIDTH * UNITS_DISTANCE / 2) ;
+//            if( i != friendlyForm.size() -1 )targetPoint.x += (WIDTH * UNITS_DISTANCE / 2) ;
+            targetPoint.x += (WIDTH * UNITS_DISTANCE / 2) ;
             net.METALNAME = RouterHelper.translateIntToMetalName(layer);
-            net.ROUNTWIDTH = DEFAULT_WIDTH * UNITS_DISTANCE ;
+            net.ROUNTWIDTH = WIDTH * UNITS_DISTANCE ;
             net.ABSOLUTE_POINT1 = startPoint ;
             net.ABSOLUTE_POINT2 = targetPoint ;
             net.SHAPE = "STRIPE";
+            nets.push_back(net);
             BlockCoordinate blockCoordinate ;
             blockCoordinate.LeftDown = startPoint ;
             blockCoordinate.LeftDown.y -= net.ROUNTWIDTH / 2 ;
@@ -376,7 +424,7 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
             blockCoordinate.upperMetal = layer ;
             if( obstacles.find(powerPinName) == obstacles.end() ) obstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
             obstacles[powerPinName].push_back(blockCoordinate);
-            cout << layer << " " << startPoint << " " << targetPoint << endl;
+//            cout << layer << " " << startPoint << " " << targetPoint << endl;
         }
         else if( diection == topOrient )
         {
@@ -391,12 +439,13 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
                 if( layer == 3 ) net.VIANAME = "via3_C";
                 if( layer == 4 ) net.VIANAME = "via4_C";
                 if( layer == 5 ) net.VIANAME = "via5_C";
-                cout << layer << " " << oringinTargetPoint << " " ;
-                if( layer == 1 ) cout << "via1_C" << endl;
-                if( layer == 2 ) cout << "via2_C" << endl;
-                if( layer == 3 ) cout << "via3_C" << endl;
-                if( layer == 4 ) cout << "via4_C" << endl;
-                if( layer == 5 ) cout << "via5_C" << endl;
+                nets.push_back(net);
+//                cout << layer << " " << oringinTargetPoint << " " ;
+//                if( layer == 1 ) cout << "via1_C" << endl;
+//                if( layer == 2 ) cout << "via2_C" << endl;
+//                if( layer == 3 ) cout << "via3_C" << endl;
+//                if( layer == 4 ) cout << "via4_C" << endl;
+//                if( layer == 5 ) cout << "via5_C" << endl;
                 layer++ ;
             }
             
@@ -414,14 +463,15 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
                 if( layer == 4 ) net.VIANAME = "via3_C";
                 if( layer == 3 ) net.VIANAME = "via2_C";
                 if( layer == 2 ) net.VIANAME = "via1_C";
+                nets.push_back(net);
                 // hard code via5c 而且 第六層走到第五層要用查的，目前hardcode
-                cout << layer << " " << oringinTargetPoint << " " ;
+//                cout << layer << " " << oringinTargetPoint << " " ;
                 
-                if( layer == 6 ) cout << "via5_C" << endl;
-                if( layer == 5 ) cout << "via4_C" << endl;
-                if( layer == 4 ) cout << "via3_C" << endl;
-                if( layer == 3 ) cout << "via2_C" << endl;
-                if( layer == 2 ) cout << "via1_C" << endl;
+//                if( layer == 6 ) cout << "via5_C" << endl;
+//                if( layer == 5 ) cout << "via4_C" << endl;
+//                if( layer == 4 ) cout << "via3_C" << endl;
+//                if( layer == 3 ) cout << "via2_C" << endl;
+//                if( layer == 2 ) cout << "via1_C" << endl;
                 layer--;
             }
             
@@ -431,25 +481,31 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
         startPoint = oringinTargetPoint ;
         if( nextDirection == upOrient )
         {
-            startPoint.y -= DEFAULT_WIDTH / 2 * UNITS_DISTANCE;
+            startPoint.y -= WIDTH / 2 * UNITS_DISTANCE;
             
         }
         if( nextDirection == downOrient )
         {
-            startPoint.y += DEFAULT_WIDTH / 2 * UNITS_DISTANCE;
+            startPoint.y += WIDTH / 2 * UNITS_DISTANCE;
         }
         if( nextDirection == leftOrient )
         {
-            startPoint.x += DEFAULT_WIDTH / 2 * UNITS_DISTANCE;
+            startPoint.x += WIDTH / 2 * UNITS_DISTANCE;
         }
         if( nextDirection == rightOrient )
         {
-            startPoint.x -= DEFAULT_WIDTH / 2 * UNITS_DISTANCE;
+            startPoint.x -= WIDTH / 2 * UNITS_DISTANCE;
         }
         if( create )
-            specialnet.NETSMULTIMAPS.insert(make_pair(net.METALNAME, net));
+        {
+            for(auto net : nets)
+                specialnet.NETSMULTIMAPS.insert(make_pair(net.METALNAME, net));
+        }
         else
-            iter->second.NETSMULTIMAPS.insert(make_pair(net.METALNAME, net));
+        {
+            for(auto net : nets)
+                iter->second.NETSMULTIMAPS.insert(make_pair(net.METALNAME, net));
+        }
         
     }
     
@@ -457,38 +513,425 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
     Converter converter("TEST");
     converter.toOutputDef();
 }
-
-void RouterV4::Route()
+void RouterV4::BlockGridCoordinate( Graph_SP * graph_sp , Block & block)
+{
+    int XSize = (int)Grids[0].size()+1;
+    int Up = XSize ;
+    int Right = 1 ;
+    auto blockGrid = getGridCoordinate(block);
+    int currentIndex = translate3D_1D(Coordinate3D(blockGrid.x,blockGrid.y,blockGrid.z));
+    
+    if( block.Direction == TOP )
+    {
+        int cnt = 1 ;
+        int currentY = getAbsolutePoint(translate1D_3D(currentIndex)).y ;
+        int nextY = getAbsolutePoint(translate1D_3D(currentIndex+Up)).y ;
+        // get how many counts should be calcaulated.
+        while( nextY - currentY <=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE )
+        {
+            cnt++ ;
+            nextY = getAbsolutePoint(translate1D_3D(currentIndex + (cnt * Up))).y ;
+        }
+        for( int i = 0 ; i <= cnt ; i++ )
+        {
+            for(int z = lowestMetal ; z <= highestMetal ; z++)
+            {
+                int index = translate3D_1D(Coordinate3D(blockGrid.x, blockGrid.y, z));
+                bool turnRight = ( blockGrid.x == Grids[0].size() ) ? false : true ;
+                bool turnUp = ( blockGrid.y == Grids.size() ) ? false : true ;
+                bool turnLeft = ( blockGrid.x == 0 ) ? false : true ;
+                bool turnDown = ( blockGrid.y == 0 ) ? false : true ;
+                if( turnRight && Grids[blockGrid.y][blockGrid.x].Edges[z].downEdge )
+                {
+                    graph_sp->UpdateWeight(index+Right, index, Max_Distance - index);
+                    graph_sp->UpdateWeight(index, index+Right, Max_Distance - index);
+                }
+                if( turnUp && Grids[blockGrid.y][blockGrid.x].Edges[z].leftEdge )
+                {
+                    graph_sp->UpdateWeight(index+Up, index, Max_Distance - index);
+                    graph_sp->UpdateWeight(index, index+Up, Max_Distance - index);
+                }
+                if( turnLeft && Grids[blockGrid.y][blockGrid.x - 1 ].Edges[z].downEdge )
+                {
+                    graph_sp->UpdateWeight(index-Right, index, Max_Distance - index );
+                    graph_sp->UpdateWeight(index, index-Right, Max_Distance - index );
+                }
+                if( turnDown && Grids[blockGrid.y - 1 ][blockGrid.x].Edges[z].leftEdge )
+                {
+                    graph_sp->UpdateWeight(index-Up, index, Max_Distance - index );
+                    graph_sp->UpdateWeight(index, index-Up, Max_Distance - index );
+                }
+            }
+            blockGrid.y += 1 ;
+        }
+    }
+    else if( block.Direction == DOWN )
+    {
+        int cnt = 1 ;
+        int currentY = getAbsolutePoint(translate1D_3D(currentIndex)).y ;
+        int nextY = getAbsolutePoint(translate1D_3D(currentIndex-Up)).y ;
+        while( currentY - nextY <=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE )
+        {
+            cnt++ ;
+            nextY = getAbsolutePoint(translate1D_3D(currentIndex - (cnt * Up))).y ;
+        }
+        for( int i = 0 ; i <= cnt ; i++ )
+        {
+            for(int z = lowestMetal ; z <= highestMetal ; z++)
+            {
+                int index = translate3D_1D(Coordinate3D(blockGrid.x, blockGrid.y, z));
+                bool turnRight = ( blockGrid.x == Grids[0].size() ) ? false : true ;
+                bool turnUp = ( blockGrid.y == Grids.size() ) ? false : true ;
+                bool turnLeft = ( blockGrid.x == 0 ) ? false : true ;
+                bool turnDown = ( blockGrid.y == 0 ) ? false : true ;
+                if( turnRight && Grids[blockGrid.y][blockGrid.x].Edges[z].downEdge )
+                {
+                    graph_sp->UpdateWeight(index+Right, index, Max_Distance - index);
+                    graph_sp->UpdateWeight(index, index+Right, Max_Distance - index);
+                }
+                if( turnUp && Grids[blockGrid.y][blockGrid.x].Edges[z].leftEdge )
+                {
+                    graph_sp->UpdateWeight(index+Up, index, Max_Distance - index);
+                    graph_sp->UpdateWeight(index, index+Up, Max_Distance - index);
+                }
+                if( turnLeft && Grids[blockGrid.y][blockGrid.x - 1 ].Edges[z].downEdge )
+                {
+                    graph_sp->UpdateWeight(index-Right, index, Max_Distance - index );
+                    graph_sp->UpdateWeight(index, index-Right, Max_Distance - index );
+                }
+                if( turnDown && Grids[blockGrid.y - 1 ][blockGrid.x].Edges[z].leftEdge )
+                {
+                    graph_sp->UpdateWeight(index-Up, index, Max_Distance - index );
+                    graph_sp->UpdateWeight(index, index-Up, Max_Distance - index );
+                }
+            }
+            blockGrid.y -= 1 ;
+        }
+    }
+    else if( block.Direction == LEFT )
+    {
+        int cnt = 1 ;
+        int currentX = getAbsolutePoint(translate1D_3D(currentIndex)).x ;
+        int nextX = getAbsolutePoint(translate1D_3D(currentIndex-Right)).x ;
+        while( currentX - nextX <=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE )
+        {
+            cnt++ ;
+            nextX = getAbsolutePoint(translate1D_3D(currentIndex - (cnt * Right ) )).x ;
+        }
+        for( int i = 0 ; i <= cnt ; i++ )
+        {
+            for(int z = lowestMetal ; z <= highestMetal ; z++)
+            {
+                int index = translate3D_1D(Coordinate3D(blockGrid.x, blockGrid.y, z));
+                bool turnRight = ( blockGrid.x == Grids[0].size() ) ? false : true ;
+                bool turnUp = ( blockGrid.y == Grids.size() ) ? false : true ;
+                bool turnLeft = ( blockGrid.x == 0 ) ? false : true ;
+                bool turnDown = ( blockGrid.y == 0 ) ? false : true ;
+                if( turnRight && Grids[blockGrid.y][blockGrid.x].Edges[z].downEdge )
+                {
+                    graph_sp->UpdateWeight(index+Right, index, Max_Distance - index);
+                    graph_sp->UpdateWeight(index, index+Right, Max_Distance - index);
+                }
+                if( turnUp && Grids[blockGrid.y][blockGrid.x].Edges[z].leftEdge )
+                {
+                    graph_sp->UpdateWeight(index+Up, index, Max_Distance - index);
+                    graph_sp->UpdateWeight(index, index+Up, Max_Distance - index);
+                }
+                if( turnLeft && Grids[blockGrid.y][blockGrid.x - 1 ].Edges[z].downEdge )
+                {
+                    graph_sp->UpdateWeight(index-Right, index, Max_Distance - index );
+                    graph_sp->UpdateWeight(index, index-Right, Max_Distance - index );
+                }
+                if( turnDown && Grids[blockGrid.y - 1 ][blockGrid.x].Edges[z].leftEdge )
+                {
+                    graph_sp->UpdateWeight(index-Up, index, Max_Distance - index );
+                    graph_sp->UpdateWeight(index, index-Up, Max_Distance - index );
+                }
+            }
+            blockGrid.x -= 1 ;
+        }
+    }
+    else if (block.Direction == RIGHT)
+    {
+        int cnt = 1 ;
+        int currentX = getAbsolutePoint(translate1D_3D(currentIndex)).x ;
+        int nextX = getAbsolutePoint(translate1D_3D(currentIndex+Right)).x ;
+        while( nextX - currentX <=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE )
+        {
+            cnt++ ;
+            nextX = getAbsolutePoint(translate1D_3D(currentIndex + (cnt * Right))).x ;
+        }
+        for( int i = 0 ; i <= cnt ; i++ )
+        {
+            for(int z = lowestMetal ; z <= highestMetal ; z++)
+            {
+                int index = translate3D_1D(Coordinate3D(blockGrid.x, blockGrid.y, z));
+                bool turnRight = ( blockGrid.x == Grids[0].size() ) ? false : true ;
+                bool turnUp = ( blockGrid.y == Grids.size() ) ? false : true ;
+                bool turnLeft = ( blockGrid.x == 0 ) ? false : true ;
+                bool turnDown = ( blockGrid.y == 0 ) ? false : true ;
+                if( turnRight && Grids[blockGrid.y][blockGrid.x].Edges[z].downEdge )
+                {
+                    graph_sp->UpdateWeight(index+Right, index, Max_Distance - index);
+                    graph_sp->UpdateWeight(index, index+Right, Max_Distance - index);
+                }
+                if( turnUp && Grids[blockGrid.y][blockGrid.x].Edges[z].leftEdge )
+                {
+                    graph_sp->UpdateWeight(index+Up, index, Max_Distance - index);
+                    graph_sp->UpdateWeight(index, index+Up, Max_Distance - index);
+                }
+                if( turnLeft && Grids[blockGrid.y][blockGrid.x - 1 ].Edges[z].downEdge )
+                {
+                    graph_sp->UpdateWeight(index-Right, index, Max_Distance - index );
+                    graph_sp->UpdateWeight(index, index-Right, Max_Distance - index );
+                }
+                if( turnDown && Grids[blockGrid.y - 1 ][blockGrid.x].Edges[z].leftEdge )
+                {
+                    graph_sp->UpdateWeight(index-Up, index, Max_Distance - index );
+                    graph_sp->UpdateWeight(index, index-Up, Max_Distance - index );
+                }
+            }
+            blockGrid.x += 1 ;
+        }
+    }
+}
+void RouterV4::BlockFrontDoor(Graph_SP * graph_sp , string sourcePowerPin)
 {
     
+    
+    for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
+    {
+        auto ret = Connection.equal_range(it->first);
+        for (auto i = ret.first; i != ret.second; ++i)
+        {
+            string powerpin = i->first ;
+            string block = i->second.BlockName ;
+            string blockPin = i->second.BlockPinName ;
+//            cout << powerpin << " " << block << " " << blockPin << endl;
+            Block powerPinCoordinate = RouterHelper.getPowerPinCoordinate(powerpin);
+            Block blockPinCoordinate = RouterHelper.getBlock(block,blockPin);
+            auto powerGrid = getGridCoordinate(powerPinCoordinate);
+            auto blockPinGrid = getGridCoordinate(blockPinCoordinate);
+            int currentIndex = translate3D_1D(Coordinate3D(powerGrid.x,powerGrid.y,powerGrid.z));
+            currentIndex = translate3D_1D(Coordinate3D(blockPinGrid.x,blockPinGrid.y,blockPinGrid.z));
+            if( powerpin != sourcePowerPin ) BlockGridCoordinate(graph_sp,powerPinCoordinate);
+            BlockGridCoordinate(graph_sp,blockPinCoordinate);
+        }
+    }
+}
+void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockinfo )
+{
+    vector<BlockCoordinate> virtualObstacles ;
+    vector<Coordinate3D> paths ;
+    auto sourceGrid = getGridCoordinate(block);
+    if( block.Direction == TOP )
+    {
+        int blockLength = block.RightUp.y - block.LeftDown.y ;
+        Coordinate3D targetGrid = sourceGrid ;
+        int currentY = getAbsolutePoint(sourceGrid).y ;
+        targetGrid.y += 1 ;
+        int nextY = getAbsolutePoint(targetGrid).y ;
+        // get how many counts should be calcaulated.
+        while( nextY - currentY !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockLength )
+        {
+            targetGrid.y += 1 ;
+            nextY = getAbsolutePoint(targetGrid).y ;
+        }
+        for(int y = sourceGrid.y ; y <= targetGrid.y ; y++)
+        {
+            Coordinate3D solution ;
+            solution.x = sourceGrid.x ;
+            solution.y = y ;
+            solution.z = sourceGrid.z ;
+            paths.push_back(solution);
+        }
+        fillSpNetMaps(paths, powerpin, blockinfo );
+        for(int i = lowestMetal ; i <= highestMetal ; i++)
+        {
+            BlockCoordinate virtualObstacle ;
+            int z = sourceGrid.z ;
+            Point<int> Source = getAbsolutePoint(sourceGrid);
+            Point<int> Target = getAbsolutePoint(targetGrid);
+            virtualObstacle.LeftDown = Source;
+            virtualObstacle.RightUp = Target;
+            virtualObstacle.LeftDown.x -= WIDTH / 2 * UNITS_DISTANCE ;
+            virtualObstacle.RightUp.x += WIDTH / 2 * UNITS_DISTANCE ;
+            if( i != z )
+            {
+                virtualObstacle.lowerMetal = i ;
+                virtualObstacle.upperMetal = i ;
+            }
+            virtualObstacles.push_back(virtualObstacle);
+        }
+    }
+    else if(block.Direction == DOWN)
+    {
+        int blockLength = block.RightUp.y - block.LeftDown.y ;
+        Coordinate3D targetGrid = sourceGrid ;
+        int currentY = getAbsolutePoint(sourceGrid).y ;
+        targetGrid.y -= 1 ;
+        int nextY = getAbsolutePoint(targetGrid).y ;
+        // get how many counts should be calcaulated.
+        while( currentY - nextY !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockLength )
+        {
+            targetGrid.y -= 1 ;
+            nextY = getAbsolutePoint(targetGrid).y ;
+        }
+        for( int y = sourceGrid.y ; y >= targetGrid.y ; y-- )
+        {
+            Coordinate3D solution ;
+            solution.x = sourceGrid.x ;
+            solution.y = y ;
+            solution.z = sourceGrid.z ;
+            paths.push_back(solution);
+        }
+        fillSpNetMaps(paths, powerpin, blockinfo  );
+        for(int i = lowestMetal ; i <= highestMetal ; i++)
+        {
+            BlockCoordinate virtualObstacle ;
+            int z = sourceGrid.z ;
+            Point<int> Source = getAbsolutePoint(sourceGrid);
+            Point<int> Target = getAbsolutePoint(targetGrid);
+            virtualObstacle.RightUp = Source;
+            virtualObstacle.LeftDown = Target;
+            virtualObstacle.LeftDown.x -= WIDTH / 2 * UNITS_DISTANCE ;
+            virtualObstacle.RightUp.x += WIDTH / 2 * UNITS_DISTANCE ;
+            if( i != z )
+            {
+                virtualObstacle.lowerMetal = i ;
+                virtualObstacle.upperMetal = i ;
+            }
+            virtualObstacles.push_back(virtualObstacle);
+        }
+    }
+    else if(block.Direction == RIGHT )
+    {
+        int blockWidth = block.RightUp.x - block.LeftDown.x ;
+        Coordinate3D targetGrid = sourceGrid ;
+        int currentX = getAbsolutePoint(sourceGrid).x ;
+        targetGrid.x += 1 ;
+        int nextX = getAbsolutePoint(targetGrid).x ;
+        // get how many counts should be calcaulated.
+        while( nextX - currentX !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockWidth )
+        {
+            targetGrid.x += 1 ;
+            nextX = getAbsolutePoint(targetGrid).x ;
+        }
+        for( int x = sourceGrid.x ; x <= targetGrid.x ; x++ )
+        {
+            Coordinate3D solution ;
+            solution.x = x ;
+            solution.y = sourceGrid.y ;
+            solution.z = sourceGrid.z ;
+            paths.push_back(solution);
+        }
+        fillSpNetMaps(paths, powerpin, blockinfo  );
+        for(int i = lowestMetal ; i <= highestMetal ; i++)
+        {
+            BlockCoordinate virtualObstacle ;
+            int z = sourceGrid.z ;
+            Point<int> Source = getAbsolutePoint(sourceGrid);
+            Point<int> Target = getAbsolutePoint(targetGrid);
+            virtualObstacle.LeftDown = Source;
+            virtualObstacle.RightUp = Target;
+            virtualObstacle.LeftDown.y -= WIDTH / 2 * UNITS_DISTANCE ;
+            virtualObstacle.RightUp.y += WIDTH / 2 * UNITS_DISTANCE ;
+            if( i != z )
+            {
+                virtualObstacle.lowerMetal = i ;
+                virtualObstacle.upperMetal = i ;
+            }
+            virtualObstacles.push_back(virtualObstacle);
+        }
+    }
+    else if(block.Direction == LEFT)
+    {
+        int blockWidth = block.RightUp.x - block.LeftDown.x ;
+        Coordinate3D targetGrid = sourceGrid ;
+        int currentX = getAbsolutePoint(sourceGrid).x ;
+        targetGrid.x -= 1 ;
+        int nextX = getAbsolutePoint(targetGrid).x ;
+        // get how many counts should be calcaulated.
+        while( currentX - nextX !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockWidth )
+        {
+            targetGrid.x -= 1 ;
+            nextX = getAbsolutePoint(targetGrid).x ;
+        }
+        for( int x = sourceGrid.x ; x >= targetGrid.x ; x-- )
+        {
+            Coordinate3D solution ;
+            solution.x = x ;
+            solution.y = sourceGrid.y ;
+            solution.z = sourceGrid.z ;
+            paths.push_back(solution);
+        }
+        fillSpNetMaps(paths, powerpin, blockinfo  );
+        for(int i = lowestMetal ; i <= highestMetal ; i++)
+        {
+            BlockCoordinate virtualObstacle ;
+            int z = sourceGrid.z ;
+            Point<int> Source = getAbsolutePoint(sourceGrid);
+            Point<int> Target = getAbsolutePoint(targetGrid);
+            virtualObstacle.RightUp = Source;
+            virtualObstacle.LeftDown = Target;
+            virtualObstacle.LeftDown.y -= WIDTH / 2 * UNITS_DISTANCE ;
+            virtualObstacle.RightUp.y += WIDTH / 2 * UNITS_DISTANCE ;
+            if( i != z )
+            {
+                virtualObstacle.lowerMetal = i ;
+                virtualObstacle.upperMetal = i ;
+            }
+            virtualObstacles.push_back(virtualObstacle);
+        }
+    }
+    for( auto virtualObstacle : virtualObstacles )
+        obstacles[powerpin].push_back(virtualObstacle);
+}
+void RouterV4::InitPowerPinAndBlockPin()
+{
+    InitGrids("");
+    for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
+    {
+        auto ret = Connection.equal_range(it->first);
+        for (auto i = ret.first; i != ret.second; ++i)
+        {
+            string powerpin = i->first ;
+            string block = i->second.BlockName ;
+            string blockPin = i->second.BlockPinName ;
+            BlockInfo blockinfo ;
+            blockinfo.BlockName = block ;
+            blockinfo.BlockPinName = blockPin ;
+            Block powerPinCoordinate = RouterHelper.getPowerPinCoordinate(powerpin);
+            Block blockPinCoordinate = RouterHelper.getBlock(block,blockPin);
+            getInitSolution(powerPinCoordinate,powerpin,blockinfo);
+            getInitSolution(blockPinCoordinate,powerpin,blockinfo);
+        }
+    }
+}
+void RouterV4::Route()
+{
+    InitPowerPinAndBlockPin();
     GlobalRouter gr ;
     auto orders = gr.getNetOrdering();
     for(auto order : orders)
     {
-        
         BlockInfo blockinfo ;
         string powerpin = order.second.source ;
         blockinfo.BlockName = order.second.target.first ;
         blockinfo.BlockPinName = order.second.target.second ;
-        
-        
         Block powerPinCoordinate = RouterHelper.getPowerPinCoordinate(powerpin);
         Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
-        
         InitGrids(powerpin);
-        
         Graph_SP * graph_sp = InitGraph_SP();
-        LegalizeTargetEdge(BlockPinCoordinate , graph_sp);
-        int source = translate3D_1D(getGridCoordinate(powerPinCoordinate));
-        int target = translate3D_1D(getGridCoordinate(BlockPinCoordinate));
-                               
-        Grids.begin();
-        
-        
+        Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp);
+        Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp);
+        int source = translate3D_1D(sourceGrid);
+        int target = translate3D_1D(targetGrid);
         graph_sp->Dijkstra(source);
         auto paths = graph_sp->getPath(target);
         if(paths.empty())
         {
+//            toGridGraph();
             cout << "Path" << endl;
             cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
             cout << "-------------------------------Source Info-------------------------------" << endl;
@@ -511,17 +954,22 @@ void RouterV4::Route()
             cout << "Target 1D:" << translate3D_1D(target3D) << endl;
             assert(0);
         }
+        
         vector<Coordinate3D> temp ;
-        cout << "Paths" << endl;
-        for(auto p : paths)
+//        cout << "Paths" << endl;
+        for(int i = (int)paths.size() - 1; i >= 0  ; i--)
         {
-            temp.push_back(translate1D_3D(p));
-            auto s = translate1D_3D(p);
-            cout << s.x << " " << s.y << " " << s.z << endl;
+            temp.push_back(translate1D_3D(paths[i]));
         }
-        fillSpNetMaps(temp, powerpin, blockinfo);
+//        for(auto p : paths)
+//        {
+//            temp.push_back(translate1D_3D(p));
+////            auto s = translate1D_3D(p);
+////            cout << s.x << " " << s.y << " " << s.z << endl;
+//        }
+        fillSpNetMaps(temp, powerpin, blockinfo );
         delete [] graph_sp ;
-        cout << "";
+        
     }
     
     
@@ -567,7 +1015,7 @@ void RouterV4::toGridGraph()
             if( init ){ cout<< " + FIXED" ; init = false ;}
             else cout << " NEW ";
             if( RouterHelper.IsBlock( col )) cout << " METAL5 " ;
-            else cout << " METAL6 " ;
+            else cout << " METAL5 " ;
             cout << col.width << " " ;
             cout << " + SHAPE STRIPE ";
             cout << " ( "<< col.startpoint.x + col.width / 2 ;
@@ -721,7 +1169,7 @@ void RouterV4::InitGrids(string source)
             Rectangle rect(grid.startpoint , Point<int>( grid.startpoint.x + grid.width , grid.startpoint.y + grid.length ));
             for(auto block : RouterHelper.BlockMap)
             {
-                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, block.second);
+                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, block.second , WIDTH , SPACING);
                 updateGrid(crosssWithBlockResult, grid);
             }
             for( auto obstacle : obstacles )
@@ -729,7 +1177,7 @@ void RouterV4::InitGrids(string source)
                 if( source == obstacle.first ) continue ;
                 for( auto o : obstacle.second )
                 {
-                    auto crosssWithObstacleResult = RouterHelper.isCrossWithBlock(rect,o);
+                    auto crosssWithObstacleResult = RouterHelper.isCrossWithBlock(rect,o, WIDTH , SPACING);
                     updateGrid(crosssWithObstacleResult, grid);
                 }
             }
@@ -877,16 +1325,16 @@ vector<pair<Direction3D, int>> RouterV4::translateToFriendlyForm( vector<Coordin
         cnt++;
     }
     paths.push_back(make_pair(initDirection, cnt));
-    for( auto p : paths )
-    {
-        if( p.first == 0 )  cout << "UP";
-        if( p.first == 1 )  cout << "DOWN";
-        if( p.first == 2 )  cout << "LEFT";
-        if( p.first == 3 )  cout << "RIGHT";
-        if( p.first == 4 )  cout << "TOP";
-        if( p.first == 5 )  cout << "BOTTOM";
-        cout << " " << p.second << endl;
-    }
-    cout << endl;
+//    for( auto p : paths )
+//    {
+//        if( p.first == 0 )  cout << "UP";
+//        if( p.first == 1 )  cout << "DOWN";
+//        if( p.first == 2 )  cout << "LEFT";
+//        if( p.first == 3 )  cout << "RIGHT";
+//        if( p.first == 4 )  cout << "TOP";
+//        if( p.first == 5 )  cout << "BOTTOM";
+//        cout << " " << p.second << endl;
+//    }
+//    cout << endl;
     return paths;
 }

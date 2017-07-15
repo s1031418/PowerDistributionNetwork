@@ -47,23 +47,37 @@ private:
     int lowestMetal ;
     int highestMetal ;
     int WIDTH = 10 ;
-    int SPACING = 2 ;
+    int SPACING = 10 ;
     set<int> boundList ;
+    
+    map<string , Coordinate3D> MagicPoints ;
     
     // key: vdd_source 
     map<string,vector<BlockCoordinate>> obstacles;
     
     RouterUtil RouterHelper;
     
-    void fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo );
+    void fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo  );
     
-    void LegalizeTargetEdge(Block coordinate , Graph_SP * graph_sp);
+    Coordinate3D LegalizeTargetEdge(Block block , Graph_SP * graph_sp);
+    
+    void toSpice();
     
     Point<int> getAbsolutePoint( Coordinate3D coordinate3d );
     
     Coordinate3D getGridCoordinate( Block block );
     
     void InitBoundList();
+    
+    void AddVirtualObstacle();
+    
+    void BlockFrontDoor(Graph_SP * graph_sp , string sourcePowerPin);
+    
+    void BlockGridCoordinate( Graph_SP * graph_sp , Block & block);
+    
+    void InitPowerPinAndBlockPin();
+    
+    void getInitSolution(Block powerBlock  , string powerpin, BlockInfo blockinfo );
     
     void InitState();
     

@@ -23,7 +23,12 @@ vector<Rectangle> RouterUtil::getBlockRectangle()
         Rectangle rect(block.second.LeftDown , block.second.RightUp);
         temp.push_back(rect);
     }
-    return temp ; 
+    for( auto powerBlock : PowerMaps )
+    {
+        Rectangle rect(powerBlock.second.LeftDown , powerBlock.second.RightUp);
+        temp.push_back(rect);
+    }
+    return temp ;
 }
 void RouterUtil::InitBlockMap()
 {
@@ -217,7 +222,7 @@ CrossInfo RouterUtil::isCrossWithObstacle( Rectangle rect1  , string source , ma
     }
     return CrossInfo();
 }
-CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1 , BlockCoordinate & block)
+CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1 , BlockCoordinate & block , int width , int spacing)
 {
     CrossInfo crossinfo ;
     Rectangle rect2 ;
@@ -225,10 +230,10 @@ CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1 , BlockCoordinate & block
     rect2.LeftDown = block.LeftDown ;
     rect2.RightUp = block.RightUp ;
     // 目前minimal space 先 hardcode 2 ，不同層有不同spacing，會浪費resource
-    rect2.LeftDown.x -= ((0.5*DEFAULT_WIDTH + 2 )*UNITS_DISTANCE);
-    rect2.LeftDown.y -= ((0.5*DEFAULT_WIDTH + 2 )*UNITS_DISTANCE);
-    rect2.RightUp.x += ((0.5*DEFAULT_WIDTH + 2 )*UNITS_DISTANCE);
-    rect2.RightUp.y += ((0.5*DEFAULT_WIDTH + 2 )*UNITS_DISTANCE);
+    rect2.LeftDown.x -= ((0.5*width + spacing )*UNITS_DISTANCE);
+    rect2.LeftDown.y -= ((0.5*width + spacing )*UNITS_DISTANCE);
+    rect2.RightUp.x += ((0.5*width + spacing )*UNITS_DISTANCE);
+    rect2.RightUp.y += ((0.5*width + spacing )*UNITS_DISTANCE);
     rect2.LeftDown.x += 1;
     rect2.LeftDown.y += 1;
     rect2.RightUp.x -= 1 ;
@@ -369,7 +374,7 @@ CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1 , BlockCoordinate & block
     }
     return crossinfo ;
 }
-CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1   )
+CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1  )
 {
     for(auto block : BlockMap)
     {

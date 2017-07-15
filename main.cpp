@@ -69,10 +69,10 @@ int main(int argc,  char * argv[])
 //    Graph_SP g ;
 //    g.Demo();
     
-    RouterUtil rutil ;
-    Rectangle rect1( Point<int>( 488000 , 646600 ) , Point<int>(  500000 , 649200) ) ;
-    Rectangle rect2( Point<int>( 495000 , 653600) , Point<int>(  712000 , 663600 ) ) ;
-    cout << boolalpha << rutil.isCross(rect1, rect2) << endl;
+//    RouterUtil rutil ;
+//    Rectangle rect1( Point<int>( 488000 , 646600 ) , Point<int>(  500000 , 649200) ) ;
+//    Rectangle rect2( Point<int>( 495000 , 653600) , Point<int>(  712000 , 663600 ) ) ;
+//    cout << boolalpha << rutil.isCross(rect1, rect2) << endl;
 //    cout << "Cross Area:" << rutil.getCrossArea(rect1, rect2) << endl;
 //    auto Rectangle = rutil.getCrossRect(rect1, rect2) ;
 //    cout << "Cross Rect:" << Rectangle.LeftDown << "," << Rectangle.RightUp << endl;

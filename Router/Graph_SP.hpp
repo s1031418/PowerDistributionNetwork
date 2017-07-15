@@ -15,6 +15,7 @@
 #include <climits>
 #include <queue>
 #include <map>
+#include <assert.h>
 const int Max_Distance = 10000000 ;
 
 //struct Node
@@ -29,6 +30,16 @@ const int Max_Distance = 10000000 ;
 //        return a.key < b.key;
 //    }
 //};
+enum TurnDirection
+{
+    TurnRight ,
+    TurnLeft ,
+    TurnUp ,
+    TurnDown ,
+    TurnTop ,
+    TurnBottom ,
+    Init
+};
 class Graph_SP // SP means Shortest Path
 {
     
@@ -40,11 +51,22 @@ public:
     
     void AddEdge(int from , int to , int weight);
     
+    void SetRight(int Right);
+    
+    void SetUp(int Up);
+    
+    void SetDirectionMode(bool mode);
+    
+    void SetTop(int Top);
+    
+    TurnDirection getTurnDirection(int diff);
     
     void PrintDataArray(vector<int> array);
+    
     void PrintIntArray(int * array);
     
     void InitalizeSingleSource(int Start);
+    
     void Relax(int from , int to , int weight);
     
     void Dijkstra(int Start = 0);
@@ -63,10 +85,14 @@ public:
     
 private:
     int num_vertex ;
-    
-    
+    int right ;
+    int up ;
+    int top ;
+    bool DirectionMode ;
+    vector<int> history ;
+    vector<int> turns ;
     vector<int> predecessor , distance ;
-    
+    vector<TurnDirection> predecessorTurns ;
 };
 
 #endif /* Graph_SP_hpp */
