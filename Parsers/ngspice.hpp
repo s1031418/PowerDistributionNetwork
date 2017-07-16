@@ -21,30 +21,17 @@
 
 using namespace std;
 
-class ngspice : public Parsers{
-    
-    
+class ngspice : public Parsers
+{
 public: 
     ngspice();
     ~ngspice();
-    void init(string casename);
     void initvoltage();
-    void ConcatIR_Drop();
-    double getIR_DropCons(string StartPowerPin , string EndBlockPin );
-    void printStats(multimap<string, string> & DetinationMap);
-    map<pair<string, string> , double> DropMap; 
-    vector < vector <string> > NoPassInfo;
-    vector < vector <string> > PassInfo;
-    void setCaseName(string name);
+    map<string,double> voltages;
 private:
-    PDNHelper helper ; 
     vector<string> Data ;
     // key值是sp的座標,value是voltage
-    map<string,double> voltages;
-    string CaseName;
     void LoadFile();
-    // 將sp的座標轉為Point
-    Point<int> translateToPoint(string key);
 };
 
 #endif /* ngspice_hpp */

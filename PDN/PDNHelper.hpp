@@ -37,6 +37,8 @@ public:
     
     double getCurrent(string blockName ,string blockPinName);
     
+    double getIRDropConstaint(string blockName , string blockPinName);
+    
     pair< Point<int>, Point<int> > getPowerPinCoordinate(int x , int y , Point<int> r_pt1, Point<int> r_pt2  , string orient);
     
     // 對Ｘ軸做鏡射

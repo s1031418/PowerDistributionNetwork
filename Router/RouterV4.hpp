@@ -18,14 +18,29 @@
 #include "InitialFileParser.hpp"
 #include "verilog.hpp"
 #include "lefrw.h"
+#include <algorithm>
 #include "defrw.h"
+#include "../Parsers/ngspice.hpp"
 #include "flute_net.hpp"
 #include "RouterUtil.hpp"
 #include "RouterComponents.hpp"
 #include "GlobalRouter.hpp"
+#include "DefGenerator.hpp"
 #include "SpiceGenerator.hpp"
 using namespace std;
 
+struct Comparator
+{
+    bool operator()(const Line & left, const Line & right) const
+    {
+        if ( left.pt1.x == right.pt1.x )
+        {
+            return left.pt1.y < right.pt1.y;
+        }
+        
+        return left.pt1.x < right.pt1.x;
+    }
+};
 
 
 class RouterV4 {
@@ -50,8 +65,10 @@ private:
     int WIDTH = 10 ;
     int SPACING = 10 ;
     set<int> boundList ;
-    Converter converter;
-    SpiceGenerator sp_gen ; 
+    SpiceGenerator sp_gen ;
+    DefGenerator def_gen ;
+    
+    
     map<string , Coordinate3D> MagicPoints ;
     
     
@@ -64,6 +81,8 @@ private:
     
     RouterUtil RouterHelper;
     
+    string getNgSpiceKey(Coordinate3D coordinate3d);
+    
     void fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo  );
     
     Coordinate3D LegalizeTargetEdge(Block block , Graph_SP * graph_sp);
@@ -71,6 +90,8 @@ private:
     double getMetalResistance(int layer);
     
     Point<int> getAbsolutePoint( Coordinate3D coordinate3d );
+    
+    void Simulation();
     
     // absolute point to grid point
     int getGridX(int x);

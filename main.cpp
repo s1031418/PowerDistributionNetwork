@@ -55,13 +55,7 @@ int main(int argc,  char * argv[])
     verilog.run();
     RouterV4 router(spiceName,defName,ouputfilesName) ;
     router.Route();
-    SpiceGenerator spice_gen ;
-    spice_gen.setSpiceName("spice");
-    spice_gen.initSpiceVdd("a", "ww", 10.2);
-    spice_gen.addSpiceResistance("a", "i", "r", 10.2);
-    spice_gen.addSpiceResistance("a", "r", "e", 10.3);
-    spice_gen.addSpiceCurrent("a", "m", 0.002);
-    spice_gen.toSpice();
+    
     
     delete[] lefargv;
     delete[] defargv ;

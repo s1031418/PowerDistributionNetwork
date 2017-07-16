@@ -21,9 +21,7 @@ RouterV4::RouterV4(string spice, string def , string output)
     spiceName = spice ;
     defName = def ;
     outputfilesName = output ;
-    converter.setDef(def);
-    converter.setSpice(spice);
-    converter.setOutput(output);
+    def_gen.setDefName(def);
     sp_gen.setSpiceName(spice);
     InitState();
     
@@ -93,8 +91,8 @@ void RouterV4::InitBoundList()
 }
 Graph_SP * RouterV4::InitGraph_SP()
 {
-    cout << "Begin Initialize 3D Shortest Path Graph ..." << endl;
-    clock_t Start = clock();
+//    cout << "Begin Initialize 3D Shortest Path Graph ..." << endl;
+//    clock_t Start = clock();
     InitBoundList();
     Graph_SP * graph_sp = new Graph_SP[1];
     int YSize = (int)Grids.size()+1 ;
@@ -179,10 +177,10 @@ Graph_SP * RouterV4::InitGraph_SP()
         }
     }
     clock_t End = clock();
-    double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
+//    double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
     //    printAllGrids();
-    cout << "3D Shortest Path Graph Done" << endl ;
-    cout << "We cost " << duration << "(s)" << endl;
+//    cout << "3D Shortest Path Graph Done" << endl ;
+//    cout << "We cost " << duration << "(s)" << endl;
     return graph_sp ;
 }
 Point<int> RouterV4::getAbsolutePoint( Coordinate3D coordinate3d )
@@ -517,8 +515,6 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
     }
     
     SpecialNetsMaps.insert(make_pair(powerPinName, specialnet));
-    
-    converter.toOutputDef();
 }
 void RouterV4::BlockGridCoordinate( Graph_SP * graph_sp , Block & block)
 {
@@ -1025,12 +1021,45 @@ void RouterV4::Route()
 ////            cout << s.x << " " << s.y << " " << s.z << endl;
 //        }
         fillSpNetMaps(temp, powerpin, blockinfo );
+        def_gen.toOutputDef();
         generateSpiceList(temp, powerpin, blockinfo );
         sp_gen.toSpice();
+        sp_gen.addSpiceCmd();
+        string cmd = "./ngspice " + spiceName + " -o simulation" ;
+        system(cmd.c_str());
+        ngspice ng_spice ;
+        ng_spice.initvoltage();
+        
+        double sourceV = ng_spice.voltages[getNgSpiceKey(sourceGrid)];
+        double targetV = ng_spice.voltages[getNgSpiceKey(targetGrid)];
+        double Drop = (sourceV - targetV) * 100 ;
+        cout << powerpin << " to " << blockinfo.BlockName << "_" << blockinfo.BlockPinName << " Drop:" << Drop << "(%) " ; 
+        double constaint = RouterHelper.getIRDropConstaint(blockinfo.BlockName, blockinfo.BlockPinName);
+        if( constaint >= Drop )
+            cout << "Pass" << endl;
+        else
+            cout << "No Pass" << endl;
+        cout << "IR Drop Constraint:" << constaint << "(%)"<< endl;
+        cout << endl;
         delete [] graph_sp ;
         
     }
     
+    
+}
+string RouterV4::getNgSpiceKey(Coordinate3D coordinate3d)
+{
+    int z = coordinate3d.z ;
+    Point<int> pt = getAbsolutePoint(coordinate3d);
+    string MetalName = RouterHelper.translateIntToMetalName(z) ;
+    string result ;
+    // to lowercase
+    transform(MetalName.begin(), MetalName.end(), MetalName.begin(), ::tolower);
+    result.append(MetalName).append("_").append(to_string(pt.x)).append("_").append(to_string(pt.y));
+    return result ;
+}
+void RouterV4::Simulation()
+{
     
 }
 double RouterV4::getMetalResistance(int layer)
@@ -1048,7 +1077,7 @@ void RouterV4::genResistance(vector<Coordinate3D> & paths , string powerPinName)
         // distance 0 means via
         // 目前打最大顆via (HardCode)
         int distance = ( pt1.x == pt2.x ) ? abs(pt1.y - pt2.y) : abs(pt1.x - pt2.x);
-        double resistance = ( distance != 0 ) ? RouterHelper.calculateResistance(getMetalResistance(paths[i].z), WIDTH * UNITS_DISTANCE, distance) : 1 ;
+        double resistance = ( distance != 0 ) ? RouterHelper.calculateResistance(getMetalResistance(paths[i].z), WIDTH * UNITS_DISTANCE, distance) : 0.25 ;
         if(resistance < 0 ) assert(0);
         sp_gen.addSpiceResistance(powerPinName, node1, node2, resistance);
     }
@@ -1258,8 +1287,8 @@ void RouterV4::updateGrid(CrossInfo result , Grid & grid)
 void RouterV4::InitGrids(string source)
 {
     Grids.clear();
-    cout << "Begin Initialize  Grid Graph ..." << endl;
-    clock_t Start = clock();
+//    cout << "Begin Initialize  Grid Graph ..." << endl;
+//    clock_t Start = clock();
     
     CutGrid(WIDTH, SPACING);
     
@@ -1306,10 +1335,10 @@ void RouterV4::InitGrids(string source)
         startpoint.y = h ;
         Grids.push_back(temp);
     }
-    clock_t End = clock();
-    double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
-    cout << "Initialize  Grid Graph Done" << endl ;
-    cout << "We cost " << duration << "(s)" << endl;
+//    clock_t End = clock();
+//    double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
+//    cout << "Initialize  Grid Graph Done" << endl ;
+//    cout << "We cost " << duration << "(s)" << endl;
     
 }
 
