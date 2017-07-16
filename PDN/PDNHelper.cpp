@@ -25,6 +25,18 @@ bool PDNHelper::isHorizontal(Point<int> pt1 , Point<int> pt2)
     else
         return false ;
 }
+double PDNHelper::getCurrent(string blockName ,string blockPinName)
+{
+    auto begin = CurrnetMaps.lower_bound(blockName);
+    auto end = CurrnetMaps.upper_bound(blockName);
+    while (begin != end)
+    {
+        if( begin->second.NAME == blockPinName )
+            return stod(begin->second.CURRENTDRAWN) / 1000 ;
+        begin++;
+    }
+    return 0 ; 
+}
 string PDNHelper::NETSMULTIMAPSToString(multimap<string,Nets> & NETSMULTIMAPS)
 {
     bool first = true ;
@@ -399,6 +411,7 @@ double PDNHelper::calculateResistance(double rpsq , int width , double length )
 {
     return rpsq * length / width ;
 }
+
 pair<string, string> PDNHelper::getBlockMsg(Point<int> pt)
 {
     for(auto block : BlockPinMaps)

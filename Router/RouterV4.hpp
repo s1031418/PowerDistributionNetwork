@@ -57,6 +57,8 @@ private:
     
     map<string,vector<Coordinate3D>> sourceTargetInitPath;
     
+    
+    
     // key: vdd_source 
     map<string,vector<BlockCoordinate>> obstacles;
     
@@ -66,15 +68,24 @@ private:
     
     Coordinate3D LegalizeTargetEdge(Block block , Graph_SP * graph_sp);
     
+    double getMetalResistance(int layer);
+    
     Point<int> getAbsolutePoint( Coordinate3D coordinate3d );
+    
+    // absolute point to grid point
+    int getGridX(int x);
+    
+    int getGridY(int y);
     
     Coordinate3D getGridCoordinate( Block block );
     
     void InitBoundList();
     
+    void genResistance(vector<Coordinate3D> & paths , string powerPinName);
+    
     void generateSpiceList(vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo );
     
-    string gridToString(Coordinate3D);
+    string gridToString(Coordinate3D , bool);
     
     void AddVirtualObstacle();
     

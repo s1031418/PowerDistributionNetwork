@@ -15,6 +15,7 @@
 #include "../Parsers/lefrw.h"
 #include "../Parsers/defrw.h"
 #include <string>
+#include "../Parsers/InitialFileParser.hpp"
 using namespace std ;
 
 class PDNHelper {
@@ -33,6 +34,8 @@ public:
     vector<Block> getPowerPinInfo();
     
     vector<Block> getBlockPinInfo();
+    
+    double getCurrent(string blockName ,string blockPinName);
     
     pair< Point<int>, Point<int> > getPowerPinCoordinate(int x , int y , Point<int> r_pt1, Point<int> r_pt2  , string orient);
     

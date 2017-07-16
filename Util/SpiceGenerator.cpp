@@ -57,7 +57,8 @@ void SpiceGenerator::addSpiceCurrent(string vdd , string node , double current )
     }
     CurrentLine currentLine ;
     currentLine.node = node ;
-    currentLine.current = current ; 
+    currentLine.current = current ;
+    
     SpiceContainer[vdd].currentSet.push_back(currentLine);
 }
 void SpiceGenerator::addSpiceCmd()
@@ -99,6 +100,7 @@ void SpiceGenerator::toSpice()
             fprintf(pFile, "I_%s_%d %s gnd %g\n" , Spice.first.c_str() , currentCount , current.node.c_str() , current.current);
             currentCount++;
         }
+        fprintf(pFile, "\n" );
     }
     fprintf(pFile, ".tran 1ns 1ns\n");
     fprintf(pFile, ".end\n");
