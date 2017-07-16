@@ -16,15 +16,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory>
-Converter::Converter(string casename)
+Converter::Converter(string spice, string def , string output)
 {
-    CaseName = casename ;
-    
+    spiceName = spice ;
+    defName = def ;
+    outputfilesName = output ;
     initConverterState();
 }
 Converter::~Converter()
 {
     
+}
+Converter::Converter()
+{
+    initConverterState();
+}
+void Converter::setSpice(string spice)
+{
+    spiceName = spice ;
+}
+void Converter::setDef(string def)
+{
+    defName = def ;
+}
+void Converter::setOutput(string output)
+{
+    outputfilesName = output ; 
 }
 void Converter::initConverterState()
 {
@@ -196,13 +213,11 @@ string Converter::getAlias(string name)
     // 假如METAL超過15層
     assert(0);
 }
+
 void Converter::toSpice()
 {
     FILE * pFile ;
-    
-    
-    string output = CaseName + ".sp" ;
-    pFile = fopen(output.c_str(), "w");
+    pFile = fopen(spiceName.c_str(), "w");
     if( NULL == pFile ) printf("Failed to open file\n");
     fprintf(pFile, "#Comments\n");
     
@@ -285,9 +300,9 @@ void Converter::toOutputFile()
 }
 void Converter::toNgspice()
 {
-    string cmd;
-    cmd.append("./ngspice ").append(CaseName).append(".sp -o ").append(CaseName).append("_ngspice");
-    system(cmd.c_str());
+//    string cmd;
+//    cmd.append("./ngspice ").append(CaseName).append(".sp -o ").append(CaseName).append("_ngspice");
+//    system(cmd.c_str());
 }
 void Converter::printVoltage(string MetalName , Point<int> StartPoint , string PinName , FILE * pFile)
 {
@@ -428,8 +443,7 @@ void Converter::toOutputDef()
         StartIndex++ ;
     }
     temp.insert(temp.begin() + StartIndex, "END SPECIALNETS");
-    string output = CaseName + "_output.def";
-    fstream fout(output , ios::out);
+    fstream fout(defName , ios::out);
     for( auto x : temp )
         fout << x << endl;
      
@@ -518,7 +532,7 @@ void Converter::toLocationFile()
     fclose(pFile);
     toSpice();
     toNgspice();
-    ng.init(CaseName);
+//    ng.init(CaseName);
     ng.ConcatIR_Drop() ;
     ng.printStats(DestinationMap);
     toOutputFile();

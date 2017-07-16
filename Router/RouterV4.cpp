@@ -9,14 +9,22 @@
 #include "RouterV4.hpp"
 
 // bug list:
-// 上下不能走
+// 上下不能走，grid edge上的點
 // 拉皮(wiring)
+// run time obstacle
 
 
 
 
-RouterV4::RouterV4()
+RouterV4::RouterV4(string spice, string def , string output)
 {
+    spiceName = spice ;
+    defName = def ;
+    outputfilesName = output ;
+    converter.setDef(def);
+    converter.setSpice(spice);
+    converter.setOutput(output);
+    sp_gen.setSpiceName(spice);
     InitState();
     
 }
@@ -109,7 +117,6 @@ Graph_SP * RouterV4::InitGraph_SP()
             for( int x = 0 ; x < XSize ; x++ )
             {
                 int index = translate3D_1D(Coordinate3D(x,y,z));
-                int weights = RouterHelper.getWeights(z);
                 if( boundList.find(index) == boundList.end() )
                 {
                     if( Grids[y][x].Edges[z].downEdge )
@@ -510,7 +517,7 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
     }
     
     SpecialNetsMaps.insert(make_pair(powerPinName, specialnet));
-    Converter converter("TEST");
+    
     converter.toOutputDef();
 }
 void RouterV4::BlockGridCoordinate( Graph_SP * graph_sp , Block & block)
@@ -719,11 +726,21 @@ void RouterV4::BlockFrontDoor(Graph_SP * graph_sp , string sourcePowerPin)
         }
     }
 }
-void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockinfo )
+string RouterV4::gridToString(Coordinate3D coordinate )
+{
+    int x = coordinate.x ;
+    int y = coordinate.y ;
+    int z = coordinate.z ;
+    string result ;
+    result.append(to_string(x)).append("_").append(to_string(y)).append("_").append(to_string(z));
+    return result ;
+}
+void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockinfo  , bool source)
 {
     vector<BlockCoordinate> virtualObstacles ;
     vector<Coordinate3D> paths ;
     auto sourceGrid = getGridCoordinate(block);
+    string key = blockinfo.BlockName.append(blockinfo.BlockPinName);
     if( block.Direction == TOP )
     {
         int blockLength = block.RightUp.y - block.LeftDown.y ;
@@ -746,23 +763,25 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             paths.push_back(solution);
         }
         fillSpNetMaps(paths, powerpin, blockinfo );
-        for(int i = lowestMetal ; i <= highestMetal ; i++)
-        {
-            BlockCoordinate virtualObstacle ;
-            int z = sourceGrid.z ;
-            Point<int> Source = getAbsolutePoint(sourceGrid);
-            Point<int> Target = getAbsolutePoint(targetGrid);
-            virtualObstacle.LeftDown = Source;
-            virtualObstacle.RightUp = Target;
-            virtualObstacle.LeftDown.x -= WIDTH / 2 * UNITS_DISTANCE ;
-            virtualObstacle.RightUp.x += WIDTH / 2 * UNITS_DISTANCE ;
-            if( i != z )
-            {
-                virtualObstacle.lowerMetal = i ;
-                virtualObstacle.upperMetal = i ;
-            }
-            virtualObstacles.push_back(virtualObstacle);
-        }
+        if(source) sourceTargetInitPath.insert(make_pair(powerpin, paths));
+        else sourceTargetInitPath.insert(make_pair(key, paths));
+//        for(int i = lowestMetal ; i <= highestMetal ; i++)
+//        {
+//            BlockCoordinate virtualObstacle ;
+//            int z = sourceGrid.z ;
+//            Point<int> Source = getAbsolutePoint(sourceGrid);
+//            Point<int> Target = getAbsolutePoint(targetGrid);
+//            virtualObstacle.LeftDown = Source;
+//            virtualObstacle.RightUp = Target;
+//            virtualObstacle.LeftDown.x -= WIDTH / 2 * UNITS_DISTANCE ;
+//            virtualObstacle.RightUp.x += WIDTH / 2 * UNITS_DISTANCE ;
+//            if( i != z )
+//            {
+//                virtualObstacle.lowerMetal = i ;
+//                virtualObstacle.upperMetal = i ;
+//            }
+//            virtualObstacles.push_back(virtualObstacle);
+//        }
     }
     else if(block.Direction == DOWN)
     {
@@ -786,23 +805,25 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             paths.push_back(solution);
         }
         fillSpNetMaps(paths, powerpin, blockinfo  );
-        for(int i = lowestMetal ; i <= highestMetal ; i++)
-        {
-            BlockCoordinate virtualObstacle ;
-            int z = sourceGrid.z ;
-            Point<int> Source = getAbsolutePoint(sourceGrid);
-            Point<int> Target = getAbsolutePoint(targetGrid);
-            virtualObstacle.RightUp = Source;
-            virtualObstacle.LeftDown = Target;
-            virtualObstacle.LeftDown.x -= WIDTH / 2 * UNITS_DISTANCE ;
-            virtualObstacle.RightUp.x += WIDTH / 2 * UNITS_DISTANCE ;
-            if( i != z )
-            {
-                virtualObstacle.lowerMetal = i ;
-                virtualObstacle.upperMetal = i ;
-            }
-            virtualObstacles.push_back(virtualObstacle);
-        }
+        if(source) sourceTargetInitPath.insert(make_pair(powerpin, paths));
+        else sourceTargetInitPath.insert(make_pair(key, paths));
+//        for(int i = lowestMetal ; i <= highestMetal ; i++)
+//        {
+//            BlockCoordinate virtualObstacle ;
+//            int z = sourceGrid.z ;
+//            Point<int> Source = getAbsolutePoint(sourceGrid);
+//            Point<int> Target = getAbsolutePoint(targetGrid);
+//            virtualObstacle.RightUp = Source;
+//            virtualObstacle.LeftDown = Target;
+//            virtualObstacle.LeftDown.x -= WIDTH / 2 * UNITS_DISTANCE ;
+//            virtualObstacle.RightUp.x += WIDTH / 2 * UNITS_DISTANCE ;
+//            if( i != z )
+//            {
+//                virtualObstacle.lowerMetal = i ;
+//                virtualObstacle.upperMetal = i ;
+//            }
+//            virtualObstacles.push_back(virtualObstacle);
+//        }
     }
     else if(block.Direction == RIGHT )
     {
@@ -826,23 +847,25 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             paths.push_back(solution);
         }
         fillSpNetMaps(paths, powerpin, blockinfo  );
-        for(int i = lowestMetal ; i <= highestMetal ; i++)
-        {
-            BlockCoordinate virtualObstacle ;
-            int z = sourceGrid.z ;
-            Point<int> Source = getAbsolutePoint(sourceGrid);
-            Point<int> Target = getAbsolutePoint(targetGrid);
-            virtualObstacle.LeftDown = Source;
-            virtualObstacle.RightUp = Target;
-            virtualObstacle.LeftDown.y -= WIDTH / 2 * UNITS_DISTANCE ;
-            virtualObstacle.RightUp.y += WIDTH / 2 * UNITS_DISTANCE ;
-            if( i != z )
-            {
-                virtualObstacle.lowerMetal = i ;
-                virtualObstacle.upperMetal = i ;
-            }
-            virtualObstacles.push_back(virtualObstacle);
-        }
+        if(source) sourceTargetInitPath.insert(make_pair(powerpin, paths));
+        else sourceTargetInitPath.insert(make_pair(key, paths));
+//        for(int i = lowestMetal ; i <= highestMetal ; i++)
+//        {
+//            BlockCoordinate virtualObstacle ;
+//            int z = sourceGrid.z ;
+//            Point<int> Source = getAbsolutePoint(sourceGrid);
+//            Point<int> Target = getAbsolutePoint(targetGrid);
+//            virtualObstacle.LeftDown = Source;
+//            virtualObstacle.RightUp = Target;
+//            virtualObstacle.LeftDown.y -= WIDTH / 2 * UNITS_DISTANCE ;
+//            virtualObstacle.RightUp.y += WIDTH / 2 * UNITS_DISTANCE ;
+//            if( i != z )
+//            {
+//                virtualObstacle.lowerMetal = i ;
+//                virtualObstacle.upperMetal = i ;
+//            }
+//            virtualObstacles.push_back(virtualObstacle);
+//        }
     }
     else if(block.Direction == LEFT)
     {
@@ -866,26 +889,28 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             paths.push_back(solution);
         }
         fillSpNetMaps(paths, powerpin, blockinfo  );
-        for(int i = lowestMetal ; i <= highestMetal ; i++)
-        {
-            BlockCoordinate virtualObstacle ;
-            int z = sourceGrid.z ;
-            Point<int> Source = getAbsolutePoint(sourceGrid);
-            Point<int> Target = getAbsolutePoint(targetGrid);
-            virtualObstacle.RightUp = Source;
-            virtualObstacle.LeftDown = Target;
-            virtualObstacle.LeftDown.y -= WIDTH / 2 * UNITS_DISTANCE ;
-            virtualObstacle.RightUp.y += WIDTH / 2 * UNITS_DISTANCE ;
-            if( i != z )
-            {
-                virtualObstacle.lowerMetal = i ;
-                virtualObstacle.upperMetal = i ;
-            }
-            virtualObstacles.push_back(virtualObstacle);
-        }
+        if(source) sourceTargetInitPath.insert(make_pair(powerpin, paths));
+        else sourceTargetInitPath.insert(make_pair(key, paths));
+//        for(int i = lowestMetal ; i <= highestMetal ; i++)
+//        {
+//            BlockCoordinate virtualObstacle ;
+//            int z = sourceGrid.z ;
+//            Point<int> Source = getAbsolutePoint(sourceGrid);
+//            Point<int> Target = getAbsolutePoint(targetGrid);
+//            virtualObstacle.RightUp = Source;
+//            virtualObstacle.LeftDown = Target;
+//            virtualObstacle.LeftDown.y -= WIDTH / 2 * UNITS_DISTANCE ;
+//            virtualObstacle.RightUp.y += WIDTH / 2 * UNITS_DISTANCE ;
+//            if( i != z )
+//            {
+//                virtualObstacle.lowerMetal = i ;
+//                virtualObstacle.upperMetal = i ;
+//            }
+//            virtualObstacles.push_back(virtualObstacle);
+//        }
     }
-    for( auto virtualObstacle : virtualObstacles )
-        obstacles[powerpin].push_back(virtualObstacle);
+//    for( auto virtualObstacle : virtualObstacles )
+//        obstacles[powerpin].push_back(virtualObstacle);
 }
 void RouterV4::InitPowerPinAndBlockPin()
 {
@@ -903,8 +928,8 @@ void RouterV4::InitPowerPinAndBlockPin()
             blockinfo.BlockPinName = blockPin ;
             Block powerPinCoordinate = RouterHelper.getPowerPinCoordinate(powerpin);
             Block blockPinCoordinate = RouterHelper.getBlock(block,blockPin);
-            getInitSolution(powerPinCoordinate,powerpin,blockinfo);
-            getInitSolution(blockPinCoordinate,powerpin,blockinfo);
+            getInitSolution(powerPinCoordinate,powerpin,blockinfo,true );
+            getInitSolution(blockPinCoordinate,powerpin,blockinfo,false);
         }
     }
 }
@@ -915,6 +940,7 @@ void RouterV4::Route()
     auto orders = gr.getNetOrdering();
     for(auto order : orders)
     {
+        obstacles.begin();
         BlockInfo blockinfo ;
         string powerpin = order.second.source ;
         blockinfo.BlockName = order.second.target.first ;
@@ -957,6 +983,7 @@ void RouterV4::Route()
         
         vector<Coordinate3D> temp ;
 //        cout << "Paths" << endl;
+        // from source to target
         for(int i = (int)paths.size() - 1; i >= 0  ; i--)
         {
             temp.push_back(translate1D_3D(paths[i]));
@@ -968,11 +995,25 @@ void RouterV4::Route()
 ////            cout << s.x << " " << s.y << " " << s.z << endl;
 //        }
         fillSpNetMaps(temp, powerpin, blockinfo );
+        
         delete [] graph_sp ;
         
     }
     
     
+}
+void RouterV4::generateSpiceList(vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo )
+{
+    // generate init
+    auto initSourcePath = sourceTargetInitPath[powerPinName] ;
+    sp_gen.initSpiceVdd(powerPinName, gridToString(initSourcePath[0]), stod(VoltageMaps[powerPinName]));
+    for(int i = 0 ; i < paths.size() - 1 ; i++)
+    {
+        string node1 = gridToString(paths[i]);
+        string node2 = gridToString(paths[i+1]);
+        double resistance = 0.0 ;
+        sp_gen.addSpiceResistance(powerPinName, node1, node2, resistance);
+    }
 }
 Coordinate3D RouterV4::getGridCoordinate( Block block  )
 {

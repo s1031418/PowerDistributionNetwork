@@ -19,25 +19,27 @@
 }
 vector <vector <string >> PDN::getNoPassInfo ()
 {
-    Converter con(WhichCase);
-    con.toSpice();
-    ngspice ng ;
-    ng.init(WhichCase);
-    cout<<"this is nopass: ";
-    ng.printStats(con.DestinationMap);
-    cout<<"End.\n"; 
-    return ng.NoPassInfo;
+//    Converter con(WhichCase);
+//    con.toSpice();
+//    ngspice ng ;
+//    ng.init(WhichCase);
+//    cout<<"this is nopass: ";
+//    ng.printStats(con.DestinationMap);
+//    cout<<"End.\n"; 
+//    return ng.NoPassInfo;
+    return vector<vector<string>>();
 }
 vector <vector <string >> PDN::getPassInfo ()
 {
-    Converter con(WhichCase);
-    con.toSpice();
-    ngspice ng ;
-    ng.init(WhichCase);
-    cout<<"this is pass: ";
-    ng.printStats(con.DestinationMap);
-    cout<<"End.\n";
-    return ng.PassInfo;
+//    Converter con(WhichCase);
+//    con.toSpice();
+//    ngspice ng ;
+//    ng.init(WhichCase);
+//    cout<<"this is pass: ";
+//    ng.printStats(con.DestinationMap);
+//    cout<<"End.\n";
+//    return ng.PassInfo;
+    return vector<vector<string>>();
 }
 bool PDN::isHorizontalExist( Nets* NET1,Nets* NET2 )
 {

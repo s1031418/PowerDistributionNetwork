@@ -102,5 +102,5 @@ extern Tree flutes_RDP(int d, DTYPE xs[], DTYPE ys[], int s[], int acc);
 
 //#define max(x,y) ((x)>(y)?(x):(y))
 //#define min(x,y) ((x)<(y)?(x):(y))
-#define abs(x) ((x)<0?(-x):(x))
-#define ADIFF(x,y) ((x)>(y)?(x-y):(y-x))  // Absolute difference
+//#define abs(x) ((x)<0?(-x):(x))
+//#define ADIFF(x,y) ((x)>(y)?(x-y):(y-x))  // Absolute difference

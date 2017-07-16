@@ -15,6 +15,7 @@
 #include <algorithm>
 #include "PDNHelper.hpp"
 #include <set>
+#include "RouterComponents.hpp"
 #include "../Parsers/ngspice.hpp"
 using namespace std;
 
@@ -35,20 +36,33 @@ struct MyComparator
     }
 };
 
+
 class Converter {
     
 public:
-    Converter(string Casename);
+    Converter();
+    Converter(string spice, string def , string output);
     ~Converter();
     void toLocationFile();
     void toSpice();
+    
+    
     void toNgspice();
     void toOutputDef();
     void toOutputFile();
     void Visualize();
+    void setSpice(string spice);
+    void setDef(string def);
+    void setOutput(string output);
     multimap<string, string> DestinationMap;
 private:
-    string CaseName ;
+    string spiceName ;
+    string defName ;
+    string outputfilesName ;
+    
+    
+    
+    
     vector<string> PinNames;
     // key是起點座標 , value:終點座標 一個起點可能有多個終點
     ngspice ng ;

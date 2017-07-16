@@ -337,8 +337,8 @@ void Router::Route()
         vector<int> updateIndex ;
         updateIndex.assign(updateGridSet.begin(), updateGridSet.end());
         updateGrids(updateIndex);
-        Converter converter("TEST");
-        converter.toOutputDef();
+//        Converter converter("TEST");
+//        converter.toOutputDef();
         // free graph_sp
     }
 //    for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))

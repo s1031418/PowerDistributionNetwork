@@ -23,7 +23,7 @@
 #include "RouterUtil.hpp"
 #include "RouterComponents.hpp"
 #include "GlobalRouter.hpp"
-
+#include "SpiceGenerator.hpp"
 using namespace std;
 
 
@@ -32,16 +32,17 @@ class RouterV4 {
     
     
 public:
-    RouterV4();
-    ~RouterV4();
+    RouterV4(string spice, string def , string output);
     
+    ~RouterV4();
     
     void Route();
     
     vector< vector< Grid > > Grids ;
-    
-    
 private:
+    string spiceName ;
+    string defName ;
+    string outputfilesName ;
     set<int> Vertical ;
     set<int> Horizontal ;
     int lowestMetal ;
@@ -49,8 +50,12 @@ private:
     int WIDTH = 10 ;
     int SPACING = 10 ;
     set<int> boundList ;
-    
+    Converter converter;
+    SpiceGenerator sp_gen ; 
     map<string , Coordinate3D> MagicPoints ;
+    
+    
+    map<string,vector<Coordinate3D>> sourceTargetInitPath;
     
     // key: vdd_source 
     map<string,vector<BlockCoordinate>> obstacles;
@@ -61,13 +66,15 @@ private:
     
     Coordinate3D LegalizeTargetEdge(Block block , Graph_SP * graph_sp);
     
-    void toSpice();
-    
     Point<int> getAbsolutePoint( Coordinate3D coordinate3d );
     
     Coordinate3D getGridCoordinate( Block block );
     
     void InitBoundList();
+    
+    void generateSpiceList(vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo );
+    
+    string gridToString(Coordinate3D);
     
     void AddVirtualObstacle();
     
@@ -77,7 +84,7 @@ private:
     
     void InitPowerPinAndBlockPin();
     
-    void getInitSolution(Block powerBlock  , string powerpin, BlockInfo blockinfo );
+    void getInitSolution(Block powerBlock  , string powerpin, BlockInfo blockinfo , bool source );
     
     void InitState();
     
