@@ -63,7 +63,7 @@ private:
     int lowestMetal ;
     int highestMetal ;
     int WIDTH = 10 ;
-    int SPACING = 10 ;
+    int SPACING = 6 ;
     set<int> boundList ;
     SpiceGenerator sp_gen ;
     DefGenerator def_gen ;
@@ -73,8 +73,6 @@ private:
     
     
     map<string,vector<Coordinate3D>> sourceTargetInitPath;
-    
-    
     
     // key: vdd_source 
     map<string,vector<BlockCoordinate>> obstacles;
@@ -101,6 +99,8 @@ private:
     Coordinate3D getGridCoordinate( Block block );
     
     void InitBoundList();
+    
+    void BlockTopBottom(Graph_SP * graph_sp);
     
     void genResistance(vector<Coordinate3D> & paths , string powerPinName);
     

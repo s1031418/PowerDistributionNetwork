@@ -103,6 +103,7 @@ Graph_SP * RouterV4::InitGraph_SP()
     int Left = -1 * Right ;
     int Down = -1 * Up ;
     int Bottom = -1 * Top ;
+    
     graph_sp->resize(XSize * YSize * highestMetal);
     graph_sp->SetRight(Right);
     graph_sp->SetUp(Up);
@@ -159,18 +160,54 @@ Graph_SP * RouterV4::InitGraph_SP()
                         graph_sp->AddEdge(index, index+Down, Max_Distance);
                         graph_sp->AddEdge(index+Down, index, Max_Distance);
                     }
-                    if( z == lowestMetal )
+                    if( z == lowestMetal)
                     {
-                        graph_sp->AddEdge(index, index+Top, 1* 10000);
+                        if( Grids[y][x].verticalEdges[z].topEdge )
+                        {
+                            graph_sp->AddEdge(index, index+Top, 1* 10000);
+                            graph_sp->AddEdge(index+Top, index, 1* 10000);
+                        }
+                        else
+                        {
+                            graph_sp->AddEdge(index, index+Top, Max_Distance);
+                            graph_sp->AddEdge(index+Top, index, Max_Distance);
+                        }
                     }
                     else if (z == highestMetal)
                     {
-                        graph_sp->AddEdge(index, index+Bottom, 1* 10000);
+                        if( Grids[y][x].verticalEdges[z].bottomEdge )
+                        {
+                            graph_sp->AddEdge(index, index+Bottom, 1* 10000);
+                            graph_sp->AddEdge(index+Bottom, index, 1* 10000);
+                        }
+                        else
+                        {
+                            graph_sp->AddEdge(index, index+Bottom, Max_Distance);
+                            graph_sp->AddEdge(index+Bottom, index, Max_Distance);
+                        }
                     }
                     else
                     {
-                        graph_sp->AddEdge(index, index+Top, 1* 10000);
-                        graph_sp->AddEdge(index, index+Bottom, 1* 10000);
+                        if( Grids[y][x].verticalEdges[z].topEdge )
+                        {
+                            graph_sp->AddEdge(index, index+Top, 1* 10000);
+                            graph_sp->AddEdge(index+Top, index, 1* 10000);
+                        }
+                        else
+                        {
+                            graph_sp->AddEdge(index, index+Top, Max_Distance);
+                            graph_sp->AddEdge(index+Top, index, Max_Distance);
+                        }
+                        if( Grids[y][x].verticalEdges[z].bottomEdge )
+                        {
+                            graph_sp->AddEdge(index, index+Bottom, 1* 10000);
+                            graph_sp->AddEdge(index+Bottom, index, 1* 10000);
+                        }
+                        else
+                        {
+                            graph_sp->AddEdge(index, index+Bottom, Max_Distance);
+                            graph_sp->AddEdge(index+Bottom, index, Max_Distance);
+                        }
                     }
                 }
             }
@@ -959,14 +996,15 @@ void RouterV4::InitPowerPinAndBlockPin()
         }
     }
 }
+
 void RouterV4::Route()
 {
     InitPowerPinAndBlockPin();
+    def_gen.toOutputDef();
     GlobalRouter gr ;
     auto orders = gr.getNetOrdering();
     for(auto order : orders)
     {
-        obstacles.begin();
         BlockInfo blockinfo ;
         string powerpin = order.second.source ;
         blockinfo.BlockName = order.second.target.first ;
@@ -980,6 +1018,7 @@ void RouterV4::Route()
         int source = translate3D_1D(sourceGrid);
         int target = translate3D_1D(targetGrid);
         graph_sp->Dijkstra(source);
+        Grids.begin();
         auto paths = graph_sp->getPath(target);
         if(paths.empty())
         {
@@ -1002,6 +1041,7 @@ void RouterV4::Route()
             if( BlockPinCoordinate.Direction == 3 ) cout << "Direction:LEFT" << endl ;
             cout << "Target Absolute:" << BlockPinCoordinate.LeftDown << " " << BlockPinCoordinate.RightUp << endl;
             Coordinate3D target3D = translate1D_3D(target);
+            
             cout << "Target 3D:" << target3D.x << " " << target3D.y << " " << target3D.z << endl;
             cout << "Target 1D:" << translate3D_1D(target3D) << endl;
             assert(0);
@@ -1014,6 +1054,8 @@ void RouterV4::Route()
         {
             temp.push_back(translate1D_3D(paths[i]));
         }
+            
+        
 //        for(auto p : paths)
 //        {
 //            temp.push_back(translate1D_3D(p));
@@ -1077,7 +1119,7 @@ void RouterV4::genResistance(vector<Coordinate3D> & paths , string powerPinName)
         // distance 0 means via
         // 目前打最大顆via (HardCode)
         int distance = ( pt1.x == pt2.x ) ? abs(pt1.y - pt2.y) : abs(pt1.x - pt2.x);
-        double resistance = ( distance != 0 ) ? RouterHelper.calculateResistance(getMetalResistance(paths[i].z), WIDTH * UNITS_DISTANCE, distance) : 0.25 ;
+        double resistance = ( distance != 0 ) ? RouterHelper.calculateResistance(getMetalResistance(paths[i].z), WIDTH * UNITS_DISTANCE, distance) : 1 ;
         if(resistance < 0 ) assert(0);
         sp_gen.addSpiceResistance(powerPinName, node1, node2, resistance);
     }
@@ -1174,6 +1216,7 @@ void RouterV4::CutGrid(int width , int spacing )
 {
     Horizontal.clear();
     Vertical.clear();
+    
     auto powerInfos = RouterHelper.getPowerPinInfo() ;
     auto blockPinInfos = RouterHelper.getBlockPinInfo() ;
     int x = 0 , y = 0 ;
@@ -1262,6 +1305,7 @@ void RouterV4::CutGrid(int width , int spacing )
     }
     Vertical.insert(DIEAREA.pt2.x);
     Horizontal.insert(DIEAREA.pt2.y);
+    
     if( *Vertical.begin() == DIEAREA.pt1.x ) Vertical.erase(Vertical.begin());
     if( *Horizontal.begin() == DIEAREA.pt1.y ) Horizontal.erase(Horizontal.begin());
     
@@ -1281,6 +1325,13 @@ void RouterV4::updateGrid(CrossInfo result , Grid & grid)
                 if( result.isLeftEdgeBlock ) grid.Edges[z].leftEdge = false ;
                 if( result.isRightEdgeBlock ) grid.Edges[z].rightEdge = false ;
             }
+        }
+        if( result.viaIsCross )
+        {
+            if( (z >= result.lowerMetal - 1 ) && ( z < result.upperMetal ) )
+                grid.verticalEdges[z].topEdge = false;
+            if( z > result.lowerMetal && z <= result.upperMetal + 1 )
+                grid.verticalEdges[z].bottomEdge = false;
         }
     }
 }
@@ -1303,15 +1354,22 @@ void RouterV4::InitGrids(string source)
             Grid grid ;
             grid.capacities.resize(highestMetal+1);
             grid.Edges.resize(highestMetal+1);
+            grid.verticalEdges.resize(highestMetal+1);
             Point<int> CrossPoint(v,h);
             grid.width = CrossPoint.x - startpoint.x ;
             grid.length = CrossPoint.y - startpoint.y ;
             grid.startpoint = startpoint ;
             // 判斷有沒有跟block有交叉
             Rectangle rect(grid.startpoint , Point<int>( grid.startpoint.x + grid.width , grid.startpoint.y + grid.length ));
+            // hardcode
+            Rectangle via ;
+            via.LeftDown.x = grid.startpoint.x - 5000 ;
+            via.LeftDown.y = grid.startpoint.y - 5000 ;
+            via.RightUp.x = grid.startpoint.x + 5000 ;
+            via.RightUp.y = grid.startpoint.y + 5000 ;
             for(auto block : RouterHelper.BlockMap)
             {
-                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, block.second , WIDTH , SPACING);
+                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , WIDTH , SPACING);
                 updateGrid(crosssWithBlockResult, grid);
             }
             for( auto obstacle : obstacles )
@@ -1319,7 +1377,7 @@ void RouterV4::InitGrids(string source)
                 if( source == obstacle.first ) continue ;
                 for( auto o : obstacle.second )
                 {
-                    auto crosssWithObstacleResult = RouterHelper.isCrossWithBlock(rect,o, WIDTH , SPACING);
+                    auto crosssWithObstacleResult = RouterHelper.isCrossWithBlock(rect , via ,o, WIDTH , SPACING);
                     updateGrid(crosssWithObstacleResult, grid);
                 }
             }
