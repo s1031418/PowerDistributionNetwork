@@ -17,6 +17,8 @@
 
 const unsigned DEFAULT_WIDTH = 10 ;
 const unsigned DEFAULT_PITCH = 12 ;
+
+
 class Border
 {
 public:
@@ -27,7 +29,12 @@ public:
     bool downEdge = true ;
 };
 
-
+class VerticalBorder
+{
+public:
+    bool topEdge = true ;
+    bool bottomEdge = true ;
+};
 
 class GridComponent
 {
@@ -47,10 +54,7 @@ public:
     unsigned int lowermetal = 0 ;
     unsigned int uppermetal = 0 ;
     std::vector<Border> Edges ;
-    bool LeftDown ;
-    bool LeftUp ;
-    bool RightDown ;
-    bool RightUp ;
+    std::vector<VerticalBorder> verticalEdges ; 
     std::vector<Rectangle> obstacles;
     std::vector<unsigned> capacities ;
     
@@ -80,6 +84,10 @@ public:
             this->z = right.z ;
         }
         return *this ;
+    }
+    bool operator!=(const Coordinate3D & right)
+    {
+        return !(this == &right);
     }
 };
 

@@ -35,7 +35,20 @@ double PDNHelper::getCurrent(string blockName ,string blockPinName)
             return stod(begin->second.CURRENTDRAWN) / 1000 ;
         begin++;
     }
+    assert(0);
     return 0 ; 
+}
+double PDNHelper::getIRDropConstaint(string blockName , string blockPinName)
+{
+    auto begin = ConstraintMaps.lower_bound(blockName);
+    auto end = ConstraintMaps.upper_bound(blockName);
+    while (begin != end)
+    {
+        if( begin->second.NAME == blockPinName )
+            return stod(begin->second.CONSTRAINT) ;
+        begin++;
+    }
+    assert(0);
 }
 string PDNHelper::NETSMULTIMAPSToString(multimap<string,Nets> & NETSMULTIMAPS)
 {

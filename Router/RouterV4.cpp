@@ -21,9 +21,7 @@ RouterV4::RouterV4(string spice, string def , string output)
     spiceName = spice ;
     defName = def ;
     outputfilesName = output ;
-    converter.setDef(def);
-    converter.setSpice(spice);
-    converter.setOutput(output);
+    def_gen.setDefName(def);
     sp_gen.setSpiceName(spice);
     InitState();
     
@@ -93,8 +91,8 @@ void RouterV4::InitBoundList()
 }
 Graph_SP * RouterV4::InitGraph_SP()
 {
-    cout << "Begin Initialize 3D Shortest Path Graph ..." << endl;
-    clock_t Start = clock();
+//    cout << "Begin Initialize 3D Shortest Path Graph ..." << endl;
+//    clock_t Start = clock();
     InitBoundList();
     Graph_SP * graph_sp = new Graph_SP[1];
     int YSize = (int)Grids.size()+1 ;
@@ -105,6 +103,7 @@ Graph_SP * RouterV4::InitGraph_SP()
     int Left = -1 * Right ;
     int Down = -1 * Up ;
     int Bottom = -1 * Top ;
+    
     graph_sp->resize(XSize * YSize * highestMetal);
     graph_sp->SetRight(Right);
     graph_sp->SetUp(Up);
@@ -161,28 +160,64 @@ Graph_SP * RouterV4::InitGraph_SP()
                         graph_sp->AddEdge(index, index+Down, Max_Distance);
                         graph_sp->AddEdge(index+Down, index, Max_Distance);
                     }
-                    if( z == lowestMetal )
+                    if( z == lowestMetal)
                     {
-                        graph_sp->AddEdge(index, index+Top, 1* 10000);
+                        if( Grids[y][x].verticalEdges[z].topEdge )
+                        {
+                            graph_sp->AddEdge(index, index+Top, 1* 10000);
+                            graph_sp->AddEdge(index+Top, index, 1* 10000);
+                        }
+                        else
+                        {
+                            graph_sp->AddEdge(index, index+Top, Max_Distance);
+                            graph_sp->AddEdge(index+Top, index, Max_Distance);
+                        }
                     }
                     else if (z == highestMetal)
                     {
-                        graph_sp->AddEdge(index, index+Bottom, 1* 10000);
+                        if( Grids[y][x].verticalEdges[z].bottomEdge )
+                        {
+                            graph_sp->AddEdge(index, index+Bottom, 1* 10000);
+                            graph_sp->AddEdge(index+Bottom, index, 1* 10000);
+                        }
+                        else
+                        {
+                            graph_sp->AddEdge(index, index+Bottom, Max_Distance);
+                            graph_sp->AddEdge(index+Bottom, index, Max_Distance);
+                        }
                     }
                     else
                     {
-                        graph_sp->AddEdge(index, index+Top, 1* 10000);
-                        graph_sp->AddEdge(index, index+Bottom, 1* 10000);
+                        if( Grids[y][x].verticalEdges[z].topEdge )
+                        {
+                            graph_sp->AddEdge(index, index+Top, 1* 10000);
+                            graph_sp->AddEdge(index+Top, index, 1* 10000);
+                        }
+                        else
+                        {
+                            graph_sp->AddEdge(index, index+Top, Max_Distance);
+                            graph_sp->AddEdge(index+Top, index, Max_Distance);
+                        }
+                        if( Grids[y][x].verticalEdges[z].bottomEdge )
+                        {
+                            graph_sp->AddEdge(index, index+Bottom, 1* 10000);
+                            graph_sp->AddEdge(index+Bottom, index, 1* 10000);
+                        }
+                        else
+                        {
+                            graph_sp->AddEdge(index, index+Bottom, Max_Distance);
+                            graph_sp->AddEdge(index+Bottom, index, Max_Distance);
+                        }
                     }
                 }
             }
         }
     }
     clock_t End = clock();
-    double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
+//    double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
     //    printAllGrids();
-    cout << "3D Shortest Path Graph Done" << endl ;
-    cout << "We cost " << duration << "(s)" << endl;
+//    cout << "3D Shortest Path Graph Done" << endl ;
+//    cout << "We cost " << duration << "(s)" << endl;
     return graph_sp ;
 }
 Point<int> RouterV4::getAbsolutePoint( Coordinate3D coordinate3d )
@@ -517,8 +552,6 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
     }
     
     SpecialNetsMaps.insert(make_pair(powerPinName, specialnet));
-    
-    converter.toOutputDef();
 }
 void RouterV4::BlockGridCoordinate( Graph_SP * graph_sp , Block & block)
 {
@@ -963,14 +996,15 @@ void RouterV4::InitPowerPinAndBlockPin()
         }
     }
 }
+
 void RouterV4::Route()
 {
     InitPowerPinAndBlockPin();
+    def_gen.toOutputDef();
     GlobalRouter gr ;
     auto orders = gr.getNetOrdering();
     for(auto order : orders)
     {
-        obstacles.begin();
         BlockInfo blockinfo ;
         string powerpin = order.second.source ;
         blockinfo.BlockName = order.second.target.first ;
@@ -984,6 +1018,7 @@ void RouterV4::Route()
         int source = translate3D_1D(sourceGrid);
         int target = translate3D_1D(targetGrid);
         graph_sp->Dijkstra(source);
+        Grids.begin();
         auto paths = graph_sp->getPath(target);
         if(paths.empty())
         {
@@ -1006,6 +1041,7 @@ void RouterV4::Route()
             if( BlockPinCoordinate.Direction == 3 ) cout << "Direction:LEFT" << endl ;
             cout << "Target Absolute:" << BlockPinCoordinate.LeftDown << " " << BlockPinCoordinate.RightUp << endl;
             Coordinate3D target3D = translate1D_3D(target);
+            
             cout << "Target 3D:" << target3D.x << " " << target3D.y << " " << target3D.z << endl;
             cout << "Target 1D:" << translate3D_1D(target3D) << endl;
             assert(0);
@@ -1018,6 +1054,8 @@ void RouterV4::Route()
         {
             temp.push_back(translate1D_3D(paths[i]));
         }
+            
+        
 //        for(auto p : paths)
 //        {
 //            temp.push_back(translate1D_3D(p));
@@ -1025,12 +1063,45 @@ void RouterV4::Route()
 ////            cout << s.x << " " << s.y << " " << s.z << endl;
 //        }
         fillSpNetMaps(temp, powerpin, blockinfo );
+        def_gen.toOutputDef();
         generateSpiceList(temp, powerpin, blockinfo );
         sp_gen.toSpice();
+        sp_gen.addSpiceCmd();
+        string cmd = "./ngspice " + spiceName + " -o simulation" ;
+        system(cmd.c_str());
+        ngspice ng_spice ;
+        ng_spice.initvoltage();
+        
+        double sourceV = ng_spice.voltages[getNgSpiceKey(sourceGrid)];
+        double targetV = ng_spice.voltages[getNgSpiceKey(targetGrid)];
+        double Drop = (sourceV - targetV) * 100 ;
+        cout << powerpin << " to " << blockinfo.BlockName << "_" << blockinfo.BlockPinName << " Drop:" << Drop << "(%) " ; 
+        double constaint = RouterHelper.getIRDropConstaint(blockinfo.BlockName, blockinfo.BlockPinName);
+        if( constaint >= Drop )
+            cout << "Pass" << endl;
+        else
+            cout << "No Pass" << endl;
+        cout << "IR Drop Constraint:" << constaint << "(%)"<< endl;
+        cout << endl;
         delete [] graph_sp ;
         
     }
     
+    
+}
+string RouterV4::getNgSpiceKey(Coordinate3D coordinate3d)
+{
+    int z = coordinate3d.z ;
+    Point<int> pt = getAbsolutePoint(coordinate3d);
+    string MetalName = RouterHelper.translateIntToMetalName(z) ;
+    string result ;
+    // to lowercase
+    transform(MetalName.begin(), MetalName.end(), MetalName.begin(), ::tolower);
+    result.append(MetalName).append("_").append(to_string(pt.x)).append("_").append(to_string(pt.y));
+    return result ;
+}
+void RouterV4::Simulation()
+{
     
 }
 double RouterV4::getMetalResistance(int layer)
@@ -1145,6 +1216,7 @@ void RouterV4::CutGrid(int width , int spacing )
 {
     Horizontal.clear();
     Vertical.clear();
+    
     auto powerInfos = RouterHelper.getPowerPinInfo() ;
     auto blockPinInfos = RouterHelper.getBlockPinInfo() ;
     int x = 0 , y = 0 ;
@@ -1233,6 +1305,7 @@ void RouterV4::CutGrid(int width , int spacing )
     }
     Vertical.insert(DIEAREA.pt2.x);
     Horizontal.insert(DIEAREA.pt2.y);
+    
     if( *Vertical.begin() == DIEAREA.pt1.x ) Vertical.erase(Vertical.begin());
     if( *Horizontal.begin() == DIEAREA.pt1.y ) Horizontal.erase(Horizontal.begin());
     
@@ -1253,13 +1326,20 @@ void RouterV4::updateGrid(CrossInfo result , Grid & grid)
                 if( result.isRightEdgeBlock ) grid.Edges[z].rightEdge = false ;
             }
         }
+        if( result.viaIsCross )
+        {
+            if( (z >= result.lowerMetal - 1 ) && ( z < result.upperMetal ) )
+                grid.verticalEdges[z].topEdge = false;
+            if( z > result.lowerMetal && z <= result.upperMetal + 1 )
+                grid.verticalEdges[z].bottomEdge = false;
+        }
     }
 }
 void RouterV4::InitGrids(string source)
 {
     Grids.clear();
-    cout << "Begin Initialize  Grid Graph ..." << endl;
-    clock_t Start = clock();
+//    cout << "Begin Initialize  Grid Graph ..." << endl;
+//    clock_t Start = clock();
     
     CutGrid(WIDTH, SPACING);
     
@@ -1274,15 +1354,22 @@ void RouterV4::InitGrids(string source)
             Grid grid ;
             grid.capacities.resize(highestMetal+1);
             grid.Edges.resize(highestMetal+1);
+            grid.verticalEdges.resize(highestMetal+1);
             Point<int> CrossPoint(v,h);
             grid.width = CrossPoint.x - startpoint.x ;
             grid.length = CrossPoint.y - startpoint.y ;
             grid.startpoint = startpoint ;
             // 判斷有沒有跟block有交叉
             Rectangle rect(grid.startpoint , Point<int>( grid.startpoint.x + grid.width , grid.startpoint.y + grid.length ));
+            // hardcode
+            Rectangle via ;
+            via.LeftDown.x = grid.startpoint.x - 5000 ;
+            via.LeftDown.y = grid.startpoint.y - 5000 ;
+            via.RightUp.x = grid.startpoint.x + 5000 ;
+            via.RightUp.y = grid.startpoint.y + 5000 ;
             for(auto block : RouterHelper.BlockMap)
             {
-                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, block.second , WIDTH , SPACING);
+                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , WIDTH , SPACING);
                 updateGrid(crosssWithBlockResult, grid);
             }
             for( auto obstacle : obstacles )
@@ -1290,7 +1377,7 @@ void RouterV4::InitGrids(string source)
                 if( source == obstacle.first ) continue ;
                 for( auto o : obstacle.second )
                 {
-                    auto crosssWithObstacleResult = RouterHelper.isCrossWithBlock(rect,o, WIDTH , SPACING);
+                    auto crosssWithObstacleResult = RouterHelper.isCrossWithBlock(rect , via ,o, WIDTH , SPACING);
                     updateGrid(crosssWithObstacleResult, grid);
                 }
             }
@@ -1306,10 +1393,10 @@ void RouterV4::InitGrids(string source)
         startpoint.y = h ;
         Grids.push_back(temp);
     }
-    clock_t End = clock();
-    double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
-    cout << "Initialize  Grid Graph Done" << endl ;
-    cout << "We cost " << duration << "(s)" << endl;
+//    clock_t End = clock();
+//    double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
+//    cout << "Initialize  Grid Graph Done" << endl ;
+//    cout << "We cost " << duration << "(s)" << endl;
     
 }
 

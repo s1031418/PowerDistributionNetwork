@@ -273,30 +273,30 @@ void Converter::toSpice()
 }
 void Converter::toOutputFile()
 {
-    FILE * pFile = nullptr ;
-    pFile = fopen("output_files", "w");
-    fprintf(pFile, "# The metal usage report\n" );
-    long double TotalUsage = 0 ;
-    
-    for(auto metal : MetalUsage)
-    {
-        
-        string alias = getAlias(metal.first);
-        fprintf(pFile, "%s %Lf\n" , alias.c_str() , metal.second);
-        TotalUsage += stod(WeightsMaps[alias]) * metal.second ;
-    }
-    
-    fprintf(pFile, "Total %Lf\n" , TotalUsage);
-    fprintf(pFile, "\n\n");
-    fprintf(pFile, "# The IR drop of each power pin (%)\n" );
-    for( auto x : ng.DropMap )
-    {
-        fprintf(pFile, "%s/%s %f\n" , x.first.first.c_str() , x.first.second.c_str() , x.second);
-    }
-    
-    
-    
-    fclose(pFile);
+//    FILE * pFile = nullptr ;
+//    pFile = fopen("output_files", "w");
+//    fprintf(pFile, "# The metal usage report\n" );
+//    long double TotalUsage = 0 ;
+//    
+//    for(auto metal : MetalUsage)
+//    {
+//        
+//        string alias = getAlias(metal.first);
+//        fprintf(pFile, "%s %Lf\n" , alias.c_str() , metal.second);
+//        TotalUsage += stod(WeightsMaps[alias]) * metal.second ;
+//    }
+//    
+//    fprintf(pFile, "Total %Lf\n" , TotalUsage);
+//    fprintf(pFile, "\n\n");
+//    fprintf(pFile, "# The IR drop of each power pin (%)\n" );
+//    for( auto x : ng.DropMap )
+//    {
+//        fprintf(pFile, "%s/%s %f\n" , x.first.first.c_str() , x.first.second.c_str() , x.second);
+//    }
+//    
+//    
+//    
+//    fclose(pFile);
 }
 void Converter::toNgspice()
 {
@@ -533,8 +533,8 @@ void Converter::toLocationFile()
     toSpice();
     toNgspice();
 //    ng.init(CaseName);
-    ng.ConcatIR_Drop() ;
-    ng.printStats(DestinationMap);
+//    ng.ConcatIR_Drop() ;
+//    ng.printStats(DestinationMap);
     toOutputFile();
     DestinationMap.clear();
 }
