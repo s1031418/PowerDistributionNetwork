@@ -62,15 +62,19 @@ private:
     set<int> Horizontal ;
     int lowestMetal ;
     int highestMetal ;
-    int WIDTH = 10 ;
-    int SPACING = 6 ;
+    int WIDTH = 2 ;
+    int SPACING = 10 ;
     set<int> boundList ;
     SpiceGenerator sp_gen ;
     DefGenerator def_gen ;
     
+    vector<set<int>> dangerousSetV;
+    
+    vector<set<int>> dangerousSetH;
+    
+    map<string,vector<Coordinate3D>> multiPinCandidates;
     
     map<string , Coordinate3D> MagicPoints ;
-    
     
     map<string,vector<Coordinate3D>> sourceTargetInitPath;
     
@@ -139,6 +143,19 @@ private:
     vector<pair<Direction3D, int>> translateToFriendlyForm( vector<Coordinate3D> & Paths );
     
     vector<int> getAbsoluteDistance(vector<pair<Direction3D, int>> & friendlyPaths , Point<int> startPoint);
+    
+    // 傳入grid座標，轉成絕對座標存起來
+    void saveMultiPinCandidates(string powerPin , vector<Coordinate3D> solutions );
+    
+    bool isMultiPin(string powerPin);
+    
+    void legalizeAllOrient(Coordinate3D coordinate , Graph_SP * graph_sp);
+    
+    int selectSource(string powerPin , Graph_SP * graph_sp );
+    
+    Coordinate3D getLastIlegalCoordinate(Direction3D orient , Coordinate3D sourceGrid);
+    
+    void legalizeEdge(Coordinate3D source , Coordinate3D target , Direction3D orient , Graph_SP * graph_sp);
 };
 
 #endif /* RouterV4_hpp */

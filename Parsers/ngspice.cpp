@@ -33,6 +33,7 @@ ngspice::~ngspice()
 }
 void ngspice::initvoltage()
 {
+    voltages.clear();
     bool start = false ;
     for (int i = 0 ; i < Data.size(); i++)
     {

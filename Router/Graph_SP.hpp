@@ -16,7 +16,7 @@
 #include <queue>
 #include <map>
 #include <assert.h>
-const int Max_Distance = 10000000 ;
+const int Max_Distance = 1000000000 ;
 
 //struct Node
 //{
