@@ -997,16 +997,21 @@ void RouterV4::InitPowerPinAndBlockPin()
         }
     }
 }
+Coordinate3D RouterV4::gridToAbsolute(Coordinate3D gridCoordinate)
+{
+    Coordinate3D coordinateAbs;
+    Point<int> pt = getAbsolutePoint(gridCoordinate);
+    coordinateAbs.x = pt.x ;
+    coordinateAbs.y = pt.y ;
+    coordinateAbs.z = gridCoordinate.z ;
+    return coordinateAbs ;
+}
 void RouterV4::saveMultiPinCandidates(string powerPin , vector<Coordinate3D> solutions )
 {
     if( multiPinCandidates.find(powerPin) == multiPinCandidates.end() ) multiPinCandidates.insert(make_pair(powerPin, vector<Coordinate3D>()));
     for( auto solution : solutions )
     {
-        Coordinate3D coordinate ;
-        Point<int> pt = getAbsolutePoint(solution);
-        coordinate.x = pt.x ;
-        coordinate.y = pt.y ;
-        coordinate.z = solution.z ;
+        Coordinate3D coordinate = gridToAbsolute(solution);
         multiPinCandidates[powerPin].push_back(coordinate);
     }
 }
@@ -1168,6 +1173,142 @@ Coordinate3D RouterV4::getLastIlegalCoordinate(Direction3D orient , Coordinate3D
     }
     return targetGrid ;
 }
+double RouterV4::getCost(string spiceName)
+{
+    // penalty constant
+    int penaltyParameter = 1 ;
+    // 超過 2% 會有penalty
+    int penaltyRange = 2 ;
+    double cost = 0 ;
+    for( auto routingList : currentRoutingLists )
+    {
+        string cmd = "./ngspice " + spiceName + " -o simulation" ;
+        system(cmd.c_str());
+        ngspice ng_spice ;
+        ng_spice.initvoltage();
+        Coordinate3D sourceGrid( getGridX(routingList.sourceCoordinate.x) , getGridY(routingList.sourceCoordinate.y) , routingList.sourceCoordinate.z );
+        Coordinate3D targetGrid( getGridX(routingList.targetCoordinate.x) , getGridY(routingList.targetCoordinate.y) , routingList.targetCoordinate.z );
+        string sourceKey = getNgSpiceKey(sourceGrid) ;
+        string targetKey = getNgSpiceKey(targetGrid) ;
+        if( ng_spice.voltages.find(sourceKey) == ng_spice.voltages.end() ) assert(0);
+        if( ng_spice.voltages.find(targetKey) == ng_spice.voltages.end() ) assert(0);
+        
+        double sourceV = ng_spice.voltages[getNgSpiceKey(sourceGrid)];
+        double targetV = ng_spice.voltages[getNgSpiceKey(targetGrid)];
+        double drop = (sourceV - targetV) * 100 ;
+        double constaint = RouterHelper.getIRDropConstaint(routingList.targetBlockName, routingList.targetBlockPinName);
+        if( constaint >= drop )
+        {
+            cost += 0 ;
+        }
+        else
+        {
+            double diff = drop - constaint ;
+            cost += diff ;
+            double penaltyCount = diff / penaltyRange ;
+            cost += penaltyCount * penaltyParameter ;
+        }
+    }
+    return cost ;
+}
+vector<Coordinate3D> RouterV4::selectPath(string powerPin , Graph_SP * graph_sp , int target, int source  , BlockInfo blockinfo)
+{
+    double minCost = INT_MAX; 
+    vector<Coordinate3D> minCostSolutions ;
+    vector<Coordinate3D> selectedPath ;
+    Coordinate3D sourceGrid = translate1D_3D(source);
+    Coordinate3D targetGrid = translate1D_3D(target);
+    // legalize target
+    legalizeAllOrient(targetGrid, graph_sp);
+    // first Route
+    if( multiPinCandidates[powerPin].empty() )
+    {
+        legalizeAllLayer(sourceGrid, graph_sp);
+        graph_sp->Dijkstra(target);
+        auto paths= graph_sp->getPath(source);
+        for( auto path : paths )
+            selectedPath.push_back(translate1D_3D(path));
+        generateSpiceList(selectedPath, powerPin, blockinfo);
+        return selectedPath ;
+    }
+    
+//    for( auto candidate : multiPinCandidates[powerPin] )
+    for( int i = 0 ; i < multiPinCandidates[powerPin].size() ; i+=100 )
+    {
+        if( i > multiPinCandidates[powerPin].size()  ) break;
+        Coordinate3D candidate = multiPinCandidates[powerPin][i];
+        Coordinate3D coordinate( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
+        if( candidate == sourceGrid )
+            legalizeAllLayer(sourceGrid, graph_sp);
+        else
+            legalizeAllOrient(coordinate, graph_sp);
+        graph_sp->Dijkstra(target);
+        auto path1D = graph_sp->getPath(translate3D_1D(coordinate));
+        if( path1D.empty() ) continue ;
+        vector<Coordinate3D> path3D ;
+        for( auto p : path1D )
+            path3D.push_back(translate1D_3D(p));
+        SpiceGenerator tmp = sp_gen ;
+        tmp.setSpiceName("tmp.sp");
+        string key = blockinfo.BlockName ;
+        key.append(blockinfo.BlockPinName);
+        auto initTargetPath = sourceTargetInitPath[key] ;
+        
+        tmp.addSpiceCurrent(powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(blockinfo.BlockName, blockinfo.BlockPinName));
+        for( auto & Path : initTargetPath )
+        {
+            Path.x = getGridX(Path.x);
+            Path.y = getGridY(Path.y);
+        }
+        genResistance(path3D, powerPin , tmp );
+        genResistance(initTargetPath,powerPin,tmp);
+        
+        tmp.toSpice();
+        tmp.addSpiceCmd();
+//        generateSpiceList(path3D, powerPin, blockinfo);
+//        sp_gen.toSpice();
+//        sp_gen.addSpiceCmd();
+        double currentCost = getCost("tmp.sp");
+        if( currentCost < minCost )
+        {
+            minCost = currentCost;
+            minCostSolutions = path3D ;
+        }
+    }
+    string key = blockinfo.BlockName ;
+    key.append(blockinfo.BlockPinName);
+    auto initTargetPath = sourceTargetInitPath[key] ;
+    
+    sp_gen.addSpiceCurrent(powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(blockinfo.BlockName, blockinfo.BlockPinName));
+    for( auto & Path : initTargetPath )
+    {
+        Path.x = getGridX(Path.x);
+        Path.y = getGridY(Path.y);
+    }
+    genResistance(minCostSolutions, powerPin , sp_gen );
+    genResistance(initTargetPath,powerPin,sp_gen);
+    
+    return minCostSolutions ;
+}
+void RouterV4::saveRoutingList(Coordinate3D sourceGrid , Coordinate3D targetGrid , string powerPin , BlockInfo blockinfo)
+{
+    RoutingPath routePath;
+    routePath.sourceName = powerPin ;
+    routePath.sourceCoordinate = gridToAbsolute(sourceGrid);
+    routePath.targetCoordinate = gridToAbsolute(targetGrid);
+    routePath.targetBlockName = blockinfo.BlockName ;
+    routePath.targetBlockPinName = blockinfo.BlockPinName ;
+    currentRoutingLists.push_back(routePath);
+}
+void RouterV4::legalizeAllLayer(Coordinate3D source , Graph_SP * graph_sp)
+{
+    for(int z = lowestMetal ; z <= highestMetal ; z++)
+    {
+        Coordinate3D temp = source;
+        temp.z = z ;
+        legalizeAllOrient(temp, graph_sp);
+    }
+}
 void RouterV4::Route()
 {
     InitPowerPinAndBlockPin();
@@ -1186,91 +1327,110 @@ void RouterV4::Route()
         Graph_SP * graph_sp = InitGraph_SP();
         Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp);
         Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp);
+        saveRoutingList(sourceGrid,targetGrid,powerpin,blockinfo);
         int source = translate3D_1D(sourceGrid);
         int target = translate3D_1D(targetGrid);
-        for(int z = lowestMetal ; z <= highestMetal ; z++)
-        {
-            Coordinate3D temp = sourceGrid;
-            temp.z = z ;
-            legalizeAllOrient(temp, graph_sp);
-            temp = targetGrid ;
-            temp.z = z ;
-            legalizeAllOrient(temp, graph_sp);
-        }
+        vector<Coordinate3D> solutions = selectPath(powerpin, graph_sp, target , source , blockinfo);
+        fillSpNetMaps(solutions, powerpin, blockinfo );
+        saveMultiPinCandidates(powerpin, solutions);
+        def_gen.toOutputDef();
 //        if( isMultiPin(powerpin) && !multiPinCandidates[powerpin].empty())
 //        {
-//            //source = selectSource();
-//            
+//            source = selectSource(powerpin,graph_sp,target,blockinfo);
 //        }
-        graph_sp->Dijkstra(source);
-        auto paths = graph_sp->getPath(target);
-        if(paths.empty())
-        {
-//            toGridGraph();
-            cout << "Path" << endl;
-            cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
-            cout << "-------------------------------Source Info-------------------------------" << endl;
-            if( powerPinCoordinate.Direction == 0 ) cout << "Direction:UP" << endl;
-            if( powerPinCoordinate.Direction == 1 ) cout << "Direction:DOWN" << endl;
-            if( powerPinCoordinate.Direction == 2 ) cout << "Direction:RIGHT" << endl;
-            if( powerPinCoordinate.Direction == 3 ) cout << "Direction:LEFT" << endl;
-            cout << "Source Absolute:" << powerPinCoordinate.LeftDown << " " << powerPinCoordinate.RightUp << endl ;
-            Coordinate3D source3D = translate1D_3D(source);
-            cout << "Source 3D:"<< source3D.x << " " << source3D.y << " " << source3D.z << endl;
-            cout << "Source 1D:" << translate3D_1D(source3D) << endl;
-            cout << "-------------------------------Target Info-------------------------------" << endl;
-            if( BlockPinCoordinate.Direction == 0 ) cout << "Direction:UP" << endl;
-            if( BlockPinCoordinate.Direction == 1 ) cout << "Direction:DOWN" << endl;
-            if( BlockPinCoordinate.Direction == 2 ) cout << "Direction:RIGHT" << endl;
-            if( BlockPinCoordinate.Direction == 3 ) cout << "Direction:LEFT" << endl ;
-            cout << "Target Absolute:" << BlockPinCoordinate.LeftDown << " " << BlockPinCoordinate.RightUp << endl;
-            Coordinate3D target3D = translate1D_3D(target);
-            
-            cout << "Target 3D:" << target3D.x << " " << target3D.y << " " << target3D.z << endl;
-            cout << "Target 1D:" << translate3D_1D(target3D) << endl;
-            assert(0);
-        }
-        
-        vector<Coordinate3D> temp ;
-//        cout << "Paths" << endl;
-        // from source to target
-        for(int i = (int)paths.size() - 1; i >= 0  ; i--)
-        {
-            temp.push_back(translate1D_3D(paths[i]));
-        }
+//        graph_sp->Dijkstra(source);
+//        auto paths = graph_sp->getPath(target);
+//        if(paths.empty())
+//        {
+////            toGridGraph();
+//            cout << "Path" << endl;
+//            cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
+//            cout << "-------------------------------Source Info-------------------------------" << endl;
+//            if( powerPinCoordinate.Direction == 0 ) cout << "Direction:UP" << endl;
+//            if( powerPinCoordinate.Direction == 1 ) cout << "Direction:DOWN" << endl;
+//            if( powerPinCoordinate.Direction == 2 ) cout << "Direction:RIGHT" << endl;
+//            if( powerPinCoordinate.Direction == 3 ) cout << "Direction:LEFT" << endl;
+//            cout << "Source Absolute:" << powerPinCoordinate.LeftDown << " " << powerPinCoordinate.RightUp << endl ;
+//            Coordinate3D source3D = translate1D_3D(source);
+//            cout << "Source 3D:"<< source3D.x << " " << source3D.y << " " << source3D.z << endl;
+//            cout << "Source 1D:" << translate3D_1D(source3D) << endl;
+//            cout << "-------------------------------Target Info-------------------------------" << endl;
+//            if( BlockPinCoordinate.Direction == 0 ) cout << "Direction:UP" << endl;
+//            if( BlockPinCoordinate.Direction == 1 ) cout << "Direction:DOWN" << endl;
+//            if( BlockPinCoordinate.Direction == 2 ) cout << "Direction:RIGHT" << endl;
+//            if( BlockPinCoordinate.Direction == 3 ) cout << "Direction:LEFT" << endl ;
+//            cout << "Target Absolute:" << BlockPinCoordinate.LeftDown << " " << BlockPinCoordinate.RightUp << endl;
+//            Coordinate3D target3D = translate1D_3D(target);
+//            
+//            cout << "Target 3D:" << target3D.x << " " << target3D.y << " " << target3D.z << endl;
+//            cout << "Target 1D:" << translate3D_1D(target3D) << endl;
+//            assert(0);
+//        }
+//        vector<Coordinate3D> temp ;
+////        cout << "Paths" << endl;
+//        // from source to target
+//        for(int i = (int)paths.size() - 1; i >= 0  ; i--)
+//        {
+//            temp.push_back(translate1D_3D(paths[i]));
+//        }
 //        for(auto p : paths)
 //        {
 //            temp.push_back(translate1D_3D(p));
 ////            auto s = translate1D_3D(p);
 ////            cout << s.x << " " << s.y << " " << s.z << endl;
 //        }
-        fillSpNetMaps(temp, powerpin, blockinfo );
-        saveMultiPinCandidates(powerpin, temp);
-        def_gen.toOutputDef();
-        generateSpiceList(temp, powerpin, blockinfo );
-        sp_gen.toSpice();
-        sp_gen.addSpiceCmd();
+//        fillSpNetMaps(temp, powerpin, blockinfo );
+//        saveMultiPinCandidates(powerpin, temp);
+//        def_gen.toOutputDef();
+//        generateSpiceList(temp, powerpin, blockinfo );
+//        sp_gen.toSpice();
+//        sp_gen.addSpiceCmd();
+//        string cmd = "./ngspice " + spiceName + " -o simulation" ;
+//        system(cmd.c_str());
+//        ngspice ng_spice ;
+//        ng_spice.initvoltage();
+//        double sourceV = ng_spice.voltages[getNgSpiceKey(sourceGrid)];
+//        double targetV = ng_spice.voltages[getNgSpiceKey(targetGrid)];
+//        double Drop = (sourceV - targetV) * 100 ;
+//        cout << powerpin << " to " << blockinfo.BlockName << "_" << blockinfo.BlockPinName << " Drop:" << Drop << "(%) " ; 
+//        double constaint = RouterHelper.getIRDropConstaint(blockinfo.BlockName, blockinfo.BlockPinName);
+//        if( constaint >= Drop )
+//            cout << "Pass" << endl;
+//        else
+//            cout << "No Pass" << endl;
+//        cout << "IR Drop Constraint:" << constaint << "(%)"<< endl;
+//        cout << endl;
+        delete [] graph_sp ;
+    }
+    sp_gen.toSpice();
+    sp_gen.addSpiceCmd();
+    for( auto routingList : currentRoutingLists )
+    {
         string cmd = "./ngspice " + spiceName + " -o simulation" ;
         system(cmd.c_str());
         ngspice ng_spice ;
         ng_spice.initvoltage();
+        Coordinate3D sourceGrid( getGridX(routingList.sourceCoordinate.x) , getGridY(routingList.sourceCoordinate.y) , routingList.sourceCoordinate.z );
+        Coordinate3D targetGrid( getGridX(routingList.targetCoordinate.x) , getGridY(routingList.targetCoordinate.y) , routingList.targetCoordinate.z );
+        string sourceKey = getNgSpiceKey(sourceGrid) ;
+        string targetKey = getNgSpiceKey(targetGrid) ;
+        if( ng_spice.voltages.find(sourceKey) == ng_spice.voltages.end() ) assert(0);
+        if( ng_spice.voltages.find(targetKey) == ng_spice.voltages.end() ) assert(0);
+        
         double sourceV = ng_spice.voltages[getNgSpiceKey(sourceGrid)];
         double targetV = ng_spice.voltages[getNgSpiceKey(targetGrid)];
-        double Drop = (sourceV - targetV) * 100 ;
-        cout << powerpin << " to " << blockinfo.BlockName << "_" << blockinfo.BlockPinName << " Drop:" << Drop << "(%) " ; 
-        double constaint = RouterHelper.getIRDropConstaint(blockinfo.BlockName, blockinfo.BlockPinName);
-        if( constaint >= Drop )
-            cout << "Pass" << endl;
+        double drop = (sourceV - targetV) * 100 ;
+        double constaint = RouterHelper.getIRDropConstaint(routingList.targetBlockName, routingList.targetBlockPinName);
+        cout << routingList.sourceName << " to " << routingList.targetBlockName << "_" << routingList.targetBlockPinName << " Drop " << drop << "(%) " ;
+        if( constaint >= drop )
+            cout << " Pass" << endl;
         else
-            cout << "No Pass" << endl;
+            cout << " No Pass" << endl;
         cout << "IR Drop Constraint:" << constaint << "(%)"<< endl;
         cout << endl;
-        delete [] graph_sp ;
-        
     }
-    
-    
 }
+// Grid 座標
 string RouterV4::getNgSpiceKey(Coordinate3D coordinate3d)
 {
     int z = coordinate3d.z ;
@@ -1290,7 +1450,7 @@ double RouterV4::getMetalResistance(int layer)
 {
     return LayerMaps[RouterHelper.translateIntToMetalName(layer)].RESISTANCE_RPERSQ ;
 }
-void RouterV4::genResistance(vector<Coordinate3D> & paths , string powerPinName)
+void RouterV4::genResistance(vector<Coordinate3D> & paths , string powerPinName , SpiceGenerator & spiceGenerator )
 {
     for(int i = 0 ; i < paths.size() - 1 ; i++)
     {
@@ -1303,7 +1463,7 @@ void RouterV4::genResistance(vector<Coordinate3D> & paths , string powerPinName)
         int distance = ( pt1.x == pt2.x ) ? abs(pt1.y - pt2.y) : abs(pt1.x - pt2.x);
         double resistance = ( distance != 0 ) ? RouterHelper.calculateResistance(getMetalResistance(paths[i].z), WIDTH * UNITS_DISTANCE, distance) : 1 ;
         if(resistance < 0 ) assert(0);
-        sp_gen.addSpiceResistance(powerPinName, node1, node2, resistance);
+        spiceGenerator.addSpiceResistance(powerPinName, node1, node2, resistance);
     }
 }
 int RouterV4::getGridX(int x)
@@ -1335,9 +1495,9 @@ void RouterV4::generateSpiceList(vector<Coordinate3D> & paths , string powerPinN
         Path.y = getGridY(Path.y);
     }
     // generate resistance
-    genResistance(initSourcePath,powerPinName);
-    genResistance(paths,powerPinName);
-    genResistance(initTargetPath,powerPinName);
+    genResistance(initSourcePath,powerPinName,sp_gen);
+    genResistance(paths,powerPinName,sp_gen);
+    genResistance(initTargetPath,powerPinName,sp_gen);
     
 }
 Coordinate3D RouterV4::getGridCoordinate( Block block  )

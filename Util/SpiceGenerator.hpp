@@ -48,6 +48,10 @@ public:
     void addSpiceCmd();
     void setSpiceName(string spiceName);
     void toSpice();
+    
+    
+    const SpiceGenerator & operator=(const SpiceGenerator & right  );
+
 private:
     string outputfileName ;
     map<string,SpiceModel> SpiceContainer ;

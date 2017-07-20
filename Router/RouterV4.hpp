@@ -29,19 +29,14 @@
 #include "SpiceGenerator.hpp"
 using namespace std;
 
-struct Comparator
-{
-    bool operator()(const Line & left, const Line & right) const
-    {
-        if ( left.pt1.x == right.pt1.x )
-        {
-            return left.pt1.y < right.pt1.y;
-        }
-        
-        return left.pt1.x < right.pt1.x;
-    }
-};
 
+struct RoutingPath {
+    string sourceName;
+    Coordinate3D sourceCoordinate ;
+    string targetBlockName ;
+    string targetBlockPinName; 
+    Coordinate3D targetCoordinate ;
+};
 
 class RouterV4 {
     
@@ -62,15 +57,14 @@ private:
     set<int> Horizontal ;
     int lowestMetal ;
     int highestMetal ;
-    int WIDTH = 2 ;
+    int WIDTH = 10 ;
     int SPACING = 10 ;
     set<int> boundList ;
     SpiceGenerator sp_gen ;
     DefGenerator def_gen ;
     
-    vector<set<int>> dangerousSetV;
-    
-    vector<set<int>> dangerousSetH;
+    // 絕對座標＋GridZ
+    vector<RoutingPath> currentRoutingLists ;
     
     map<string,vector<Coordinate3D>> multiPinCandidates;
     
@@ -106,7 +100,7 @@ private:
     
     void BlockTopBottom(Graph_SP * graph_sp);
     
-    void genResistance(vector<Coordinate3D> & paths , string powerPinName);
+    void genResistance(vector<Coordinate3D> & paths , string powerPinName , SpiceGenerator & sp_gen );
     
     void generateSpiceList(vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo );
     
@@ -151,11 +145,19 @@ private:
     
     void legalizeAllOrient(Coordinate3D coordinate , Graph_SP * graph_sp);
     
-    int selectSource(string powerPin , Graph_SP * graph_sp );
+    vector<Coordinate3D> selectPath(string powerPin , Graph_SP * graph_sp , int target , int source , BlockInfo blockinfo);
     
     Coordinate3D getLastIlegalCoordinate(Direction3D orient , Coordinate3D sourceGrid);
     
     void legalizeEdge(Coordinate3D source , Coordinate3D target , Direction3D orient , Graph_SP * graph_sp);
+    
+    void saveRoutingList(Coordinate3D sourceGrid , Coordinate3D targetGrid , string powerPin , BlockInfo blockinfo);
+    
+    Coordinate3D gridToAbsolute(Coordinate3D gridCoordinate);
+    
+    void legalizeAllLayer(Coordinate3D source , Graph_SP * graph_sp);
+    
+    double getCost(string spiceName);
 };
 
 #endif /* RouterV4_hpp */
