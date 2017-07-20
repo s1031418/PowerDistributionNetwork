@@ -61,7 +61,7 @@ void verilog::run()
                 ParseSubBlock(results[0] , results[1]);
                 
             }
-            
+            regfree(&Regex);
         }
     }
 //    for( auto it = Connection.begin(), end = Connection.end(); it != end;it = Connection.upper_bound(it->first))

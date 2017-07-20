@@ -47,6 +47,7 @@ void ngspice::initvoltage()
             if ( regcomp(&Regex, "(([[:alnum:]]|_|[.])+)[[:space:]]+(-?([[:alnum:]]|_|[.])+)", REG_EXTENDED) ) cerr << "Compile Error";
             vector<string> results = GetParsingString(Regex, Data[i], vector<int>{1,3});
             voltages.insert(make_pair(results[0], stod(results[1])));
+            regfree(&Regex);
             continue;
         }
         if( Data[i].find("Node") != string::npos )
