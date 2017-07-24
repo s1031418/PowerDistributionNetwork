@@ -325,7 +325,52 @@ Coordinate3D RouterV4::LegalizeTargetEdge(Block block ,Graph_SP * graph_sp )
     }
     return targetGrid ;
 }
-void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo )
+pair<string,vector<Point<int>>>  RouterV4::getViaLocation(Nets & net , Point<int> & orginTarget , bool top)
+{
+    ViaInfo viaInfo ;
+    vector<Point<int>> viaLocation ;
+    double minResistace = INT_MAX ;
+    int crossArea = WIDTH * WIDTH ;
+    Point<int> LeftUp = orginTarget ;
+    Point<int> RightDown = orginTarget ;
+    LeftUp.x -= (WIDTH * UNITS_DISTANCE / 2 );
+    LeftUp.y += (WIDTH * UNITS_DISTANCE / 2 );
+    RightDown.x += (WIDTH * UNITS_DISTANCE / 2 );
+    RightDown.y -= (WIDTH * UNITS_DISTANCE / 2 );
+    string key = ( top ) ? RouterHelper.translateIntToMetalName( RouterHelper.translateMetalNameToInt(net.METALNAME) - 1 ): net.METALNAME ;
+    // select best via
+    for( auto via : RouterHelper.ViaInfos[key] )
+    {
+        int width = via.width;
+        int length = via.length ;
+        int area = width * length ;
+        int cnt = crossArea / area ;
+        double resistance = via.resistance / cnt ;
+        if( minResistace > resistance )
+        {
+            minResistace = resistance ;
+            viaInfo.name = via.name ;
+            viaInfo.width = via.width ;
+            viaInfo.length = via.length;
+        }
+    }
+    int X = LeftUp.x + (viaInfo.width * UNITS_DISTANCE / 2) ;
+    int Y = LeftUp.y - (viaInfo.length * UNITS_DISTANCE / 2) ;
+    Point<int> first(X,Y);
+    X = RightDown.x - (viaInfo.width * UNITS_DISTANCE / 2) ;
+    Y = RightDown.y + (viaInfo.length * UNITS_DISTANCE / 2 ) ;
+    Point<int> last(X,Y);
+    if( first == last ) viaLocation.push_back(first);
+    for( int x = first.x ; x <= last.x ; x += (viaInfo.width * UNITS_DISTANCE ) )
+    {
+        for( int y = first.y ; y >= last.y ; y -= (viaInfo.length * UNITS_DISTANCE) )
+        {
+            viaLocation.push_back(Point<int>(x,y));
+        }
+    }
+    return make_pair(viaInfo.name, viaLocation);
+}
+void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo , bool peek )
 {
 //    for(auto p : paths)
 //        cout << p.x << " " << p.y << " " << p.z << endl;
@@ -351,10 +396,32 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
     auto source = paths[0];
     int startLayer = source.z ;
     int layer = startLayer ;
-    auto startPoint = Grids[source.y][source.x].startpoint ;
+    auto friendlyForm = translateToFriendlyForm(paths);
+    Point<int> startPoint = Grids[source.y][source.x].startpoint ;
     Point<int> oringinTargetPoint = startPoint;
     Point<int> targetPoint = startPoint;
-    auto friendlyForm = translateToFriendlyForm(paths);
+    Direction3D nextDirection = friendlyForm[0].first ;
+    if(peek)
+    {
+        if( nextDirection == upOrient )
+        {
+            startPoint.y -= (WIDTH * UNITS_DISTANCE / 2) ;
+        }
+        else if (nextDirection == downOrient)
+        {
+            startPoint.y += (WIDTH * UNITS_DISTANCE / 2) ;
+        }
+        else if (nextDirection == leftOrient)
+        {
+            startPoint.x += (WIDTH * UNITS_DISTANCE / 2) ;
+        }
+        else if (nextDirection == rightOrient)
+        {
+            startPoint.x -= (WIDTH * UNITS_DISTANCE / 2) ;
+        }
+    }
+    
+    
 //    for( auto p : friendlyForm )
 //    {
 //        if( p.first == 0 )  cout << "UP";
@@ -475,19 +542,13 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
                 net.METALNAME = RouterHelper.translateIntToMetalName(layer);
                 net.ROUNTWIDTH = 0 ;
                 net.SHAPE = "STRIPE";
-                net.ABSOLUTE_POINT1 = oringinTargetPoint;
-                if( layer == 1 ) net.VIANAME = "via1_C";
-                if( layer == 2 ) net.VIANAME = "via2_C";
-                if( layer == 3 ) net.VIANAME = "via3_C";
-                if( layer == 4 ) net.VIANAME = "via4_C";
-                if( layer == 5 ) net.VIANAME = "via5_C";
-                nets.push_back(net);
-//                cout << layer << " " << oringinTargetPoint << " " ;
-//                if( layer == 1 ) cout << "via1_C" << endl;
-//                if( layer == 2 ) cout << "via2_C" << endl;
-//                if( layer == 3 ) cout << "via3_C" << endl;
-//                if( layer == 4 ) cout << "via4_C" << endl;
-//                if( layer == 5 ) cout << "via5_C" << endl;
+                auto viaSols = getViaLocation(net,oringinTargetPoint , false);
+                net.VIANAME = viaSols.first;
+                for( auto sol : viaSols.second )
+                {
+                    net.ABSOLUTE_POINT1 = sol;
+                    nets.push_back(net);
+                }
                 layer++ ;
             }
             
@@ -499,21 +560,13 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
                 net.METALNAME = RouterHelper.translateIntToMetalName(layer);
                 net.ROUNTWIDTH = 0 ;
                 net.SHAPE = "STRIPE";
-                net.ABSOLUTE_POINT1 = oringinTargetPoint;
-                if( layer == 6 ) net.VIANAME = "via5_C";
-                if( layer == 5 ) net.VIANAME = "via4_C";
-                if( layer == 4 ) net.VIANAME = "via3_C";
-                if( layer == 3 ) net.VIANAME = "via2_C";
-                if( layer == 2 ) net.VIANAME = "via1_C";
-                nets.push_back(net);
-                // hard code via5c 而且 第六層走到第五層要用查的，目前hardcode
-//                cout << layer << " " << oringinTargetPoint << " " ;
-                
-//                if( layer == 6 ) cout << "via5_C" << endl;
-//                if( layer == 5 ) cout << "via4_C" << endl;
-//                if( layer == 4 ) cout << "via3_C" << endl;
-//                if( layer == 3 ) cout << "via2_C" << endl;
-//                if( layer == 2 ) cout << "via1_C" << endl;
+                auto viaSols = getViaLocation(net,oringinTargetPoint , true );
+                net.VIANAME = viaSols.first;
+                for( auto sol : viaSols.second )
+                {
+                    net.ABSOLUTE_POINT1 = sol;
+                    nets.push_back(net);
+                }
                 layer--;
             }
             
@@ -797,7 +850,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             solution.z = sourceGrid.z ;
             paths.push_back(solution);
         }
-        fillSpNetMaps(paths, powerpin, blockinfo );
+        fillSpNetMaps(paths, powerpin, blockinfo , false );
         vector<Coordinate3D> absolutePoints ;
         for(auto p : paths)
         {
@@ -847,7 +900,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             solution.z = sourceGrid.z ;
             paths.push_back(solution);
         }
-        fillSpNetMaps(paths, powerpin, blockinfo  );
+        fillSpNetMaps(paths, powerpin, blockinfo , false );
         vector<Coordinate3D> absolutePoints ;
         for(auto p : paths)
         {
@@ -896,7 +949,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             solution.z = sourceGrid.z ;
             paths.push_back(solution);
         }
-        fillSpNetMaps(paths, powerpin, blockinfo  );
+        fillSpNetMaps(paths, powerpin, blockinfo , false );
         vector<Coordinate3D> absolutePoints ;
         for(auto p : paths)
         {
@@ -945,7 +998,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             solution.z = sourceGrid.z ;
             paths.push_back(solution);
         }
-        fillSpNetMaps(paths, powerpin, blockinfo );
+        fillSpNetMaps(paths, powerpin, blockinfo , false);
         vector<Coordinate3D> absolutePoints ;
         for(auto p : paths)
         {
@@ -1331,7 +1384,7 @@ void RouterV4::Route()
         int source = translate3D_1D(sourceGrid);
         int target = translate3D_1D(targetGrid);
         vector<Coordinate3D> solutions = selectPath(powerpin, graph_sp, target , source , blockinfo);
-        fillSpNetMaps(solutions, powerpin, blockinfo );
+        fillSpNetMaps(solutions, powerpin, blockinfo , true );
         saveMultiPinCandidates(powerpin, solutions);
         def_gen.toOutputDef();
 //        if( isMultiPin(powerpin) && !multiPinCandidates[powerpin].empty())
@@ -1402,6 +1455,22 @@ void RouterV4::Route()
 //        cout << endl;
         delete [] graph_sp ;
     }
+    Simulation();
+}
+// Grid 座標
+string RouterV4::getNgSpiceKey(Coordinate3D coordinate3d)
+{
+    int z = coordinate3d.z ;
+    Point<int> pt = getAbsolutePoint(coordinate3d);
+    string MetalName = RouterHelper.translateIntToMetalName(z) ;
+    string result ;
+    // to lowercase
+    transform(MetalName.begin(), MetalName.end(), MetalName.begin(), ::tolower);
+    result.append(MetalName).append("_").append(to_string(pt.x)).append("_").append(to_string(pt.y));
+    return result ;
+}
+void RouterV4::Simulation()
+{
     sp_gen.toSpice();
     sp_gen.addSpiceCmd();
     for( auto routingList : currentRoutingLists )
@@ -1430,22 +1499,6 @@ void RouterV4::Route()
         cout << endl;
     }
 }
-// Grid 座標
-string RouterV4::getNgSpiceKey(Coordinate3D coordinate3d)
-{
-    int z = coordinate3d.z ;
-    Point<int> pt = getAbsolutePoint(coordinate3d);
-    string MetalName = RouterHelper.translateIntToMetalName(z) ;
-    string result ;
-    // to lowercase
-    transform(MetalName.begin(), MetalName.end(), MetalName.begin(), ::tolower);
-    result.append(MetalName).append("_").append(to_string(pt.x)).append("_").append(to_string(pt.y));
-    return result ;
-}
-void RouterV4::Simulation()
-{
-    
-}
 double RouterV4::getMetalResistance(int layer)
 {
     return LayerMaps[RouterHelper.translateIntToMetalName(layer)].RESISTANCE_RPERSQ ;
@@ -1461,7 +1514,7 @@ void RouterV4::genResistance(vector<Coordinate3D> & paths , string powerPinName 
         // distance 0 means via
         // 目前打最大顆via (HardCode)
         int distance = ( pt1.x == pt2.x ) ? abs(pt1.y - pt2.y) : abs(pt1.x - pt2.x);
-        double resistance = ( distance != 0 ) ? RouterHelper.calculateResistance(getMetalResistance(paths[i].z), WIDTH * UNITS_DISTANCE, distance) : 1 ;
+        double resistance = ( distance != 0 ) ? RouterHelper.calculateResistance(getMetalResistance(paths[i].z), WIDTH * UNITS_DISTANCE, distance) : 0.1 ;
         if(resistance < 0 ) assert(0);
         spiceGenerator.addSpiceResistance(powerPinName, node1, node2, resistance);
     }

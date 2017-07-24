@@ -31,6 +31,8 @@ public:
     // Key: BlockName , value : BlockPin的詳細資訊 (包含BlockPinName , Blockpin 座標 , Blockpin 包含的Metal層)
     map<string , vector<Block> > BlockPinMaps ;
     
+    map<string,vector<ViaInfo>> ViaInfos;
+    
     vector<Block> getPowerPinInfo();
     
     vector<Block> getBlockPinInfo();
@@ -99,6 +101,10 @@ public:
     
     
     Point<int> getCenter( Point<int> LeftDown , Point<int> RightUp );
+    
+    double getSourceVoltage(string powerpin);
+    
+    void InitViaInfos();
     
 };
 

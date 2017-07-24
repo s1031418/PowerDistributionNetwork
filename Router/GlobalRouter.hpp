@@ -94,13 +94,12 @@ private:
     
     void printAllGrids();
     
-    bool hasCommonGrid( );
     
     void updateGraph_SP(set<int> & UpdateGrids , map<int,int> & hvTable);
     
+    void Esitimate();
     
-    
-    
+    double getEsitimateWidth(string powerPin , BlockInfo blockinfo );
     
     unsigned estimateCritical(vector<Point<int>> & Points);
     

@@ -13,6 +13,20 @@ PDNHelper::PDNHelper()
     }
     InitBlockMaps();
     InitPowerMaps();
+    InitViaInfos();
+}
+void PDNHelper::InitViaInfos()
+{
+    for( auto via : ViaMaps )
+    {
+        ViaInfo viaInfo ;
+        viaInfo.name = via.second.NAME ;
+        viaInfo.resistance = via.second.RESISTANCE ;
+        viaInfo.width = abs( via.second.InnerMaps.begin()->second.pt1.x - via.second.InnerMaps.begin()->second.pt2.x );
+        viaInfo.length = abs( via.second.InnerMaps.begin()->second.pt1.y - via.second.InnerMaps.begin()->second.pt2.y );
+        if( ViaInfos.find(via.second.InnerMaps.begin()->second.NAME) == ViaInfos.end() ) ViaInfos.insert(make_pair(via.second.InnerMaps.begin()->second.NAME, vector<ViaInfo>()));
+        ViaInfos[via.second.InnerMaps.begin()->second.NAME].push_back(viaInfo);
+    }
 }
 PDNHelper::~PDNHelper()
 {
@@ -476,6 +490,10 @@ Point<int> PDNHelper::FlipX(float y_axis , Point<int> pt , DIRECTION orientation
 Block PDNHelper::getPowerPinCoordinate(string powerPinName)
 {
     return PowerMaps[powerPinName] ;
+}
+double PDNHelper::getSourceVoltage(string powerpin)
+{
+    return stod(VoltageMaps[powerpin]);
 }
 void PDNHelper::InitPowerMaps()
 {

@@ -439,7 +439,14 @@ public:
     Point<int> RightUp ;
 };
 
-
+class ViaInfo {
+    
+public:
+    double resistance ;
+    int width ;
+    int length ;
+    std::string name ;
+};
 
 
 #endif /* Components_h */

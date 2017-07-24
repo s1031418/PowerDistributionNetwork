@@ -115,25 +115,7 @@ void GlobalRouter::InitGrids()
 //    printAllGrids();
     
 }
-void GlobalRouter::printAllGrids()
-{
-    
-    for(auto a : Grids)
-    {
-        for(auto b : a)
-        {
-            Point<int> rightup(b.startpoint.x+b.width , b.startpoint.y + b.length);
-            cout << "LeftDown:" << b.startpoint << " RightUp:" <<  rightup;
-            cout << "[ " << b.lowermetal << "," << b.uppermetal << " ]" << endl;
-            
-            cout << "Capacities:" << endl ;
-            for( int i = 0 ; i < b.capacities.size() ; i++ )
-                cout << "Layer" << i << ":" << b.capacities[i] << endl;
-            cout << "----------------------------------------------------------------" << endl;
-        }
-        
-    }
-}
+
 TwoDGridLocation GlobalRouter::get2DGridLocation(int x , int y)
 {
     int x_lowest = 0 ;
@@ -508,6 +490,10 @@ int GlobalRouter::getLength(vector<int> & path)
     }
     return sum ;
 }
+double GlobalRouter::getEsitimateWidth(string powerPin , BlockInfo blockinfo )
+{
+    return 0 ;
+}
 map<double,Path> GlobalRouter::getNetOrdering()
 {
     InitGraph_SP();
@@ -602,54 +588,7 @@ map<double,Path> GlobalRouter::getNetOrdering()
     assert(0);
 //    return map<double,map<double,Path>>();
 }
-//vector<Path> GlobalRouter::getNetOrdering()
-//{
-//    map<double,Path> orders;
-//    vector<Path> criticalOrder;
-//    // foreach powerpin
-//    for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
-//    {
-//        vector<Point<int>> points ;
-//        vector<pair<string, string>> targets ;
-//        Pin pin = PinMaps[it->first];
-//        auto source = RouterHelper.getPowerPinCoordinate(pin.STARTPOINT.x, pin.STARTPOINT.y, pin.RELATIVE_POINT1, pin.RELATIVE_POINT2, pin.ORIENT);
-//        Point<int> sourcePoint;
-//        auto sourceCenter = RouterHelper.getCenter(source.first, source.second);
-//        points.push_back(sourceCenter);
-//        auto ret = Connection.equal_range(it->first);
-//        for (auto i = ret.first; i != ret.second; ++i)
-//        {
-//            auto block = RouterHelper.getBlock(i->second.BlockName, i->second.BlockPinName);
-//            targets.push_back(make_pair(i->second.BlockName, i->second.BlockPinName));
-//            points.push_back(RouterHelper.getCenter(block.LeftDown, block.RightUp));
-//        }
-//
-//        flute_net flute;
-//        flute.getSteinerTree(points);
-//        for( auto target : targets )
-//        {
-//            string constraint ;
-//            Path path ;
-//            auto block = RouterHelper.getBlock(target.first, target.second);
-//            auto targetCenter = RouterHelper.getCenter(block.LeftDown, block.RightUp);
-//            vector<Point<int>> pathOrder = flute.getShortestPathOrder(sourceCenter, targetCenter);
-//            unsigned shortestLength = flute.getShortestPathLength(pathOrder);
-//            auto iter = ConstraintMaps.find(target.first) ;
-//            auto retu = ConstraintMaps.equal_range(iter->first);
-//            for (auto i = retu.first; i != retu.second; ++i)
-//                if( i->second.NAME == target.second ) constraint = i->second.CONSTRAINT;
-//            double critical = stod(constraint) / shortestLength ;
-//            path.source = it->first ;
-//            path.target = make_pair(it->second.BlockName, it->second.BlockPinName);
-//            orders.insert(make_pair(critical, path));
-//        }
-//    }
-//    
-//    for( auto x : orders )
-//        criticalOrder.push_back(x.second);
-//    return criticalOrder ;
-//    
-//}
+
 unsigned GlobalRouter::estimateCritical(vector<Point<int>> & Points)
 {
     return 0 ;
@@ -701,7 +640,20 @@ void GlobalRouter::updateGraph_SP(set<int> & UpdateGrids , map<int,int> & hvTabl
     }
     
 }
-
+void GlobalRouter::Esitimate()
+{
+    auto orders = getNetOrdering() ;
+    for( auto order : orders )
+    {
+        BlockInfo blockinfo ;
+        string powerpin = order.second.source ;
+        blockinfo.BlockName = order.second.target.first ;
+        blockinfo.BlockPinName = order.second.target.second ;
+        Block powerPinCoordinate = RouterHelper.getPowerPinCoordinate(powerpin);
+        Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
+//        int mahantaceDistance = 
+    }
+}
 void GlobalRouter::Route()
 {
     cout << "Begin Global Routing ..." << endl;
@@ -713,7 +665,7 @@ void GlobalRouter::Route()
     // Decide Net Ordering
     // Net order 是用 PowerSoure crtical 的平均 做排序 , 以 PowerSource 為單位
     // 將來或許可以以線為單位，但是不好實作（所以目前先以VDD為考量）
-//    auto orders = getNetOrdering(IR_DROP) ;
+    auto orders = getNetOrdering() ;
     
     
 //    for(auto o : orders)

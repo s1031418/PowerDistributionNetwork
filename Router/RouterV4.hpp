@@ -79,7 +79,7 @@ private:
     
     string getNgSpiceKey(Coordinate3D coordinate3d);
     
-    void fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo  );
+    void fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo , bool peek );
     
     Coordinate3D LegalizeTargetEdge(Block block , Graph_SP * graph_sp);
     
@@ -158,6 +158,9 @@ private:
     void legalizeAllLayer(Coordinate3D source , Graph_SP * graph_sp);
     
     double getCost(string spiceName);
+    
+    // 第一個為viaName,第二個為via location set
+    pair<string,vector<Point<int>>>  getViaLocation(Nets & net , Point<int> & orginTarget , bool top);
 };
 
 #endif /* RouterV4_hpp */

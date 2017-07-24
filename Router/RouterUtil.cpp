@@ -628,19 +628,20 @@ string RouterUtil::translateIntToMetalName(int layer)
 pair<bool, string> RouterUtil::IsBlock(Point<int> LeftDown , Point<int> RightUp)
 {
     pair<bool, string> result ;
-//    get<0>(result) = false;
-//    get<1>(result) = "";
-//    for(auto block : BlockMap)
-//    {
-//        if( LeftDown.x >= block.second.first.x
-//           && RightUp.x <= block.second.second.x
-//           && LeftDown.y >= block.second.first.y
-//           && RightUp.y <= block.second.second.y )
-//        {
-//            get<0>(result) = true;
-//            get<1>(result) = ComponentMaps[block.first].MACROTYPE;
-//        }
-//    }
+    get<0>(result) = false;
+    get<1>(result) = "";
+    for(auto block : BlockMap)
+    {
+        
+        if( LeftDown.x >= block.second.LeftDown.x
+           && RightUp.x <= block.second.RightUp.x
+           && LeftDown.y >= block.second.LeftDown.y
+           && RightUp.y <= block.second.RightUp.y )
+        {
+            get<0>(result) = true;
+            get<1>(result) = ComponentMaps[block.first].MACROTYPE;
+        }
+    }
     return result;
 }
 string RouterUtil::getAlias(string MetalName)

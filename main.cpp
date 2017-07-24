@@ -22,9 +22,10 @@
 #include "PDN.hpp"
 #include <stdexcept>
 #include "verilog.hpp"
-#include "Router.hpp"
 #include <array>
 #include "SpiceGenerator.hpp"
+#include "Predictor.hpp"
+#include "Printer.hpp"
 using namespace std ;
 
 string exec(const char* cmd);
@@ -55,7 +56,8 @@ int main(int argc,  char * argv[])
     verilog.run();
     RouterV4 router(spiceName,defName,ouputfilesName) ;
     router.Route();
-    
+//    Predictor predictor ;
+//    predictor.estimate();
     
     delete[] lefargv;
     delete[] defargv ;
