@@ -1233,12 +1233,12 @@ double RouterV4::getCost(string spiceName)
     // 超過 2% 會有penalty
     int penaltyRange = 2 ;
     double cost = 0 ;
+    string cmd = "./ngspice " + spiceName + " -o simulation" ;
+    system(cmd.c_str());
+    ngspice ng_spice ;
+    ng_spice.initvoltage();
     for( auto routingList : currentRoutingLists )
     {
-        string cmd = "./ngspice " + spiceName + " -o simulation" ;
-        system(cmd.c_str());
-        ngspice ng_spice ;
-        ng_spice.initvoltage();
         Coordinate3D sourceGrid( getGridX(routingList.sourceCoordinate.x) , getGridY(routingList.sourceCoordinate.y) , routingList.sourceCoordinate.z );
         Coordinate3D targetGrid( getGridX(routingList.targetCoordinate.x) , getGridY(routingList.targetCoordinate.y) , routingList.targetCoordinate.z );
         string sourceKey = getNgSpiceKey(sourceGrid) ;
@@ -1284,14 +1284,14 @@ vector<Coordinate3D> RouterV4::selectPath(string powerPin , Graph_SP * graph_sp 
         generateSpiceList(selectedPath, powerPin, blockinfo);
         return selectedPath ;
     }
-    
+    cout << "multipin candidate:" << multiPinCandidates[powerPin].size() << endl;
 //    for( auto candidate : multiPinCandidates[powerPin] )
     for( int i = 0 ; i < multiPinCandidates[powerPin].size() ; i+=100 )
     {
         if( i > multiPinCandidates[powerPin].size()  ) break;
         Coordinate3D candidate = multiPinCandidates[powerPin][i];
         Coordinate3D coordinate( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
-        if( candidate == sourceGrid )
+        if( coordinate == sourceGrid )
             legalizeAllLayer(sourceGrid, graph_sp);
         else
             legalizeAllOrient(coordinate, graph_sp);
@@ -1473,12 +1473,12 @@ void RouterV4::Simulation()
 {
     sp_gen.toSpice();
     sp_gen.addSpiceCmd();
+    string cmd = "./ngspice " + spiceName + " -o simulation" ;
+    system(cmd.c_str());
+    ngspice ng_spice ;
+    ng_spice.initvoltage();
     for( auto routingList : currentRoutingLists )
     {
-        string cmd = "./ngspice " + spiceName + " -o simulation" ;
-        system(cmd.c_str());
-        ngspice ng_spice ;
-        ng_spice.initvoltage();
         Coordinate3D sourceGrid( getGridX(routingList.sourceCoordinate.x) , getGridY(routingList.sourceCoordinate.y) , routingList.sourceCoordinate.z );
         Coordinate3D targetGrid( getGridX(routingList.targetCoordinate.x) , getGridY(routingList.targetCoordinate.y) , routingList.targetCoordinate.z );
         string sourceKey = getNgSpiceKey(sourceGrid) ;
