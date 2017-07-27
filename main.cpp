@@ -56,6 +56,7 @@ int main(int argc,  char * argv[])
     PinMaps.begin();
     RouterV4 router(spiceName,defName,ouputfilesName) ;
     router.Route();
+    cout << "test" << endl;
 //    Predictor predictor ;
 //    predictor.estimate();
     
