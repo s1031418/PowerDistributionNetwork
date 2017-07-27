@@ -788,28 +788,7 @@ void RouterV4::BlockGridCoordinate( Graph_SP * graph_sp , Block & block)
         }
     }
 }
-void RouterV4::BlockFrontDoor(Graph_SP * graph_sp , string sourcePowerPin)
-{
-    for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
-    {
-        auto ret = Connection.equal_range(it->first);
-        for (auto i = ret.first; i != ret.second; ++i)
-        {
-            string powerpin = i->first ;
-            string block = i->second.BlockName ;
-            string blockPin = i->second.BlockPinName ;
-//            cout << powerpin << " " << block << " " << blockPin << endl;
-            Block powerPinCoordinate = RouterHelper.getPowerPinCoordinate(powerpin);
-            Block blockPinCoordinate = RouterHelper.getBlock(block,blockPin);
-            auto powerGrid = getGridCoordinate(powerPinCoordinate);
-            auto blockPinGrid = getGridCoordinate(blockPinCoordinate);
-            int currentIndex = translate3D_1D(Coordinate3D(powerGrid.x,powerGrid.y,powerGrid.z));
-            currentIndex = translate3D_1D(Coordinate3D(blockPinGrid.x,blockPinGrid.y,blockPinGrid.z));
-            if( powerpin != sourcePowerPin ) BlockGridCoordinate(graph_sp,powerPinCoordinate);
-            BlockGridCoordinate(graph_sp,blockPinCoordinate);
-        }
-    }
-}
+
 // x y are absolute coordinate 
 string RouterV4::gridToString(Coordinate3D coordinate , bool translate )
 {
@@ -1030,6 +1009,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
 void RouterV4::InitPowerPinAndBlockPin()
 {
     InitGrids("");
+
     for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
     {
         auto ret = Connection.equal_range(it->first);
@@ -1041,7 +1021,9 @@ void RouterV4::InitPowerPinAndBlockPin()
             BlockInfo blockinfo ;
             blockinfo.BlockName = block ;
             blockinfo.BlockPinName = blockPin ;
-            Block powerPinCoordinate = RouterHelper.getPowerPinCoordinate(powerpin);
+            vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerpin);
+            // 如果有multiSource 目前hardcode第一個
+            Block powerPinCoordinate = powerPinCoordinates[0];
             Block blockPinCoordinate = RouterHelper.getBlock(block,blockPin);
             if( i == ret.first ) getInitSolution(powerPinCoordinate,powerpin,blockinfo,true );
             getInitSolution(blockPinCoordinate,powerpin,blockinfo,false);
@@ -1366,13 +1348,15 @@ void RouterV4::Route()
     def_gen.toOutputDef();
     GlobalRouter gr ;
     auto orders = gr.getNetOrdering();
+
     for(auto order : orders)
     {
         BlockInfo blockinfo ;
         string powerpin = order.second.source ;
         blockinfo.BlockName = order.second.target.first ;
         blockinfo.BlockPinName = order.second.target.second ;
-        Block powerPinCoordinate = RouterHelper.getPowerPinCoordinate(powerpin);
+        vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerpin);
+        Block powerPinCoordinate = powerPinCoordinates[0];
         Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
         InitGrids(powerpin);
         Graph_SP * graph_sp = InitGraph_SP();

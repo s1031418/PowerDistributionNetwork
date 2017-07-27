@@ -171,20 +171,20 @@ void Printer::printAllComponentMsg(std::map<std::string,Components> & ComponentM
 }
 void Printer::printPinMsg(string PinName ,  std::map<std::string,Pin> & PinMaps)
 {
-    cout << PinName << " " << "Direction " << PinMaps[PinName].DIRECTION << " USE " << PinMaps[PinName].USE  << endl;
-    if(PinMaps[PinName].PortMaps.empty())
-    {
-        
-        cout << " Layer " << PinMaps[PinName].METALNAME << " ( " << PinMaps[PinName].RELATIVE_POINT1.x << " " << PinMaps[PinName].RELATIVE_POINT1.y << " )";
-        cout << " ( " << PinMaps[PinName].RELATIVE_POINT2.x << " " << PinMaps[PinName].RELATIVE_POINT2.y << " ) " << endl;
-        cout << "Fixed " << "( " << PinMaps[PinName].STARTPOINT.x << " " << PinMaps[PinName].STARTPOINT.y << " )";
-        cout << PinMaps[PinName].ORIENT << endl;
-    }
-    else
-    {
-        printAllPortMsg(PinMaps[PinName].PortMaps);
-    }
-    cout << endl;
+//    cout << PinName << " " << "Direction " << PinMaps[PinName].DIRECTION << " USE " << PinMaps[PinName].USE  << endl;
+//    if(PinMaps[PinName].PortMaps.empty())
+//    {
+//        
+//        cout << " Layer " << PinMaps[PinName].METALNAME << " ( " << PinMaps[PinName].RELATIVE_POINT1.x << " " << PinMaps[PinName].RELATIVE_POINT1.y << " )";
+//        cout << " ( " << PinMaps[PinName].RELATIVE_POINT2.x << " " << PinMaps[PinName].RELATIVE_POINT2.y << " ) " << endl;
+//        cout << "Fixed " << "( " << PinMaps[PinName].STARTPOINT.x << " " << PinMaps[PinName].STARTPOINT.y << " )";
+//        cout << PinMaps[PinName].ORIENT << endl;
+//    }
+//    else
+//    {
+//        printAllPortMsg(PinMaps[PinName].PortMaps);
+//    }
+//    cout << endl;
 }
 void Printer::printAllPinMsg(std::map<std::string,Pin> & PinMaps)
 {

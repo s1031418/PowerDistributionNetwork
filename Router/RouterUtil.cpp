@@ -25,8 +25,11 @@ vector<Rectangle> RouterUtil::getBlockRectangle()
     }
     for( auto powerBlock : PowerMaps )
     {
-        Rectangle rect(powerBlock.second.LeftDown , powerBlock.second.RightUp);
-        temp.push_back(rect);
+        for( auto x : powerBlock.second )
+        {
+            Rectangle rect(x.LeftDown , x.RightUp);
+            temp.push_back(rect);
+        }
     }
     return temp ;
 }

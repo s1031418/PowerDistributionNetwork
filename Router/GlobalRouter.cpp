@@ -497,96 +497,58 @@ double GlobalRouter::getEsitimateWidth(string powerPin , BlockInfo blockinfo )
 map<double,Path> GlobalRouter::getNetOrdering()
 {
     InitGraph_SP();
-//    if( netOrder == SHORTESTPATH )
-//    {
-//        
-//    }
-//    else if ( netOrder == IR_DROP )
-//    {
+    map<double,map<double,Path>> orders ;
     
-        // key:PowerSourceName , value: criticalMap
-        // In order to for global routing , multiterminal must be consider together .
-        // if source is the same  , we use the same key to map different value 
-        map<double,map<double,Path>> orders ;
-        
-        map<double,Path> criticalMap;
-        for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
+    map<double,Path> criticalMap;
+    for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
+    {
+        // key:critical value( the smaller is more critical ) , value : Path( Define in RouteComponents )
+//        cout << it->second.BlockName << " " << it->second.BlockPinName << endl;
+        int index = 0 ;
+        double sumCritical = 0 ;
+        Pin pin = PinMaps[it->first];
+        // source absoult coordinate
+        auto source = RouterHelper.getPowerPinCoordinate(pin.STARTPOINT.x, pin.STARTPOINT.y, pin.RELATIVE_POINT1, pin.RELATIVE_POINT2, pin.ORIENT);
+        auto sourceCenter = RouterHelper.getCenter(source.first, source.second);
+        // source grid coordinate
+        auto sourceGrid = getGridCoordinate(sourceCenter);
+        Coordinate3D SGridCoodinate(sourceGrid.first , sourceGrid.second , RouterHelper.translateMetalNameToInt(pin.METALNAME) );
+        auto ret = Connection.equal_range(it->first);
+        for (auto i = ret.first; i != ret.second; ++i)
         {
-            // key:critical value( the smaller is more critical ) , value : Path( Define in RouteComponents )
-            
-            int index = 0 ;
-            double sumCritical = 0 ;
-            Pin pin = PinMaps[it->first];
-            // source absoult coordinate
-            auto source = RouterHelper.getPowerPinCoordinate(pin.STARTPOINT.x, pin.STARTPOINT.y, pin.RELATIVE_POINT1, pin.RELATIVE_POINT2, pin.ORIENT);
-            auto sourceCenter = RouterHelper.getCenter(source.first, source.second);
-            // source grid coordinate 
-            auto sourceGrid = getGridCoordinate(sourceCenter);
-            Coordinate3D SGridCoodinate(sourceGrid.first , sourceGrid.second , RouterHelper.translateMetalNameToInt(pin.METALNAME) );
-            auto ret = Connection.equal_range(it->first);
-            for (auto i = ret.first; i != ret.second; ++i)
-            {
-                index++;
-                string constraint ;
-//                cout << i->first << " " << i->second.BlockName << " " << i->second.BlockPinName << endl;
-                auto target = RouterHelper.getBlock(i->second.BlockName, i->second.BlockPinName);
-                int topLayer = RouterHelper.translateMetalNameToInt( target.Metals[target.Metals.size()-1] );
-                auto targetCenter = RouterHelper.getCenter(target.LeftDown,target.RightUp);
-                auto targetGrid = getGridCoordinate(targetCenter);
-                if( target.Direction == LEFT ) get<0>(targetGrid) -= 1 ;
-                if( target.Direction == RIGHT ) get<0>(targetGrid) += 1 ;
-                if( target.Direction == TOP ) get<1>(targetGrid) += 1 ;
-                if( target.Direction == DOWN ) get<1>(targetGrid) -= 1 ;
-                Coordinate3D TGridCoodinate(targetGrid.first , targetGrid.second , topLayer );
-                graph.Dijkstra(translate3D_1D(SGridCoodinate.x, SGridCoodinate.y, SGridCoodinate.z));
-                vector<int> path = graph.getPath(translate3D_1D(targetGrid.first, targetGrid.second, topLayer));
-                int length = getLength(path);
-                auto iter = ConstraintMaps.find(i->second.BlockName) ;
-                auto retu = ConstraintMaps.equal_range(iter->first);
-                for (auto t = retu.first; t != retu.second; ++t)
-                    if( t->second.NAME == i->second.BlockPinName ) constraint = t->second.CONSTRAINT;
-                double critical = stod(constraint) / length ;
-                sumCritical += critical ;
-                // initialize path object
-                Path p ;
-                p.source = i->first ;
-                p.target = make_pair(i->second.BlockName, i->second.BlockPinName);
-                p.sourceGrid = SGridCoodinate ;
-                p.targetGrid = TGridCoodinate ;
-                // sorting by critical
-                criticalMap.insert(make_pair(critical,p));
-            }
-//            double averageCritical = sumCritical / index ;
-//            orders.insert(make_pair(averageCritical, criticalMap));
-//        }
-        // print crtical map
-//        for( auto o : criticalMap )
-//        {
-//            cout << o.first << " " << o.second.source << " " << o.second.target.first << " " << o.second.target.second << endl;
-//        }
-        // assign critical map to the value of orders
-//        for( auto x : criticalMap )
-//        {
-//            if( orders.find(x.second.source) == orders.end())
-//            {
-//                orders.insert(make_pair(x.second.source, map<double,Path>()));
-//            }
-//            orders[x.second.source].insert(make_pair(x.first, x.second));
-//        }
-        
-        // print orders
-//        for( auto x : orders )
-//        {
-//            cout << x.first << " " ;
-//            for( auto y : x.second )
-//                cout << y.first << " " << y.second.source << " " << y.second.target.first << " " << y.second.target.second << endl;
-//            
-//        }
-//        return orders ;
+            index++;
+            string constraint ;
+            //                cout << i->first << " " << i->second.BlockName << " " << i->second.BlockPinName << endl;
+            auto target = RouterHelper.getBlock(i->second.BlockName, i->second.BlockPinName);
+            int topLayer = RouterHelper.translateMetalNameToInt( target.Metals[target.Metals.size()-1] );
+            auto targetCenter = RouterHelper.getCenter(target.LeftDown,target.RightUp);
+            auto targetGrid = getGridCoordinate(targetCenter);
+            if( target.Direction == LEFT ) get<0>(targetGrid) -= 1 ;
+            if( target.Direction == RIGHT ) get<0>(targetGrid) += 1 ;
+            if( target.Direction == TOP ) get<1>(targetGrid) += 1 ;
+            if( target.Direction == DOWN ) get<1>(targetGrid) -= 1 ;
+            Coordinate3D TGridCoodinate(targetGrid.first , targetGrid.second , topLayer );
+            graph.Dijkstra(translate3D_1D(SGridCoodinate.x, SGridCoodinate.y, SGridCoodinate.z));
+            vector<int> path = graph.getPath(translate3D_1D(targetGrid.first, targetGrid.second, topLayer));
+            int length = getLength(path);
+            auto iter = ConstraintMaps.find(i->second.BlockName) ;
+            auto retu = ConstraintMaps.equal_range(iter->first);
+            for (auto t = retu.first; t != retu.second; ++t)
+                if( t->second.NAME == i->second.BlockPinName ) constraint = t->second.CONSTRAINT;
+            double critical = stod(constraint) / length ;
+            sumCritical += critical ;
+            // initialize path object
+            Path p ;
+            p.source = i->first ;
+            p.target = make_pair(i->second.BlockName, i->second.BlockPinName);
+            p.sourceGrid = SGridCoodinate ;
+            p.targetGrid = TGridCoodinate ;
+//             sorting by critical
+            criticalMap.insert(make_pair(critical,p));
+        }
     }
     return criticalMap;
     assert(0);
-//    return map<double,map<double,Path>>();
 }
 
 unsigned GlobalRouter::estimateCritical(vector<Point<int>> & Points)
@@ -642,17 +604,17 @@ void GlobalRouter::updateGraph_SP(set<int> & UpdateGrids , map<int,int> & hvTabl
 }
 void GlobalRouter::Esitimate()
 {
-    auto orders = getNetOrdering() ;
-    for( auto order : orders )
-    {
-        BlockInfo blockinfo ;
-        string powerpin = order.second.source ;
-        blockinfo.BlockName = order.second.target.first ;
-        blockinfo.BlockPinName = order.second.target.second ;
-        Block powerPinCoordinate = RouterHelper.getPowerPinCoordinate(powerpin);
-        Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
-//        int mahantaceDistance = 
-    }
+//    auto orders = getNetOrdering() ;
+//    for( auto order : orders )
+//    {
+//        BlockInfo blockinfo ;
+//        string powerpin = order.second.source ;
+//        blockinfo.BlockName = order.second.target.first ;
+//        blockinfo.BlockPinName = order.second.target.second ;
+//        Block powerPinCoordinate = RouterHelper.getPowerPinCoordinate(powerpin);
+//        Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
+////        int mahantaceDistance = 
+//    }
 }
 void GlobalRouter::Route()
 {

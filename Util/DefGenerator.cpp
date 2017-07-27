@@ -50,7 +50,30 @@ void DefGenerator::toOutputDef()
         Rowindex++;
     }
     // vector 用 erase 要注意 performace
-    temp.erase(temp.begin() + StartIndex, temp.begin()+EndIndex + 1 );
+    if( StartIndex != 0 && EndIndex != 0 ) temp.erase(temp.begin() + StartIndex, temp.begin()+EndIndex + 1 );
+    if( StartIndex == 0 )
+    {
+        Rowindex = 0 ;
+        for(auto line : temp)
+        {
+            if( line.find("PINS") != string::npos )
+            {
+                if(StartIndex == 0)
+                {
+                    StartIndex = Rowindex ;
+                    Rowindex++;
+                    continue;
+                }
+                if(EndIndex == 0)
+                    EndIndex = Rowindex ;
+                if(EndIndex != 0)
+                    break;
+            }
+            Rowindex++;
+        }
+        StartIndex = EndIndex + 1 ; 
+    }
+    
     vector<string> NewDefSp;
     NewDefSp.push_back("SPECIALNETS " + to_string(SpecialNetsMaps.size()) + " ;");
     

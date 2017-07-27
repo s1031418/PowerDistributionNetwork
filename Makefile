@@ -2,7 +2,7 @@
 
 CXX = g++
 CXXFLAGS = -std=c++11  -I Parsers -I include -I lib -I Router -I Util -I PDN -O3 -I Flute
-OBJS = main.o Parsers/Parsers.o Parsers/Printer.o Parsers/lefrw.o Parsers/defrw.o Parsers/InitialFileParser.o PDN/Converter.o PDN/PDN.o PDN/PDNHelper.o Parsers/ngspice.o Router/Graph_SP.o Router/BinaryHeap.o Router/GlobalRouter.o Parsers/verilog.o  Router/RouterUtil.o Router/Weights.o Router/Router.o Router/RouterV4.o Util/SpiceGenerator.o Util/DefGenerator.o Util/OutputFilesGenerator.o
+OBJS = main.o Parsers/Parsers.o Parsers/Printer.o Parsers/lefrw.o Parsers/defrw.o Parsers/InitialFileParser.o PDN/PDNHelper.o Parsers/ngspice.o Router/Graph_SP.o Router/BinaryHeap.o Router/GlobalRouter.o Parsers/verilog.o  Router/RouterUtil.o Router/RouterV4.o Util/SpiceGenerator.o Util/DefGenerator.o Util/OutputFilesGenerator.o
 STATICLIB = lib/liblef.a lib/libdef.a 
 LEF_PATH=lef
 DEF_PATH=def
@@ -17,13 +17,10 @@ $(DEF_STATICLIB):
 	cd $(DEF_PATH) && make 
 
 main.o: main.cpp Parsers/lefrw.o
-PDN.o:lib/PDN.cpp lib/PDN.hpp
 PDNHelper.o:PDN/PDNHelper.cpp PDN/PDNHelper.hpp
-Router.o:Router/Router.cpp Router/Router.hpp
 RouterV4.o:Router/RouterV4.cpp Router/RouterV4.hpp
 GlobalRouter.o:Router/GlobalRouter.cpp Router/GlobalRouter.hpp
 RouterUtil.o:Router/RouterUtil.cpp Router/RouterUtil.hpp
-Weights.o:Router/Weights.cpp Router/Weights.hpp
 OutputFilesGenerator.o:Util/OutputFilesGenerator.cpp Util/OutputFilesGenerator.hpp
 lefrw.o:lefrw.cpp lefrw.h
 ngspice.o:ngspice.cpp ngspice.hpp

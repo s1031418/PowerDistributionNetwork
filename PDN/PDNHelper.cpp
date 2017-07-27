@@ -126,7 +126,10 @@ vector<Block> PDNHelper::getPowerPinInfo()
 {
     vector<Block> temp ;
     for(auto powerpin : PowerMaps)
-        temp.push_back(powerpin.second);
+    {
+        for( auto x : powerpin.second)
+            temp.push_back(x);
+    }
     return temp ;
 }
 vector<Block> PDNHelper::getBlockPinInfo()
@@ -419,21 +422,21 @@ Point<int> PDNHelper::getCrossPoint(Line line1 , Line line2)
     }
     return CrossPoint ;
 }
-Point<int> PDNHelper::getEndPoint(Point<int> pt1  , Point<int> pt2 )
-{
-    Point<int> temp ;
-    for(auto Blocks : BlockPinMaps)
-    {
-        for(auto block : Blocks.second)
-        {
-            if( pt1.x >= block.LeftDown.x && pt1.x <= block.RightUp.x && pt1.y >= block.LeftDown.y && pt1.y <= block.RightUp.y )
-                return block.RightUp ;
-            if( pt2.x >= block.LeftDown.x && pt2.x <= block.RightUp.x && pt2.y >= block.LeftDown.y && pt2.y <= block.RightUp.y )
-                return block.RightUp ;
-        }
-    }
-    return temp;
-}
+//Point<int> PDNHelper::getEndPoint(Point<int> pt1  , Point<int> pt2 )
+//{
+//    Point<int> temp ;
+//    for(auto Blocks : BlockPinMaps)
+//    {
+//        for(auto block : Blocks.second)
+//        {
+//            if( pt1.x >= block.LeftDown.x && pt1.x <= block.RightUp.x && pt1.y >= block.LeftDown.y && pt1.y <= block.RightUp.y )
+//                return block.RightUp ;
+//            if( pt2.x >= block.LeftDown.x && pt2.x <= block.RightUp.x && pt2.y >= block.LeftDown.y && pt2.y <= block.RightUp.y )
+//                return block.RightUp ;
+//        }
+//    }
+//    return temp;
+//}
 double PDNHelper::calculateResistance(double rpsq , int width , double length )
 {
     return rpsq * length / width ;
@@ -487,7 +490,7 @@ Point<int> PDNHelper::FlipX(float y_axis , Point<int> pt , DIRECTION orientation
     return Point<int>(x,y);
     
 }
-Block PDNHelper::getPowerPinCoordinate(string powerPinName)
+vector<Block> PDNHelper::getPowerPinCoordinate(string powerPinName)
 {
     return PowerMaps[powerPinName] ;
 }
@@ -497,52 +500,76 @@ double PDNHelper::getSourceVoltage(string powerpin)
 }
 void PDNHelper::InitPowerMaps()
 {
+    
     // key pinName , value block
     for(auto pin : PinMaps)
     {
-        string orient = pin.second.ORIENT ;
-        Block block ;
-        pair< Point<int>, Point<int> > PowerPinCoordinate = getPowerPinCoordinate(pin.second.STARTPOINT.x, pin.second.STARTPOINT.y, pin.second.RELATIVE_POINT1 , pin.second.RELATIVE_POINT2, orient);
-        block.LeftDown = get<0>(PowerPinCoordinate);
-        block.RightUp = get<1>(PowerPinCoordinate);
-        block.Metals.push_back(pin.second.METALNAME);
-        
-        if( block.LeftDown.y == DIEAREA.pt1.y ) block.Direction = TOP ;
-        if( block.LeftDown.x == DIEAREA.pt1.x ) block.Direction = RIGHT ;
-        if( block.RightUp.y == DIEAREA.pt2.y ) block.Direction = DOWN ;
-        if( block.RightUp.x == DIEAREA.pt2.x ) block.Direction = LEFT ;
-        PowerMaps.insert(make_pair(pin.first, block));
+        vector<Block> temp ;
+        if( pin.second.Ports.size() > 1 )
+        {
+            for( auto port : pin.second.Ports )
+            {
+                string orient = port.ORIENT ;
+                Block block ;
+                pair< Point<int>, Point<int> > PowerPinCoordinate = getPowerPinCoordinate(port.STARTPOINT.x, port.STARTPOINT.y, port.RELATIVE_POINT1 , port.RELATIVE_POINT2, orient);
+                block.LeftDown = get<0>(PowerPinCoordinate);
+                block.RightUp = get<1>(PowerPinCoordinate);
+                block.Metals.push_back(port.NAME);
+                
+                if( block.LeftDown.y == DIEAREA.pt1.y ) block.Direction = TOP ;
+                if( block.LeftDown.x == DIEAREA.pt1.x ) block.Direction = RIGHT ;
+                if( block.RightUp.y == DIEAREA.pt2.y ) block.Direction = DOWN ;
+                if( block.RightUp.x == DIEAREA.pt2.x ) block.Direction = LEFT ;
+                temp.push_back(block);
+            }
+        }
+        else
+        {
+            string orient = pin.second.ORIENT ;
+            Block block ;
+            pair< Point<int>, Point<int> > PowerPinCoordinate = getPowerPinCoordinate(pin.second.STARTPOINT.x, pin.second.STARTPOINT.y, pin.second.RELATIVE_POINT1 , pin.second.RELATIVE_POINT2, orient);
+            block.LeftDown = get<0>(PowerPinCoordinate);
+            block.RightUp = get<1>(PowerPinCoordinate);
+            block.Metals.push_back(pin.second.METALNAME);
+            
+            if( block.LeftDown.y == DIEAREA.pt1.y ) block.Direction = TOP ;
+            if( block.LeftDown.x == DIEAREA.pt1.x ) block.Direction = RIGHT ;
+            if( block.RightUp.y == DIEAREA.pt2.y ) block.Direction = DOWN ;
+            if( block.RightUp.x == DIEAREA.pt2.x ) block.Direction = LEFT ;
+            temp.push_back(block);
+        }
+        PowerMaps.insert(make_pair(pin.first, temp));
     }
 }
-string PDNHelper::getPowerPinMsg(Point<int> pt)
-{
-    for(auto pin : PowerMaps)
-    {
-        if( pt.x >= pin.second.LeftDown.x && pt.x <= pin.second.RightUp.x && pt.y >= pin.second.LeftDown.y && pt.y <= pin.second.RightUp.y )
-        {
-            return pin.first ;
-        }
-    }
-    return string();
-}
-Point<int> PDNHelper::getStartPoint(Point<int> pt1 , Point<int> pt2 )
-{
-    
-    for(auto pin : PowerMaps)
-    {
-        // 假如pt1在Powerpin得範圍內
-        if( pt1.x >= pin.second.LeftDown.x && pt1.x <= pin.second.RightUp.x && pt1.y >= pin.second.LeftDown.y && pt1.y <= pin.second.RightUp.y )
-        {
-            return pt1 ;
-        }
-        // 假如pt2在Powerpin得範圍內
-        if( pt2.x >= pin.second.LeftDown.x && pt2.x <= pin.second.RightUp.x && pt2.y >= pin.second.LeftDown.y && pt2.y <= pin.second.RightUp.y )
-        {
-            return pt2 ;
-        }
-    }
-    return Point<int>();
-}
+//string PDNHelper::getPowerPinMsg(Point<int> pt)
+//{
+//    for(auto pin : PowerMaps)
+//    {
+//        if( pt.x >= pin.second.LeftDown.x && pt.x <= pin.second.RightUp.x && pt.y >= pin.second.LeftDown.y && pt.y <= pin.second.RightUp.y )
+//        {
+//            return pin.first ;
+//        }
+//    }
+//    return string();
+//}
+//Point<int> PDNHelper::getStartPoint(Point<int> pt1 , Point<int> pt2 )
+//{
+//    
+//    for(auto pin : PowerMaps)
+//    {
+//        // 假如pt1在Powerpin得範圍內
+//        if( pt1.x >= pin.second.LeftDown.x && pt1.x <= pin.second.RightUp.x && pt1.y >= pin.second.LeftDown.y && pt1.y <= pin.second.RightUp.y )
+//        {
+//            return pt1 ;
+//        }
+//        // 假如pt2在Powerpin得範圍內
+//        if( pt2.x >= pin.second.LeftDown.x && pt2.x <= pin.second.RightUp.x && pt2.y >= pin.second.LeftDown.y && pt2.y <= pin.second.RightUp.y )
+//        {
+//            return pt2 ;
+//        }
+//    }
+//    return Point<int>();
+//}
 Block PDNHelper::getBlock( string BlockName , string BlockPinName )
 {
     for(auto x : BlockPinMaps[BlockName])

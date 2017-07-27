@@ -355,8 +355,9 @@ class Pin
         Point<int> RELATIVE_POINT1;
         Point<int> RELATIVE_POINT2;
         std::string ORIENT ;
+        std::vector<Port> Ports;
         // key:MetalName , value: Port
-        std::multimap< std::string, Port > PortMaps;
+//        std::multimap< std::string, Port > PortMaps;
 
 };
 class Diearea{
