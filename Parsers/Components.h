@@ -437,6 +437,19 @@ public:
     Rectangle(Point<int> leftdown , Point<int> rightup) :LeftDown(leftdown),RightUp(rightup) {};
     Point<int> LeftDown ;
     Point<int> RightUp ;
+    const Rectangle & operator=(const Rectangle & right)
+    {
+        if( this != &right )
+        {
+            this->LeftDown = right.LeftDown;
+            this->RightUp = right.RightUp;
+        }
+        return *this ;
+    }
+    bool operator==(const Rectangle & right)
+    {
+        return (this->LeftDown == right.LeftDown && this->RightUp == right.RightUp);
+    }
 };
 
 class ViaInfo {

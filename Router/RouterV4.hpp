@@ -27,6 +27,7 @@
 #include "GlobalRouter.hpp"
 #include "DefGenerator.hpp"
 #include "SpiceGenerator.hpp"
+#include "OutputFilesGenerator.hpp"
 using namespace std;
 
 
@@ -62,7 +63,7 @@ private:
     set<int> boundList ;
     SpiceGenerator sp_gen ;
     DefGenerator def_gen ;
-    
+    OutputFilesGenerator output_gen ;  
     // 絕對座標＋GridZ
     vector<RoutingPath> currentRoutingLists ;
     

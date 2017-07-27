@@ -26,6 +26,7 @@
 #include "SpiceGenerator.hpp"
 #include "Predictor.hpp"
 #include "Printer.hpp"
+#include "OutputFilesGenerator.hpp"
 using namespace std ;
 
 string exec(const char* cmd);

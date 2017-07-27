@@ -163,8 +163,8 @@ Graph_SP * RouterV4::InitGraph_SP()
                     {
                         if( Grids[y][x].verticalEdges[z].topEdge )
                         {
-                            graph_sp->AddEdge(index, index+Top, 1* 10000);
-                            graph_sp->AddEdge(index+Top, index, 1* 10000);
+                            graph_sp->AddEdge(index, index+Top, 1* 1000);
+                            graph_sp->AddEdge(index+Top, index, 1* 1000);
                         }
                         else
                         {
@@ -176,8 +176,8 @@ Graph_SP * RouterV4::InitGraph_SP()
                     {
                         if( Grids[y][x].verticalEdges[z].bottomEdge )
                         {
-                            graph_sp->AddEdge(index, index+Bottom, 1* 10000);
-                            graph_sp->AddEdge(index+Bottom, index, 1* 10000);
+                            graph_sp->AddEdge(index, index+Bottom, 1* 1000);
+                            graph_sp->AddEdge(index+Bottom, index, 1* 1000);
                         }
                         else
                         {
@@ -189,8 +189,8 @@ Graph_SP * RouterV4::InitGraph_SP()
                     {
                         if( Grids[y][x].verticalEdges[z].topEdge )
                         {
-                            graph_sp->AddEdge(index, index+Top, 1* 10000);
-                            graph_sp->AddEdge(index+Top, index, 1* 10000);
+                            graph_sp->AddEdge(index, index+Top, 1* 1000);
+                            graph_sp->AddEdge(index+Top, index, 1* 1000);
                         }
                         else
                         {
@@ -199,8 +199,8 @@ Graph_SP * RouterV4::InitGraph_SP()
                         }
                         if( Grids[y][x].verticalEdges[z].bottomEdge )
                         {
-                            graph_sp->AddEdge(index, index+Bottom, 1* 10000);
-                            graph_sp->AddEdge(index+Bottom, index, 1* 10000);
+                            graph_sp->AddEdge(index, index+Bottom, 1* 1000);
+                            graph_sp->AddEdge(index+Bottom, index, 1* 1000);
                         }
                         else
                         {
@@ -790,8 +790,6 @@ void RouterV4::BlockGridCoordinate( Graph_SP * graph_sp , Block & block)
 }
 void RouterV4::BlockFrontDoor(Graph_SP * graph_sp , string sourcePowerPin)
 {
-    
-    
     for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
     {
         auto ret = Connection.equal_range(it->first);
@@ -1387,75 +1385,11 @@ void RouterV4::Route()
         fillSpNetMaps(solutions, powerpin, blockinfo , true );
         saveMultiPinCandidates(powerpin, solutions);
         def_gen.toOutputDef();
-//        if( isMultiPin(powerpin) && !multiPinCandidates[powerpin].empty())
-//        {
-//            source = selectSource(powerpin,graph_sp,target,blockinfo);
-//        }
-//        graph_sp->Dijkstra(source);
-//        auto paths = graph_sp->getPath(target);
-//        if(paths.empty())
-//        {
-////            toGridGraph();
-//            cout << "Path" << endl;
-//            cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
-//            cout << "-------------------------------Source Info-------------------------------" << endl;
-//            if( powerPinCoordinate.Direction == 0 ) cout << "Direction:UP" << endl;
-//            if( powerPinCoordinate.Direction == 1 ) cout << "Direction:DOWN" << endl;
-//            if( powerPinCoordinate.Direction == 2 ) cout << "Direction:RIGHT" << endl;
-//            if( powerPinCoordinate.Direction == 3 ) cout << "Direction:LEFT" << endl;
-//            cout << "Source Absolute:" << powerPinCoordinate.LeftDown << " " << powerPinCoordinate.RightUp << endl ;
-//            Coordinate3D source3D = translate1D_3D(source);
-//            cout << "Source 3D:"<< source3D.x << " " << source3D.y << " " << source3D.z << endl;
-//            cout << "Source 1D:" << translate3D_1D(source3D) << endl;
-//            cout << "-------------------------------Target Info-------------------------------" << endl;
-//            if( BlockPinCoordinate.Direction == 0 ) cout << "Direction:UP" << endl;
-//            if( BlockPinCoordinate.Direction == 1 ) cout << "Direction:DOWN" << endl;
-//            if( BlockPinCoordinate.Direction == 2 ) cout << "Direction:RIGHT" << endl;
-//            if( BlockPinCoordinate.Direction == 3 ) cout << "Direction:LEFT" << endl ;
-//            cout << "Target Absolute:" << BlockPinCoordinate.LeftDown << " " << BlockPinCoordinate.RightUp << endl;
-//            Coordinate3D target3D = translate1D_3D(target);
-//            
-//            cout << "Target 3D:" << target3D.x << " " << target3D.y << " " << target3D.z << endl;
-//            cout << "Target 1D:" << translate3D_1D(target3D) << endl;
-//            assert(0);
-//        }
-//        vector<Coordinate3D> temp ;
-////        cout << "Paths" << endl;
-//        // from source to target
-//        for(int i = (int)paths.size() - 1; i >= 0  ; i--)
-//        {
-//            temp.push_back(translate1D_3D(paths[i]));
-//        }
-//        for(auto p : paths)
-//        {
-//            temp.push_back(translate1D_3D(p));
-////            auto s = translate1D_3D(p);
-////            cout << s.x << " " << s.y << " " << s.z << endl;
-//        }
-//        fillSpNetMaps(temp, powerpin, blockinfo );
-//        saveMultiPinCandidates(powerpin, temp);
-//        def_gen.toOutputDef();
-//        generateSpiceList(temp, powerpin, blockinfo );
-//        sp_gen.toSpice();
-//        sp_gen.addSpiceCmd();
-//        string cmd = "./ngspice " + spiceName + " -o simulation" ;
-//        system(cmd.c_str());
-//        ngspice ng_spice ;
-//        ng_spice.initvoltage();
-//        double sourceV = ng_spice.voltages[getNgSpiceKey(sourceGrid)];
-//        double targetV = ng_spice.voltages[getNgSpiceKey(targetGrid)];
-//        double Drop = (sourceV - targetV) * 100 ;
-//        cout << powerpin << " to " << blockinfo.BlockName << "_" << blockinfo.BlockPinName << " Drop:" << Drop << "(%) " ; 
-//        double constaint = RouterHelper.getIRDropConstaint(blockinfo.BlockName, blockinfo.BlockPinName);
-//        if( constaint >= Drop )
-//            cout << "Pass" << endl;
-//        else
-//            cout << "No Pass" << endl;
-//        cout << "IR Drop Constraint:" << constaint << "(%)"<< endl;
-//        cout << endl;
         delete [] graph_sp ;
     }
     Simulation();
+    
+    
 }
 // Grid 座標
 string RouterV4::getNgSpiceKey(Coordinate3D coordinate3d)
@@ -1471,6 +1405,7 @@ string RouterV4::getNgSpiceKey(Coordinate3D coordinate3d)
 }
 void RouterV4::Simulation()
 {
+    output_gen.setOutputFilesName(outputfilesName);
     sp_gen.toSpice();
     sp_gen.addSpiceCmd();
     string cmd = "./ngspice " + spiceName + " -o simulation" ;
@@ -1485,8 +1420,7 @@ void RouterV4::Simulation()
         string targetKey = getNgSpiceKey(targetGrid) ;
         if( ng_spice.voltages.find(sourceKey) == ng_spice.voltages.end() ) assert(0);
         if( ng_spice.voltages.find(targetKey) == ng_spice.voltages.end() ) assert(0);
-        
-        double sourceV = ng_spice.voltages[getNgSpiceKey(sourceGrid)];
+        double sourceV = stod(VoltageMaps[routingList.sourceName]);
         double targetV = ng_spice.voltages[getNgSpiceKey(targetGrid)];
         double drop = (sourceV - targetV) * 100 ;
         double constaint = RouterHelper.getIRDropConstaint(routingList.targetBlockName, routingList.targetBlockPinName);
@@ -1497,7 +1431,9 @@ void RouterV4::Simulation()
             cout << " No Pass" << endl;
         cout << "IR Drop Constraint:" << constaint << "(%)"<< endl;
         cout << endl;
+        output_gen.setIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop);
     }
+    output_gen.toOutputFiles();
 }
 double RouterV4::getMetalResistance(int layer)
 {

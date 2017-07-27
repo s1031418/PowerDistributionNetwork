@@ -106,6 +106,11 @@ public:
     
     void InitViaInfos();
     
+    int getCrossArea(Rectangle rect1 , Rectangle rect2);
+    
+    bool isCross(Rectangle rect1 , Rectangle rect2);
+    
+    string getAlias(string MetalName);
 };
 
 #endif /* PDNHelper_hpp */

@@ -61,7 +61,6 @@ public:
     
     CrossInfo isCrossWithObstacle( Rectangle rect1  , string source , map<string,vector<BlockCoordinate>> & obstacles);
     
-    int getCrossArea(Rectangle rect1 , Rectangle rect2);
     
     // 如果完全沒有相交 return -1 , -1
     // 如果相交在一個點就return rectangle 左下右上都是那個點
@@ -74,13 +73,10 @@ public:
     
     string getLCS(string s1,string s2);
     
-    string getAlias(string MetalName);
     
     int translateMetalNameToInt(string MetalName);
     
     string translateIntToMetalName(int layer);
-    
-    bool isCross(Rectangle rect1 , Rectangle rect2);
     
     tuple<bool,bool,bool,bool> getCrossEdge();
     
