@@ -13,6 +13,20 @@ PDNHelper::PDNHelper()
     }
     InitBlockMaps();
     InitPowerMaps();
+    InitViaInfos();
+}
+void PDNHelper::InitViaInfos()
+{
+    for( auto via : ViaMaps )
+    {
+        ViaInfo viaInfo ;
+        viaInfo.name = via.second.NAME ;
+        viaInfo.resistance = via.second.RESISTANCE ;
+        viaInfo.width = abs( via.second.InnerMaps.begin()->second.pt1.x - via.second.InnerMaps.begin()->second.pt2.x );
+        viaInfo.length = abs( via.second.InnerMaps.begin()->second.pt1.y - via.second.InnerMaps.begin()->second.pt2.y );
+        if( ViaInfos.find(via.second.InnerMaps.begin()->second.NAME) == ViaInfos.end() ) ViaInfos.insert(make_pair(via.second.InnerMaps.begin()->second.NAME, vector<ViaInfo>()));
+        ViaInfos[via.second.InnerMaps.begin()->second.NAME].push_back(viaInfo);
+    }
 }
 PDNHelper::~PDNHelper()
 {
@@ -112,7 +126,10 @@ vector<Block> PDNHelper::getPowerPinInfo()
 {
     vector<Block> temp ;
     for(auto powerpin : PowerMaps)
-        temp.push_back(powerpin.second);
+    {
+        for( auto x : powerpin.second)
+            temp.push_back(x);
+    }
     return temp ;
 }
 vector<Block> PDNHelper::getBlockPinInfo()
@@ -405,21 +422,21 @@ Point<int> PDNHelper::getCrossPoint(Line line1 , Line line2)
     }
     return CrossPoint ;
 }
-Point<int> PDNHelper::getEndPoint(Point<int> pt1  , Point<int> pt2 )
-{
-    Point<int> temp ;
-    for(auto Blocks : BlockPinMaps)
-    {
-        for(auto block : Blocks.second)
-        {
-            if( pt1.x >= block.LeftDown.x && pt1.x <= block.RightUp.x && pt1.y >= block.LeftDown.y && pt1.y <= block.RightUp.y )
-                return block.RightUp ;
-            if( pt2.x >= block.LeftDown.x && pt2.x <= block.RightUp.x && pt2.y >= block.LeftDown.y && pt2.y <= block.RightUp.y )
-                return block.RightUp ;
-        }
-    }
-    return temp;
-}
+//Point<int> PDNHelper::getEndPoint(Point<int> pt1  , Point<int> pt2 )
+//{
+//    Point<int> temp ;
+//    for(auto Blocks : BlockPinMaps)
+//    {
+//        for(auto block : Blocks.second)
+//        {
+//            if( pt1.x >= block.LeftDown.x && pt1.x <= block.RightUp.x && pt1.y >= block.LeftDown.y && pt1.y <= block.RightUp.y )
+//                return block.RightUp ;
+//            if( pt2.x >= block.LeftDown.x && pt2.x <= block.RightUp.x && pt2.y >= block.LeftDown.y && pt2.y <= block.RightUp.y )
+//                return block.RightUp ;
+//        }
+//    }
+//    return temp;
+//}
 double PDNHelper::calculateResistance(double rpsq , int width , double length )
 {
     return rpsq * length / width ;
@@ -473,58 +490,86 @@ Point<int> PDNHelper::FlipX(float y_axis , Point<int> pt , DIRECTION orientation
     return Point<int>(x,y);
     
 }
-Block PDNHelper::getPowerPinCoordinate(string powerPinName)
+vector<Block> PDNHelper::getPowerPinCoordinate(string powerPinName)
 {
     return PowerMaps[powerPinName] ;
 }
+double PDNHelper::getSourceVoltage(string powerpin)
+{
+    return stod(VoltageMaps[powerpin]);
+}
 void PDNHelper::InitPowerMaps()
 {
+    
     // key pinName , value block
     for(auto pin : PinMaps)
     {
-        string orient = pin.second.ORIENT ;
-        Block block ;
-        pair< Point<int>, Point<int> > PowerPinCoordinate = getPowerPinCoordinate(pin.second.STARTPOINT.x, pin.second.STARTPOINT.y, pin.second.RELATIVE_POINT1 , pin.second.RELATIVE_POINT2, orient);
-        block.LeftDown = get<0>(PowerPinCoordinate);
-        block.RightUp = get<1>(PowerPinCoordinate);
-        block.Metals.push_back(pin.second.METALNAME);
-        
-        if( block.LeftDown.y == DIEAREA.pt1.y ) block.Direction = TOP ;
-        if( block.LeftDown.x == DIEAREA.pt1.x ) block.Direction = RIGHT ;
-        if( block.RightUp.y == DIEAREA.pt2.y ) block.Direction = DOWN ;
-        if( block.RightUp.x == DIEAREA.pt2.x ) block.Direction = LEFT ;
-        PowerMaps.insert(make_pair(pin.first, block));
+        vector<Block> temp ;
+        if( pin.second.Ports.size() > 1 )
+        {
+            for( auto port : pin.second.Ports )
+            {
+                string orient = port.ORIENT ;
+                Block block ;
+                pair< Point<int>, Point<int> > PowerPinCoordinate = getPowerPinCoordinate(port.STARTPOINT.x, port.STARTPOINT.y, port.RELATIVE_POINT1 , port.RELATIVE_POINT2, orient);
+                block.LeftDown = get<0>(PowerPinCoordinate);
+                block.RightUp = get<1>(PowerPinCoordinate);
+                block.Metals.push_back(port.NAME);
+                
+                if( block.LeftDown.y == DIEAREA.pt1.y ) block.Direction = TOP ;
+                if( block.LeftDown.x == DIEAREA.pt1.x ) block.Direction = RIGHT ;
+                if( block.RightUp.y == DIEAREA.pt2.y ) block.Direction = DOWN ;
+                if( block.RightUp.x == DIEAREA.pt2.x ) block.Direction = LEFT ;
+                temp.push_back(block);
+            }
+        }
+        else
+        {
+            string orient = pin.second.ORIENT ;
+            Block block ;
+            pair< Point<int>, Point<int> > PowerPinCoordinate = getPowerPinCoordinate(pin.second.STARTPOINT.x, pin.second.STARTPOINT.y, pin.second.RELATIVE_POINT1 , pin.second.RELATIVE_POINT2, orient);
+            block.LeftDown = get<0>(PowerPinCoordinate);
+            block.RightUp = get<1>(PowerPinCoordinate);
+            block.Metals.push_back(pin.second.METALNAME);
+            
+            if( block.LeftDown.y == DIEAREA.pt1.y ) block.Direction = TOP ;
+            if( block.LeftDown.x == DIEAREA.pt1.x ) block.Direction = RIGHT ;
+            if( block.RightUp.y == DIEAREA.pt2.y ) block.Direction = DOWN ;
+            if( block.RightUp.x == DIEAREA.pt2.x ) block.Direction = LEFT ;
+            temp.push_back(block);
+        }
+        PowerMaps.insert(make_pair(pin.first, temp));
     }
 }
-string PDNHelper::getPowerPinMsg(Point<int> pt)
-{
-    for(auto pin : PowerMaps)
-    {
-        if( pt.x >= pin.second.LeftDown.x && pt.x <= pin.second.RightUp.x && pt.y >= pin.second.LeftDown.y && pt.y <= pin.second.RightUp.y )
-        {
-            return pin.first ;
-        }
-    }
-    return string();
-}
-Point<int> PDNHelper::getStartPoint(Point<int> pt1 , Point<int> pt2 )
-{
-    
-    for(auto pin : PowerMaps)
-    {
-        // 假如pt1在Powerpin得範圍內
-        if( pt1.x >= pin.second.LeftDown.x && pt1.x <= pin.second.RightUp.x && pt1.y >= pin.second.LeftDown.y && pt1.y <= pin.second.RightUp.y )
-        {
-            return pt1 ;
-        }
-        // 假如pt2在Powerpin得範圍內
-        if( pt2.x >= pin.second.LeftDown.x && pt2.x <= pin.second.RightUp.x && pt2.y >= pin.second.LeftDown.y && pt2.y <= pin.second.RightUp.y )
-        {
-            return pt2 ;
-        }
-    }
-    return Point<int>();
-}
+//string PDNHelper::getPowerPinMsg(Point<int> pt)
+//{
+//    for(auto pin : PowerMaps)
+//    {
+//        if( pt.x >= pin.second.LeftDown.x && pt.x <= pin.second.RightUp.x && pt.y >= pin.second.LeftDown.y && pt.y <= pin.second.RightUp.y )
+//        {
+//            return pin.first ;
+//        }
+//    }
+//    return string();
+//}
+//Point<int> PDNHelper::getStartPoint(Point<int> pt1 , Point<int> pt2 )
+//{
+//    
+//    for(auto pin : PowerMaps)
+//    {
+//        // 假如pt1在Powerpin得範圍內
+//        if( pt1.x >= pin.second.LeftDown.x && pt1.x <= pin.second.RightUp.x && pt1.y >= pin.second.LeftDown.y && pt1.y <= pin.second.RightUp.y )
+//        {
+//            return pt1 ;
+//        }
+//        // 假如pt2在Powerpin得範圍內
+//        if( pt2.x >= pin.second.LeftDown.x && pt2.x <= pin.second.RightUp.x && pt2.y >= pin.second.LeftDown.y && pt2.y <= pin.second.RightUp.y )
+//        {
+//            return pt2 ;
+//        }
+//    }
+//    return Point<int>();
+//}
 Block PDNHelper::getBlock( string BlockName , string BlockPinName )
 {
     for(auto x : BlockPinMaps[BlockName])
@@ -537,4 +582,54 @@ Block PDNHelper::getBlock( string BlockName , string BlockPinName )
 Point<int> PDNHelper::getCenter( Point<int> LeftDown , Point<int> RightUp )
 {
     return Point<int>( ( LeftDown.x + RightUp.x ) / 2 , ( LeftDown.y + RightUp.y) / 2 ); 
+}
+bool PDNHelper::isCross(Rectangle rect1 , Rectangle rect2)
+{
+    pair<int, int> rect1Center = make_pair( ( rect1.LeftDown.x + rect1.RightUp.x ) / 2 , ( rect1.LeftDown.y + rect1.RightUp.y ) / 2 );
+    pair<int, int> rect2Center = make_pair( ( rect2.LeftDown.x + rect2.RightUp.x ) / 2 , ( rect2.LeftDown.y + rect2.RightUp.y ) / 2 );
+    int verticalDistance = abs(rect1Center.second - rect2Center.second);
+    int horizontalDistance = abs(rect1Center.first - rect2Center.first);
+    int rect1Width = rect1.RightUp.x - rect1.LeftDown.x ;
+    int rect1Height = rect1.RightUp.y - rect1.LeftDown.y ;
+    int rect2Width = rect2.RightUp.x - rect2.LeftDown.x ;
+    int rect2Height = rect2.RightUp.y - rect2.LeftDown.y ;
+    int verticalThreshold = (rect1Height + rect2Height)/2 ;
+    int horizontalThreshold = (rect1Width + rect2Width)/2 ;
+    if( verticalDistance > verticalThreshold || horizontalDistance > horizontalThreshold )
+        return false ;
+    return true ;
+}
+int PDNHelper::getCrossArea(Rectangle rect1 , Rectangle rect2)
+{
+    
+    int innerLeft = rect1.LeftDown.x > rect2.LeftDown.x ? rect1.LeftDown.x : rect2.LeftDown.x ;
+    int innerRight = rect1.RightUp.x < rect2.RightUp.x ? rect1.RightUp.x : rect2.RightUp.x ;
+    int innerTop = rect1.RightUp.y < rect2.RightUp.y ? rect1.RightUp.y : rect2.RightUp.y;
+    int innerBottom = rect1.LeftDown.y > rect2.LeftDown.y ? rect1.LeftDown.y : rect2.LeftDown.y;
+    
+    
+    int innerWidth = innerTop > innerBottom ? (innerTop - innerBottom) : 0;
+    int innerHeight = innerRight > innerLeft ? (innerRight - innerLeft) : 0;
+    int innerArea = innerWidth * innerHeight;
+    return innerArea ;
+    //    return (rect1.RightUp.x - rect1.LeftDown.x) * (rect1.RightUp.y - rect1.LeftDown.y) + (rect2.RightUp.x - rect2.LeftDown.x) * (rect2.RightUp.y - rect2.LeftDown.y) - innerArea;
+}
+string PDNHelper::getAlias(string MetalName)
+{
+    if( MetalName == "METAL15" ) return "M15";
+    if( MetalName == "METAL14" ) return "M14";
+    if( MetalName == "METAL13" ) return "M13";
+    if( MetalName == "METAL12" ) return "M12";
+    if( MetalName == "METAL11" ) return "M11";
+    if( MetalName == "METAL10" ) return "M10";
+    if( MetalName == "METAL9" ) return "M9";
+    if( MetalName == "METAL8" ) return "M8";
+    if( MetalName == "METAL7" ) return "M7";
+    if( MetalName == "METAL6" ) return "M6";
+    if( MetalName == "METAL5" ) return "M5";
+    if( MetalName == "METAL4" ) return "M4";
+    if( MetalName == "METAL3" ) return "M3";
+    if( MetalName == "METAL2" ) return "M2";
+    if( MetalName == "METAL1" ) return "M1";
+    assert(0);
 }

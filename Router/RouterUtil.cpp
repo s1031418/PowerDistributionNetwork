@@ -25,8 +25,11 @@ vector<Rectangle> RouterUtil::getBlockRectangle()
     }
     for( auto powerBlock : PowerMaps )
     {
-        Rectangle rect(powerBlock.second.LeftDown , powerBlock.second.RightUp);
-        temp.push_back(rect);
+        for( auto x : powerBlock.second )
+        {
+            Rectangle rect(x.LeftDown , x.RightUp);
+            temp.push_back(rect);
+        }
     }
     return temp ;
 }
@@ -537,21 +540,7 @@ CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1  )
     }
     return CrossInfo();
 }
-int RouterUtil::getCrossArea(Rectangle rect1 , Rectangle rect2)
-{
-    
-    int innerLeft = rect1.LeftDown.x > rect2.LeftDown.x ? rect1.LeftDown.x : rect2.LeftDown.x ;
-    int innerRight = rect1.RightUp.x < rect2.RightUp.x ? rect1.RightUp.x : rect2.RightUp.x ;
-    int innerTop = rect1.RightUp.y < rect2.RightUp.y ? rect1.RightUp.y : rect2.RightUp.y;
-    int innerBottom = rect1.LeftDown.y > rect2.LeftDown.y ? rect1.LeftDown.y : rect2.LeftDown.y;
-    
-    
-    int innerWidth = innerTop > innerBottom ? (innerTop - innerBottom) : 0;
-    int innerHeight = innerRight > innerLeft ? (innerRight - innerLeft) : 0;
-    int innerArea = innerWidth * innerHeight;
-    return innerArea ;
-//    return (rect1.RightUp.x - rect1.LeftDown.x) * (rect1.RightUp.y - rect1.LeftDown.y) + (rect2.RightUp.x - rect2.LeftDown.x) * (rect2.RightUp.y - rect2.LeftDown.y) - innerArea;
-}
+
 Rectangle RouterUtil::getCrossRect(Rectangle rect1 , Rectangle rect2)
 {
     if( !isCross(rect1, rect2) )
@@ -570,24 +559,7 @@ Rectangle RouterUtil::getCrossRect(Rectangle rect1 , Rectangle rect2)
     
     
 }
-bool RouterUtil::isCross(Rectangle rect1 , Rectangle rect2)
-{
-    
-    pair<int, int> rect1Center = make_pair( ( rect1.LeftDown.x + rect1.RightUp.x ) / 2 , ( rect1.LeftDown.y + rect1.RightUp.y ) / 2 );
-    pair<int, int> rect2Center = make_pair( ( rect2.LeftDown.x + rect2.RightUp.x ) / 2 , ( rect2.LeftDown.y + rect2.RightUp.y ) / 2 );
-    int verticalDistance = abs(rect1Center.second - rect2Center.second);
-    int horizontalDistance = abs(rect1Center.first - rect2Center.first);
-    int rect1Width = rect1.RightUp.x - rect1.LeftDown.x ;
-    int rect1Height = rect1.RightUp.y - rect1.LeftDown.y ;
-    int rect2Width = rect2.RightUp.x - rect2.LeftDown.x ;
-    int rect2Height = rect2.RightUp.y - rect2.LeftDown.y ;
-    int verticalThreshold = (rect1Height + rect2Height)/2 ;
-    int horizontalThreshold = (rect1Width + rect2Width)/2 ;
-    if( verticalDistance > verticalThreshold || horizontalDistance > horizontalThreshold )
-        return false ; 
-    return true ; 
-    
-}
+
 bool RouterUtil::IsBlock(Grid grid)
 {
     if( grid.lowermetal == 0 && grid.uppermetal == 0 )
@@ -628,40 +600,23 @@ string RouterUtil::translateIntToMetalName(int layer)
 pair<bool, string> RouterUtil::IsBlock(Point<int> LeftDown , Point<int> RightUp)
 {
     pair<bool, string> result ;
-//    get<0>(result) = false;
-//    get<1>(result) = "";
-//    for(auto block : BlockMap)
-//    {
-//        if( LeftDown.x >= block.second.first.x
-//           && RightUp.x <= block.second.second.x
-//           && LeftDown.y >= block.second.first.y
-//           && RightUp.y <= block.second.second.y )
-//        {
-//            get<0>(result) = true;
-//            get<1>(result) = ComponentMaps[block.first].MACROTYPE;
-//        }
-//    }
+    get<0>(result) = false;
+    get<1>(result) = "";
+    for(auto block : BlockMap)
+    {
+        
+        if( LeftDown.x >= block.second.LeftDown.x
+           && RightUp.x <= block.second.RightUp.x
+           && LeftDown.y >= block.second.LeftDown.y
+           && RightUp.y <= block.second.RightUp.y )
+        {
+            get<0>(result) = true;
+            get<1>(result) = ComponentMaps[block.first].MACROTYPE;
+        }
+    }
     return result;
 }
-string RouterUtil::getAlias(string MetalName)
-{
-    if( MetalName == "METAL15" ) return "M15";
-    if( MetalName == "METAL14" ) return "M14";
-    if( MetalName == "METAL13" ) return "M13";
-    if( MetalName == "METAL12" ) return "M12";
-    if( MetalName == "METAL11" ) return "M11";
-    if( MetalName == "METAL10" ) return "M10";
-    if( MetalName == "METAL9" ) return "M9";
-    if( MetalName == "METAL8" ) return "M8";
-    if( MetalName == "METAL7" ) return "M7";
-    if( MetalName == "METAL6" ) return "M6";
-    if( MetalName == "METAL5" ) return "M5";
-    if( MetalName == "METAL4" ) return "M4";
-    if( MetalName == "METAL3" ) return "M3";
-    if( MetalName == "METAL2" ) return "M2";
-    if( MetalName == "METAL1" ) return "M1";
-    assert(0);
-}
+
 int RouterUtil::getWeights(int layer)
 {
     string key = getAlias(translateIntToMetalName(layer));

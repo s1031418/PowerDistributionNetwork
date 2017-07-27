@@ -26,10 +26,11 @@ public:
     ~PDNHelper();
     vector<string> PinNames;
     
-    // value 應該要vector<Block> 暫時先只有block 
-    map<string , Block > PowerMaps ;
+    map<string , vector<Block> > PowerMaps ;
     // Key: BlockName , value : BlockPin的詳細資訊 (包含BlockPinName , Blockpin 座標 , Blockpin 包含的Metal層)
     map<string , vector<Block> > BlockPinMaps ;
+    
+    map<string,vector<ViaInfo>> ViaInfos;
     
     vector<Block> getPowerPinInfo();
     
@@ -66,11 +67,11 @@ public:
     
     // 給我兩個點，判斷是不是起點（ PowerPin內 ）
     // 如果是就把那個點回傳，否則回傳空的Point
-    Point<int> getStartPoint(Point<int> pt1 , Point<int> pt2);
+//    Point<int> getStartPoint(Point<int> pt1 , Point<int> pt2);
     
     // 給我兩個點，判斷是不是終點（ BlockPin內 ）
     // 如果是就把那個點回傳，否則回傳空的Point
-    Point<int> getEndPoint(Point<int> pt1 , Point<int> pt2);
+//    Point<int> getEndPoint(Point<int> pt1 , Point<int> pt2);
     
     double calculateResistance(double rpsq , int width , double length );
     
@@ -86,7 +87,7 @@ public:
     // 回傳 PowerPin Name
     string getPowerPinMsg(Point<int> pt);
     
-    Block getPowerPinCoordinate(string powerPinName);
+    vector<Block> getPowerPinCoordinate(string powerPinName);
     
     //給Block左下跟右上角，BlockPin左下跟右上角，還有方向
     //回傳旋轉完的左下跟右上
@@ -100,6 +101,15 @@ public:
     
     Point<int> getCenter( Point<int> LeftDown , Point<int> RightUp );
     
+    double getSourceVoltage(string powerpin);
+    
+    void InitViaInfos();
+    
+    int getCrossArea(Rectangle rect1 , Rectangle rect2);
+    
+    bool isCross(Rectangle rect1 , Rectangle rect2);
+    
+    string getAlias(string MetalName);
 };
 
 #endif /* PDNHelper_hpp */

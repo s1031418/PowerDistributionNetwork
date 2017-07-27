@@ -74,6 +74,15 @@ void SpiceGenerator::addSpiceCmd()
     fprintf(pFile, ".enddc\n");
     fclose(pFile);
 }
+const SpiceGenerator & SpiceGenerator::operator=(const SpiceGenerator & right  )
+{
+    if( this != &right )
+    {
+        this->outputfileName = right.outputfileName ;
+        this->SpiceContainer = right.SpiceContainer ;
+    }
+    return *this ;
+}
 void SpiceGenerator::toSpice()
 {
     FILE * pFile ;

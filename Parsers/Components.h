@@ -355,8 +355,9 @@ class Pin
         Point<int> RELATIVE_POINT1;
         Point<int> RELATIVE_POINT2;
         std::string ORIENT ;
+        std::vector<Port> Ports;
         // key:MetalName , value: Port
-        std::multimap< std::string, Port > PortMaps;
+//        std::multimap< std::string, Port > PortMaps;
 
 };
 class Diearea{
@@ -437,9 +438,29 @@ public:
     Rectangle(Point<int> leftdown , Point<int> rightup) :LeftDown(leftdown),RightUp(rightup) {};
     Point<int> LeftDown ;
     Point<int> RightUp ;
+    const Rectangle & operator=(const Rectangle & right)
+    {
+        if( this != &right )
+        {
+            this->LeftDown = right.LeftDown;
+            this->RightUp = right.RightUp;
+        }
+        return *this ;
+    }
+    bool operator==(const Rectangle & right)
+    {
+        return (this->LeftDown == right.LeftDown && this->RightUp == right.RightUp);
+    }
 };
 
-
+class ViaInfo {
+    
+public:
+    double resistance ;
+    int width ;
+    int length ;
+    std::string name ;
+};
 
 
 #endif /* Components_h */

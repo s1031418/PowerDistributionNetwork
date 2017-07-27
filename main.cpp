@@ -15,16 +15,16 @@
 #include <map>
 #include "InitialFileParser.hpp"
 #include <cstdio>
-#include "Converter.hpp"
 //#include "DetailRouter.hpp"
 #include "RouterV4.hpp"
 #include <memory>
-#include "PDN.hpp"
 #include <stdexcept>
 #include "verilog.hpp"
-#include "Router.hpp"
 #include <array>
 #include "SpiceGenerator.hpp"
+#include "Predictor.hpp"
+#include "Printer.hpp"
+#include "OutputFilesGenerator.hpp"
 using namespace std ;
 
 string exec(const char* cmd);
@@ -53,9 +53,11 @@ int main(int argc,  char * argv[])
     def.run();
     initialfile.run();
     verilog.run();
+    PinMaps.begin();
     RouterV4 router(spiceName,defName,ouputfilesName) ;
     router.Route();
-    
+//    Predictor predictor ;
+//    predictor.estimate();
     
     delete[] lefargv;
     delete[] defargv ;

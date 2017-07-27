@@ -2135,9 +2135,9 @@ int cls(defrCallbackType_e c, void* cl, defiUserData ud) {
 //                                        orientStr1(port->orient()));
                             }
                         }
-                        PortMaps.insert(std::make_pair(myport.NAME, myport));
-                    }
-                    mypin.PortMaps = PortMaps ; 
+//                        PortMaps.insert(std::make_pair(myport.NAME, myport));
+                        mypin.Ports.push_back(myport);
+                    }   
                 }
                 if (pin->hasPlacement()) {
                     if (pin->isPlaced()) {
@@ -2322,19 +2322,19 @@ int cls(defrCallbackType_e c, void* cl, defiUserData ud) {
                             track->firstTrackMask());
                 }
             } else {
-                fprintf(fout1, "TRACKS %s %g DO %g STEP %g LAYER ",
-                        track->macro(), track->x(),
-                        track->xNum(), track->xStep());
+//                fprintf(fout1, "TRACKS %s %g DO %g STEP %g LAYER ",
+//                        track->macro(), track->x(),
+//                        track->xNum(), track->xStep());
             }
-            for (i = 0; i < track->numLayers(); i++)
-                fprintf(fout1, "%s ", track->layer(i));
+//            for (i = 0; i < track->numLayers(); i++)
+//                fprintf(fout1, "%s ", track->layer(i));
             //fprintf(fout1, ";\n");
             break;
         case defrGcellGridCbkType :
             gcg = (defiGcellGrid*)cl;
-            fprintf(fout1, "GCELLGRID %s %d DO %d STEP %g ;\n",
-                    gcg->macro(), gcg->x(),
-                    gcg->xNum(), gcg->xStep());
+//            fprintf(fout1, "GCELLGRID %s %d DO %d STEP %g ;\n",
+//                    gcg->macro(), gcg->x(),
+//                    gcg->xNum(), gcg->xStep());
             break;
         case defrViaCbkType :
             via = (defiVia*)cl;

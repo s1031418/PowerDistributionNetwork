@@ -14,7 +14,6 @@
 #include "defrw.h"
 #include "Graph_SP.hpp"
 #include "PDNHelper.hpp"
-#include "Converter.hpp"
 #include "InitialFileParser.hpp"
 #include "verilog.hpp"
 #include "lefrw.h"
@@ -27,21 +26,17 @@
 #include "GlobalRouter.hpp"
 #include "DefGenerator.hpp"
 #include "SpiceGenerator.hpp"
+#include "OutputFilesGenerator.hpp"
 using namespace std;
 
-struct Comparator
-{
-    bool operator()(const Line & left, const Line & right) const
-    {
-        if ( left.pt1.x == right.pt1.x )
-        {
-            return left.pt1.y < right.pt1.y;
-        }
-        
-        return left.pt1.x < right.pt1.x;
-    }
-};
 
+struct RoutingPath {
+    string sourceName;
+    Coordinate3D sourceCoordinate ;
+    string targetBlockName ;
+    string targetBlockPinName; 
+    Coordinate3D targetCoordinate ;
+};
 
 class RouterV4 {
     
@@ -63,14 +58,17 @@ private:
     int lowestMetal ;
     int highestMetal ;
     int WIDTH = 10 ;
-    int SPACING = 6 ;
+    int SPACING = 10 ;
     set<int> boundList ;
     SpiceGenerator sp_gen ;
     DefGenerator def_gen ;
+    OutputFilesGenerator output_gen ;  
+    // 絕對座標＋GridZ
+    vector<RoutingPath> currentRoutingLists ;
     
+    map<string,vector<Coordinate3D>> multiPinCandidates;
     
     map<string , Coordinate3D> MagicPoints ;
-    
     
     map<string,vector<Coordinate3D>> sourceTargetInitPath;
     
@@ -81,7 +79,7 @@ private:
     
     string getNgSpiceKey(Coordinate3D coordinate3d);
     
-    void fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo  );
+    void fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo , bool peek );
     
     Coordinate3D LegalizeTargetEdge(Block block , Graph_SP * graph_sp);
     
@@ -102,7 +100,7 @@ private:
     
     void BlockTopBottom(Graph_SP * graph_sp);
     
-    void genResistance(vector<Coordinate3D> & paths , string powerPinName);
+    void genResistance(vector<Coordinate3D> & paths , string powerPinName , SpiceGenerator & sp_gen );
     
     void generateSpiceList(vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo );
     
@@ -139,6 +137,30 @@ private:
     vector<pair<Direction3D, int>> translateToFriendlyForm( vector<Coordinate3D> & Paths );
     
     vector<int> getAbsoluteDistance(vector<pair<Direction3D, int>> & friendlyPaths , Point<int> startPoint);
+    
+    // 傳入grid座標，轉成絕對座標存起來
+    void saveMultiPinCandidates(string powerPin , vector<Coordinate3D> solutions );
+    
+    bool isMultiPin(string powerPin);
+    
+    void legalizeAllOrient(Coordinate3D coordinate , Graph_SP * graph_sp);
+    
+    vector<Coordinate3D> selectPath(string powerPin , Graph_SP * graph_sp , int target , int source , BlockInfo blockinfo);
+    
+    Coordinate3D getLastIlegalCoordinate(Direction3D orient , Coordinate3D sourceGrid);
+    
+    void legalizeEdge(Coordinate3D source , Coordinate3D target , Direction3D orient , Graph_SP * graph_sp);
+    
+    void saveRoutingList(Coordinate3D sourceGrid , Coordinate3D targetGrid , string powerPin , BlockInfo blockinfo);
+    
+    Coordinate3D gridToAbsolute(Coordinate3D gridCoordinate);
+    
+    void legalizeAllLayer(Coordinate3D source , Graph_SP * graph_sp);
+    
+    double getCost(string spiceName);
+    
+    // 第一個為viaName,第二個為via location set
+    pair<string,vector<Point<int>>>  getViaLocation(Nets & net , Point<int> & orginTarget , bool top);
 };
 
 #endif /* RouterV4_hpp */
