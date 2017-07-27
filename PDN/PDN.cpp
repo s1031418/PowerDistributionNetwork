@@ -19,26 +19,26 @@
 }
 vector <vector <string >> PDN::getNoPassInfo ()
 {
-//    Converter con(WhichCase);
-//    con.toSpice();
-//    ngspice ng ;
-//    ng.init(WhichCase);
-//    cout<<"this is nopass: ";
-//    ng.printStats(con.DestinationMap);
-//    cout<<"End.\n"; 
-//    return ng.NoPassInfo;
+    //    Converter con(WhichCase);
+    //    con.toSpice();
+    //    ngspice ng ;
+    //    ng.init(WhichCase);
+    //    cout<<"this is nopass: ";
+    //    ng.printStats(con.DestinationMap);
+    //    cout<<"End.\n"; 
+    //    return ng.NoPassInfo;
     return vector<vector<string>>();
 }
 vector <vector <string >> PDN::getPassInfo ()
 {
-//    Converter con(WhichCase);
-//    con.toSpice();
-//    ngspice ng ;
-//    ng.init(WhichCase);
-//    cout<<"this is pass: ";
-//    ng.printStats(con.DestinationMap);
-//    cout<<"End.\n";
-//    return ng.PassInfo;
+    //    Converter con(WhichCase);
+    //    con.toSpice();
+    //    ngspice ng ;
+    //    ng.init(WhichCase);
+    //    cout<<"this is pass: ";
+    //    ng.printStats(con.DestinationMap);
+    //    cout<<"End.\n";
+    //    return ng.PassInfo;
     return vector<vector<string>>();
 }
 bool PDN::isHorizontalExist( Nets* NET1,Nets* NET2 )
@@ -121,13 +121,13 @@ void PDN::Optimize()
     //cout<<"This is NoPass : \n";
     //for(int i = 0 ; i < NoPassInfo.size();i++)
     //{
-        //cout<<NoPassInfo[i][0]<<" "<<NoPassInfo[i][1]<< " "<<NoPassInfo[i][2]<<endl;
+    //cout<<NoPassInfo[i][0]<<" "<<NoPassInfo[i][1]<< " "<<NoPassInfo[i][2]<<endl;
     //}
     //cout<<"---------\n";
     //cout<<"This is Pass : \n";
     //for(int i = 0 ; i < PassInfo.size();i++)
     //{
-        //cout<<PassInfo[i][0]<<" "<<PassInfo[i][1]<< " "<<PassInfo[i][2]<<endl;
+    //cout<<PassInfo[i][0]<<" "<<PassInfo[i][1]<< " "<<PassInfo[i][2]<<endl;
     //}
     //cout<<"---------\n";
     map < Nets* , bool > isModify ;
@@ -479,7 +479,7 @@ void PDN::AddVia( vector<Nets*> &lineGroup , map <Nets* , bool > &isAdd  ,string
     for(int i = 0  ;  i < lineGroup.size();i++)
     {
         //if ( isAdd[lineGroup[i]] == true )
-            //continue;
+        //continue;
         if ( lineGroup[i]->ROUNTWIDTH == 0  )
         {
             if ( lineGroup[i-1]->METALNAME.compare(lineGroup[i+1]->METALNAME)!=0 && lineGroup[i+1]->ROUNTWIDTH != 0 )//只檢查單科Via via連via還沒做
@@ -566,7 +566,7 @@ void PDN::AddVia( vector<Nets*> &lineGroup , map <Nets* , bool > &isAdd  ,string
                         }
                         tmpPointY += viaWidth;
                     }   
-                                                         
+
                 }
                 i+=tempVector.size();
             }
