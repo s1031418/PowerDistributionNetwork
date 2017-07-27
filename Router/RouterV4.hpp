@@ -66,6 +66,8 @@ private:
     // 絕對座標＋GridZ
     vector<RoutingPath> currentRoutingLists ;
     
+    vector<RoutingPath> NoPassRoutingLists ; 
+    
     map<string,vector<Coordinate3D>> multiPinCandidates;
     
     map<string , Coordinate3D> MagicPoints ;
@@ -79,7 +81,7 @@ private:
     
     string getNgSpiceKey(Coordinate3D coordinate3d);
     
-    void fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo , bool peek );
+    void fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName ,string blockName , string blockPinName  , int width , bool peek );
     
     Coordinate3D LegalizeTargetEdge(Block block , Graph_SP * graph_sp);
     
@@ -102,7 +104,7 @@ private:
     
     void genResistance(vector<Coordinate3D> & paths , string powerPinName , SpiceGenerator & sp_gen );
     
-    void generateSpiceList(vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo );
+    void generateSpiceList(vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName  );
     
     string gridToString(Coordinate3D , bool);
     
@@ -112,9 +114,9 @@ private:
     
     void BlockGridCoordinate( Graph_SP * graph_sp , Block & block);
     
-    void InitPowerPinAndBlockPin();
+    void InitPowerPinAndBlockPin(int width , int spacing );
     
-    void getInitSolution(Block powerBlock  , string powerpin, BlockInfo blockinfo , bool source );
+    void getInitSolution(Block powerBlock  , string powerpin, string blockName , string BlockPinName , int width , int spacing , bool source );
     
     void InitState();
     
@@ -122,7 +124,7 @@ private:
     
     void CutGrid(int width , int spacing);
     
-    void InitGrids(string source );
+    void InitGrids(string source , int width , int spacing );
     
     Graph_SP * InitGraph_SP();
     
@@ -161,6 +163,10 @@ private:
     
     // 第一個為viaName,第二個為via location set
     pair<string,vector<Point<int>>>  getViaLocation(Nets & net , Point<int> & orginTarget , bool top);
+    
+    bool parallelRoute(string powerPin , string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , int width , int spacing );
+    
+    Coordinate3D AbsToGrid(Coordinate3D coordinateABS);
 };
 
 #endif /* RouterV4_hpp */

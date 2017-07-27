@@ -116,6 +116,12 @@ void OutputFilesGenerator::calculateMetalUsage()
         metalUsageLines.push_back(metalUsageLine);
     }
 }
+void OutputFilesGenerator::clear()
+{
+    irDropLines.clear();
+    metalUsageLines.clear();
+    outputfileName.clear();
+}
 void OutputFilesGenerator::toOutputFiles()
 {
     double TotalMetalUsage = 0 ;

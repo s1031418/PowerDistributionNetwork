@@ -370,7 +370,7 @@ pair<string,vector<Point<int>>>  RouterV4::getViaLocation(Nets & net , Point<int
     }
     return make_pair(viaInfo.name, viaLocation);
 }
-void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo , bool peek )
+void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , int width ,  bool peek )
 {
 //    for(auto p : paths)
 //        cout << p.x << " " << p.y << " " << p.z << endl;
@@ -387,9 +387,9 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
     
     
     if( create )
-        specialnet.DESTINATIONMAPS.insert(make_pair(blockinfo.BlockName, blockinfo.BlockPinName));
+        specialnet.DESTINATIONMAPS.insert(make_pair(blockName, blockPinName));
     else
-        iter->second.DESTINATIONMAPS.insert(make_pair(blockinfo.BlockName, blockinfo.BlockPinName));
+        iter->second.DESTINATIONMAPS.insert(make_pair(blockName, blockPinName));
     specialnet.USE = "POWER";
     
     
@@ -799,13 +799,14 @@ string RouterV4::gridToString(Coordinate3D coordinate , bool translate )
     result.append("_").append(to_string(x)).append("_").append(to_string(y));
     return result ;
 }
-void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockinfo  , bool source)
+void RouterV4::getInitSolution(Block block  , string powerpin, string blockName , string BlockPinName , int width  , int spacing ,  bool source)
 {
     // Virtual Obstacles 還沒存入multipinCandidate
     vector<BlockCoordinate> virtualObstacles ;
     vector<Coordinate3D> paths ;
     auto sourceGrid = getGridCoordinate(block);
-    string key = blockinfo.BlockName.append(blockinfo.BlockPinName);
+    string key ;
+    key.append(blockName).append(BlockPinName);
     if( block.Direction == TOP )
     {
         int blockLength = block.RightUp.y - block.LeftDown.y ;
@@ -814,7 +815,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
         targetGrid.y += 1 ;
         int nextY = getAbsolutePoint(targetGrid).y ;
         // get how many counts should be calcaulated.
-        while( nextY - currentY !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockLength )
+        while( nextY - currentY !=  (0.5 * width + spacing)*UNITS_DISTANCE + blockLength )
         {
             targetGrid.y += 1 ;
             nextY = getAbsolutePoint(targetGrid).y ;
@@ -827,7 +828,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             solution.z = sourceGrid.z ;
             paths.push_back(solution);
         }
-        fillSpNetMaps(paths, powerpin, blockinfo , false );
+        fillSpNetMaps(paths, powerpin, blockName , BlockPinName ,width ,  false );
         vector<Coordinate3D> absolutePoints ;
         for(auto p : paths)
         {
@@ -846,8 +847,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             Point<int> Target = getAbsolutePoint(targetGrid);
             virtualObstacle.LeftDown = Source;
             virtualObstacle.RightUp = Target;
-            virtualObstacle.LeftDown.x -= WIDTH / 2 * UNITS_DISTANCE ;
-            virtualObstacle.RightUp.x += WIDTH / 2 * UNITS_DISTANCE ;
+            virtualObstacle.LeftDown.x -= width / 2 * UNITS_DISTANCE ;
+            virtualObstacle.RightUp.x += width / 2 * UNITS_DISTANCE ;
             if( i != z )
             {
                 virtualObstacle.lowerMetal = i ;
@@ -864,7 +865,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
         targetGrid.y -= 1 ;
         int nextY = getAbsolutePoint(targetGrid).y ;
         // get how many counts should be calcaulated.
-        while( currentY - nextY !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockLength )
+        while( currentY - nextY !=  (0.5 * width + spacing)*UNITS_DISTANCE + blockLength )
         {
             targetGrid.y -= 1 ;
             nextY = getAbsolutePoint(targetGrid).y ;
@@ -877,7 +878,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             solution.z = sourceGrid.z ;
             paths.push_back(solution);
         }
-        fillSpNetMaps(paths, powerpin, blockinfo , false );
+        fillSpNetMaps(paths, powerpin, blockName , BlockPinName ,width ,  false );
         vector<Coordinate3D> absolutePoints ;
         for(auto p : paths)
         {
@@ -895,8 +896,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             Point<int> Target = getAbsolutePoint(targetGrid);
             virtualObstacle.RightUp = Source;
             virtualObstacle.LeftDown = Target;
-            virtualObstacle.LeftDown.x -= WIDTH / 2 * UNITS_DISTANCE ;
-            virtualObstacle.RightUp.x += WIDTH / 2 * UNITS_DISTANCE ;
+            virtualObstacle.LeftDown.x -= width / 2 * UNITS_DISTANCE ;
+            virtualObstacle.RightUp.x += width / 2 * UNITS_DISTANCE ;
             if( i != z )
             {
                 virtualObstacle.lowerMetal = i ;
@@ -913,7 +914,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
         targetGrid.x += 1 ;
         int nextX = getAbsolutePoint(targetGrid).x ;
         // get how many counts should be calcaulated.
-        while( nextX - currentX !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockWidth )
+        while( nextX - currentX !=  (0.5 * width + spacing)*UNITS_DISTANCE + blockWidth )
         {
             targetGrid.x += 1 ;
             nextX = getAbsolutePoint(targetGrid).x ;
@@ -926,7 +927,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             solution.z = sourceGrid.z ;
             paths.push_back(solution);
         }
-        fillSpNetMaps(paths, powerpin, blockinfo , false );
+        fillSpNetMaps(paths, powerpin, blockName , BlockPinName ,width ,  false );
         vector<Coordinate3D> absolutePoints ;
         for(auto p : paths)
         {
@@ -944,8 +945,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             Point<int> Target = getAbsolutePoint(targetGrid);
             virtualObstacle.LeftDown = Source;
             virtualObstacle.RightUp = Target;
-            virtualObstacle.LeftDown.y -= WIDTH / 2 * UNITS_DISTANCE ;
-            virtualObstacle.RightUp.y += WIDTH / 2 * UNITS_DISTANCE ;
+            virtualObstacle.LeftDown.y -= width / 2 * UNITS_DISTANCE ;
+            virtualObstacle.RightUp.y += width / 2 * UNITS_DISTANCE ;
             if( i != z )
             {
                 virtualObstacle.lowerMetal = i ;
@@ -962,7 +963,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
         targetGrid.x -= 1 ;
         int nextX = getAbsolutePoint(targetGrid).x ;
         // get how many counts should be calcaulated.
-        while( currentX - nextX !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockWidth )
+        while( currentX - nextX !=  (0.5 * width + spacing)*UNITS_DISTANCE + blockWidth )
         {
             targetGrid.x -= 1 ;
             nextX = getAbsolutePoint(targetGrid).x ;
@@ -975,7 +976,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             solution.z = sourceGrid.z ;
             paths.push_back(solution);
         }
-        fillSpNetMaps(paths, powerpin, blockinfo , false);
+        fillSpNetMaps(paths, powerpin, blockName , BlockPinName ,width ,  false );
         vector<Coordinate3D> absolutePoints ;
         for(auto p : paths)
         {
@@ -993,8 +994,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
             Point<int> Target = getAbsolutePoint(targetGrid);
             virtualObstacle.RightUp = Source;
             virtualObstacle.LeftDown = Target;
-            virtualObstacle.LeftDown.y -= WIDTH / 2 * UNITS_DISTANCE ;
-            virtualObstacle.RightUp.y += WIDTH / 2 * UNITS_DISTANCE ;
+            virtualObstacle.LeftDown.y -= width / 2 * UNITS_DISTANCE ;
+            virtualObstacle.RightUp.y += width / 2 * UNITS_DISTANCE ;
             if( i != z )
             {
                 virtualObstacle.lowerMetal = i ;
@@ -1006,9 +1007,9 @@ void RouterV4::getInitSolution(Block block  , string powerpin, BlockInfo blockin
     for( auto virtualObstacle : virtualObstacles )
         obstacles[powerpin].push_back(virtualObstacle);
 }
-void RouterV4::InitPowerPinAndBlockPin()
+void RouterV4::InitPowerPinAndBlockPin(int width , int spacing )
 {
-    InitGrids("");
+    InitGrids("", width , spacing );
 
     for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
     {
@@ -1018,15 +1019,12 @@ void RouterV4::InitPowerPinAndBlockPin()
             string powerpin = i->first ;
             string block = i->second.BlockName ;
             string blockPin = i->second.BlockPinName ;
-            BlockInfo blockinfo ;
-            blockinfo.BlockName = block ;
-            blockinfo.BlockPinName = blockPin ;
             vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerpin);
             // 如果有multiSource 目前hardcode第一個
             Block powerPinCoordinate = powerPinCoordinates[0];
             Block blockPinCoordinate = RouterHelper.getBlock(block,blockPin);
-            if( i == ret.first ) getInitSolution(powerPinCoordinate,powerpin,blockinfo,true );
-            getInitSolution(blockPinCoordinate,powerpin,blockinfo,false);
+            if( i == ret.first ) getInitSolution(powerPinCoordinate,powerpin,block,blockPin,width,spacing,true );
+            getInitSolution(blockPinCoordinate,powerpin,block,blockPin,width,spacing,false);
         }
     }
 }
@@ -1244,6 +1242,11 @@ double RouterV4::getCost(string spiceName)
     }
     return cost ;
 }
+Coordinate3D RouterV4::AbsToGrid(Coordinate3D coordinateABS)
+{
+    Coordinate3D coordinate( getGridX(coordinateABS.x) , getGridY(coordinateABS.y) , coordinateABS.z );
+    return coordinate ;
+}
 vector<Coordinate3D> RouterV4::selectPath(string powerPin , Graph_SP * graph_sp , int target, int source  , BlockInfo blockinfo)
 {
     double minCost = INT_MAX; 
@@ -1261,7 +1264,7 @@ vector<Coordinate3D> RouterV4::selectPath(string powerPin , Graph_SP * graph_sp 
         auto paths= graph_sp->getPath(source);
         for( auto path : paths )
             selectedPath.push_back(translate1D_3D(path));
-        generateSpiceList(selectedPath, powerPin, blockinfo);
+        generateSpiceList(selectedPath, powerPin, blockinfo.BlockName , blockinfo.BlockPinName);
         return selectedPath ;
     }
     cout << "multipin candidate:" << multiPinCandidates[powerPin].size() << endl;
@@ -1344,7 +1347,7 @@ void RouterV4::legalizeAllLayer(Coordinate3D source , Graph_SP * graph_sp)
 }
 void RouterV4::Route()
 {
-    InitPowerPinAndBlockPin();
+    InitPowerPinAndBlockPin(WIDTH,SPACING);
     def_gen.toOutputDef();
     GlobalRouter gr ;
     auto orders = gr.getNetOrdering();
@@ -1358,7 +1361,7 @@ void RouterV4::Route()
         vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerpin);
         Block powerPinCoordinate = powerPinCoordinates[0];
         Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
-        InitGrids(powerpin);
+        InitGrids(powerpin,WIDTH , SPACING);
         Graph_SP * graph_sp = InitGraph_SP();
         Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp);
         Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp);
@@ -1366,7 +1369,7 @@ void RouterV4::Route()
         int source = translate3D_1D(sourceGrid);
         int target = translate3D_1D(targetGrid);
         vector<Coordinate3D> solutions = selectPath(powerpin, graph_sp, target , source , blockinfo);
-        fillSpNetMaps(solutions, powerpin, blockinfo , true );
+        fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , WIDTH,true );
         saveMultiPinCandidates(powerpin, solutions);
         def_gen.toOutputDef();
         delete [] graph_sp ;
@@ -1374,7 +1377,39 @@ void RouterV4::Route()
     Simulation();
     
     
+    while (!NoPassRoutingLists.empty())
+    {
+        for(auto noPassRoutingList : NoPassRoutingLists)
+        {
+            if( !parallelRoute(noPassRoutingList.sourceName, noPassRoutingList.targetBlockName, noPassRoutingList.targetBlockPinName, noPassRoutingList.sourceCoordinate, noPassRoutingList.targetCoordinate, WIDTH, SPACING) )
+                assert(0);
+        }
+        Simulation();
+    }
 }
+// coordindate 為 絕對座標 + Z
+bool RouterV4::parallelRoute(string powerPin ,string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , int width , int spacing )
+{
+    vector<Coordinate3D> solutions ;
+    InitGrids(powerPin,WIDTH,SPACING);
+    Graph_SP * graph_sp = InitGraph_SP();
+    Coordinate3D sourceGrid = AbsToGrid(source);
+    Coordinate3D targetGrid = AbsToGrid(target);
+    legalizeAllOrient(sourceGrid, graph_sp);
+    legalizeAllOrient(targetGrid, graph_sp);
+    int source1D = translate3D_1D(sourceGrid);
+    int target1D = translate3D_1D(targetGrid);
+    graph_sp->Dijkstra(target1D);
+    auto paths= graph_sp->getPath(source1D);
+    if( paths.empty() ) return false;
+    for( auto path : paths )
+        solutions.push_back(translate1D_3D(path));
+    fillSpNetMaps(solutions, powerPin, blockName , blockPinName , width , true );
+    def_gen.toOutputDef();
+    genResistance(solutions,powerPin,sp_gen);
+    return true ;
+}
+
 // Grid 座標
 string RouterV4::getNgSpiceKey(Coordinate3D coordinate3d)
 {
@@ -1389,6 +1424,8 @@ string RouterV4::getNgSpiceKey(Coordinate3D coordinate3d)
 }
 void RouterV4::Simulation()
 {
+    output_gen.clear();
+    NoPassRoutingLists.clear();
     output_gen.setOutputFilesName(outputfilesName);
     sp_gen.toSpice();
     sp_gen.addSpiceCmd();
@@ -1410,9 +1447,14 @@ void RouterV4::Simulation()
         double constaint = RouterHelper.getIRDropConstaint(routingList.targetBlockName, routingList.targetBlockPinName);
         cout << routingList.sourceName << " to " << routingList.targetBlockName << "_" << routingList.targetBlockPinName << " Drop " << drop << "(%) " ;
         if( constaint >= drop )
+        {
             cout << " Pass" << endl;
+        }
         else
+        {
             cout << " No Pass" << endl;
+            NoPassRoutingLists.push_back(routingList);
+        }
         cout << "IR Drop Constraint:" << constaint << "(%)"<< endl;
         cout << endl;
         output_gen.setIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop);
@@ -1449,14 +1491,14 @@ int RouterV4::getGridY(int y)
     if( Horizontal.find(y) == Horizontal.end() ) return  0 ;
     return (int)distance(Horizontal.begin(), Horizontal.find(y)) + 1 ;
 }
-void RouterV4::generateSpiceList(vector<Coordinate3D> & paths , string powerPinName , BlockInfo blockinfo )
+void RouterV4::generateSpiceList(vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName )
 {
-    string key = blockinfo.BlockName ;
-    key.append(blockinfo.BlockPinName);
+    string key;
+    key.append(blockName).append(blockPinName);
     auto initSourcePath = sourceTargetInitPath[powerPinName] ;
     auto initTargetPath = sourceTargetInitPath[key] ;
     sp_gen.initSpiceVdd(powerPinName, gridToString(initSourcePath[0],false), stod(VoltageMaps[powerPinName]));
-    sp_gen.addSpiceCurrent(powerPinName, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(blockinfo.BlockName, blockinfo.BlockPinName));
+    sp_gen.addSpiceCurrent(powerPinName, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(blockName, blockPinName));
     for( auto & Path : initSourcePath )
     {
         Path.x = getGridX(Path.x);
@@ -1650,13 +1692,13 @@ void RouterV4::updateGrid(CrossInfo result , Grid & grid)
         }
     }
 }
-void RouterV4::InitGrids(string source)
+void RouterV4::InitGrids(string source , int width , int spacing )
 {
     Grids.clear();
 //    cout << "Begin Initialize  Grid Graph ..." << endl;
 //    clock_t Start = clock();
     
-    CutGrid(WIDTH, SPACING);
+    CutGrid(width, spacing);
     
 //    //    CutByBlockBoundary();
 //    //    CutByUserDefine();

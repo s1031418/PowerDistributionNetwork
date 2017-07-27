@@ -40,7 +40,7 @@ public:
     void setIRDrop(string BlockName , string BlockPinName , double DropPercentage);
     void setOutputFilesName(string outputName);
     void toOutputFiles();
-    
+    void clear();
 private:
     string outputfileName ;
     vector<IRDropLine> irDropLines ;
