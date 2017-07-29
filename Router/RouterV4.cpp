@@ -1386,6 +1386,9 @@ void RouterV4::Route()
         }
         Simulation();
     }
+    sp_gen.toSpice();
+    system("rm tmp.sp");
+    system("rm simulation");
 }
 // coordindate 為 絕對座標 + Z
 bool RouterV4::parallelRoute(string powerPin ,string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , int width , int spacing )
