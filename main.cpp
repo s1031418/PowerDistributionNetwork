@@ -53,7 +53,7 @@ int main(int argc,  char * argv[])
     def.run();
     initialfile.run();
     verilog.run();
-    PinMaps.begin();
+    
     RouterV4 router(spiceName,defName,ouputfilesName) ;
     router.Route();
     

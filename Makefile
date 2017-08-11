@@ -3,7 +3,7 @@
 CXX = g++
 CXXFLAGS = -std=c++11  -I Parsers -I include -I lib -I Router -I Util -I PDN -O3 -I Flute
 OBJS = main.o Parsers/Parsers.o Parsers/Printer.o Parsers/lefrw.o Parsers/defrw.o Parsers/InitialFileParser.o PDN/PDNHelper.o Parsers/ngspice.o Router/Graph_SP.o Router/BinaryHeap.o Router/GlobalRouter.o Parsers/verilog.o  Router/RouterUtil.o Router/RouterV4.o Util/SpiceGenerator.o Util/DefGenerator.o Util/OutputFilesGenerator.o
-STATICLIB = lib/liblef.a lib/libdef.a 
+STATICLIB = lib/liblef.a lib/libdef.a Router/Simulator.o
 LEF_PATH=lef
 DEF_PATH=def
 LEF_STATICLIB=$(LEF_PATH)/lib/liblef.a
@@ -17,23 +17,23 @@ $(DEF_STATICLIB):
 	cd $(DEF_PATH) && make 
 
 main.o: main.cpp Parsers/lefrw.o
-PDNHelper.o:PDN/PDNHelper.cpp PDN/PDNHelper.hpp
-RouterV4.o:Router/RouterV4.cpp Router/RouterV4.hpp
-GlobalRouter.o:Router/GlobalRouter.cpp Router/GlobalRouter.hpp
-RouterUtil.o:Router/RouterUtil.cpp Router/RouterUtil.hpp
-OutputFilesGenerator.o:Util/OutputFilesGenerator.cpp Util/OutputFilesGenerator.hpp
-lefrw.o:lefrw.cpp lefrw.h
-ngspice.o:ngspice.cpp ngspice.hpp
-SpiceGenerator.o:SpiceGenerator.cpp SpiceGenerator.hpp
-DefGenerator.o:DefGenerator.cpp DefGenerator.hpp
-verilog.o:verilog.cpp verilog.hpp
-defrw.o:defrw.cpp defrw.h
-Graph_SP.o:Graph_SP.cpp Graph_SP.hpp
-BinaryHeap:BinaryHeap.cpp BinaryHeap.hpp
-Converter.o:lib/Converter.cpp lib/Converter.hpp
-Parser.o: Parsers/Parsers.cpp Parsers/Parsers.hpp
-InitialFileParser.o:Parsers/InitialFileParser.cpp Parsers/InitialFileParser.hpp
-Debugger.o:lib/Debugger.cpp lib/Debugger.hpp
+PDN/PDNHelper.o:PDN/PDNHelper.cpp PDN/PDNHelper.hpp
+Router/RouterV4.o:Router/RouterV4.cpp Router/RouterV4.hpp
+Router/GlobalRouter.o:Router/GlobalRouter.cpp Router/GlobalRouter.hpp
+Router/RouterUtil.o:Router/RouterUtil.cpp Router/RouterUtil.hpp
+Util/OutputFilesGenerator.o:Util/OutputFilesGenerator.cpp Util/OutputFilesGenerator.hpp
+Parsers/lefrw.o:Parsers/lefrw.cpp Parsers/lefrw.h
+Router/Simulator.o:Router/Simulator.cpp Router/Simulator.hpp
+Parsers/ngspice.o:Parsers/ngspice.cpp Parsers/ngspice.hpp
+Util/SpiceGenerator.o:Util/SpiceGenerator.cpp Util/SpiceGenerator.hpp
+Util/DefGenerator.o:Util/DefGenerator.cpp Util/DefGenerator.hpp
+Parsers/verilog.o:Parsers/verilog.cpp Parsers/verilog.hpp
+Parsers/defrw.o:Parsers/defrw.cpp Parsers/defrw.h
+Router/Graph_SP.o:Router/Graph_SP.cpp Router/Graph_SP.hpp
+Router/BinaryHeap:Router/BinaryHeap.cpp Router/BinaryHeap.hpp
+Parsers/Parser.o: Parsers/Parsers.cpp Parsers/Parsers.hpp
+Parsers/InitialFileParser.o:Parsers/InitialFileParser.cpp Parsers/InitialFileParser.hpp
+Parsers/Printer.o:Parsers/Printer.cpp Parsers/Printer.hpp
 
 run_case1:
 	time ./cadXX.out TestCase/2017/case1/case1.v TestCase/2017/case1/case1_input.def TestCase/2017/case1/tech.lef TestCase/2017/case1/blocks.lef TestCase/2017/case1/initial_files case1_output.def case1.sp output_files

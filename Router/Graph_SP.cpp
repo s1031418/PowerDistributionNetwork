@@ -106,7 +106,10 @@ void Graph_SP::Relax(int from , int to , int weight)
         }
     }
 }
-
+void Graph_SP::Prim(int Start)
+{
+    
+}
 vector<int> Graph_SP::getPath( int target )
 {
     
@@ -133,8 +136,7 @@ vector<int> Graph_SP::getPath( int target )
 }
 int Graph_SP::getShortestPath(int target)
 {
-    
-    return 0;
+    return distance[target];
 }
 void Graph_SP::Demo()
 {
@@ -147,6 +149,7 @@ void Graph_SP::Demo()
     g9.AddEdge(5, 3, 2);g9.AddEdge(5, 4, 8);
     
     g9.Dijkstra(0);
+    
 }
 void Graph_SP::resize(int n )
 {

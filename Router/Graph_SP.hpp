@@ -71,6 +71,8 @@ public:
     
     void Dijkstra(int Start = 0);
     
+    void Prim(int Start  );
+    
     vector<int> getPath( int target );
     
     int getShortestPath(int target);

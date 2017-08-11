@@ -86,6 +86,8 @@ public:
 
     map<string, BlockCoordinate > BlockMap;
     
+    int getViaWeight(int area , int layer);
+    
 private:
     
     

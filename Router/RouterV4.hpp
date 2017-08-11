@@ -126,7 +126,7 @@ private:
     
     void InitGrids(string source , int width , int spacing );
     
-    Graph_SP * InitGraph_SP();
+    Graph_SP * InitGraph_SP(int width , int spacing);
     
     int translate3D_1D(Coordinate3D coordinate3d);
     
@@ -147,7 +147,7 @@ private:
     
     void legalizeAllOrient(Coordinate3D coordinate , Graph_SP * graph_sp);
     
-    vector<Coordinate3D> selectPath(string powerPin , Graph_SP * graph_sp , int target , int source , BlockInfo blockinfo);
+    vector<Coordinate3D> selectPath(string powerPin , Graph_SP * graph_sp , int target , int source , string block , string blockPin);
     
     Coordinate3D getLastIlegalCoordinate(Direction3D orient , Coordinate3D sourceGrid);
     
@@ -167,6 +167,12 @@ private:
     bool parallelRoute(string powerPin , string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , int width , int spacing );
     
     Coordinate3D AbsToGrid(Coordinate3D coordinateABS);
+    
+    pair<vector<string>,map<string,vector<Path>>> getNetOrdering(int width, int spacing);
+    
+    void SteinerTreeConstruction();
+    
+    vector<Coordinate3D> selectSteinerPoint(string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin);
 };
 
 #endif /* RouterV4_hpp */

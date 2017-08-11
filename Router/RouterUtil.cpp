@@ -15,6 +15,25 @@ RouterUtil::RouterUtil()
 {
     InitBlockMap();
 }
+int RouterUtil::getViaWeight(int area , int layer )
+{
+    double minResistace = INT_MAX ;
+    string key = translateIntToMetalName(layer);
+    // select best via
+    for( auto via : this->ViaInfos[key] )
+    {
+        int width = via.width;
+        int length = via.length ;
+        int viaArea = width * length ;
+        int cnt = area / viaArea ;
+        double resistance = via.resistance / cnt ;
+        if( minResistace > resistance )
+        {
+            minResistace = resistance ;
+        }
+    }
+    return minResistace * 10000 ; 
+}
 vector<Rectangle> RouterUtil::getBlockRectangle()
 {
     vector<Rectangle> temp ;
