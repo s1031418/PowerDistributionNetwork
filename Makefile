@@ -67,10 +67,6 @@ run_case15:
 	time ./cadXX.out TestCase/test/test11/test11.v TestCase/test/test11/test11_input.def TestCase/test/test11/tech.lef TestCase/test/test11/blocks.lef TestCase/test/test11/initial_files test11_output.def test11.sp output_files
 run_case16:	
 	time ./cadXX.out TestCase/test/test12/test12.v TestCase/test/test12/test12_input.def TestCase/test/test12/tech.lef TestCase/test/test12/blocks.lef TestCase/test/test12/initial_files test12_output.def test12.sp output_files
-run_case17:	
-	time ./cadXX.out TestCase/test/test13/test13.v TestCase/test/test13/test13_input.def TestCase/test/test13/tech.lef TestCase/test/test13/blocks.lef TestCase/test/test13/initial_files test13_output.def test13.sp output_files
-run_case18:	
-	time ./cadXX.out TestCase/test/test14/test14.v TestCase/test/test14/test14_input.def TestCase/test/test14/tech.lef TestCase/test/test14/blocks.lef TestCase/test/test14/initial_files test14_output.def test14.sp output_files
 
 .PHONY : clean
 clean:
