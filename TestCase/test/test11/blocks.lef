@@ -20,9 +20,9 @@ MACRO block1
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL5 ;
+    LAYER METAL2 ;
        RECT 0 10 5 60 ;
-    LAYER METAL6 ;
+    LAYER METAL3 ;
        RECT 0 10 5 60 ;
     END 
   END VDD_A
@@ -30,9 +30,9 @@ MACRO block1
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL5 ;
+    LAYER METAL2 ;
        RECT 0 200 5 250 ;
-    LAYER METAL6 ;
+    LAYER METAL3 ;
        RECT 0 200 5 250 ;
     END
   END VDD_B
@@ -43,12 +43,6 @@ MACRO block1
     LAYER METAL2 ;
        RECT 0 0 1000 500 ;
     LAYER METAL3 ;
-       RECT 0 0 1000 500 ;
-    LAYER METAL4 ;
-       RECT 0 0 1000 500 ;
-    LAYER METAL5 ;
-       RECT 0 0 1000 500 ;
-    LAYER METAL6 ;
        RECT 0 0 1000 500 ;
   END
 END block1
@@ -63,9 +57,9 @@ MACRO block2
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL5 ;
+    LAYER METAL3 ;
        RECT 0 100 5 150 ;
-    LAYER METAL6 ;
+    LAYER METAL4 ;
        RECT 0 100 5 150 ;
     END
   END VDD_A
@@ -78,10 +72,6 @@ MACRO block2
     LAYER METAL3 ;
        RECT 0 0 700 600 ;
     LAYER METAL4 ;
-       RECT 0 0 700 600 ;
-    LAYER METAL5 ;
-       RECT 0 0 700 600 ;
-    LAYER METAL6 ;
        RECT 0 0 700 600 ;
   END
 END block2
@@ -98,23 +88,11 @@ MACRO block3
     PORT
     LAYER METAL5 ;
        RECT 0 50 5 100 ;
-    LAYER METAL6 ;
-       RECT 0 50 5 100 ;
     END
   END VDD_A
 
   OBS
-    LAYER METAL1 ;
-       RECT 0 0 500 500 ;
-    LAYER METAL2 ;
-       RECT 0 0 500 500 ;
-    LAYER METAL3 ;
-       RECT 0 0 500 500 ;
-    LAYER METAL4 ;
-       RECT 0 0 500 500 ;
     LAYER METAL5 ;
-       RECT 0 0 500 500 ;
-	LAYER METAL6 ;
        RECT 0 0 500 500 ;
   END
 END block3
@@ -129,9 +107,9 @@ MACRO block4
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL5 ;
+    LAYER METAL3 ;
        RECT 0 80 5 120 ;
-    LAYER METAL6 ;
+    LAYER METAL4 ;
        RECT 0 80 5 120 ;
     END
   END VDD_A
@@ -144,10 +122,6 @@ MACRO block4
     LAYER METAL3 ;
        RECT 0 0 200 200 ;
     LAYER METAL4 ;
-       RECT 0 0 200 200 ;
-	LAYER METAL5 ;
-       RECT 0 0 200 200 ;
-    LAYER METAL6 ;
        RECT 0 0 200 200 ;
   END
 END block4
@@ -162,9 +136,9 @@ MACRO block5
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL5 ;
+    LAYER METAL3 ;
        RECT 0 200 5 250 ;
-    LAYER METAL6 ;
+    LAYER METAL4 ;
        RECT 0 200 5 250 ;
     END
   END VDD_A
@@ -172,9 +146,9 @@ MACRO block5
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL5 ;
+    LAYER METAL3 ;
        RECT 0 400 5 450 ;
-    LAYER METAL6 ;
+    LAYER METAL4 ;
        RECT 0 400 5 450 ;
     END
   END VDD_B
@@ -188,43 +162,27 @@ MACRO block5
        RECT 0 0 200 1000 ;
     LAYER METAL4 ;
        RECT 0 0 200 1000 ;
-    LAYER METAL5 ;
-       RECT 0 0 200 1000 ;
-    LAYER METAL6 ;
-       RECT 0 0 200 1000 ;
   END
 END block5
 
 MACRO block6
   CLASS BLOCK ;
   ORIGIN 0 0 ;
-  SIZE 300 BY 300 ;
+  SIZE 900 BY 900 ;
   SYMMETRY X Y R90 ;
 
   PIN VDD_A
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL5 ;
-       RECT 0 100 5 200 ;
     LAYER METAL6 ;
        RECT 0 100 5 200 ;
     END
   END VDD_A
 
   OBS
-    LAYER METAL1 ;
-       RECT 0 0 300 300 ;
-    LAYER METAL2 ;
-       RECT 0 0 300 300 ;
-    LAYER METAL3 ;
-       RECT 0 0 300 300 ;
-    LAYER METAL4 ;
-       RECT 0 0 300 300 ;
-    LAYER METAL5 ;
-       RECT 0 0 300 300 ;
     LAYER METAL6 ;
-       RECT 0 0 300 300 ;
+       RECT 0 0 900 900 ;
   END
 END block6
 
