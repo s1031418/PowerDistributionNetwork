@@ -42,6 +42,33 @@ run_case2:
 	time ./cadXX.out TestCase/2017/case2/case2.v TestCase/2017/case2/case2_input.def TestCase/2017/case2/tech.lef TestCase/2017/case2/blocks.lef TestCase/2017/case2/initial_files case2_output.def case2.sp output_files 
 run_case3:	
 	time ./cadXX.out TestCase/2016/case3/case3.v TestCase/2016/case3/case3_input.def TestCase/2016/case3/tech.lef TestCase/2016/case3/blocks.lef TestCase/2016/case3/initial_files case3_output.def case3.sp output_files
+run_case4:	
+	time ./cadXX.out TestCase/test/test0/test0.v TestCase/test/test0/test0_input.def TestCase/test/test0/tech.lef TestCase/test/test0/blocks.lef TestCase/test/test0/initial_files test0_output.def test0.sp output_files
+run_case5:	
+	time ./cadXX.out TestCase/test/test1/test1.v TestCase/test/test1/test1_input.def TestCase/test/test1/tech.lef TestCase/test/test1/blocks.lef TestCase/test/test1/initial_files test1_output.def test1.sp output_files
+run_case6:	
+	time ./cadXX.out TestCase/test/test2/test2.v TestCase/test/test2/test2_input.def TestCase/test/test2/tech.lef TestCase/test/test2/blocks.lef TestCase/test/test2/initial_files test2_output.def test2.sp output_files
+run_case7:	
+	time ./cadXX.out TestCase/test/test3/test3.v TestCase/test/test3/test3_input.def TestCase/test/test3/tech.lef TestCase/test/test3/blocks.lef TestCase/test/test3/initial_files test3_output.def test3.sp output_files
+run_case8:	
+	time ./cadXX.out TestCase/test/test4/test4.v TestCase/test/test4/test4_input.def TestCase/test/test4/tech.lef TestCase/test/test4/blocks.lef TestCase/test/test4/initial_files test4_output.def test4.sp output_files
+run_case9:	
+	time ./cadXX.out TestCase/test/test5/test5.v TestCase/test/test5/test5_input.def TestCase/test/test5/tech.lef TestCase/test/test5/blocks.lef TestCase/test/test5/initial_files test5_output.def test5.sp output_files
+run_case10:	
+	time ./cadXX.out TestCase/test/test6/test6.v TestCase/test/test6/test6_input.def TestCase/test/test6/tech.lef TestCase/test/test6/blocks.lef TestCase/test/test6/initial_files test6_output.def test6.sp output_files
+run_case11:	
+	time ./cadXX.out TestCase/test/test7/test7.v TestCase/test/test7/test7_input.def TestCase/test/test7/tech.lef TestCase/test/test7/blocks.lef TestCase/test/test7/initial_files test7_output.def test7.sp output_files
+run_case12:	
+	time ./cadXX.out TestCase/test/test8/test8.v TestCase/test/test8/test8_input.def TestCase/test/test8/tech.lef TestCase/test/test8/block.lef TestCase/test/test8/initial_files test8_output.def test8.sp output_files
+run_case13:	
+	time ./cadXX.out TestCase/test/test9/test9.v TestCase/test/test9/test9_input.def TestCase/test/test9/tech.lef TestCase/test/test9/blocks.lef TestCase/test/test9/initial_files test9_output.def test9.sp output_files
+run_case14:	
+	time ./cadXX.out TestCase/test/test10/test10.v TestCase/test/test10/test10_input.def TestCase/test/test10/tech.lef TestCase/test/test10/blocks.lef TestCase/test/test10/initial_files test10_output.def test10.sp output_files
+run_case15:	
+	time ./cadXX.out TestCase/test/test11/test11.v TestCase/test/test11/test11_input.def TestCase/test/test11/tech.lef TestCase/test/test11/blocks.lef TestCase/test/test11/initial_files test11_output.def test11.sp output_files
+run_case16:	
+	time ./cadXX.out TestCase/test/test12/test12.v TestCase/test/test12/test12_input.def TestCase/test/test12/tech.lef TestCase/test/test12/blocks.lef TestCase/test/test12/initial_files test12_output.def test12.sp output_files
+
 .PHONY : clean
 clean:
 	cd $(LEF_PATH) && make clean

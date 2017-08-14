@@ -1,0 +1,45 @@
+# C:/Users/Eydi/Documents/School things/CAD Contest/2017test case/test/test0/test0_input.def
+# Created by Glade release version 4.6.3 compiled on May 19 2017 09:38:54
+# Run by Eydi on host LHT at Thu Jul  6 17:55:02 2017
+
+VERSION 5.7 ;
+NAMESCASESENSITIVE ON ;
+DIVIDERCHAR "/" ;
+BUSBITCHARS "[]" ;
+DESIGN top ;
+UNITS DISTANCE MICRONS 1000 ;
+DIEAREA ( 0 0 ) ( 3000000 3000000 ) ;
+
+COMPONENTS 3 ;
+  - B3 block3 + FIXED ( 1694500 559200 ) N ;
+  - B2 block2 + FIXED ( 483700 428900 ) W ;
+  - B1 block1 + FIXED ( 1069600 1838700 ) N ;
+END COMPONENTS
+
+PINS 3 ;
+  - VDD3 + NET VDD3 + DIRECTION INPUT + USE SIGNAL
+    + LAYER METAL5 ( -500 -5000 ) ( 500 5000 ) + FIXED ( 500 1000000 ) N ;
+  - VDD1 + NET VDD1 + DIRECTION INPUT + USE SIGNAL
+    + LAYER METAL6 ( -5000 -500 ) ( 5000 500 ) + FIXED ( 200000 500 ) N ;
+  - VDD2 + NET VDD2 + DIRECTION INPUT + USE SIGNAL
+    + LAYER METAL5 ( -500 -5000 ) ( 500 5000 ) + FIXED ( 500 500000 ) N ;
+END PINS
+
+
+SPECIALNETS 3 ;
+- VDD1
+  ( B1 VDD_A )
+  + USE POWER ;
+- VDD2
+  ( B1 VDD_B )
+  + USE POWER ;
+- VDD3
+  ( B3 VDD_A )
+  ( B2 VDD_A )
+  + USE POWER ;
+END SPECIALNETS
+
+NETS 0 ;
+END NETS
+
+END DESIGN
