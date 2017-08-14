@@ -1505,8 +1505,7 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(int width
  */
 void RouterV4::SteinerTreeConstruction(vector<Coordinate3D> & solutions , double current , Graph * & steinerTree)
 {
-    if( steinerTree == nullptr )
-        steinerTree = new Graph[1];
+    
     vector<Coordinate3D> absSolutions;
     for(auto sol : solutions)
     {
@@ -1514,7 +1513,13 @@ void RouterV4::SteinerTreeConstruction(vector<Coordinate3D> & solutions , double
         absSolutions.push_back(coordinate);
     }
     auto friendlyForm = translateToFriendlyForm(solutions);
-    steinerTree->initialize(absSolutions[0], current, 0);
+    
+    if( steinerTree == nullptr )
+    {
+        steinerTree = new Graph[1];
+        steinerTree->initialize(absSolutions[0], current, 0);
+    }
+    
     // 從source 到 target
     for(int i = 1 ; i < absSolutions.size() ; i++)
     {
@@ -1632,10 +1637,9 @@ void RouterV4::Route()
             saveMultiPinCandidates(powerpin, solutions);
             def_gen.toOutputDef();
             delete [] graph_sp ;
-            
         }
         
-//        steinerTree->reduction();
+        steinerTree->reduction();
         delete [] steinerTree;
     }
 //    InitPowerPinAndBlockPin(WIDTH,SPACING);
@@ -2134,7 +2138,6 @@ vector<int> RouterV4::getAbsoluteDistance(vector<pair<Direction3D, int>> & frien
 }
 vector<pair<Direction3D, int>> RouterV4::translateToFriendlyForm( vector<Coordinate3D> & Paths )
 {
-    int cnt = 1 ;
     Direction3D initDirection = topOrient ;
     if( (int)(Paths[1].x - Paths[0].x) > 0) initDirection = rightOrient ;
     if( (int)(Paths[1].x - Paths[0].x) < 0) initDirection = leftOrient ;
@@ -2143,39 +2146,34 @@ vector<pair<Direction3D, int>> RouterV4::translateToFriendlyForm( vector<Coordin
     if( (int)(Paths[1].z - Paths[0].z) > 0) initDirection = topOrient ;
     if( (int)(Paths[1].z - Paths[0].z) < 0) initDirection = bottomOrient ;
     vector<pair<Direction3D, int>> paths ;
-    for( int i = 1 ; i < Paths.size()-1 ; i++ )
+    int cnt = 0 ;
+    Direction3D currentDir = initDirection ;
+    Direction3D nextDir = initDirection ;
+   
+    for(int i = 0 ; i < Paths.size() ; i++)
     {
-        Direction3D direction = topOrient ;
-        if( (int)(Paths[i+1].x - Paths[i].x) > 0)
-        {
-            direction = rightOrient ;
-//            cnt += ( Grids[Paths[i].y][Paths[i+1].x].startpoint.x - Grids[Paths[i].y][Paths[i].x].startpoint.x);
-        }
-        if( (int)(Paths[i+1].x - Paths[i].x) < 0)
-        {
-            direction = leftOrient ;
-//            cnt += ( Grids[Paths[i].y][Paths[i].x].startpoint.x - Grids[Paths[i].y][Paths[i].x-1].startpoint.x);
-        }
-        if( (int)(Paths[i+1].y - Paths[i].y) > 0)
-        {
-            direction = upOrient ;
-        }
-        if( (int)(Paths[i+1].y - Paths[i].y) < 0)
-        {
-            direction = downOrient ;
-        }
-        if( (int)(Paths[i+1].z - Paths[i].z) > 0) direction = topOrient ;
-        if( (int)(Paths[i+1].z - Paths[i].z) < 0) direction = bottomOrient ;
+        if( (int)(Paths[i+1].x - Paths[i].x) > 0) nextDir = rightOrient ;
+        if( (int)(Paths[i+1].x - Paths[i].x) < 0) nextDir = leftOrient ;
+        if( (int)(Paths[i+1].y - Paths[i].y) > 0) nextDir = upOrient ;
+        if( (int)(Paths[i+1].y - Paths[i].y) < 0) nextDir = downOrient ;
+        if( (int)(Paths[i+1].z - Paths[i].z) > 0) nextDir = topOrient ;
+        if( (int)(Paths[i+1].z - Paths[i].z) < 0) nextDir = bottomOrient ;
+        if( currentDir == nextDir && nextDir == rightOrient ) cnt += (Paths[i+1].x - Paths[i].x);
+        if( currentDir == nextDir && nextDir == leftOrient ) cnt += (Paths[i].x - Paths[i+1].x);
+        if( currentDir == nextDir && nextDir == upOrient ) cnt += (Paths[i+1].y - Paths[i].y);
+        if( currentDir == nextDir && nextDir == downOrient ) cnt += (Paths[i].y - Paths[i+1].y);
+        if( currentDir == nextDir && nextDir == topOrient ) cnt += (Paths[i+1].z - Paths[i].z);
+        if( currentDir == nextDir && nextDir == bottomOrient ) cnt += (Paths[i].z - Paths[i+1].z);
         
-        if( direction != initDirection )
+        if( currentDir != nextDir )
         {
-            paths.push_back(make_pair(initDirection, cnt));
+            paths.push_back(make_pair(currentDir, cnt));
             cnt = 0 ;
-            initDirection = direction;
+            currentDir = nextDir ;
+            i -= 1 ;
         }
-        cnt++;
     }
-    paths.push_back(make_pair(initDirection, cnt));
+//    cout << "translate:" << endl;
 //    for( auto p : paths )
 //    {
 //        if( p.first == 0 )  cout << "UP";

@@ -45,10 +45,10 @@ public:
     void reduction();
     void reduceVertex(Vertex * front , Vertex * next);
     void destoryGraph();
-private:
     Vertex * root ;
     map<string,Vertex *> LUT ;
-    map<string,int> IDT;
+private:
+    
 };
 
 #endif /* Graph_hpp */
