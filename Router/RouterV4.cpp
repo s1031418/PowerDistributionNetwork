@@ -1366,7 +1366,7 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(int width
     // tree 內部的順序
     map<string,vector<Path>> innerTreeOrder ;
     map<double,Path> criteriaOrdering ;
-    map<double,Path> distanceOrdering ;
+    map<InnerTreeObj,Path,InnerTreeObjComparator> innerTreeOrderMap ;
     for( auto it = Connection.begin() ; it != Connection.end() ; it = Connection.upper_bound(it->first))
     {
         auto ret = Connection.equal_range(it->first);
@@ -1388,6 +1388,7 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(int width
             vector<Coordinate3D> solutions ;
             graph_sp->Dijkstra(target);
             auto paths= graph_sp->getPath(source);
+            delete [] graph_sp; 
             for( auto path : paths )
                 solutions.push_back(translate1D_3D(path));
             auto friendlyForm = translateToFriendlyForm(solutions);
@@ -1397,6 +1398,7 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(int width
             double allowDrop = sourceV * ( constraint );
             double Sum = 0 ;
             double totalDistance = 0 ;
+            double I = RouterHelper.getCurrent(block, blockPin);
             auto Distance = getAbsoluteDistance(friendlyForm, Point<int>(solutions[0].x,solutions[0].y));
             for( int i = 0 ; i < friendlyForm.size() ; i++ )
             {
@@ -1405,7 +1407,7 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(int width
                 {
                     totalDistance += Distance[i] ;
                     double currentResistance = LayerMaps[ RouterHelper.translateIntToMetalName(defaultLayer) ].RESISTANCE_RPERSQ ;
-                    double I = RouterHelper.getCurrent(block, blockPin);
+                    
                     double R = RouterHelper.calculateResistance(currentResistance, width * UNITS_DISTANCE, Distance[i]);
                     deltaV = I * R ;
                 }
@@ -1414,7 +1416,6 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(int width
                     if( friendlyForm[i].first ==  topOrient )
                     {
                         double R = RouterHelper.getViaWeight(width * width , defaultLayer ) / 10000 ;
-                        double I = RouterHelper.getCurrent(block, blockPin);
                         deltaV = I * R ;
                         defaultLayer += 1;
                         
@@ -1423,7 +1424,6 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(int width
                     {
                         defaultLayer -= 1;
                         double R = RouterHelper.getViaWeight(width * width , defaultLayer ) / 10000 ;
-                        double I = RouterHelper.getCurrent(block, blockPin);
                         deltaV = I * R ;
                     }
                 }
@@ -1435,10 +1435,14 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(int width
             p.target.second = blockPin ;
             
             double criteria = (allowDrop - Sum)/totalDistance ;
+            InnerTreeObj innerObj ;
+            innerObj.current = I ;
+            innerObj.critical = criteria ;
             criteriaOrdering.insert(make_pair(criteria, p));
-            distanceOrdering.insert(make_pair(totalDistance, p));
+            innerTreeOrderMap.insert(make_pair(innerObj, p));
         }
     }
+    // decide external order
     for(auto order : criteriaOrdering)
     {
         
@@ -1453,11 +1457,17 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(int width
         }
         if(insert)treeOrder.push_back(order.second.source);
     }
-    for(auto order : distanceOrdering)
+    // decide inner order
+    for(auto innerOrder : innerTreeOrderMap)
     {
-        if( innerTreeOrder.find(order.second.source) == innerTreeOrder.end()) innerTreeOrder.insert(make_pair(order.second.source, vector<Path>()));
-        innerTreeOrder[order.second.source].push_back(order.second);
+        if( innerTreeOrder.find(innerOrder.second.source) == innerTreeOrder.end()) innerTreeOrder.insert(make_pair(innerOrder.second.source, vector<Path>()));
+        innerTreeOrder[innerOrder.second.source].push_back(innerOrder.second);
     }
+//    for(auto order : distanceOrdering)
+//    {
+//        if( innerTreeOrder.find(order.second.source) == innerTreeOrder.end()) innerTreeOrder.insert(make_pair(order.second.source, vector<Path>()));
+//        innerTreeOrder[order.second.source].push_back(order.second);
+//    }
     clock_t End = clock();
     double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
     cout << "Net Ordering cost " << duration << "(s)" << endl;
@@ -1473,6 +1483,7 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(int width
     長出Steiner Tree 以後 ， 利用電流原理去Tune 線寬 ， 有個標準去判斷這種線寬是否合適
         Tune wire width: 
             用 pin to pin 去估線寬，共同部份累加。
+            估線寬要考慮congestion
         問題：標準為何？
         方法：標準：
             1. routabliloity ?
@@ -1492,13 +1503,30 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(int width
  
  
  */
-void RouterV4::SteinerTreeConstruction()
+void RouterV4::SteinerTreeConstruction(vector<Coordinate3D> & solutions , double current , Graph * & steinerTree)
 {
-    
+    if( steinerTree == nullptr )
+        steinerTree = new Graph[1];
+    vector<Coordinate3D> absSolutions;
+    for(auto sol : solutions)
+    {
+        auto coordinate = gridToAbsolute(sol);
+        absSolutions.push_back(coordinate);
+    }
+    auto friendlyForm = translateToFriendlyForm(solutions);
+    steinerTree->initialize(absSolutions[0], current, 0);
+    // 從source 到 target
+    for(int i = 1 ; i < absSolutions.size() ; i++)
+    {
+//        cout << absSolutions[i].x << " " << absSolutions[i].y << " " << absSolutions[i].z << endl;
+        Point<int> pt1(absSolutions[i-1].x , absSolutions[i-1].y);
+        Point<int> pt2(absSolutions[i].x , absSolutions[i].y);
+        double distance = RouterHelper.getManhattanDistance( pt1 , pt2);
+        steinerTree->insert(absSolutions[i-1], absSolutions[i], current, distance);
+    }
 }
 vector<Coordinate3D> RouterV4::selectSteinerPoint(string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin)
 {
-    double minCost = INT_MAX;
     vector<Coordinate3D> minCostSolutions ;
     vector<Coordinate3D> selectedPath ;
     Coordinate3D sourceGrid = translate1D_3D(source);
@@ -1558,79 +1586,35 @@ vector<Coordinate3D> RouterV4::selectSteinerPoint(string powerPin , Graph_SP * g
         genResistance(initTargetPath,powerPin,sp_gen);
         return selectedPath ;
     }
-    
-//    for( int i = 0 ; i < multiPinCandidates[powerPin].size() ; i+=100 )
-//    {
-//        if( i > multiPinCandidates[powerPin].size()  ) break;
-//        Coordinate3D candidate = multiPinCandidates[powerPin][i];
-//        Coordinate3D coordinate( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
-//        if( coordinate == sourceGrid )
-//            legalizeAllLayer(sourceGrid, graph_sp);
-//        else
-//            legalizeAllOrient(coordinate, graph_sp);
-//        graph_sp->Dijkstra(target);
-//        auto path1D = graph_sp->getPath(translate3D_1D(coordinate));
-//        if( path1D.empty() ) continue ;
-//        vector<Coordinate3D> path3D ;
-//        for( auto p : path1D )
-//            path3D.push_back(translate1D_3D(p));
-//        SpiceGenerator tmp = sp_gen ;
-//        tmp.setSpiceName("tmp.sp");
-//        string key = block ;
-//        key.append(blockPin);
-//        auto initTargetPath = sourceTargetInitPath[key] ;
-//        
-//        tmp.addSpiceCurrent(powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(block, blockPin));
-//        for( auto & Path : initTargetPath )
-//        {
-//            Path.x = getGridX(Path.x);
-//            Path.y = getGridY(Path.y);
-//        }
-//        genResistance(path3D, powerPin , tmp );
-//        genResistance(initTargetPath,powerPin,tmp);
-//        
-//        tmp.toSpice();
-//        tmp.addSpiceCmd();
-//        //        generateSpiceList(path3D, powerPin, blockinfo);
-//        //        sp_gen.toSpice();
-//        //        sp_gen.addSpiceCmd();
-//        double currentCost = getCost("tmp.sp");
-//        if( currentCost < minCost )
-//        {
-//            minCost = currentCost;
-//            minCostSolutions = path3D ;
-//        }
-//    }
-//    string key = block ;
-//    key.append(blockPin);
-//    auto initTargetPath = sourceTargetInitPath[key] ;
-//    
-//    sp_gen.addSpiceCurrent(powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(block, blockPin));
-//    for( auto & Path : initTargetPath )
-//    {
-//        Path.x = getGridX(Path.x);
-//        Path.y = getGridY(Path.y);
-//    }
-//    genResistance(minCostSolutions, powerPin , sp_gen );
-//    genResistance(initTargetPath,powerPin,sp_gen);
-    
+
     return minCostSolutions ;
+}
+void RouterV4::SteinerTreeReduction(Graph * &steinerTree , vector<Coordinate3D> & terminals)
+{
+    for(auto terminal : terminals)
+    {
+        string encodeString = steinerTree->encode(terminal);
+        
+    }
 }
 void RouterV4::Route()
 {
-//    SteinerTreeConstruction();
+
     auto ordering = getNetOrdering(WIDTH,SPACING);
     auto treeOrder = ordering.first ;
     auto innerTreeOrder = ordering.second ;
+    
     InitPowerPinAndBlockPin(WIDTH,SPACING);
     for(auto tree : treeOrder)
     {
+        Graph * steinerTree = nullptr ;
         for(auto innerTree : innerTreeOrder[tree])
         {
             BlockInfo blockinfo ;
             string powerpin = innerTree.source ;
             blockinfo.BlockName = innerTree.target.first ;
             blockinfo.BlockPinName = innerTree.target.second;
+            double current = RouterHelper.getCurrent(blockinfo.BlockName, blockinfo.BlockPinName);
             vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerpin);
             Block powerPinCoordinate = powerPinCoordinates[0];
             Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
@@ -1642,11 +1626,17 @@ void RouterV4::Route()
             int source = translate3D_1D(sourceGrid);
             int target = translate3D_1D(targetGrid);
             vector<Coordinate3D> solutions = selectSteinerPoint(powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName);
+            cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
+            SteinerTreeConstruction(solutions,current, steinerTree);
             fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , WIDTH,true );
             saveMultiPinCandidates(powerpin, solutions);
             def_gen.toOutputDef();
             delete [] graph_sp ;
+            
         }
+        
+//        steinerTree->reduction();
+        delete [] steinerTree;
     }
 //    InitPowerPinAndBlockPin(WIDTH,SPACING);
 //    def_gen.toOutputDef();

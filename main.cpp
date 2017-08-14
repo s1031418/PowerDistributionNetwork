@@ -25,6 +25,7 @@
 #include "Predictor.hpp"
 #include "Printer.hpp"
 #include "OutputFilesGenerator.hpp"
+#include "Graph.hpp"
 using namespace std ;
 
 string exec(const char* cmd);
@@ -59,7 +60,12 @@ int main(int argc,  char * argv[])
     
 //    Predictor predictor ;
 //    predictor.estimate();
-    
+//    string str = "3123314341234";
+//    Graph graph ;
+//    auto a = graph.decode(str);
+//    cout << a.x << " " << a.y << " " << a.z << endl;
+//    cout << str.compare( graph.encode(a) ) << endl;
+//    int x = stoi(temp);
     delete[] lefargv;
     delete[] defargv ;
     return 0;

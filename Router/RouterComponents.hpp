@@ -87,7 +87,7 @@ public:
     }
     bool operator!=(const Coordinate3D & right)
     {
-        return !(this == &right);
+        return !(*this == right);
     }
 };
 

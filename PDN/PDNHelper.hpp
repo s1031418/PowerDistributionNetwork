@@ -110,6 +110,8 @@ public:
     bool isCross(Rectangle rect1 , Rectangle rect2);
     
     string getAlias(string MetalName);
+    
+    double getManhattanDistance(Point<int> pt1 , Point<int> pt2);
 };
 
 #endif /* PDNHelper_hpp */

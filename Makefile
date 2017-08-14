@@ -2,7 +2,7 @@
 
 CXX = g++
 CXXFLAGS = -std=c++11  -I Parsers -I include -I lib -I Router -I Util -I PDN -O3 -I Flute
-OBJS = main.o Parsers/Parsers.o Parsers/Printer.o Parsers/lefrw.o Parsers/defrw.o Parsers/InitialFileParser.o PDN/PDNHelper.o Parsers/ngspice.o Router/Graph_SP.o Router/BinaryHeap.o Router/GlobalRouter.o Parsers/verilog.o  Router/RouterUtil.o Router/RouterV4.o Util/SpiceGenerator.o Util/DefGenerator.o Util/OutputFilesGenerator.o
+OBJS = main.o Parsers/Parsers.o Parsers/Printer.o Parsers/lefrw.o Parsers/defrw.o Parsers/InitialFileParser.o PDN/PDNHelper.o Parsers/ngspice.o Router/Graph_SP.o Router/BinaryHeap.o Router/GlobalRouter.o Parsers/verilog.o  Router/RouterUtil.o Router/RouterV4.o Util/SpiceGenerator.o Util/DefGenerator.o Util/OutputFilesGenerator.o Router/Graph.o
 STATICLIB = lib/liblef.a lib/libdef.a Router/Simulator.o
 LEF_PATH=lef
 DEF_PATH=def
@@ -21,6 +21,7 @@ PDN/PDNHelper.o:PDN/PDNHelper.cpp PDN/PDNHelper.hpp
 Router/RouterV4.o:Router/RouterV4.cpp Router/RouterV4.hpp
 Router/GlobalRouter.o:Router/GlobalRouter.cpp Router/GlobalRouter.hpp
 Router/RouterUtil.o:Router/RouterUtil.cpp Router/RouterUtil.hpp
+Router/Graph.o:Router/Graph.cpp Router/Graph.hpp
 Util/OutputFilesGenerator.o:Util/OutputFilesGenerator.cpp Util/OutputFilesGenerator.hpp
 Parsers/lefrw.o:Parsers/lefrw.cpp Parsers/lefrw.h
 Router/Simulator.o:Router/Simulator.cpp Router/Simulator.hpp

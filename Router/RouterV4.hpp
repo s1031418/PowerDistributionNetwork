@@ -27,6 +27,8 @@
 #include "DefGenerator.hpp"
 #include "SpiceGenerator.hpp"
 #include "OutputFilesGenerator.hpp"
+#include "Graph.hpp"
+#include "InnerTreeObj.h"
 using namespace std;
 
 
@@ -60,6 +62,7 @@ private:
     int WIDTH = 10 ;
     int SPACING = 10 ;
     set<int> boundList ;
+    
     SpiceGenerator sp_gen ;
     DefGenerator def_gen ;
     OutputFilesGenerator output_gen ;  
@@ -170,7 +173,9 @@ private:
     
     pair<vector<string>,map<string,vector<Path>>> getNetOrdering(int width, int spacing);
     
-    void SteinerTreeConstruction();
+    void SteinerTreeConstruction(vector<Coordinate3D> & solutions , double current , Graph * &steinerTree);
+    
+    void SteinerTreeReduction(Graph * &steinerTree , vector<Coordinate3D> & terminals);
     
     vector<Coordinate3D> selectSteinerPoint(string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin);
 };
