@@ -88,7 +88,7 @@ void RouterV4::InitBoundList()
         }
     }
 }
-Graph_SP * RouterV4::InitGraph_SP(int width , int spacing )
+Graph_SP * RouterV4::InitGraph_SP(double width , double spacing )
 {
 //    cout << "Begin Initialize 3D Shortest Path Graph ..." << endl;
 //    clock_t Start = clock();
@@ -122,8 +122,8 @@ Graph_SP * RouterV4::InitGraph_SP(int width , int spacing )
                 {
                     if( Grids[y][x].Edges[z].downEdge )
                     {
-                        graph_sp->AddEdge(index, index+Right, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x].width) * 10000  );
-                        graph_sp->AddEdge(index+Right, index, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x].width) * 10000 ) ;
+                        graph_sp->AddEdge(index, index+Right, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].width) * 10000  );
+                        graph_sp->AddEdge(index+Right, index, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].width) * 10000 ) ;
                     }
                     else
                     {
@@ -133,8 +133,8 @@ Graph_SP * RouterV4::InitGraph_SP(int width , int spacing )
                     if( Grids[y][x-1].Edges[z].downEdge )
                     {
                         
-                        graph_sp->AddEdge(index, index+Left, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x-1].width)* 10000 );
-                        graph_sp->AddEdge(index+Left, index, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x-1].width)* 10000 );
+                        graph_sp->AddEdge(index, index+Left, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x-1].width)* 10000 );
+                        graph_sp->AddEdge(index+Left, index, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x-1].width)* 10000 );
                     }
                     else
                     {
@@ -143,8 +143,8 @@ Graph_SP * RouterV4::InitGraph_SP(int width , int spacing )
                     }
                     if( Grids[y][x].Edges[z].leftEdge )
                     {
-                        graph_sp->AddEdge(index, index+Up, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x].length) * 10000);
-                        graph_sp->AddEdge(index+Up, index, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x].length) * 10000);
+                        graph_sp->AddEdge(index, index+Up, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].length) * 10000);
+                        graph_sp->AddEdge(index+Up, index, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].length) * 10000);
                     }
                     else
                     {
@@ -154,8 +154,8 @@ Graph_SP * RouterV4::InitGraph_SP(int width , int spacing )
                     if( Grids[y-1][x].Edges[z].leftEdge )
                     {
                         
-                        graph_sp->AddEdge(index, index+Down, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y-1][x].length)* 10000 );
-                        graph_sp->AddEdge(index+Down, index, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y-1][x].length) * 10000);
+                        graph_sp->AddEdge(index, index+Down, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y-1][x].length)* 10000 );
+                        graph_sp->AddEdge(index+Down, index, RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y-1][x].length) * 10000);
                     }
                     else
                     {
@@ -240,7 +240,7 @@ Point<int> RouterV4::getAbsolutePoint( Coordinate3D coordinate3d )
     int Y = ( y != 0 ) ? *std::next(Horizontal.begin(), y-1) : 0 ;
     return Point<int>(X,Y);
 }
-Coordinate3D RouterV4::LegalizeTargetEdge(Block block ,Graph_SP * graph_sp )
+Coordinate3D RouterV4::LegalizeTargetEdge(Block block ,Graph_SP * graph_sp , double width , double spacing )
 {
     vector<Coordinate3D> paths ;
     auto sourceGrid = getGridCoordinate(block);
@@ -255,7 +255,7 @@ Coordinate3D RouterV4::LegalizeTargetEdge(Block block ,Graph_SP * graph_sp )
         int nextY = getAbsolutePoint(targetGrid).y ;
         paths.push_back(targetGrid);
         // get how many counts should be calcaulated.
-        while( nextY - currentY !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockLength )
+        while( nextY - currentY !=  (0.5 * width + spacing)*UNITS_DISTANCE + blockLength )
         {
             targetGrid.y += 1 ;
             paths.push_back(targetGrid);
@@ -277,7 +277,7 @@ Coordinate3D RouterV4::LegalizeTargetEdge(Block block ,Graph_SP * graph_sp )
         paths.push_back(targetGrid);
         int nextY = getAbsolutePoint(targetGrid).y ;
         // get how many counts should be calcaulated.
-        while( currentY - nextY !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockLength )
+        while( currentY - nextY !=  (0.5 * width + spacing)*UNITS_DISTANCE + blockLength )
         {
             targetGrid.y -= 1 ;
             paths.push_back(targetGrid);
@@ -299,7 +299,7 @@ Coordinate3D RouterV4::LegalizeTargetEdge(Block block ,Graph_SP * graph_sp )
         paths.push_back(targetGrid);
         int nextX = getAbsolutePoint(targetGrid).x ;
         // get how many counts should be calcaulated.
-        while( nextX - currentX !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockWidth )
+        while( nextX - currentX !=  (0.5 * width + spacing)*UNITS_DISTANCE + blockWidth )
         {
             targetGrid.x += 1 ;
             paths.push_back(targetGrid);
@@ -322,7 +322,7 @@ Coordinate3D RouterV4::LegalizeTargetEdge(Block block ,Graph_SP * graph_sp )
         paths.push_back(targetGrid);
         int nextX = getAbsolutePoint(targetGrid).x ;
         // get how many counts should be calcaulated.
-        while( currentX - nextX !=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + blockWidth )
+        while( currentX - nextX !=  (0.5 * width + spacing)*UNITS_DISTANCE + blockWidth )
         {
             targetGrid.x -= 1 ;
             paths.push_back(targetGrid);
@@ -337,18 +337,18 @@ Coordinate3D RouterV4::LegalizeTargetEdge(Block block ,Graph_SP * graph_sp )
     }
     return targetGrid ;
 }
-pair<string,vector<Point<int>>>  RouterV4::getViaLocation(Nets & net , Point<int> & orginTarget , bool top)
+pair<string,vector<Point<int>>>  RouterV4::getViaLocation(Nets & net , Point<int> & orginTarget , bool top , double width)
 {
     ViaInfo viaInfo ;
     vector<Point<int>> viaLocation ;
     double minResistace = INT_MAX ;
-    int crossArea = WIDTH * WIDTH ;
+    int crossArea = width * width ;
     Point<int> LeftUp = orginTarget ;
     Point<int> RightDown = orginTarget ;
-    LeftUp.x -= (WIDTH * UNITS_DISTANCE / 2 );
-    LeftUp.y += (WIDTH * UNITS_DISTANCE / 2 );
-    RightDown.x += (WIDTH * UNITS_DISTANCE / 2 );
-    RightDown.y -= (WIDTH * UNITS_DISTANCE / 2 );
+    LeftUp.x -= (width * UNITS_DISTANCE / 2 );
+    LeftUp.y += (width * UNITS_DISTANCE / 2 );
+    RightDown.x += (width * UNITS_DISTANCE / 2 );
+    RightDown.y -= (width * UNITS_DISTANCE / 2 );
     string key = ( top ) ? RouterHelper.translateIntToMetalName( RouterHelper.translateMetalNameToInt(net.METALNAME) - 1 ): net.METALNAME ;
     // select best via
     for( auto via : RouterHelper.ViaInfos[key] )
@@ -382,7 +382,7 @@ pair<string,vector<Point<int>>>  RouterV4::getViaLocation(Nets & net , Point<int
     }
     return make_pair(viaInfo.name, viaLocation);
 }
-void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , int width ,  bool peek )
+void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , double width ,  bool peek )
 {
 //    for(auto p : paths)
 //        cout << p.x << " " << p.y << " " << p.z << endl;
@@ -408,7 +408,18 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
     auto source = paths[0];
     int startLayer = source.z ;
     int layer = startLayer ;
+    Graph g ;
+    for(auto p : paths)
+    {
+        auto abs = gridToAbsolute(p);
+        cout << "abs:" << abs.x << " " << abs.y << " " << abs.z << endl;
+        if(abs.x == 371000 && abs.y == 320000 && abs.z == 5)
+            cout << "";
+        widthTable.insert(make_pair(g.encode(abs), width));
+    }
     auto friendlyForm = translateToFriendlyForm(paths);
+    
+    cout << endl;
     Point<int> startPoint = Grids[source.y][source.x].startpoint ;
     Point<int> oringinTargetPoint = startPoint;
     Point<int> targetPoint = startPoint;
@@ -417,19 +428,19 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
     {
         if( nextDirection == upOrient )
         {
-            startPoint.y -= (WIDTH * UNITS_DISTANCE / 2) ;
+            startPoint.y -= (width * UNITS_DISTANCE / 2) ;
         }
         else if (nextDirection == downOrient)
         {
-            startPoint.y += (WIDTH * UNITS_DISTANCE / 2) ;
+            startPoint.y += (width * UNITS_DISTANCE / 2) ;
         }
         else if (nextDirection == leftOrient)
         {
-            startPoint.x += (WIDTH * UNITS_DISTANCE / 2) ;
+            startPoint.x += (width * UNITS_DISTANCE / 2) ;
         }
         else if (nextDirection == rightOrient)
         {
-            startPoint.x -= (WIDTH * UNITS_DISTANCE / 2) ;
+            startPoint.x -= (width * UNITS_DISTANCE / 2) ;
         }
     }
     
@@ -445,7 +456,7 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
 //        cout << " " << p.second << endl;
 //    }
 //    cout << endl;
-    
+    Grids.begin();
     auto Distance = getAbsoluteDistance(friendlyForm, Point<int>(source.x,source.y));
 //    for(auto d : Distance)
 //        cout << d << endl;
@@ -460,9 +471,9 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
             oringinTargetPoint = Point<int>( oringinTargetPoint.x , oringinTargetPoint.y + Distance[i]);
             targetPoint = oringinTargetPoint ;
 //            if( i != friendlyForm.size() -1 )targetPoint.y += (WIDTH * UNITS_DISTANCE / 2) ;
-            targetPoint.y += (WIDTH * UNITS_DISTANCE / 2) ;
+            targetPoint.y += (width * UNITS_DISTANCE / 2) ;
             net.METALNAME = RouterHelper.translateIntToMetalName(layer);
-            net.ROUNTWIDTH = WIDTH * UNITS_DISTANCE ;
+            net.ROUNTWIDTH = width * UNITS_DISTANCE ;
             net.SHAPE = "STRIPE";
             net.ABSOLUTE_POINT1 = startPoint ;
             net.ABSOLUTE_POINT2 = targetPoint ;
@@ -483,9 +494,9 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
             oringinTargetPoint = Point<int>( oringinTargetPoint.x , oringinTargetPoint.y - Distance[i]);
             targetPoint = oringinTargetPoint ;
 //            if( i != friendlyForm.size() -1 )targetPoint.y -= (WIDTH * UNITS_DISTANCE / 2) ;
-            targetPoint.y -= (WIDTH * UNITS_DISTANCE / 2) ;
+            targetPoint.y -= (width * UNITS_DISTANCE / 2) ;
             net.METALNAME = RouterHelper.translateIntToMetalName(layer);
-            net.ROUNTWIDTH = WIDTH * UNITS_DISTANCE ;
+            net.ROUNTWIDTH = width * UNITS_DISTANCE ;
             net.ABSOLUTE_POINT1 = startPoint ;
             net.ABSOLUTE_POINT2 = targetPoint ;
             net.SHAPE = "STRIPE";
@@ -506,9 +517,9 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
             oringinTargetPoint = Point<int>( oringinTargetPoint.x - Distance[i], oringinTargetPoint.y );
             targetPoint = oringinTargetPoint ;
 //            if( i != friendlyForm.size() -1 ) targetPoint.x -= (WIDTH * UNITS_DISTANCE / 2) ;
-            targetPoint.x -= (WIDTH * UNITS_DISTANCE / 2) ;
+            targetPoint.x -= (width * UNITS_DISTANCE / 2) ;
             net.METALNAME = RouterHelper.translateIntToMetalName(layer);
-            net.ROUNTWIDTH = WIDTH * UNITS_DISTANCE ;
+            net.ROUNTWIDTH = width * UNITS_DISTANCE ;
             net.ABSOLUTE_POINT1 = startPoint ;
             net.ABSOLUTE_POINT2 = targetPoint ;
             net.SHAPE = "STRIPE";
@@ -529,9 +540,9 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
             oringinTargetPoint = Point<int>( oringinTargetPoint.x + Distance[i], oringinTargetPoint.y );
             targetPoint = oringinTargetPoint ;
 //            if( i != friendlyForm.size() -1 )targetPoint.x += (WIDTH * UNITS_DISTANCE / 2) ;
-            targetPoint.x += (WIDTH * UNITS_DISTANCE / 2) ;
+            targetPoint.x += (width * UNITS_DISTANCE / 2) ;
             net.METALNAME = RouterHelper.translateIntToMetalName(layer);
-            net.ROUNTWIDTH = WIDTH * UNITS_DISTANCE ;
+            net.ROUNTWIDTH = width * UNITS_DISTANCE ;
             net.ABSOLUTE_POINT1 = startPoint ;
             net.ABSOLUTE_POINT2 = targetPoint ;
             net.SHAPE = "STRIPE";
@@ -554,7 +565,7 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
                 net.METALNAME = RouterHelper.translateIntToMetalName(layer);
                 net.ROUNTWIDTH = 0 ;
                 net.SHAPE = "STRIPE";
-                auto viaSols = getViaLocation(net,oringinTargetPoint , false);
+                auto viaSols = getViaLocation(net,oringinTargetPoint , false , width);
                 net.VIANAME = viaSols.first;
                 for( auto sol : viaSols.second )
                 {
@@ -572,7 +583,7 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
                 net.METALNAME = RouterHelper.translateIntToMetalName(layer);
                 net.ROUNTWIDTH = 0 ;
                 net.SHAPE = "STRIPE";
-                auto viaSols = getViaLocation(net,oringinTargetPoint , true );
+                auto viaSols = getViaLocation(net,oringinTargetPoint , true ,width );
                 net.VIANAME = viaSols.first;
                 for( auto sol : viaSols.second )
                 {
@@ -588,20 +599,20 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
         startPoint = oringinTargetPoint ;
         if( nextDirection == upOrient )
         {
-            startPoint.y -= WIDTH / 2 * UNITS_DISTANCE;
+            startPoint.y -= width / 2 * UNITS_DISTANCE;
             
         }
         if( nextDirection == downOrient )
         {
-            startPoint.y += WIDTH / 2 * UNITS_DISTANCE;
+            startPoint.y += width / 2 * UNITS_DISTANCE;
         }
         if( nextDirection == leftOrient )
         {
-            startPoint.x += WIDTH / 2 * UNITS_DISTANCE;
+            startPoint.x += width / 2 * UNITS_DISTANCE;
         }
         if( nextDirection == rightOrient )
         {
-            startPoint.x -= WIDTH / 2 * UNITS_DISTANCE;
+            startPoint.x -= width / 2 * UNITS_DISTANCE;
         }
         if( create )
         {
@@ -618,189 +629,6 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
     
     SpecialNetsMaps.insert(make_pair(powerPinName, specialnet));
 }
-void RouterV4::BlockGridCoordinate( Graph_SP * graph_sp , Block & block)
-{
-    int XSize = (int)Grids[0].size()+1;
-    int Up = XSize ;
-    int Right = 1 ;
-    auto blockGrid = getGridCoordinate(block);
-    int currentIndex = translate3D_1D(Coordinate3D(blockGrid.x,blockGrid.y,blockGrid.z));
-    
-    if( block.Direction == TOP )
-    {
-        int cnt = 1 ;
-        int currentY = getAbsolutePoint(translate1D_3D(currentIndex)).y ;
-        int nextY = getAbsolutePoint(translate1D_3D(currentIndex+Up)).y ;
-        // get how many counts should be calcaulated.
-        while( nextY - currentY <=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE )
-        {
-            cnt++ ;
-            nextY = getAbsolutePoint(translate1D_3D(currentIndex + (cnt * Up))).y ;
-        }
-        for( int i = 0 ; i <= cnt ; i++ )
-        {
-            for(int z = lowestMetal ; z <= highestMetal ; z++)
-            {
-                int index = translate3D_1D(Coordinate3D(blockGrid.x, blockGrid.y, z));
-                bool turnRight = ( blockGrid.x == Grids[0].size() ) ? false : true ;
-                bool turnUp = ( blockGrid.y == Grids.size() ) ? false : true ;
-                bool turnLeft = ( blockGrid.x == 0 ) ? false : true ;
-                bool turnDown = ( blockGrid.y == 0 ) ? false : true ;
-                if( turnRight && Grids[blockGrid.y][blockGrid.x].Edges[z].downEdge )
-                {
-                    graph_sp->UpdateWeight(index+Right, index, Max_Distance - index);
-                    graph_sp->UpdateWeight(index, index+Right, Max_Distance - index);
-                }
-                if( turnUp && Grids[blockGrid.y][blockGrid.x].Edges[z].leftEdge )
-                {
-                    graph_sp->UpdateWeight(index+Up, index, Max_Distance - index);
-                    graph_sp->UpdateWeight(index, index+Up, Max_Distance - index);
-                }
-                if( turnLeft && Grids[blockGrid.y][blockGrid.x - 1 ].Edges[z].downEdge )
-                {
-                    graph_sp->UpdateWeight(index-Right, index, Max_Distance - index );
-                    graph_sp->UpdateWeight(index, index-Right, Max_Distance - index );
-                }
-                if( turnDown && Grids[blockGrid.y - 1 ][blockGrid.x].Edges[z].leftEdge )
-                {
-                    graph_sp->UpdateWeight(index-Up, index, Max_Distance - index );
-                    graph_sp->UpdateWeight(index, index-Up, Max_Distance - index );
-                }
-            }
-            blockGrid.y += 1 ;
-        }
-    }
-    else if( block.Direction == DOWN )
-    {
-        int cnt = 1 ;
-        int currentY = getAbsolutePoint(translate1D_3D(currentIndex)).y ;
-        int nextY = getAbsolutePoint(translate1D_3D(currentIndex-Up)).y ;
-        while( currentY - nextY <=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE )
-        {
-            cnt++ ;
-            nextY = getAbsolutePoint(translate1D_3D(currentIndex - (cnt * Up))).y ;
-        }
-        for( int i = 0 ; i <= cnt ; i++ )
-        {
-            for(int z = lowestMetal ; z <= highestMetal ; z++)
-            {
-                int index = translate3D_1D(Coordinate3D(blockGrid.x, blockGrid.y, z));
-                bool turnRight = ( blockGrid.x == Grids[0].size() ) ? false : true ;
-                bool turnUp = ( blockGrid.y == Grids.size() ) ? false : true ;
-                bool turnLeft = ( blockGrid.x == 0 ) ? false : true ;
-                bool turnDown = ( blockGrid.y == 0 ) ? false : true ;
-                if( turnRight && Grids[blockGrid.y][blockGrid.x].Edges[z].downEdge )
-                {
-                    graph_sp->UpdateWeight(index+Right, index, Max_Distance - index);
-                    graph_sp->UpdateWeight(index, index+Right, Max_Distance - index);
-                }
-                if( turnUp && Grids[blockGrid.y][blockGrid.x].Edges[z].leftEdge )
-                {
-                    graph_sp->UpdateWeight(index+Up, index, Max_Distance - index);
-                    graph_sp->UpdateWeight(index, index+Up, Max_Distance - index);
-                }
-                if( turnLeft && Grids[blockGrid.y][blockGrid.x - 1 ].Edges[z].downEdge )
-                {
-                    graph_sp->UpdateWeight(index-Right, index, Max_Distance - index );
-                    graph_sp->UpdateWeight(index, index-Right, Max_Distance - index );
-                }
-                if( turnDown && Grids[blockGrid.y - 1 ][blockGrid.x].Edges[z].leftEdge )
-                {
-                    graph_sp->UpdateWeight(index-Up, index, Max_Distance - index );
-                    graph_sp->UpdateWeight(index, index-Up, Max_Distance - index );
-                }
-            }
-            blockGrid.y -= 1 ;
-        }
-    }
-    else if( block.Direction == LEFT )
-    {
-        int cnt = 1 ;
-        int currentX = getAbsolutePoint(translate1D_3D(currentIndex)).x ;
-        int nextX = getAbsolutePoint(translate1D_3D(currentIndex-Right)).x ;
-        while( currentX - nextX <=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE )
-        {
-            cnt++ ;
-            nextX = getAbsolutePoint(translate1D_3D(currentIndex - (cnt * Right ) )).x ;
-        }
-        for( int i = 0 ; i <= cnt ; i++ )
-        {
-            for(int z = lowestMetal ; z <= highestMetal ; z++)
-            {
-                int index = translate3D_1D(Coordinate3D(blockGrid.x, blockGrid.y, z));
-                bool turnRight = ( blockGrid.x == Grids[0].size() ) ? false : true ;
-                bool turnUp = ( blockGrid.y == Grids.size() ) ? false : true ;
-                bool turnLeft = ( blockGrid.x == 0 ) ? false : true ;
-                bool turnDown = ( blockGrid.y == 0 ) ? false : true ;
-                if( turnRight && Grids[blockGrid.y][blockGrid.x].Edges[z].downEdge )
-                {
-                    graph_sp->UpdateWeight(index+Right, index, Max_Distance - index);
-                    graph_sp->UpdateWeight(index, index+Right, Max_Distance - index);
-                }
-                if( turnUp && Grids[blockGrid.y][blockGrid.x].Edges[z].leftEdge )
-                {
-                    graph_sp->UpdateWeight(index+Up, index, Max_Distance - index);
-                    graph_sp->UpdateWeight(index, index+Up, Max_Distance - index);
-                }
-                if( turnLeft && Grids[blockGrid.y][blockGrid.x - 1 ].Edges[z].downEdge )
-                {
-                    graph_sp->UpdateWeight(index-Right, index, Max_Distance - index );
-                    graph_sp->UpdateWeight(index, index-Right, Max_Distance - index );
-                }
-                if( turnDown && Grids[blockGrid.y - 1 ][blockGrid.x].Edges[z].leftEdge )
-                {
-                    graph_sp->UpdateWeight(index-Up, index, Max_Distance - index );
-                    graph_sp->UpdateWeight(index, index-Up, Max_Distance - index );
-                }
-            }
-            blockGrid.x -= 1 ;
-        }
-    }
-    else if (block.Direction == RIGHT)
-    {
-        int cnt = 1 ;
-        int currentX = getAbsolutePoint(translate1D_3D(currentIndex)).x ;
-        int nextX = getAbsolutePoint(translate1D_3D(currentIndex+Right)).x ;
-        while( nextX - currentX <=  (0.5 * WIDTH + SPACING)*UNITS_DISTANCE )
-        {
-            cnt++ ;
-            nextX = getAbsolutePoint(translate1D_3D(currentIndex + (cnt * Right))).x ;
-        }
-        for( int i = 0 ; i <= cnt ; i++ )
-        {
-            for(int z = lowestMetal ; z <= highestMetal ; z++)
-            {
-                int index = translate3D_1D(Coordinate3D(blockGrid.x, blockGrid.y, z));
-                bool turnRight = ( blockGrid.x == Grids[0].size() ) ? false : true ;
-                bool turnUp = ( blockGrid.y == Grids.size() ) ? false : true ;
-                bool turnLeft = ( blockGrid.x == 0 ) ? false : true ;
-                bool turnDown = ( blockGrid.y == 0 ) ? false : true ;
-                if( turnRight && Grids[blockGrid.y][blockGrid.x].Edges[z].downEdge )
-                {
-                    graph_sp->UpdateWeight(index+Right, index, Max_Distance - index);
-                    graph_sp->UpdateWeight(index, index+Right, Max_Distance - index);
-                }
-                if( turnUp && Grids[blockGrid.y][blockGrid.x].Edges[z].leftEdge )
-                {
-                    graph_sp->UpdateWeight(index+Up, index, Max_Distance - index);
-                    graph_sp->UpdateWeight(index, index+Up, Max_Distance - index);
-                }
-                if( turnLeft && Grids[blockGrid.y][blockGrid.x - 1 ].Edges[z].downEdge )
-                {
-                    graph_sp->UpdateWeight(index-Right, index, Max_Distance - index );
-                    graph_sp->UpdateWeight(index, index-Right, Max_Distance - index );
-                }
-                if( turnDown && Grids[blockGrid.y - 1 ][blockGrid.x].Edges[z].leftEdge )
-                {
-                    graph_sp->UpdateWeight(index-Up, index, Max_Distance - index );
-                    graph_sp->UpdateWeight(index, index-Up, Max_Distance - index );
-                }
-            }
-            blockGrid.x += 1 ;
-        }
-    }
-}
-
 // x y are absolute coordinate 
 string RouterV4::gridToString(Coordinate3D coordinate , bool translate )
 {
@@ -811,7 +639,7 @@ string RouterV4::gridToString(Coordinate3D coordinate , bool translate )
     result.append("_").append(to_string(x)).append("_").append(to_string(y));
     return result ;
 }
-void RouterV4::getInitSolution(Block block  , string powerpin, string blockName , string BlockPinName , int width  , int spacing ,  bool source)
+void RouterV4::getInitSolution(Block block  , string powerpin, string blockName , string BlockPinName , double width  , double spacing ,  bool source)
 {
     // Virtual Obstacles 還沒存入multipinCandidate
     vector<BlockCoordinate> virtualObstacles ;
@@ -1019,7 +847,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
     for( auto virtualObstacle : virtualObstacles )
         obstacles[powerpin].push_back(virtualObstacle);
 }
-void RouterV4::InitPowerPinAndBlockPin(int width , int spacing )
+void RouterV4::InitPowerPinAndBlockPin(double width , double spacing )
 {
     InitGrids("", width , spacing );
 
@@ -1062,7 +890,7 @@ bool RouterV4::isMultiPin(string powerPin)
 {
     return Connection.count(powerPin) > 1 ;
 }
-void RouterV4::legalizeEdge(Coordinate3D source , Coordinate3D target , Direction3D orient , Graph_SP * graph_sp)
+void RouterV4::legalizeEdge(Coordinate3D source , Coordinate3D target , Direction3D orient , Graph_SP * graph_sp , double width )
 {
     if( source == target ) return ;
     int cnt = 0 ;
@@ -1101,8 +929,8 @@ void RouterV4::legalizeEdge(Coordinate3D source , Coordinate3D target , Directio
             int from = translate3D_1D(target);
             target.y -= 1 ;
             int to = translate3D_1D(target);
-            graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y-1][x].length) * 10000);
-            graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y-1][x].length) * 10000);
+            graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y-1][x].length) * 10000);
+            graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y-1][x].length) * 10000);
         }
     }
     else if (orient == downOrient)
@@ -1116,8 +944,8 @@ void RouterV4::legalizeEdge(Coordinate3D source , Coordinate3D target , Directio
             int from = translate3D_1D(target);
             target.y += 1 ;
             int to = translate3D_1D(target);
-            graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x].length) * 10000);
-            graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x].length) * 10000);
+            graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].length) * 10000);
+            graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].length) * 10000);
         }
     }
     else if( orient == leftOrient )
@@ -1131,8 +959,8 @@ void RouterV4::legalizeEdge(Coordinate3D source , Coordinate3D target , Directio
             int from = translate3D_1D(target);
             target.x += 1 ;
             int to = translate3D_1D(target);
-            graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x].width) * 10000);
-            graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x].width) * 10000);
+            graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].width) * 10000);
+            graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].width) * 10000);
         }
     }
     else if( orient == rightOrient)
@@ -1146,34 +974,34 @@ void RouterV4::legalizeEdge(Coordinate3D source , Coordinate3D target , Directio
             int from = translate3D_1D(target);
             target.x -= 1 ;
             int to = translate3D_1D(target);
-            graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x-1].width) * 10000);
-            graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, WIDTH * UNITS_DISTANCE, Grids[y][x-1].width) * 10000);
+            graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x-1].width) * 10000);
+            graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x-1].width) * 10000);
         }
     }
     
 }
-void RouterV4::legalizeAllOrient(Coordinate3D coordinate , Graph_SP * graph_sp)
+void RouterV4::legalizeAllOrient(Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth)
 {
     // top
-    auto lastLegal = getLastIlegalCoordinate(topOrient, coordinate);
-    legalizeEdge(coordinate, lastLegal, topOrient , graph_sp);
+    auto lastLegal = getLastIlegalCoordinate(topOrient, coordinate , width , spacing , originWidth);
+    legalizeEdge(coordinate, lastLegal, topOrient , graph_sp , width);
     // bottom
-    lastLegal = getLastIlegalCoordinate(bottomOrient, coordinate);
-    legalizeEdge(coordinate, lastLegal, bottomOrient , graph_sp);
+    lastLegal = getLastIlegalCoordinate(bottomOrient, coordinate , width , spacing , originWidth);
+    legalizeEdge(coordinate, lastLegal, bottomOrient , graph_sp , width);
     // up
-    lastLegal = getLastIlegalCoordinate(upOrient, coordinate);
-    legalizeEdge(coordinate, lastLegal, upOrient , graph_sp);
+    lastLegal = getLastIlegalCoordinate(upOrient, coordinate , width , spacing , originWidth);
+    legalizeEdge(coordinate, lastLegal, upOrient , graph_sp , width);
     // down
-    lastLegal = getLastIlegalCoordinate(downOrient, coordinate);
-    legalizeEdge(coordinate, lastLegal, downOrient , graph_sp);
+    lastLegal = getLastIlegalCoordinate(downOrient, coordinate , width , spacing , originWidth);
+    legalizeEdge(coordinate, lastLegal, downOrient , graph_sp , width);
     // left
-    lastLegal = getLastIlegalCoordinate(leftOrient, coordinate);
-    legalizeEdge(coordinate, lastLegal, leftOrient , graph_sp);
+    lastLegal = getLastIlegalCoordinate(leftOrient, coordinate , width , spacing , originWidth);
+    legalizeEdge(coordinate, lastLegal, leftOrient , graph_sp , width);
     // right
-    lastLegal = getLastIlegalCoordinate(rightOrient, coordinate);
-    legalizeEdge(coordinate, lastLegal, rightOrient , graph_sp);
+    lastLegal = getLastIlegalCoordinate(rightOrient, coordinate , width , spacing , originWidth);
+    legalizeEdge(coordinate, lastLegal, rightOrient , graph_sp , width);
 }
-Coordinate3D RouterV4::getLastIlegalCoordinate(Direction3D orient , Coordinate3D sourceGrid)
+Coordinate3D RouterV4::getLastIlegalCoordinate(Direction3D orient , Coordinate3D sourceGrid , double width , double spacing , double originWidth)
 {
     Coordinate3D targetGrid = sourceGrid ;
     if( orient == topOrient )
@@ -1189,29 +1017,45 @@ Coordinate3D RouterV4::getLastIlegalCoordinate(Direction3D orient , Coordinate3D
     else if( orient == upOrient )
     {
         int currentY = getAbsolutePoint(sourceGrid).y ;
-        int targetY = currentY + (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + 0.5 * WIDTH * UNITS_DISTANCE ;
-        if( Horizontal.find(targetY) == Horizontal.end() ) return sourceGrid ;
+        int targetY = currentY + (0.5 * width + spacing)*UNITS_DISTANCE + 0.5 * originWidth * UNITS_DISTANCE ;
+        if( Horizontal.find(targetY) == Horizontal.end() )
+        {
+            
+            return sourceGrid ;
+        }
         targetGrid.y = getGridY(targetY);
     }
     else if (orient == downOrient)
     {
         int currentY = getAbsolutePoint(sourceGrid).y ;
-        int targetY = currentY - (0.5 * WIDTH + SPACING)*UNITS_DISTANCE - 0.5 * WIDTH * UNITS_DISTANCE;
-        if( Horizontal.find(targetY) == Horizontal.end() ) return sourceGrid ;
+        int targetY = currentY - (0.5 * width + spacing)*UNITS_DISTANCE - 0.5 * originWidth * UNITS_DISTANCE;
+        if( Horizontal.find(targetY) == Horizontal.end() )
+        {
+            
+            return sourceGrid ;
+        }
         targetGrid.y = getGridY(targetY);
     }
     else if( orient == leftOrient )
     {
         int currentX = getAbsolutePoint(sourceGrid).x ;
-        int targetX = currentX - (0.5 * WIDTH + SPACING)*UNITS_DISTANCE - 0.5 * WIDTH * UNITS_DISTANCE ;
-        if( Vertical.find(targetX) == Vertical.end() ) return sourceGrid ;
+        int targetX = currentX - (0.5 * width + spacing)*UNITS_DISTANCE - 0.5 * originWidth * UNITS_DISTANCE ;
+        if( Vertical.find(targetX) == Vertical.end() )
+        {
+            
+            return sourceGrid ;
+        }
         targetGrid.x = getGridX(targetX);
     }
     else if( orient == rightOrient)
     {
         int currentX = getAbsolutePoint(sourceGrid).x ;
-        int targetX = currentX + (0.5 * WIDTH + SPACING)*UNITS_DISTANCE + 0.5 * WIDTH * UNITS_DISTANCE ;
-        if( Vertical.find(targetX) == Vertical.end() ) return sourceGrid ;
+        int targetX = currentX + (0.5 * width + spacing)*UNITS_DISTANCE + 0.5 * originWidth * UNITS_DISTANCE ;
+        if( Vertical.find(targetX) == Vertical.end() )
+        {
+            
+            return sourceGrid ;
+        }
         targetGrid.x = getGridX(targetX);
     }
     return targetGrid ;
@@ -1259,7 +1103,7 @@ Coordinate3D RouterV4::AbsToGrid(Coordinate3D coordinateABS)
     Coordinate3D coordinate( getGridX(coordinateABS.x) , getGridY(coordinateABS.y) , coordinateABS.z );
     return coordinate ;
 }
-vector<Coordinate3D> RouterV4::selectPath(string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin)
+vector<Coordinate3D> RouterV4::selectPath(string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth)
 {
     double minCost = INT_MAX; 
     vector<Coordinate3D> minCostSolutions ;
@@ -1267,16 +1111,16 @@ vector<Coordinate3D> RouterV4::selectPath(string powerPin , Graph_SP * graph_sp 
     Coordinate3D sourceGrid = translate1D_3D(source);
     Coordinate3D targetGrid = translate1D_3D(target);
     // legalize target
-    legalizeAllOrient(targetGrid, graph_sp);
+    legalizeAllOrient(targetGrid, graph_sp , width , spacing , originWidth);
     // first Route
     if( multiPinCandidates[powerPin].empty() )
     {
-        legalizeAllLayer(sourceGrid, graph_sp);
+        legalizeAllLayer(sourceGrid, graph_sp,width,spacing , originWidth);
         graph_sp->Dijkstra(target);
         auto paths= graph_sp->getPath(source);
         for( auto path : paths )
             selectedPath.push_back(translate1D_3D(path));
-        generateSpiceList(selectedPath, powerPin, block , blockPin);
+        generateSpiceList(selectedPath, powerPin, block , blockPin , width);
         return selectedPath ;
     }
     cout << "multipin candidate:" << multiPinCandidates[powerPin].size() << endl;
@@ -1287,9 +1131,9 @@ vector<Coordinate3D> RouterV4::selectPath(string powerPin , Graph_SP * graph_sp 
         Coordinate3D candidate = multiPinCandidates[powerPin][i];
         Coordinate3D coordinate( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
         if( coordinate == sourceGrid )
-            legalizeAllLayer(sourceGrid, graph_sp);
+            legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
         else
-            legalizeAllOrient(coordinate, graph_sp);
+            legalizeAllOrient(coordinate, graph_sp , width ,spacing , originWidth);
         graph_sp->Dijkstra(target);
         auto path1D = graph_sp->getPath(translate3D_1D(coordinate));
         if( path1D.empty() ) continue ;
@@ -1308,8 +1152,8 @@ vector<Coordinate3D> RouterV4::selectPath(string powerPin , Graph_SP * graph_sp 
             Path.x = getGridX(Path.x);
             Path.y = getGridY(Path.y);
         }
-        genResistance(path3D, powerPin , tmp );
-        genResistance(initTargetPath,powerPin,tmp);
+        genResistance(path3D, powerPin , tmp , width);
+        genResistance(initTargetPath,powerPin,tmp , width );
         
         tmp.toSpice();
         tmp.addSpiceCmd();
@@ -1333,8 +1177,8 @@ vector<Coordinate3D> RouterV4::selectPath(string powerPin , Graph_SP * graph_sp 
         Path.x = getGridX(Path.x);
         Path.y = getGridY(Path.y);
     }
-    genResistance(minCostSolutions, powerPin , sp_gen );
-    genResistance(initTargetPath,powerPin,sp_gen);
+    genResistance(minCostSolutions, powerPin , sp_gen , width );
+    genResistance(initTargetPath,powerPin,sp_gen , width);
     
     return minCostSolutions ;
 }
@@ -1348,16 +1192,16 @@ void RouterV4::saveRoutingList(Coordinate3D sourceGrid , Coordinate3D targetGrid
     routePath.targetBlockPinName = blockinfo.BlockPinName ;
     currentRoutingLists.push_back(routePath);
 }
-void RouterV4::legalizeAllLayer(Coordinate3D source , Graph_SP * graph_sp)
+void RouterV4::legalizeAllLayer(Coordinate3D source , Graph_SP * graph_sp , double width , double spacing , double originWidth)
 {
     for(int z = lowestMetal ; z <= highestMetal ; z++)
     {
         Coordinate3D temp = source;
         temp.z = z ;
-        legalizeAllOrient(temp, graph_sp);
+        legalizeAllOrient(temp, graph_sp ,width ,spacing , originWidth);
     }
 }
-pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(int width, int spacing)
+pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(double width, double spacing , double originWidth)
 {
     cout << "Begin determine Net Ordering ..." << endl;
     clock_t Start = clock();
@@ -1380,11 +1224,11 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(int width
             vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerpin);
             Block powerPinCoordinate = powerPinCoordinates[0];
             Block BlockPinCoordinate = RouterHelper.getBlock(block, blockPin);
-            Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp);
-            Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp);
+            Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp , width , spacing);
+            Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp , width , spacing);
             int source = translate3D_1D(sourceGrid);
             int target = translate3D_1D(targetGrid);
-            legalizeAllLayer(sourceGrid, graph_sp);
+            legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
             vector<Coordinate3D> solutions ;
             graph_sp->Dijkstra(target);
             auto paths= graph_sp->getPath(source);
@@ -1503,7 +1347,7 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(int width
  
  
  */
-void RouterV4::SteinerTreeConstruction(vector<Coordinate3D> & solutions , double current , Graph * & steinerTree)
+void RouterV4::SteinerTreeConstruction(vector<Coordinate3D> & solutions , double current , double constraint , double voltage , string powerPin , string block , string blockPin ,  Graph * & steinerTree)
 {
     
     vector<Coordinate3D> absSolutions;
@@ -1517,9 +1361,8 @@ void RouterV4::SteinerTreeConstruction(vector<Coordinate3D> & solutions , double
     if( steinerTree == nullptr )
     {
         steinerTree = new Graph[1];
-        steinerTree->initialize(absSolutions[0], current, 0);
+        steinerTree->initialize(absSolutions[0]);
     }
-    
     // 從source 到 target
     for(int i = 1 ; i < absSolutions.size() ; i++)
     {
@@ -1527,26 +1370,28 @@ void RouterV4::SteinerTreeConstruction(vector<Coordinate3D> & solutions , double
         Point<int> pt1(absSolutions[i-1].x , absSolutions[i-1].y);
         Point<int> pt2(absSolutions[i].x , absSolutions[i].y);
         double distance = RouterHelper.getManhattanDistance( pt1 , pt2);
-        steinerTree->insert(absSolutions[i-1], absSolutions[i], current, distance);
+        steinerTree->insert(absSolutions[i-1], absSolutions[i], distance);
     }
+    steinerTree->addLeaf(*(--absSolutions.end()), constraint , current , voltage);
+    steinerTree->addLeafInfo(*(--absSolutions.end()) , powerPin, block, blockPin);
 }
-vector<Coordinate3D> RouterV4::selectSteinerPoint(string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin)
+vector<Coordinate3D> RouterV4::selectSteinerPoint(string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth)
 {
     vector<Coordinate3D> minCostSolutions ;
     vector<Coordinate3D> selectedPath ;
     Coordinate3D sourceGrid = translate1D_3D(source);
     Coordinate3D targetGrid = translate1D_3D(target);
     // legalize target
-    legalizeAllOrient(targetGrid, graph_sp);
+    legalizeAllOrient(targetGrid, graph_sp , width , spacing , originWidth);
     // first Route
     if( multiPinCandidates[powerPin].empty() )
     {
-        legalizeAllLayer(sourceGrid, graph_sp);
+        legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
         graph_sp->Dijkstra(target);
         auto paths= graph_sp->getPath(source);
         for( auto path : paths )
             selectedPath.push_back(translate1D_3D(path));
-        generateSpiceList(selectedPath, powerPin, block , blockPin);
+//        generateSpiceList(selectedPath, powerPin, block , blockPin , width);
         return selectedPath ;
     }
     else
@@ -1557,9 +1402,9 @@ vector<Coordinate3D> RouterV4::selectSteinerPoint(string powerPin , Graph_SP * g
         {
             Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
             if( coordinate3D == sourceGrid )
-                legalizeAllLayer(sourceGrid, graph_sp);
+                legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
             else
-                legalizeAllOrient(coordinate3D, graph_sp);
+                legalizeAllOrient(coordinate3D, graph_sp , width , spacing , originWidth);
         }
         graph_sp->Dijkstra(target);
         for( auto candidate : multiPinCandidates[powerPin] )
@@ -1577,18 +1422,18 @@ vector<Coordinate3D> RouterV4::selectSteinerPoint(string powerPin , Graph_SP * g
         auto paths = graph_sp->getPath(minimumTarget);
         for( auto path : paths )
             selectedPath.push_back(translate1D_3D(path));
-        string key = block ;
-        key.append(blockPin);
-        auto initTargetPath = sourceTargetInitPath[key] ;
-        
-        sp_gen.addSpiceCurrent(powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(block, blockPin));
-        for( auto & Path : initTargetPath )
-        {
-            Path.x = getGridX(Path.x);
-            Path.y = getGridY(Path.y);
-        }
-        genResistance(selectedPath, powerPin , sp_gen );
-        genResistance(initTargetPath,powerPin,sp_gen);
+//        string key = block ;
+//        key.append(blockPin);
+//        auto initTargetPath = sourceTargetInitPath[key] ;
+//        
+//        sp_gen.addSpiceCurrent(powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(block, blockPin));
+//        for( auto & Path : initTargetPath )
+//        {
+//            Path.x = getGridX(Path.x);
+//            Path.y = getGridY(Path.y);
+//        }
+//        genResistance(selectedPath, powerPin , sp_gen ,width );
+//        genResistance(initTargetPath,powerPin,sp_gen , width);
         return selectedPath ;
     }
 
@@ -1604,12 +1449,12 @@ void RouterV4::SteinerTreeReduction(Graph * &steinerTree , vector<Coordinate3D> 
 }
 void RouterV4::Route()
 {
-
-    auto ordering = getNetOrdering(WIDTH,SPACING);
+    
+    auto ordering = getNetOrdering(DEFAULTWIDTH,DEFAULTSPACING,DEFAULTWIDTH);
     auto treeOrder = ordering.first ;
     auto innerTreeOrder = ordering.second ;
     
-    InitPowerPinAndBlockPin(WIDTH,SPACING);
+    InitPowerPinAndBlockPin(DEFAULTWIDTH,DEFAULTSPACING);
     for(auto tree : treeOrder)
     {
         Graph * steinerTree = nullptr ;
@@ -1620,26 +1465,111 @@ void RouterV4::Route()
             blockinfo.BlockName = innerTree.target.first ;
             blockinfo.BlockPinName = innerTree.target.second;
             double current = RouterHelper.getCurrent(blockinfo.BlockName, blockinfo.BlockPinName);
+            double constraint = RouterHelper.getIRDropConstaint(blockinfo.BlockName, blockinfo.BlockPinName);
+            double voltage = stod(VoltageMaps[powerpin]);
             vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerpin);
             Block powerPinCoordinate = powerPinCoordinates[0];
             Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
-            InitGrids(powerpin,WIDTH , SPACING);
-            Graph_SP * graph_sp = InitGraph_SP(WIDTH,SPACING);
-            Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp);
-            Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp);
-            saveRoutingList(sourceGrid,targetGrid,powerpin,blockinfo);
+            InitGrids(powerpin,DEFAULTWIDTH , DEFAULTSPACING);
+            Graph_SP * graph_sp = InitGraph_SP(DEFAULTWIDTH,DEFAULTSPACING);
+            Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING );
+            Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING);
+//            saveRoutingList(sourceGrid,targetGrid,powerpin,blockinfo);
             int source = translate3D_1D(sourceGrid);
             int target = translate3D_1D(targetGrid);
-            vector<Coordinate3D> solutions = selectSteinerPoint(powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName);
-            cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
-            SteinerTreeConstruction(solutions,current, steinerTree);
-            fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , WIDTH,true );
+            vector<Coordinate3D> solutions = selectSteinerPoint(powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
+//            cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
+            SteinerTreeConstruction(solutions,current, constraint , voltage , powerpin , blockinfo.BlockName , blockinfo.BlockPinName, steinerTree);
+//            fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , WIDTH,true );
             saveMultiPinCandidates(powerpin, solutions);
-            def_gen.toOutputDef();
+//            def_gen.toOutputDef();
             delete [] graph_sp ;
         }
-        
+        def_gen.toOutputDef();
+        multiPinCandidates.clear() ; 
         steinerTree->reduction();
+        steinerTree->rectifyCurrent() ;
+        steinerTree->rectifyWidth() ;
+        steinerTree->printAllPath();
+        auto leafPath = steinerTree->traverse();
+        for( auto leaf : leafPath )
+        {
+            for(auto innerLeaf : leaf)
+                cout << innerLeaf->coordinate.x << " " << innerLeaf->coordinate.y << " " << innerLeaf->coordinate.z << endl;
+        }
+        for(auto a : widthTable)
+            cout << a.first << " " << a.second << endl;
+        for( auto leaf : leafPath  )
+        {
+            Coordinate3D source = AbsToGrid(leaf[0]->coordinate);
+            Coordinate3D target = AbsToGrid(leaf[leaf.size()-1]->coordinate);
+            LeafInfo leafInfo = steinerTree->getLeafInfo();
+            BlockInfo blockinfo ;
+            blockinfo.BlockName = leafInfo.block;
+            blockinfo.BlockPinName = leafInfo.blockPin ;
+            saveRoutingList(source,target,leafInfo.powerPin,blockinfo);
+            vector<int> SpecialHorizontal ;
+            vector<int> SpecialVertical ;
+            double width = leaf[0]->width / UNITS_DISTANCE ;
+            vector<pair<Coordinate3D, Coordinate3D>> pairs ; // source and target
+            for(int i = 0 ; i < leaf.size() ; i++)
+            {
+                if( i + 1 < leaf.size() )
+                    pairs.push_back(make_pair(leaf[i]->coordinate, leaf[i+1]->coordinate));
+                SpecialHorizontal.push_back(leaf[i]->coordinate.y);
+                SpecialVertical.push_back(leaf[i]->coordinate.x);
+            }
+            
+            InitGrids(leafInfo.powerPin, width , DEFAULTSPACING ,  SpecialHorizontal , SpecialVertical);
+            Graph_SP * graph_sp = InitGraph_SP(width,DEFAULTSPACING);
+            for( auto pair : pairs )
+            {
+                Coordinate3D sourceGrid = AbsToGrid(pair.first);
+                Coordinate3D targetGrid = AbsToGrid(pair.second);
+                double originWidth = 0 ;
+                string encodeString = steinerTree->encode(pair.first);
+                auto t = gridToAbsolute(sourceGrid);
+                auto ta = gridToAbsolute(targetGrid);
+                originWidth = ( widthTable.find(encodeString) != widthTable.end() ) ? widthTable[encodeString] : width ;
+                legalizeAllOrient(sourceGrid, graph_sp , width , DEFAULTSPACING , originWidth);
+                encodeString = steinerTree->encode(pair.second);
+                originWidth = ( widthTable.find(encodeString) != widthTable.end() ) ? widthTable[encodeString] : width ;
+                legalizeAllOrient(targetGrid, graph_sp , width , DEFAULTSPACING , originWidth);
+                int source1D = translate3D_1D(sourceGrid);
+                int target1D = translate3D_1D(targetGrid);
+                graph_sp->Dijkstra(target1D);
+                auto paths= graph_sp->getPath(source1D);
+                vector<Coordinate3D> solutions ;
+                for( auto path : paths )
+                    solutions.push_back(translate1D_3D(path));
+                for(auto sol : solutions)
+                {
+                    auto abs = gridToAbsolute(sol);
+                    cout << abs.x << " " << abs.y << " " << abs.z << endl;
+                }
+                fillSpNetMaps(solutions, leafInfo.powerPin, leafInfo.block , leafInfo.blockPin , width , true );
+                if( multiPinCandidates[leafInfo.powerPin].empty() )
+                {
+                    generateSpiceList(solutions, leafInfo.powerPin, leafInfo.block , leafInfo.blockPin , width);
+                }
+                else
+                {
+                    string key = leafInfo.block ;
+                    key.append(leafInfo.blockPin);
+                    auto initTargetPath = sourceTargetInitPath[key] ;
+                    sp_gen.addSpiceCurrent(leafInfo.powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(leafInfo.block, leafInfo.blockPin));
+                    for( auto & Path : initTargetPath )
+                    {
+                        Path.x = getGridX(Path.x);
+                        Path.y = getGridY(Path.y);
+                    }
+                    genResistance(solutions, leafInfo.powerPin , sp_gen ,width );
+                    genResistance(initTargetPath,leafInfo.powerPin,sp_gen , width);
+                }
+                saveMultiPinCandidates(leafInfo.powerPin, solutions);
+                def_gen.toOutputDef();
+            }
+        }
         delete [] steinerTree;
     }
 //    InitPowerPinAndBlockPin(WIDTH,SPACING);
@@ -1686,15 +1616,19 @@ void RouterV4::Route()
 //    system("rm simulation");
 }
 // coordindate 為 絕對座標 + Z
-bool RouterV4::parallelRoute(string powerPin ,string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , int width , int spacing )
+bool RouterV4::parallelRoute(string powerPin ,string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , double width , double spacing , double originWidth )
 {
     vector<Coordinate3D> solutions ;
-    InitGrids(powerPin,WIDTH,SPACING);
-    Graph_SP * graph_sp = InitGraph_SP(WIDTH,SPACING);
+    InitGrids(powerPin,10,spacing);
+//    Vertical.insert(1681000);
+//    Horizontal.insert(354000);
+//    Horizontal.insert(16000);
+//    Vertical.insert(200000);
+    Graph_SP * graph_sp = InitGraph_SP(19,spacing);
     Coordinate3D sourceGrid = AbsToGrid(source);
     Coordinate3D targetGrid = AbsToGrid(target);
-    legalizeAllOrient(sourceGrid, graph_sp);
-    legalizeAllOrient(targetGrid, graph_sp);
+    legalizeAllOrient(sourceGrid, graph_sp , width ,spacing , originWidth);
+    legalizeAllOrient(targetGrid, graph_sp , width , spacing , originWidth);
     int source1D = translate3D_1D(sourceGrid);
     int target1D = translate3D_1D(targetGrid);
     graph_sp->Dijkstra(target1D);
@@ -1704,11 +1638,11 @@ bool RouterV4::parallelRoute(string powerPin ,string blockName , string blockPin
         solutions.push_back(translate1D_3D(path));
     fillSpNetMaps(solutions, powerPin, blockName , blockPinName , width , true );
     def_gen.toOutputDef();
-    genResistance(solutions,powerPin,sp_gen);
+    genResistance(solutions,powerPin,sp_gen , width);
     return true ;
 }
 
-// Grid 座標
+
 string RouterV4::getNgSpiceKey(Coordinate3D coordinate3d)
 {
     int z = coordinate3d.z ;
@@ -1763,7 +1697,7 @@ double RouterV4::getMetalResistance(int layer)
 {
     return LayerMaps[RouterHelper.translateIntToMetalName(layer)].RESISTANCE_RPERSQ ;
 }
-void RouterV4::genResistance(vector<Coordinate3D> & paths , string powerPinName , SpiceGenerator & spiceGenerator )
+void RouterV4::genResistance(vector<Coordinate3D> & paths , string powerPinName , SpiceGenerator & spiceGenerator , double width )
 {
     for(int i = 0 ; i < paths.size() - 1 ; i++)
     {
@@ -1774,7 +1708,7 @@ void RouterV4::genResistance(vector<Coordinate3D> & paths , string powerPinName 
         // distance 0 means via
         // 目前打最大顆via (HardCode)
         int distance = ( pt1.x == pt2.x ) ? abs(pt1.y - pt2.y) : abs(pt1.x - pt2.x);
-        double resistance = ( distance != 0 ) ? RouterHelper.calculateResistance(getMetalResistance(paths[i].z), WIDTH * UNITS_DISTANCE, distance) : 0.1 ;
+        double resistance = ( distance != 0 ) ? RouterHelper.calculateResistance(getMetalResistance(paths[i].z), width * UNITS_DISTANCE, distance) : 0.1 ;
         if(resistance < 0 ) assert(0);
         spiceGenerator.addSpiceResistance(powerPinName, node1, node2, resistance);
     }
@@ -1789,7 +1723,7 @@ int RouterV4::getGridY(int y)
     if( Horizontal.find(y) == Horizontal.end() ) return  0 ;
     return (int)distance(Horizontal.begin(), Horizontal.find(y)) + 1 ;
 }
-void RouterV4::generateSpiceList(vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName )
+void RouterV4::generateSpiceList(vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , double width)
 {
     string key;
     key.append(blockName).append(blockPinName);
@@ -1808,9 +1742,9 @@ void RouterV4::generateSpiceList(vector<Coordinate3D> & paths , string powerPinN
         Path.y = getGridY(Path.y);
     }
     // generate resistance
-    genResistance(initSourcePath,powerPinName,sp_gen);
-    genResistance(paths,powerPinName,sp_gen);
-    genResistance(initTargetPath,powerPinName,sp_gen);
+    genResistance(initSourcePath,powerPinName,sp_gen,width);
+    genResistance(paths,powerPinName,sp_gen,width);
+    genResistance(initTargetPath,powerPinName,sp_gen,width);
     
 }
 Coordinate3D RouterV4::getGridCoordinate( Block block  )
@@ -1867,7 +1801,7 @@ void RouterV4::toGridGraph()
     
 }
 
-void RouterV4::CutGrid(int width , int spacing )
+void RouterV4::CutGrid(double width , double spacing )
 {
     Horizontal.clear();
     Vertical.clear();
@@ -1990,14 +1924,17 @@ void RouterV4::updateGrid(CrossInfo result , Grid & grid)
         }
     }
 }
-void RouterV4::InitGrids(string source , int width , int spacing )
+void RouterV4::InitGrids(string source , double width , double spacing , vector<int> SpecialHorizontal ,  vector<int> SpecialVertical )
 {
     Grids.clear();
 //    cout << "Begin Initialize  Grid Graph ..." << endl;
 //    clock_t Start = clock();
     
     CutGrid(width, spacing);
-    
+    for(auto h : SpecialHorizontal)
+        Horizontal.insert(h);
+    for(auto v : SpecialVertical)
+        Vertical.insert(v);
 //    //    CutByBlockBoundary();
 //    //    CutByUserDefine();
     Point<int> startpoint(0,0) ;
@@ -2018,13 +1955,13 @@ void RouterV4::InitGrids(string source , int width , int spacing )
             Rectangle rect(grid.startpoint , Point<int>( grid.startpoint.x + grid.width , grid.startpoint.y + grid.length ));
             // hardcode
             Rectangle via ;
-            via.LeftDown.x = grid.startpoint.x - 5000 ;
-            via.LeftDown.y = grid.startpoint.y - 5000 ;
-            via.RightUp.x = grid.startpoint.x + 5000 ;
-            via.RightUp.y = grid.startpoint.y + 5000 ;
+            via.LeftDown.x = grid.startpoint.x - (width * UNITS_DISTANCE / 2 ) ;
+            via.LeftDown.y = grid.startpoint.y - (width * UNITS_DISTANCE / 2 ) ;
+            via.RightUp.x = grid.startpoint.x + (width * UNITS_DISTANCE / 2 ) ;
+            via.RightUp.y = grid.startpoint.y + (width * UNITS_DISTANCE / 2 ) ;
             for(auto block : RouterHelper.BlockMap)
             {
-                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , WIDTH , SPACING);
+                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
                 updateGrid(crosssWithBlockResult, grid);
             }
             for( auto obstacle : obstacles )
@@ -2032,7 +1969,7 @@ void RouterV4::InitGrids(string source , int width , int spacing )
 //                if( source == obstacle.first ) continue ;
                 for( auto o : obstacle.second )
                 {
-                    auto crosssWithObstacleResult = RouterHelper.isCrossWithBlock(rect , via ,o, WIDTH , SPACING);
+                    auto crosssWithObstacleResult = RouterHelper.isCrossWithBlock(rect , via ,o, width , spacing);
                     updateGrid(crosssWithObstacleResult, grid);
                 }
             }

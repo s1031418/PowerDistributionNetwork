@@ -15,7 +15,7 @@ RouterUtil::RouterUtil()
 {
     InitBlockMap();
 }
-int RouterUtil::getViaWeight(int area , int layer )
+int RouterUtil::getViaWeight(double area , int layer )
 {
     double minResistace = INT_MAX ;
     string key = translateIntToMetalName(layer);
@@ -244,7 +244,7 @@ CrossInfo RouterUtil::isCrossWithObstacle( Rectangle rect1  , string source , ma
     }
     return CrossInfo();
 }
-CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1 , Rectangle via ,  BlockCoordinate & block , int width , int spacing)
+CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1 , Rectangle via ,  BlockCoordinate & block , double width , double spacing)
 {
     CrossInfo crossinfo ;
     Rectangle rect2 ;
