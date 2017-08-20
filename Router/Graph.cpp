@@ -78,45 +78,91 @@ void Graph::rectifyCurrent()
         }
     }
 }
+void Graph::erase(vector<Coordinate3D> coordinates)
+{
+    for(auto encodeString : history)
+    {
+        auto it = LUT.find(encodeString) ;
+        if( !LUT[encodeString]->isSteiner )
+        {
+            Vertex * vertex = LUT[encodeString];
+            delete [] vertex ; 
+            LUT.erase(it);
+        }
+    }
+    history.clear();
+    leafs.pop_back();
+    leafQueue.pop();
+}
+double Graph::getTotalMetalUsage()
+{
+    double TotalMetalWeight = 0 ;
+    auto allPaths = traverse();
+    for( auto leaf : allPaths )
+    {
+        for(auto leafPath : leaf)
+        {
+            if( leafPath->length != 0 )
+            {
+                int layer = leafPath->coordinate.z ;
+                double weight = stod(WeightsMaps[RouterHelper.getAlias(RouterHelper.translateIntToMetalName(layer))]);
+                TotalMetalWeight += leafPath->length * 10000 /UNITS_DISTANCE / UNITS_DISTANCE * weight;
+            }
+        }
+    }
+    return TotalMetalWeight;
+}
 double Graph::analysis()
 {
-    reduction();
     rectifyCurrent();
     rectifyWidth();
     double cost = 0 ;
+    double totalMetalUsage = getTotalMetalUsage();
+    // penalty constant
+    int penaltyParameter = 10000000 ;
+    // 超過 2% 會有penalty
+    double penaltyRange = 2 ;
     for( auto leaf : leafs )
     {
-        bool passCount = 0 ;
         Vertex * ptr = leaf ;
         // 一開始長出來那個金屬的voltage drop
         // double targetVR = ptr->current * LayerMaps[RouterHelper.translateIntToMetalName(ptr->coordinate.z)].RESISTANCE_RPERSQ * ;
         string encodeString = encode(ptr->coordinate) ;
         double constraint = COT[encodeString];
-        double allowDrop = VT[encodeString] * (constraint ) / 100 ;
+        double sourceV = VT[encodeString];
         double realDrop = 0 ;
         auto leafPaths = getPath(leaf->coordinate);
         // backtrace
-        for(int i = (int)leafPaths.size() - 1 ; i >= 0 ; i++)
+        for(int i = (int)leafPaths.size() - 1 ; i >= 0 ; i--)
         {
+            ptr = leafPaths[i] ;
+//            cout << ptr->current << endl;
             int layer = leafPaths[i]->coordinate.z ;
             double RPERSQ = LayerMaps[RouterHelper.translateIntToMetalName(layer)].RESISTANCE_RPERSQ ;
             // 假設width = 10 ;
             realDrop += leafPaths[i]->current * RPERSQ * leafPaths[i]->length / 10000;
             Vertex * fanIn = leafPaths[i]->fanIn ;
+            if( fanIn == nullptr ) break;
             bool calulatedVia = ( ptr->coordinate.z != fanIn->coordinate.z ) ? true : false ;
             if( calulatedVia )
             {
                 string key = ( ptr->coordinate.z > fanIn->coordinate.z ) ? RouterHelper.translateIntToMetalName(--layer) : RouterHelper.translateIntToMetalName(layer);
                 // hard code 第一顆via 未來要改成動態
-                int width = RouterHelper.ViaInfos[key][0].width ;
-                int length = RouterHelper.ViaInfos[key][0].length ;
-                int viaArea = width * length ;
-                realDrop += leafPaths[i]->current * RouterHelper.ViaInfos[key][0].resistance / viaArea;
+//                int width = RouterHelper.ViaInfos[key][0].width ;
+//                int length = RouterHelper.ViaInfos[key][0].length ;
+//                int viaArea = width * length ;
+                realDrop += leafPaths[i]->current * RouterHelper.ViaInfos[key][0].resistance / 100;
             }
         }
-        double slack = allowDrop - realDrop ;
-        if( slack >= 0 ) passCount += 1 ;
-        cost += passCount * 1000000 + slack ;
+        double targetV = sourceV - realDrop ;
+        double drop = (sourceV - targetV) / sourceV * 100 ;
+        if( constraint < drop )
+        {
+            double diff = drop - constraint ;
+            int penaltyCount = diff / penaltyRange ;
+            cost += ( diff + penaltyCount ) * penaltyParameter ;
+        }
+        cost += totalMetalUsage ;
     }
     return cost;
 }
@@ -202,6 +248,15 @@ pair<double, double> Graph::getQuadraticEquation(double a , double b , double c 
     solution2=((-b)-sqrt(b*b-4*a*c))/(2*a);
     return make_pair(solution1, solution2);
 }
+void Graph::reset()
+{
+    for(auto lut : LUT)
+    {
+        lut.second->current = 0 ;
+        lut.second->width = 0 ;
+        lut.second->isSteiner = false; 
+    }
+}
 void Graph::rectifyWidth()
 {
     
@@ -286,8 +341,20 @@ void Graph::addLeaf(Coordinate3D leaf , double constraint , double current , dou
     VT.insert(make_pair(encodeString, voltage));
     leafs.push_back(LUT[encodeString]);
 }
+void Graph::setSimulationMode(bool isSimulation)
+{
+    simulationMode = isSimulation; 
+}
 void Graph::insert(Coordinate3D source , Coordinate3D target, double length )
 {
+    if( simulationMode )
+    {
+        string targetEncodeString = encode(target);
+        if( LUT.find(targetEncodeString) == LUT.end() )
+        {
+            history.push_back(targetEncodeString);
+        }
+    }
     string encodeString = encode(source);
     if( LUT.find(encodeString) == LUT.end() )
         assert(0);

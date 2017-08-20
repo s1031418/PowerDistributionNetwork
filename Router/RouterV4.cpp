@@ -1350,7 +1350,7 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(double wi
  
  
  */
-void RouterV4::SteinerTreeConstruction(vector<Coordinate3D> & solutions , double current , double constraint , double voltage , string powerPin , string block , string blockPin ,  Graph * & steinerTree)
+void RouterV4::SteinerTreeConstruction( bool isSimulation , vector<Coordinate3D> & solutions , double current , double constraint , double voltage , string powerPin , string block , string blockPin ,  Graph * & steinerTree)
 {
     
     vector<Coordinate3D> absSolutions;
@@ -1370,6 +1370,7 @@ void RouterV4::SteinerTreeConstruction(vector<Coordinate3D> & solutions , double
     {
         steinerTree->setSteriner(absSolutions[0]);
     }
+    steinerTree->setSimulationMode(isSimulation);
     // 從source 到 target
     for(int i = 1 ; i < absSolutions.size() ; i++)
     {
@@ -1382,10 +1383,8 @@ void RouterV4::SteinerTreeConstruction(vector<Coordinate3D> & solutions , double
     steinerTree->addLeaf(*(--absSolutions.end()), constraint , current , voltage);
     steinerTree->addLeafInfo(*(--absSolutions.end()) , powerPin, block, blockPin);
 }
-vector<Coordinate3D> RouterV4::selectSteinerPoint(string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth)
+vector<Coordinate3D> RouterV4::selectMergePoint(double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth)
 {
-    vector<Coordinate3D> minCostSolutions ;
-    vector<Coordinate3D> selectedPath ;
     Coordinate3D sourceGrid = translate1D_3D(source);
     Coordinate3D targetGrid = translate1D_3D(target);
     // legalize target
@@ -1393,6 +1392,7 @@ vector<Coordinate3D> RouterV4::selectSteinerPoint(string powerPin , Graph_SP * g
     // first Route
     if( multiPinCandidates[powerPin].empty() )
     {
+        vector<Coordinate3D> selectedPath ;
         legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
         graph_sp->Dijkstra(target);
         auto paths= graph_sp->getPath(source);
@@ -1403,8 +1403,8 @@ vector<Coordinate3D> RouterV4::selectSteinerPoint(string powerPin , Graph_SP * g
     }
     else
     {
-//        int minimumDistance = INT_MAX;
-//        int minimumTarget = -1 ;
+        double minCost = INT_MAX;
+        vector<Coordinate3D> minCostSolutions ;
 //        for( auto candidate : multiPinCandidates[powerPin] )
 //        {
 //            Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
@@ -1414,21 +1414,37 @@ vector<Coordinate3D> RouterV4::selectSteinerPoint(string powerPin , Graph_SP * g
 //                legalizeAllOrient(coordinate3D, graph_sp , width , spacing , originWidth);
 //        }
 //        graph_sp->Dijkstra(target);
-//        for( auto candidate : multiPinCandidates[powerPin] )
-//        {
-//            Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
-//            int mergePoint = translate3D_1D(coordinate3D) ;
-//            auto paths = graph_sp->getPath(mergePoint);
-//            int distance = graph_sp->getShortestPath(mergePoint) ;
-//            if( minimumDistance > distance )
-//            {
-//                minimumDistance = distance ;
-//                minimumTarget = mergePoint ;
-//            }
-//        }
-//        auto paths = graph_sp->getPath(minimumTarget);
-//        for( auto path : paths )
-//            selectedPath.push_back(translate1D_3D(path));
+        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += (multiPinCandidates[powerPin].size()/20) )
+        {
+            if( i > multiPinCandidates[powerPin].size()  ) break;
+            Coordinate3D candidate = multiPinCandidates[powerPin][i];
+            Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
+            if( coordinate3D == sourceGrid )
+                legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
+            else
+                legalizeAllOrient(coordinate3D, graph_sp , width ,spacing , originWidth);
+            graph_sp->Dijkstra(target);
+            int mergePoint = translate3D_1D(coordinate3D) ;
+            auto paths = graph_sp->getPath(mergePoint);
+            vector<Coordinate3D> solutions ;
+            for( auto path : paths )
+                solutions.push_back(translate1D_3D(path));
+            if(!paths.empty())
+            {
+                SteinerTreeConstruction(true , solutions, current, constraint, voltage, powerPin, block, blockPin, steinerTree);
+                double FOM = steinerTree->analysis();
+                if( minCost > FOM )
+                {
+                    minCost = FOM ;
+                    minCostSolutions = solutions ;
+                }
+                vector<Coordinate3D> absSolutions ;
+                for(auto sol : solutions)
+                    absSolutions.push_back(gridToAbsolute(sol));
+                steinerTree->erase(absSolutions);
+                steinerTree->reset() ;
+            }
+        }
         string key = block ;
         key.append(blockPin);
         auto initTargetPath = sourceTargetInitPath[key] ;
@@ -1439,12 +1455,12 @@ vector<Coordinate3D> RouterV4::selectSteinerPoint(string powerPin , Graph_SP * g
             Path.x = getGridX(Path.x);
             Path.y = getGridY(Path.y);
         }
-        genResistance(selectedPath, powerPin , sp_gen ,width );
+        genResistance(minCostSolutions, powerPin , sp_gen ,width );
         genResistance(initTargetPath,powerPin,sp_gen , width);
-        return selectedPath ;
+        return minCostSolutions ;
     }
 
-    return minCostSolutions ;
+    return vector<Coordinate3D>() ;
 }
 void RouterV4::SteinerTreeReduction(Graph * &steinerTree , vector<Coordinate3D> & terminals)
 {
@@ -1673,14 +1689,15 @@ void RouterV4::Route()
             saveRoutingList(gridToAbsolute(sourceGrid),gridToAbsolute(targetGrid),powerpin,blockinfo);
             int source = translate3D_1D(sourceGrid);
             int target = translate3D_1D(targetGrid);
-            vector<Coordinate3D> solutions = selectSteinerPoint(powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
+            vector<Coordinate3D> solutions = selectMergePoint(constraint , current , voltage , steinerTree , powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
 //            vector<Coordinate3D> solutions = selectPath(powerpin, graph_sp, target, source, blockinfo.BlockName, blockinfo.BlockPinName, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
 //            cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
-            SteinerTreeConstruction(solutions,current, constraint , voltage , powerpin , blockinfo.BlockName , blockinfo.BlockPinName, steinerTree);
+            SteinerTreeConstruction(false , solutions,current, constraint , voltage , powerpin , blockinfo.BlockName , blockinfo.BlockPinName, steinerTree);
             fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH ,true );
             saveMultiPinCandidates(powerpin, solutions);
             def_gen.toOutputDef();
             delete [] graph_sp ;
+//            Simulation();
         }
 //        optimize(steinerTree);
         delete [] steinerTree;
@@ -1802,7 +1819,7 @@ void RouterV4::Simulation()
         if( ng_spice.voltages.find(targetKey) == ng_spice.voltages.end() ) assert(0);
         double sourceV = stod(VoltageMaps[routingList.sourceName]);
         double targetV = ng_spice.voltages[targetKey];
-        double drop = (sourceV - targetV) * 100 ;
+        double drop = (sourceV - targetV) / sourceV * 100 ;
         double constaint = RouterHelper.getIRDropConstaint(routingList.targetBlockName, routingList.targetBlockPinName);
         cout << routingList.sourceName << " to " << routingList.targetBlockName << "_" << routingList.targetBlockPinName << " Drop " << drop << "(%) " ;
         if( constaint >= drop )
@@ -2003,10 +2020,10 @@ void RouterV4::CutGrid(double width , double spacing )
         int rightX = block.RightUp.x + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
         int downY = block.LeftDown.y - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
         int upY = block.RightUp.y + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-        if( downY > 0 )Horizontal.insert(downY);
-        if( upY > 0 )Horizontal.insert(upY);
-        if( leftX > 0 )Vertical.insert(leftX);
-        if( rightX > 0 )Vertical.insert(rightX);
+        if( downY > 0 && downY <= DIEAREA.pt2.y )Horizontal.insert(downY);
+        if( upY > 0 && upY <= DIEAREA.pt2.y)Horizontal.insert(upY);
+        if( leftX > 0 && leftX <= DIEAREA.pt2.x)Vertical.insert(leftX);
+        if( rightX > 0 && rightX <= DIEAREA.pt2.x)Vertical.insert(rightX);
     }
     for( auto key : obstacles )
     {
@@ -2016,10 +2033,10 @@ void RouterV4::CutGrid(double width , double spacing )
             int rightX = block.RightUp.x + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
             int downY = block.LeftDown.y - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
             int upY = block.RightUp.y + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-            if( downY > 0 )Horizontal.insert(downY);
-            if( upY > 0 )Horizontal.insert(upY);
-            if( leftX > 0 )Vertical.insert(leftX);
-            if( rightX > 0 )Vertical.insert(rightX);
+            if( downY > 0 && downY <= DIEAREA.pt2.y )Horizontal.insert(downY);
+            if( upY > 0 && upY <= DIEAREA.pt2.y)Horizontal.insert(upY);
+            if( leftX > 0 && leftX <= DIEAREA.pt2.x)Vertical.insert(leftX);
+            if( rightX > 0 && rightX <= DIEAREA.pt2.x)Vertical.insert(rightX);
         }
     }
     Vertical.insert(DIEAREA.pt2.x);

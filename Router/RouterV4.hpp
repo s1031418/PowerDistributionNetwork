@@ -59,7 +59,7 @@ private:
     set<int> Horizontal ;
     int lowestMetal ;
     int highestMetal ;
-    double DEFAULTWIDTH = 8 ;
+    double DEFAULTWIDTH = 10 ;
     double DEFAULTSPACING = 2 ;
     set<int> boundList ;
     
@@ -176,11 +176,11 @@ private:
     
     pair<vector<string>,map<string,vector<Path>>> getNetOrdering(double width, double spacing , double originWidth);
     
-    void SteinerTreeConstruction(vector<Coordinate3D> & solutions , double current , double constraint , double voltage , string powerPin , string block , string blockPin , Graph * & steinerTree);
+    void SteinerTreeConstruction(bool isSimulation ,  vector<Coordinate3D> & solutions , double current , double constraint , double voltage , string powerPin , string block , string blockPin , Graph * & steinerTree);
     
     void SteinerTreeReduction(Graph * &steinerTree , vector<Coordinate3D> & terminals);
     
-    vector<Coordinate3D> selectSteinerPoint(string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth) ;
+    vector<Coordinate3D> selectMergePoint(double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth) ;
     
     void InitializeSpiceGen(Graph * steinerTree);
     

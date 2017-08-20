@@ -18,6 +18,7 @@
 #include "lefrw.h"
 #include "defrw.h"
 #include "RouterUtil.hpp"
+#include "InitialFileParser.hpp"
 using namespace std;
 
 
@@ -69,14 +70,19 @@ public:
     pair<double, double> getQuadraticEquation(double a , double b , double c );
     double analysis();
     void printAllPath();
-    
+    void reset();
     vector<vector<Vertex *>> traverse();
+    double getTotalMetalUsage();
+    void erase(vector<Coordinate3D> coordinates);
+    void setSimulationMode(bool isSimulation);
 private:
+    bool simulationMode  ;
     Vertex * root ;
     map<string,Vertex *> LUT ; // Look Up Table (query ptr)
     map<string,double> COT ; // Constaint Table(query constraint)
     map<string,double> CUT ; // Current Table(query constraint)
     map<string,double> VT ; // Voltage Table (query voltage)
+    vector<string> history ;
     queue<LeafInfo> leafQueue ;
     vector<Vertex *> leafs ;
     RouterUtil RouterHelper; 
