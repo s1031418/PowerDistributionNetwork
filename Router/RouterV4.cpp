@@ -9,8 +9,10 @@
 #include "RouterV4.hpp"
 
 // bug list:
-// (wiring)
-// same net 
+// 溝通要用絕對座標
+// 優化何時要問ngspice
+// source target selection
+// spice 打錯 (應該是失真問題)
 
 
 
@@ -408,18 +410,14 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
     auto source = paths[0];
     int startLayer = source.z ;
     int layer = startLayer ;
-    Graph g ;
-    for(auto p : paths)
-    {
-        auto abs = gridToAbsolute(p);
-        cout << "abs:" << abs.x << " " << abs.y << " " << abs.z << endl;
-        if(abs.x == 371000 && abs.y == 320000 && abs.z == 5)
-            cout << "";
-        widthTable.insert(make_pair(g.encode(abs), width));
-    }
+//    Graph g ;
+//    for(auto p : paths)
+//    {
+//        auto abs = gridToAbsolute(p);
+//        widthTable.insert(make_pair(g.encode(abs), width));
+//    }
     auto friendlyForm = translateToFriendlyForm(paths);
     
-    cout << endl;
     Point<int> startPoint = Grids[source.y][source.x].startpoint ;
     Point<int> oringinTargetPoint = startPoint;
     Point<int> targetPoint = startPoint;
@@ -456,7 +454,7 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
 //        cout << " " << p.second << endl;
 //    }
 //    cout << endl;
-    Grids.begin();
+    
     auto Distance = getAbsoluteDistance(friendlyForm, Point<int>(source.x,source.y));
 //    for(auto d : Distance)
 //        cout << d << endl;
@@ -901,9 +899,10 @@ void RouterV4::legalizeEdge(Coordinate3D source , Coordinate3D target , Directio
         {
             int from = translate3D_1D(target);
             target.z -= 1 ;
+            int viaWeight = RouterHelper.getViaWeight(width * width, target.z);
             int to = translate3D_1D(target);
-            graph_sp->UpdateWeight(from, to, 1 * 10000);
-            graph_sp->UpdateWeight(to, from , 1 * 10000);
+            graph_sp->UpdateWeight(from, to, viaWeight);
+            graph_sp->UpdateWeight(to, from , viaWeight);
         }
     }
     else if( orient == bottomOrient )
@@ -912,10 +911,11 @@ void RouterV4::legalizeEdge(Coordinate3D source , Coordinate3D target , Directio
         for(int i = 0 ; i < cnt ; i++)
         {
             int from = translate3D_1D(target);
+            int viaWeight = RouterHelper.getViaWeight(width * width, target.z);
             target.z += 1 ;
             int to = translate3D_1D(target);
-            graph_sp->UpdateWeight(from, to, 1 * 10000);
-            graph_sp->UpdateWeight(to, from , 1 * 10000);
+            graph_sp->UpdateWeight(from, to, viaWeight);
+            graph_sp->UpdateWeight(to, from , viaWeight);
         }
     }
     else if( orient == upOrient )
@@ -1073,15 +1073,17 @@ double RouterV4::getCost(string spiceName)
     ng_spice.initvoltage();
     for( auto routingList : currentRoutingLists )
     {
-        Coordinate3D sourceGrid( getGridX(routingList.sourceCoordinate.x) , getGridY(routingList.sourceCoordinate.y) , routingList.sourceCoordinate.z );
-        Coordinate3D targetGrid( getGridX(routingList.targetCoordinate.x) , getGridY(routingList.targetCoordinate.y) , routingList.targetCoordinate.z );
-        string sourceKey = getNgSpiceKey(sourceGrid) ;
-        string targetKey = getNgSpiceKey(targetGrid) ;
+//        Coordinate3D sourceGrid( getGridX(routingList.sourceCoordinate.x) , getGridY(routingList.sourceCoordinate.y) , routingList.sourceCoordinate.z );
+//        Coordinate3D targetGrid( getGridX(routingList.targetCoordinate.x) , getGridY(routingList.targetCoordinate.y) , routingList.targetCoordinate.z );
+//        string sourceKey = getNgSpiceKey(sourceGrid) ;
+//        string targetKey = getNgSpiceKey(targetGrid) ;
+        string sourceKey = getNgSpiceKey(routingList.sourceCoordinate) ;
+        string targetKey = getNgSpiceKey(routingList.targetCoordinate) ;
         if( ng_spice.voltages.find(sourceKey) == ng_spice.voltages.end() ) assert(0);
         if( ng_spice.voltages.find(targetKey) == ng_spice.voltages.end() ) assert(0);
         
-        double sourceV = ng_spice.voltages[getNgSpiceKey(sourceGrid)];
-        double targetV = ng_spice.voltages[getNgSpiceKey(targetGrid)];
+        double sourceV = ng_spice.voltages[sourceKey];
+        double targetV = ng_spice.voltages[targetKey];
         double drop = (sourceV - targetV) * 100 ;
         double constaint = RouterHelper.getIRDropConstaint(routingList.targetBlockName, routingList.targetBlockPinName);
         if( constaint >= drop )
@@ -1182,12 +1184,13 @@ vector<Coordinate3D> RouterV4::selectPath(string powerPin , Graph_SP * graph_sp 
     
     return minCostSolutions ;
 }
-void RouterV4::saveRoutingList(Coordinate3D sourceGrid , Coordinate3D targetGrid , string powerPin , BlockInfo blockinfo)
+// x y
+void RouterV4::saveRoutingList(Coordinate3D source , Coordinate3D target , string powerPin , BlockInfo blockinfo)
 {
     RoutingPath routePath;
     routePath.sourceName = powerPin ;
-    routePath.sourceCoordinate = gridToAbsolute(sourceGrid);
-    routePath.targetCoordinate = gridToAbsolute(targetGrid);
+    routePath.sourceCoordinate = source;
+    routePath.targetCoordinate = target;
     routePath.targetBlockName = blockinfo.BlockName ;
     routePath.targetBlockPinName = blockinfo.BlockPinName ;
     currentRoutingLists.push_back(routePath);
@@ -1363,6 +1366,10 @@ void RouterV4::SteinerTreeConstruction(vector<Coordinate3D> & solutions , double
         steinerTree = new Graph[1];
         steinerTree->initialize(absSolutions[0]);
     }
+    else
+    {
+        steinerTree->setSteriner(absSolutions[0]);
+    }
     // 從source 到 target
     for(int i = 1 ; i < absSolutions.size() ; i++)
     {
@@ -1391,49 +1398,49 @@ vector<Coordinate3D> RouterV4::selectSteinerPoint(string powerPin , Graph_SP * g
         auto paths= graph_sp->getPath(source);
         for( auto path : paths )
             selectedPath.push_back(translate1D_3D(path));
-//        generateSpiceList(selectedPath, powerPin, block , blockPin , width);
+        generateSpiceList(selectedPath, powerPin, block , blockPin , width);
         return selectedPath ;
     }
     else
     {
-        int minimumDistance = INT_MAX;
-        int minimumTarget = -1 ;
-        for( auto candidate : multiPinCandidates[powerPin] )
-        {
-            Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
-            if( coordinate3D == sourceGrid )
-                legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
-            else
-                legalizeAllOrient(coordinate3D, graph_sp , width , spacing , originWidth);
-        }
-        graph_sp->Dijkstra(target);
-        for( auto candidate : multiPinCandidates[powerPin] )
-        {
-            Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
-            int mergePoint = translate3D_1D(coordinate3D) ;
-            auto paths = graph_sp->getPath(mergePoint);
-            int distance = graph_sp->getShortestPath(mergePoint) ;
-            if( minimumDistance > distance )
-            {
-                minimumDistance = distance ;
-                minimumTarget = mergePoint ;
-            }
-        }
-        auto paths = graph_sp->getPath(minimumTarget);
-        for( auto path : paths )
-            selectedPath.push_back(translate1D_3D(path));
-//        string key = block ;
-//        key.append(blockPin);
-//        auto initTargetPath = sourceTargetInitPath[key] ;
-//        
-//        sp_gen.addSpiceCurrent(powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(block, blockPin));
-//        for( auto & Path : initTargetPath )
+//        int minimumDistance = INT_MAX;
+//        int minimumTarget = -1 ;
+//        for( auto candidate : multiPinCandidates[powerPin] )
 //        {
-//            Path.x = getGridX(Path.x);
-//            Path.y = getGridY(Path.y);
+//            Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
+//            if( coordinate3D == sourceGrid )
+//                legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
+//            else
+//                legalizeAllOrient(coordinate3D, graph_sp , width , spacing , originWidth);
 //        }
-//        genResistance(selectedPath, powerPin , sp_gen ,width );
-//        genResistance(initTargetPath,powerPin,sp_gen , width);
+//        graph_sp->Dijkstra(target);
+//        for( auto candidate : multiPinCandidates[powerPin] )
+//        {
+//            Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
+//            int mergePoint = translate3D_1D(coordinate3D) ;
+//            auto paths = graph_sp->getPath(mergePoint);
+//            int distance = graph_sp->getShortestPath(mergePoint) ;
+//            if( minimumDistance > distance )
+//            {
+//                minimumDistance = distance ;
+//                minimumTarget = mergePoint ;
+//            }
+//        }
+//        auto paths = graph_sp->getPath(minimumTarget);
+//        for( auto path : paths )
+//            selectedPath.push_back(translate1D_3D(path));
+        string key = block ;
+        key.append(blockPin);
+        auto initTargetPath = sourceTargetInitPath[key] ;
+        
+        sp_gen.addSpiceCurrent(powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(block, blockPin));
+        for( auto & Path : initTargetPath )
+        {
+            Path.x = getGridX(Path.x);
+            Path.y = getGridY(Path.y);
+        }
+        genResistance(selectedPath, powerPin , sp_gen ,width );
+        genResistance(initTargetPath,powerPin,sp_gen , width);
         return selectedPath ;
     }
 
@@ -1445,6 +1452,195 @@ void RouterV4::SteinerTreeReduction(Graph * &steinerTree , vector<Coordinate3D> 
     {
         string encodeString = steinerTree->encode(terminal);
         
+    }
+}
+void RouterV4::InitializeSpiceGen(Graph * steinerTree)
+{
+    vector<LeafInfo> leafInfos = steinerTree->getLeafInfos();
+    auto initSourcePath = sourceTargetInitPath[leafInfos[0].powerPin] ;
+    sp_gen.initSpiceVdd(leafInfos[0].powerPin, gridToString(initSourcePath[0],false), stod(VoltageMaps[leafInfos[0].powerPin]));
+    for( auto & Path : initSourcePath )
+    {
+        Path.x = getGridX(Path.x);
+        Path.y = getGridY(Path.y);
+    }
+    genResistance(initSourcePath,leafInfos[0].powerPin,sp_gen,DEFAULTWIDTH);
+    for(auto leafInfo : leafInfos)
+    {
+        
+        string key;
+        key.append(leafInfo.block).append(leafInfo.blockPin);
+        
+        auto initTargetPath = sourceTargetInitPath[key] ;
+        
+        sp_gen.addSpiceCurrent(leafInfo.powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(leafInfo.block, leafInfo.blockPin));
+        
+        for( auto & Path : initTargetPath )
+        {
+            Path.x = getGridX(Path.x);
+            Path.y = getGridY(Path.y);
+        }
+        
+        genResistance(initTargetPath,leafInfo.powerPin,sp_gen,DEFAULTWIDTH);
+    }
+    
+    // generate resistance
+//    genResistance(paths,powerPinName,sp_gen,width);
+    
+}
+vector<Coordinate3D> RouterV4::getCorner(vector<pair<Direction3D, int>> & friendlyForm , Coordinate3D source)
+{
+    vector<Coordinate3D> corners ;
+    Coordinate3D temp = source ;
+    
+    for( auto path : friendlyForm )
+    {
+        // "UP";
+        if( path.first == 0 )
+        {
+            temp.y += path.second;
+            corners.push_back(temp);
+        }
+        // "DOWN"
+        if( path.first == 1 )
+        {
+            temp.y -= path.second;
+            corners.push_back(temp);
+        }
+        // "LEFT"
+        if( path.first == 2 )
+        {
+            temp.x -= path.second;
+            corners.push_back(temp);
+        }
+        // "RIGHT"
+        if( path.first == 3 )
+        {
+            temp.x += path.second;
+            corners.push_back(temp);
+        }
+        // "TOP"
+        if( path.first == 4 )
+        {
+            temp.z += path.second;
+        }
+        // "BOTTOM"
+        if( path.first == 5 )
+        {
+            temp.z -= path.second;
+        }
+    }
+    return corners ;
+}
+int RouterV4::gridYToAbs(int gridY)
+{
+    return ( gridY != 0 ) ? *std::next(Horizontal.begin(), gridY-1) : 0 ;
+}
+int RouterV4::gridXToAbs(int gridX)
+{
+    return ( gridX != 0 ) ? *std::next(Vertical.begin(), gridX-1) : 0 ;
+}
+Coordinate3D RouterV4::getNext(Direction3D direction , Coordinate3D corner)
+{
+    if( direction == upOrient )
+    {
+        int y = gridYToAbs(corner.y);
+        int nextY = gridYToAbs(corner.y+1);
+        if( nextY - y >= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE )
+        {
+            corner.y += 1;
+            return corner;
+        }
+        while ( nextY - y < (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE )
+        {
+            corner.y += 1;
+            nextY = gridYToAbs(corner.y);
+        }
+        return corner ;
+    }
+    else if( direction == downOrient )
+    {
+        int y = gridYToAbs(corner.y);
+        int nextY = gridYToAbs(corner.y-1);
+        if( y - nextY >= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE )
+        {
+            corner.y -= 1;
+            return corner;
+        }
+        while ( y - nextY < (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE )
+        {
+            corner.y -= 1;
+            nextY = gridYToAbs(corner.y);
+        }
+        return corner ;
+    }
+    else if( direction == leftOrient )
+    {
+        int x = gridXToAbs(corner.x);
+        int nextX = gridXToAbs(corner.x-1);
+        if( x - nextX >= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE )
+        {
+            corner.x -= 1;
+            return corner;
+        }
+        while ( x - nextX < (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE )
+        {
+            corner.x -= 1;
+            nextX = gridXToAbs(corner.x);
+        }
+        return corner ;
+    }
+    else if( direction == rightOrient )
+    {
+        int x = gridXToAbs(corner.x);
+        int nextX = gridXToAbs(corner.x+1);
+        if( nextX - x >= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE )
+        {
+            corner.x += 1;
+            return corner;
+        }
+        while ( nextX - x < (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE )
+        {
+            corner.x += 1;
+            nextX = gridXToAbs(corner.x);
+        }
+        return corner ;
+    }
+    return Coordinate3D();
+}
+Coordinate3D RouterV4::selectSource(Coordinate3D corner)
+{
+    return corner;
+}
+Coordinate3D RouterV4::selectTarget(Coordinate3D corner)
+{
+    return corner ;
+}
+void RouterV4::optimize(Graph * steinerTree)
+{
+    Simulation();
+    steinerTree->reduction();
+    steinerTree->rectifyCurrent() ;
+    steinerTree->rectifyWidth() ;
+    vector<vector<Vertex *>> traversePaths = steinerTree->traverse() ;
+    if( !NoPassRoutingLists.empty() )
+    {
+        for( auto leaf : traversePaths )
+        {
+            LeafInfo leafInfo = steinerTree->getLeafInfo();
+            Coordinate3D source = leaf[0]->coordinate ;
+            Coordinate3D target = leaf[leaf.size()-1]->coordinate;
+            vector<Coordinate3D> solutions = parallelRoute(leafInfo.powerPin, leafInfo.block, leafInfo.blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+            if(solutions.empty())
+                cout << "";
+            if( !solutions.empty() )
+            {
+                fillSpNetMaps(solutions, leafInfo.powerPin, leafInfo.block , leafInfo.blockPin , DEFAULTWIDTH , true );
+                def_gen.toOutputDef();
+                genResistance(solutions,leafInfo.powerPin,sp_gen , DEFAULTWIDTH);
+                Simulation();
+            }
+        }
     }
 }
 void RouterV4::Route()
@@ -1474,105 +1670,23 @@ void RouterV4::Route()
             Graph_SP * graph_sp = InitGraph_SP(DEFAULTWIDTH,DEFAULTSPACING);
             Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING );
             Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING);
-//            saveRoutingList(sourceGrid,targetGrid,powerpin,blockinfo);
+            saveRoutingList(gridToAbsolute(sourceGrid),gridToAbsolute(targetGrid),powerpin,blockinfo);
             int source = translate3D_1D(sourceGrid);
             int target = translate3D_1D(targetGrid);
             vector<Coordinate3D> solutions = selectSteinerPoint(powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
+//            vector<Coordinate3D> solutions = selectPath(powerpin, graph_sp, target, source, blockinfo.BlockName, blockinfo.BlockPinName, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
 //            cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
             SteinerTreeConstruction(solutions,current, constraint , voltage , powerpin , blockinfo.BlockName , blockinfo.BlockPinName, steinerTree);
-//            fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , WIDTH,true );
+            fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH ,true );
             saveMultiPinCandidates(powerpin, solutions);
-//            def_gen.toOutputDef();
+            def_gen.toOutputDef();
             delete [] graph_sp ;
         }
-        def_gen.toOutputDef();
-        multiPinCandidates.clear() ; 
-        steinerTree->reduction();
-        steinerTree->rectifyCurrent() ;
-        steinerTree->rectifyWidth() ;
-        steinerTree->printAllPath();
-        auto leafPath = steinerTree->traverse();
-        for( auto leaf : leafPath )
-        {
-            for(auto innerLeaf : leaf)
-                cout << innerLeaf->coordinate.x << " " << innerLeaf->coordinate.y << " " << innerLeaf->coordinate.z << endl;
-        }
-        for(auto a : widthTable)
-            cout << a.first << " " << a.second << endl;
-        for( auto leaf : leafPath  )
-        {
-            Coordinate3D source = AbsToGrid(leaf[0]->coordinate);
-            Coordinate3D target = AbsToGrid(leaf[leaf.size()-1]->coordinate);
-            LeafInfo leafInfo = steinerTree->getLeafInfo();
-            BlockInfo blockinfo ;
-            blockinfo.BlockName = leafInfo.block;
-            blockinfo.BlockPinName = leafInfo.blockPin ;
-            saveRoutingList(source,target,leafInfo.powerPin,blockinfo);
-            vector<int> SpecialHorizontal ;
-            vector<int> SpecialVertical ;
-            double width = leaf[0]->width / UNITS_DISTANCE ;
-            vector<pair<Coordinate3D, Coordinate3D>> pairs ; // source and target
-            for(int i = 0 ; i < leaf.size() ; i++)
-            {
-                if( i + 1 < leaf.size() )
-                    pairs.push_back(make_pair(leaf[i]->coordinate, leaf[i+1]->coordinate));
-                SpecialHorizontal.push_back(leaf[i]->coordinate.y);
-                SpecialVertical.push_back(leaf[i]->coordinate.x);
-            }
-            
-            InitGrids(leafInfo.powerPin, width , DEFAULTSPACING ,  SpecialHorizontal , SpecialVertical);
-            Graph_SP * graph_sp = InitGraph_SP(width,DEFAULTSPACING);
-            for( auto pair : pairs )
-            {
-                Coordinate3D sourceGrid = AbsToGrid(pair.first);
-                Coordinate3D targetGrid = AbsToGrid(pair.second);
-                double originWidth = 0 ;
-                string encodeString = steinerTree->encode(pair.first);
-                auto t = gridToAbsolute(sourceGrid);
-                auto ta = gridToAbsolute(targetGrid);
-                originWidth = ( widthTable.find(encodeString) != widthTable.end() ) ? widthTable[encodeString] : width ;
-                legalizeAllOrient(sourceGrid, graph_sp , width , DEFAULTSPACING , originWidth);
-                encodeString = steinerTree->encode(pair.second);
-                originWidth = ( widthTable.find(encodeString) != widthTable.end() ) ? widthTable[encodeString] : width ;
-                legalizeAllOrient(targetGrid, graph_sp , width , DEFAULTSPACING , originWidth);
-                int source1D = translate3D_1D(sourceGrid);
-                int target1D = translate3D_1D(targetGrid);
-                graph_sp->Dijkstra(target1D);
-                auto paths= graph_sp->getPath(source1D);
-                vector<Coordinate3D> solutions ;
-                for( auto path : paths )
-                    solutions.push_back(translate1D_3D(path));
-                for(auto sol : solutions)
-                {
-                    auto abs = gridToAbsolute(sol);
-                    cout << abs.x << " " << abs.y << " " << abs.z << endl;
-                }
-                fillSpNetMaps(solutions, leafInfo.powerPin, leafInfo.block , leafInfo.blockPin , width , true );
-                if( multiPinCandidates[leafInfo.powerPin].empty() )
-                {
-                    generateSpiceList(solutions, leafInfo.powerPin, leafInfo.block , leafInfo.blockPin , width);
-                }
-                else
-                {
-                    string key = leafInfo.block ;
-                    key.append(leafInfo.blockPin);
-                    auto initTargetPath = sourceTargetInitPath[key] ;
-                    sp_gen.addSpiceCurrent(leafInfo.powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(leafInfo.block, leafInfo.blockPin));
-                    for( auto & Path : initTargetPath )
-                    {
-                        Path.x = getGridX(Path.x);
-                        Path.y = getGridY(Path.y);
-                    }
-                    genResistance(solutions, leafInfo.powerPin , sp_gen ,width );
-                    genResistance(initTargetPath,leafInfo.powerPin,sp_gen , width);
-                }
-                saveMultiPinCandidates(leafInfo.powerPin, solutions);
-                def_gen.toOutputDef();
-            }
-        }
+//        optimize(steinerTree);
         delete [] steinerTree;
+//        widthTable.clear();
     }
-//    InitPowerPinAndBlockPin(WIDTH,SPACING);
+//    InitPowerPinAndBlockPin(DEFAULTWIDTH,DEFAULTSPACING);
 //    def_gen.toOutputDef();
 //    GlobalRouter gr ;
 //    auto orders = gr.getNetOrdering();
@@ -1586,15 +1700,15 @@ void RouterV4::Route()
 //        vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerpin);
 //        Block powerPinCoordinate = powerPinCoordinates[0];
 //        Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
-//        InitGrids(powerpin,WIDTH , SPACING);
-//        Graph_SP * graph_sp = InitGraph_SP(WIDTH,SPACING);
-//        Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp);
-//        Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp);
-//        saveRoutingList(sourceGrid,targetGrid,powerpin,blockinfo);
+//        InitGrids(powerpin,DEFAULTWIDTH , DEFAULTSPACING);
+//        Graph_SP * graph_sp = InitGraph_SP(DEFAULTWIDTH,DEFAULTSPACING);
+//        Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING);
+//        Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING);
+//        saveRoutingList(gridToAbsolute(sourceGrid),gridToAbsolute(targetGrid),powerpin,blockinfo);
 //        int source = translate3D_1D(sourceGrid);
 //        int target = translate3D_1D(targetGrid);
-//        vector<Coordinate3D> solutions = selectPath(powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName);
-//        fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , WIDTH,true );
+//        vector<Coordinate3D> solutions = selectPath(powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
+//        fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH,true );
 //        saveMultiPinCandidates(powerpin, solutions);
 //        def_gen.toOutputDef();
 //        delete [] graph_sp ;
@@ -1615,43 +1729,56 @@ void RouterV4::Route()
 //    system("rm tmp.sp");
 //    system("rm simulation");
 }
-// coordindate 為 絕對座標 + Z
-bool RouterV4::parallelRoute(string powerPin ,string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , double width , double spacing , double originWidth )
+bool RouterV4::isSameLayer(vector<Coordinate3D> & path)
 {
+    int z = path[0].z;
+    for(int i = 1 ; i < path.size() ; i++)
+    {
+        if( z != path[i].z )
+            return false;
+    }
+    return true;
+}
+// coordindate 為 絕對座標 + Z
+vector<Coordinate3D> RouterV4::parallelRoute(string powerPin ,string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , double width , double spacing , double originWidth )
+{
+    
+    Graph_SP * graph_sp = new Graph_SP[1];
     vector<Coordinate3D> solutions ;
-    InitGrids(powerPin,10,spacing);
-//    Vertical.insert(1681000);
-//    Horizontal.insert(354000);
-//    Horizontal.insert(16000);
-//    Vertical.insert(200000);
-    Graph_SP * graph_sp = InitGraph_SP(19,spacing);
+    InitGrids(powerPin, DEFAULTWIDTH, DEFAULTSPACING);
+    graph_sp = InitGraph_SP(DEFAULTWIDTH, DEFAULTSPACING);
     Coordinate3D sourceGrid = AbsToGrid(source);
     Coordinate3D targetGrid = AbsToGrid(target);
-    legalizeAllOrient(sourceGrid, graph_sp , width ,spacing , originWidth);
-    legalizeAllOrient(targetGrid, graph_sp , width , spacing , originWidth);
+    legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
+//    legalizeAllOrient(sourceGrid, graph_sp , width ,spacing , originWidth);
+//    legalizeAllOrient(targetGrid, graph_sp , width , spacing , originWidth);
+    legalizeAllLayer(targetGrid, graph_sp , width , spacing , originWidth);
     int source1D = translate3D_1D(sourceGrid);
     int target1D = translate3D_1D(targetGrid);
     graph_sp->Dijkstra(target1D);
     auto paths= graph_sp->getPath(source1D);
-    if( paths.empty() ) return false;
+    delete [] graph_sp ;
+    if( paths.empty() ) return vector<Coordinate3D>();
     for( auto path : paths )
         solutions.push_back(translate1D_3D(path));
-    fillSpNetMaps(solutions, powerPin, blockName , blockPinName , width , true );
-    def_gen.toOutputDef();
-    genResistance(solutions,powerPin,sp_gen , width);
-    return true ;
+    return solutions;
+//    bool sameLayer = isSameLayer(solutions);
+//    fillSpNetMaps(solutions, powerPin, blockName , blockPinName , width , true );
+//    def_gen.toOutputDef();
+//    genResistance(solutions,powerPin,sp_gen , width);
+//    return (sameLayer) ? solutions : vector<Coordinate3D>();
 }
 
-
+// x y are abs , z is grid
 string RouterV4::getNgSpiceKey(Coordinate3D coordinate3d)
 {
     int z = coordinate3d.z ;
-    Point<int> pt = getAbsolutePoint(coordinate3d);
+//    Point<int> pt = getAbsolutePoint(coordinate3d);
     string MetalName = RouterHelper.translateIntToMetalName(z) ;
     string result ;
     // to lowercase
     transform(MetalName.begin(), MetalName.end(), MetalName.begin(), ::tolower);
-    result.append(MetalName).append("_").append(to_string(pt.x)).append("_").append(to_string(pt.y));
+    result.append(MetalName).append("_").append(to_string(coordinate3d.x)).append("_").append(to_string(coordinate3d.y));
     return result ;
 }
 void RouterV4::Simulation()
@@ -1667,14 +1794,14 @@ void RouterV4::Simulation()
     ng_spice.initvoltage();
     for( auto routingList : currentRoutingLists )
     {
-        Coordinate3D sourceGrid( getGridX(routingList.sourceCoordinate.x) , getGridY(routingList.sourceCoordinate.y) , routingList.sourceCoordinate.z );
-        Coordinate3D targetGrid( getGridX(routingList.targetCoordinate.x) , getGridY(routingList.targetCoordinate.y) , routingList.targetCoordinate.z );
-        string sourceKey = getNgSpiceKey(sourceGrid) ;
-        string targetKey = getNgSpiceKey(targetGrid) ;
+//        Coordinate3D sourceGrid( getGridX(routingList.sourceCoordinate.x) , getGridY(routingList.sourceCoordinate.y) , routingList.sourceCoordinate.z );
+//        Coordinate3D targetGrid( getGridX(routingList.targetCoordinate.x) , getGridY(routingList.targetCoordinate.y) , routingList.targetCoordinate.z );
+        string sourceKey = getNgSpiceKey(routingList.sourceCoordinate) ;
+        string targetKey = getNgSpiceKey(routingList.targetCoordinate) ;
         if( ng_spice.voltages.find(sourceKey) == ng_spice.voltages.end() ) assert(0);
         if( ng_spice.voltages.find(targetKey) == ng_spice.voltages.end() ) assert(0);
         double sourceV = stod(VoltageMaps[routingList.sourceName]);
-        double targetV = ng_spice.voltages[getNgSpiceKey(targetGrid)];
+        double targetV = ng_spice.voltages[targetKey];
         double drop = (sourceV - targetV) * 100 ;
         double constaint = RouterHelper.getIRDropConstaint(routingList.targetBlockName, routingList.targetBlockPinName);
         cout << routingList.sourceName << " to " << routingList.targetBlockName << "_" << routingList.targetBlockPinName << " Drop " << drop << "(%) " ;
@@ -1706,9 +1833,12 @@ void RouterV4::genResistance(vector<Coordinate3D> & paths , string powerPinName 
         Point<int> pt1 = getAbsolutePoint(paths[i]);
         Point<int> pt2 = getAbsolutePoint(paths[i+1]);
         // distance 0 means via
-        // 目前打最大顆via (HardCode)
         int distance = ( pt1.x == pt2.x ) ? abs(pt1.y - pt2.y) : abs(pt1.x - pt2.x);
-        double resistance = ( distance != 0 ) ? RouterHelper.calculateResistance(getMetalResistance(paths[i].z), width * UNITS_DISTANCE, distance) : 0.1 ;
+        // 目前打最小顆via (HardCode)
+        int area = (int)width * (int)width ;
+        double viaResistance = 10 ;
+        double parallelViaResistance = viaResistance / area / 1   ;
+        double resistance = ( distance != 0 ) ? RouterHelper.calculateResistance(getMetalResistance(paths[i].z), width * UNITS_DISTANCE, distance) : parallelViaResistance ;
         if(resistance < 0 ) assert(0);
         spiceGenerator.addSpiceResistance(powerPinName, node1, node2, resistance);
     }
@@ -1742,9 +1872,9 @@ void RouterV4::generateSpiceList(vector<Coordinate3D> & paths , string powerPinN
         Path.y = getGridY(Path.y);
     }
     // generate resistance
-    genResistance(initSourcePath,powerPinName,sp_gen,width);
+    genResistance(initSourcePath,powerPinName,sp_gen,DEFAULTWIDTH);
     genResistance(paths,powerPinName,sp_gen,width);
-    genResistance(initTargetPath,powerPinName,sp_gen,width);
+    genResistance(initTargetPath,powerPinName,sp_gen,DEFAULTWIDTH);
     
 }
 Coordinate3D RouterV4::getGridCoordinate( Block block  )
@@ -1924,13 +2054,13 @@ void RouterV4::updateGrid(CrossInfo result , Grid & grid)
         }
     }
 }
-void RouterV4::InitGrids(string source , double width , double spacing , vector<int> SpecialHorizontal ,  vector<int> SpecialVertical )
+void RouterV4::InitGrids(string source , double width , double spacing , bool cutGrid, vector<int> SpecialHorizontal ,  vector<int> SpecialVertical )
 {
     Grids.clear();
 //    cout << "Begin Initialize  Grid Graph ..." << endl;
 //    clock_t Start = clock();
     
-    CutGrid(width, spacing);
+    if(cutGrid)CutGrid(width, spacing);
     for(auto h : SpecialHorizontal)
         Horizontal.insert(h);
     for(auto v : SpecialVertical)
@@ -1953,7 +2083,6 @@ void RouterV4::InitGrids(string source , double width , double spacing , vector<
             grid.startpoint = startpoint ;
             // 判斷有沒有跟block有交叉
             Rectangle rect(grid.startpoint , Point<int>( grid.startpoint.x + grid.width , grid.startpoint.y + grid.length ));
-            // hardcode
             Rectangle via ;
             via.LeftDown.x = grid.startpoint.x - (width * UNITS_DISTANCE / 2 ) ;
             via.LeftDown.y = grid.startpoint.y - (width * UNITS_DISTANCE / 2 ) ;
@@ -2089,6 +2218,11 @@ vector<pair<Direction3D, int>> RouterV4::translateToFriendlyForm( vector<Coordin
    
     for(int i = 0 ; i < Paths.size() ; i++)
     {
+        if( i + 1 >= Paths.size() )
+        {
+            paths.push_back(make_pair(currentDir, cnt));
+            break;
+        }
         if( (int)(Paths[i+1].x - Paths[i].x) > 0) nextDir = rightOrient ;
         if( (int)(Paths[i+1].x - Paths[i].x) < 0) nextDir = leftOrient ;
         if( (int)(Paths[i+1].y - Paths[i].y) > 0) nextDir = upOrient ;

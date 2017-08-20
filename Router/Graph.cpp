@@ -26,13 +26,15 @@ Vertex * Graph::getVertex(Coordinate3D coordinate)
 }
 void Graph::destoryGraph()
 {
-//    for(auto vertex : LUT)
-//    {
+//    for(auto & vertex : LUT)
+    for(auto it = LUT.begin() ; it != LUT.end() ; ++it)
+    {
 //        if( vertex.second->fanIn != nullptr ) delete [] vertex.second->fanIn ;
 //        for(auto fanout : vertex.second->fanOut)
 //            delete [] fanout ;
-//        delete [] vertex.second ;
-//    }
+        delete [] it->second;
+    }
+    LUT.clear();
 }
 void Graph::initialize(Coordinate3D source )
 {
@@ -76,6 +78,48 @@ void Graph::rectifyCurrent()
         }
     }
 }
+double Graph::analysis()
+{
+    reduction();
+    rectifyCurrent();
+    rectifyWidth();
+    double cost = 0 ;
+    for( auto leaf : leafs )
+    {
+        bool passCount = 0 ;
+        Vertex * ptr = leaf ;
+        // 一開始長出來那個金屬的voltage drop
+        // double targetVR = ptr->current * LayerMaps[RouterHelper.translateIntToMetalName(ptr->coordinate.z)].RESISTANCE_RPERSQ * ;
+        string encodeString = encode(ptr->coordinate) ;
+        double constraint = COT[encodeString];
+        double allowDrop = VT[encodeString] * (constraint ) / 100 ;
+        double realDrop = 0 ;
+        auto leafPaths = getPath(leaf->coordinate);
+        // backtrace
+        for(int i = (int)leafPaths.size() - 1 ; i >= 0 ; i++)
+        {
+            int layer = leafPaths[i]->coordinate.z ;
+            double RPERSQ = LayerMaps[RouterHelper.translateIntToMetalName(layer)].RESISTANCE_RPERSQ ;
+            // 假設width = 10 ;
+            realDrop += leafPaths[i]->current * RPERSQ * leafPaths[i]->length / 10000;
+            Vertex * fanIn = leafPaths[i]->fanIn ;
+            bool calulatedVia = ( ptr->coordinate.z != fanIn->coordinate.z ) ? true : false ;
+            if( calulatedVia )
+            {
+                string key = ( ptr->coordinate.z > fanIn->coordinate.z ) ? RouterHelper.translateIntToMetalName(--layer) : RouterHelper.translateIntToMetalName(layer);
+                // hard code 第一顆via 未來要改成動態
+                int width = RouterHelper.ViaInfos[key][0].width ;
+                int length = RouterHelper.ViaInfos[key][0].length ;
+                int viaArea = width * length ;
+                realDrop += leafPaths[i]->current * RouterHelper.ViaInfos[key][0].resistance / viaArea;
+            }
+        }
+        double slack = allowDrop - realDrop ;
+        if( slack >= 0 ) passCount += 1 ;
+        cost += passCount * 1000000 + slack ;
+    }
+    return cost;
+}
 void Graph::addLeafInfo(Coordinate3D leaf , string powerPin , string block , string blockPin)
 {
     string encodeString = encode(leaf); 
@@ -97,7 +141,6 @@ vector<vector<Vertex *>> Graph::traverse()
     map<Vertex *,bool> traverseTable ; // Traverse Table( query vertex is being traverse or not )
     for(auto leaf : leafs)
     {
-        cout << "leaf:" << leaf->coordinate.x << " " << leaf->coordinate.y << " " << leaf->coordinate.z << endl;
         vector<Vertex * > leafPath ;
         stack<Vertex *> reversePaths ;
         string encodeString = encode(leaf->coordinate);
@@ -122,10 +165,21 @@ vector<vector<Vertex *>> Graph::traverse()
     }
     return traversePath ;
 }
+vector<vector<Vertex *>> Graph::getAllPath()
+{
+    vector<vector<Vertex *>> allPaths ;
+    for(auto leaf : leafs)
+    {
+        vector<Vertex *> path = getPath(leaf->coordinate);
+        allPaths.push_back(path);
+    }
+    return allPaths; 
+}
 void Graph::printAllPath()
 {
     for(auto leaf : leafs)
     {
+        LeafInfo leafInfo = getLeafInfo();
         vector<Vertex *> path = getPath(leaf->coordinate);
         cout << "coordinate:" << endl ;
         for(auto p : path)
@@ -135,7 +189,9 @@ void Graph::printAllPath()
 //            cout << "current:" << p->current << endl;
 //            cout << "length:" << p->length << endl;
 //            cout << "width:" << p->width << endl;
-        }
+            
+         }
+        cout << leafInfo.powerPin << " " << leafInfo.block << " " << leafInfo.blockPin ;
         cout << endl;
     }
 }
@@ -156,7 +212,7 @@ void Graph::rectifyWidth()
         // double targetVR = ptr->current * LayerMaps[RouterHelper.translateIntToMetalName(ptr->coordinate.z)].RESISTANCE_RPERSQ * ;
         string encodeString = encode(ptr->coordinate) ;
         double constraint = COT[encodeString];
-        double allowDrop = VT[encodeString] * constraint / 100 * 0.98;
+        double allowDrop = VT[encodeString] * (constraint ) / 100 ;
         double firstCoefficient = allowDrop ;
         double secodeCoefficient = 0 ;
         double constant = 0 ;
@@ -200,6 +256,8 @@ void Graph::rectifyWidth()
             int length = width / unitLength ;
             width = unitLength * (length + 1);
         }
+        if( (int)width % (2 * unitLength ) != 0 ) width += unitLength ;
+//        width += UNITS_DISTANCE;
         // 將線寬回傳
         ptr = leaf ;
         while ( ptr != nullptr )
@@ -208,6 +266,17 @@ void Graph::rectifyWidth()
             ptr = ptr->fanIn ;
         }
     }
+}
+vector<LeafInfo> Graph::getLeafInfos()
+{
+    vector<LeafInfo> leafInfos ;
+    auto temp = leafQueue ;
+    while( !temp.empty() )
+    {
+        leafInfos.push_back(temp.front());
+        temp.pop();
+    }
+    return leafInfos ; 
 }
 void Graph::addLeaf(Coordinate3D leaf , double constraint , double current , double voltage)
 {
@@ -235,6 +304,12 @@ void Graph::insert(Coordinate3D source , Coordinate3D target, double length )
     encodeString = encode(target);
     LUT.insert(make_pair(encodeString, nextVertex));
 }
+void Graph::setSteriner(Coordinate3D coordinate)
+{
+    string encodeString = encode(coordinate);
+    Vertex * vertex = LUT[encodeString];
+    vertex->isSteiner = true ; 
+}
 void Graph::reduction()
 {
     for(auto leaf : leafs)
@@ -255,7 +330,7 @@ void Graph::reduction()
                 }
                 break ;
             }
-            if( fanIn->fanOut.size() > 1 || fanIn->coordinate.z != ptr->coordinate.z )
+            if( fanIn->isSteiner || fanIn->coordinate.z != ptr->coordinate.z )
             {
                 // reduction
                 node->fanIn = fanIn ;

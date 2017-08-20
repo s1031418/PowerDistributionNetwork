@@ -28,7 +28,7 @@ public:
             return false ;
         else
         {
-            if( lhs.critical > rhs.critical )
+            if( lhs.critical < rhs.critical )
                 return true ;
             else
                 return false ;

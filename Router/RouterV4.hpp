@@ -59,15 +59,15 @@ private:
     set<int> Horizontal ;
     int lowestMetal ;
     int highestMetal ;
-    double DEFAULTWIDTH = 10 ;
-    double DEFAULTSPACING = 10 ;
+    double DEFAULTWIDTH = 8 ;
+    double DEFAULTSPACING = 2 ;
     set<int> boundList ;
     
     SpiceGenerator sp_gen ;
     DefGenerator def_gen ;
     OutputFilesGenerator output_gen ;
     // 用來查詢各個點的width
-    map<string,double> widthTable ;
+    
     
     // 絕對座標＋GridZ
     vector<RoutingPath> currentRoutingLists ;
@@ -130,7 +130,7 @@ private:
     
     void CutGrid(double width , double spacing);
     
-    void InitGrids(string source , double width , double spacing , vector<int> SpecialHorizontal = vector<int>(),  vector<int> SpecialVertical = vector<int>());
+    void InitGrids(string source , double width , double spacing , bool cutGrid = true , vector<int> SpecialHorizontal = vector<int>(),  vector<int> SpecialVertical = vector<int>());
     
     Graph_SP * InitGraph_SP(double width , double spacing);
     
@@ -159,7 +159,7 @@ private:
     
     void legalizeEdge(Coordinate3D source , Coordinate3D target , Direction3D orient , Graph_SP * graph_sp , double width);
     
-    void saveRoutingList(Coordinate3D sourceGrid , Coordinate3D targetGrid , string powerPin , BlockInfo blockinfo);
+    void saveRoutingList(Coordinate3D source , Coordinate3D target , string powerPin , BlockInfo blockinfo);
     
     Coordinate3D gridToAbsolute(Coordinate3D gridCoordinate);
     
@@ -170,7 +170,7 @@ private:
     // 第一個為viaName,第二個為via location set
     pair<string,vector<Point<int>>>  getViaLocation(Nets & net , Point<int> & orginTarget , bool top , double width);
     
-    bool parallelRoute(string powerPin , string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , double width , double spacing , double originWidth);
+    vector<Coordinate3D> parallelRoute( string powerPin , string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , double width , double spacing , double originWidth);
     
     Coordinate3D AbsToGrid(Coordinate3D coordinateABS);
     
@@ -181,6 +181,26 @@ private:
     void SteinerTreeReduction(Graph * &steinerTree , vector<Coordinate3D> & terminals);
     
     vector<Coordinate3D> selectSteinerPoint(string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth) ;
+    
+    void InitializeSpiceGen(Graph * steinerTree);
+    
+    
+    void optimize(Graph * steinerTree);
+    
+    vector<Coordinate3D> getCorner(vector<pair<Direction3D, int>> & friendlyForm , Coordinate3D source );
+    
+    
+    Coordinate3D getNext(Direction3D direction , Coordinate3D corner);
+    
+    int gridYToAbs(int gridY);
+    
+    int gridXToAbs(int gridX);
+    
+    bool isSameLayer(vector<Coordinate3D> & path);
+    
+    Coordinate3D selectSource(Coordinate3D corner);
+    
+    Coordinate3D selectTarget(Coordinate3D corner);
 };
 
 #endif /* RouterV4_hpp */

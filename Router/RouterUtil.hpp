@@ -88,6 +88,8 @@ public:
     
     int getViaWeight(double area , int layer);
     
+    Direction3D upSideDown(Direction3D direction3D);
+    
 private:
     
     

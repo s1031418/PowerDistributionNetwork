@@ -29,6 +29,7 @@ struct Vertex
     Coordinate3D coordinate ;
     Vertex * fanIn ;
     vector<Vertex *> fanOut ;
+    bool isSteiner = false ;
     // 與fanin 得長度
     double length = 0 ;
     double current = 0 ;
@@ -53,16 +54,20 @@ public:
     vector<Vertex *> getPath(Coordinate3D target);
     void addLeaf(Coordinate3D leaf , double constraint , double current , double voltage);
     void addLeafInfo(Coordinate3D leaf , string powerPin , string block , string blockPin);
+    void setSteriner(Coordinate3D coordinate);
+    vector<LeafInfo> getLeafInfos();
+    
     LeafInfo getLeafInfo();
     // 依照fanout 或 via
     void reduction();
 //    void reduceVertex(Vertex * front , Vertex * next);
     void rectifyCurrent();
     void rectifyWidth();
+    vector<vector<Vertex *>> getAllPath();
     Vertex * getVertex(Coordinate3D coordinate);
     void destoryGraph();
     pair<double, double> getQuadraticEquation(double a , double b , double c );
-    
+    double analysis();
     void printAllPath();
     
     vector<vector<Vertex *>> traverse();

@@ -58,8 +58,13 @@ void SpiceGenerator::addSpiceCurrent(string vdd , string node , double current )
     CurrentLine currentLine ;
     currentLine.node = node ;
     currentLine.current = current ;
-    
-    SpiceContainer[vdd].currentSet.push_back(currentLine);
+    bool insert = true ;
+    for(auto cl : SpiceContainer[vdd].currentSet)
+    {
+        if( cl.node == node )
+            insert = false ;
+    }
+    if( insert ) SpiceContainer[vdd].currentSet.push_back(currentLine);
 }
 void SpiceGenerator::addSpiceCmd()
 {

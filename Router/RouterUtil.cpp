@@ -24,9 +24,9 @@ int RouterUtil::getViaWeight(double area , int layer )
     {
         int width = via.width;
         int length = via.length ;
-        int viaArea = width * length ;
-        int cnt = area / viaArea ;
-        double resistance = via.resistance / cnt ;
+        double viaArea = width * length ;
+        double cnt = area / viaArea ;
+        double resistance = via.resistance / (int)cnt ;
         if( minResistace > resistance )
         {
             minResistace = resistance ;
@@ -706,4 +706,14 @@ vector<int> RouterUtil::getPowerPinGridCandidate(Rectangle rect)
     for( int i = yLowerBound + 1 ; i <= yUpperBound ; i += DEFAULT_PITCH )
         yCandidates.push_back(i);
     return vector<int>();
+}
+Direction3D RouterUtil::upSideDown(Direction3D direction3D)
+{
+    if( direction3D == upOrient ) return downOrient ;
+    if( direction3D == downOrient ) return upOrient ;
+    if( direction3D == leftOrient ) return rightOrient ;
+    if( direction3D == rightOrient ) return leftOrient ;
+    if( direction3D == topOrient ) return bottomOrient ;
+    if( direction3D == bottomOrient ) return topOrient ;
+    return direction3D; 
 }
