@@ -645,6 +645,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
     auto sourceGrid = getGridCoordinate(block);
     string key ;
     key.append(blockName).append(BlockPinName);
+    if( powerpin == "VDD_111b" && blockName == "B6_05" )
+        cout << "";
     if( block.Direction == TOP )
     {
         int blockLength = block.RightUp.y - block.LeftDown.y ;
@@ -685,6 +687,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
             Point<int> Target = getAbsolutePoint(targetGrid);
             virtualObstacle.LeftDown = Source;
             virtualObstacle.RightUp = Target;
+            virtualObstacle.RightUp.y += (0.5 * DEFAULTWIDTH) * UNITS_DISTANCE ;
             virtualObstacle.LeftDown.x -= width / 2 * UNITS_DISTANCE ;
             virtualObstacle.RightUp.x += width / 2 * UNITS_DISTANCE ;
             if( i != z )
@@ -734,6 +737,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
             Point<int> Target = getAbsolutePoint(targetGrid);
             virtualObstacle.RightUp = Source;
             virtualObstacle.LeftDown = Target;
+            virtualObstacle.LeftDown.y -= (0.5 * DEFAULTWIDTH) * UNITS_DISTANCE ;
             virtualObstacle.LeftDown.x -= width / 2 * UNITS_DISTANCE ;
             virtualObstacle.RightUp.x += width / 2 * UNITS_DISTANCE ;
             if( i != z )
@@ -783,6 +787,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
             Point<int> Target = getAbsolutePoint(targetGrid);
             virtualObstacle.LeftDown = Source;
             virtualObstacle.RightUp = Target;
+            virtualObstacle.RightUp.x += (0.5 * DEFAULTWIDTH) * UNITS_DISTANCE ;
             virtualObstacle.LeftDown.y -= width / 2 * UNITS_DISTANCE ;
             virtualObstacle.RightUp.y += width / 2 * UNITS_DISTANCE ;
             if( i != z )
@@ -816,7 +821,6 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
         }
         SpecialNetsMaps.begin();
         fillSpNetMaps(paths, powerpin, blockName , BlockPinName ,width ,  false );
-        def_gen.toOutputDef();
         vector<Coordinate3D> absolutePoints ;
         for(auto p : paths)
         {
@@ -834,6 +838,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
             Point<int> Target = getAbsolutePoint(targetGrid);
             virtualObstacle.RightUp = Source;
             virtualObstacle.LeftDown = Target;
+            virtualObstacle.LeftDown.x -= (0.5 * DEFAULTWIDTH) * UNITS_DISTANCE ;
             virtualObstacle.LeftDown.y -= width / 2 * UNITS_DISTANCE ;
             virtualObstacle.RightUp.y += width / 2 * UNITS_DISTANCE ;
             if( i != z )
@@ -859,14 +864,16 @@ void RouterV4::InitPowerPinAndBlockPin(double width , double spacing )
             string powerpin = i->first ;
             string block = i->second.BlockName ;
             string blockPin = i->second.BlockPinName ;
-            if(powerpin== "VDD14")
-                cout << "";
             vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerpin);
             // 如果有multiSource 目前hardcode第一個
-            Block powerPinCoordinate = powerPinCoordinates[0];
+//            Block powerPinCoordinate = powerPinCoordinates[0];
             Block blockPinCoordinate = RouterHelper.getBlock(block,blockPin);
-            if( i == ret.first ) getInitSolution(powerPinCoordinate,powerpin,block,blockPin,width,spacing,true );
-            getInitSolution(blockPinCoordinate,powerpin,block,blockPin,width,spacing,false);
+            for(auto powerPinCoordinate : powerPinCoordinates)
+            {
+                
+                if( i == ret.first ) getInitSolution(powerPinCoordinate,powerpin,block,blockPin,width,spacing,true );
+                getInitSolution(blockPinCoordinate,powerpin,block,blockPin,width,spacing,false);
+            }
         }
     }
 }
@@ -1671,7 +1678,6 @@ void RouterV4::Route()
     auto innerTreeOrder = ordering.second ;
     
     InitPowerPinAndBlockPin(DEFAULTWIDTH,DEFAULTSPACING);
-    
     for(auto tree : treeOrder)
     {
         Graph * steinerTree = nullptr ;
@@ -1735,7 +1741,7 @@ void RouterV4::Route()
 //        def_gen.toOutputDef();
 //        delete [] graph_sp ;
 //    }
-    Simulation();
+//    Simulation();
 //
 //    
 //    while (!NoPassRoutingLists.empty())
