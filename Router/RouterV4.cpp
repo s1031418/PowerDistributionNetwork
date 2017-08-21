@@ -1690,23 +1690,28 @@ void RouterV4::Route()
             double constraint = RouterHelper.getIRDropConstaint(blockinfo.BlockName, blockinfo.BlockPinName);
             double voltage = stod(VoltageMaps[powerpin]);
             vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerpin);
-            Block powerPinCoordinate = powerPinCoordinates[0];
-            Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
-            InitGrids(powerpin,DEFAULTWIDTH , DEFAULTSPACING);
-            Graph_SP * graph_sp = InitGraph_SP(DEFAULTWIDTH,DEFAULTSPACING);
-            Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING );
-            Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING);
-            saveRoutingList(gridToAbsolute(sourceGrid),gridToAbsolute(targetGrid),powerpin,blockinfo);
-            int source = translate3D_1D(sourceGrid);
-            int target = translate3D_1D(targetGrid);
-            vector<Coordinate3D> solutions = selectMergePoint(constraint , current , voltage , steinerTree , powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
-//            vector<Coordinate3D> solutions = selectPath(powerpin, graph_sp, target, source, blockinfo.BlockName, blockinfo.BlockPinName, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
-//            cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
-            SteinerTreeConstruction(false , solutions,current, constraint , voltage , powerpin , blockinfo.BlockName , blockinfo.BlockPinName, steinerTree);
-            fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH ,true );
-            saveMultiPinCandidates(powerpin, solutions);
-            def_gen.toOutputDef();
-            delete [] graph_sp ;
+            bool init = true ;
+            for(auto powerPinCoordinate : powerPinCoordinates)
+            {
+//                Block powerPinCoordinate = powerPinCoordinates[0];
+                Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
+                InitGrids(powerpin,DEFAULTWIDTH , DEFAULTSPACING);
+                Graph_SP * graph_sp = InitGraph_SP(DEFAULTWIDTH,DEFAULTSPACING);
+                Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING );
+                Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING);
+                saveRoutingList(gridToAbsolute(sourceGrid),gridToAbsolute(targetGrid),powerpin,blockinfo);
+                int source = translate3D_1D(sourceGrid);
+                int target = translate3D_1D(targetGrid);
+                vector<Coordinate3D> solutions = (init ) ? selectMergePoint(constraint , current , voltage , steinerTree , powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH) : selectMergePoint(constraint , current , voltage , steinerTree , powerpin, graph_sp, source , target , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
+                //            vector<Coordinate3D> solutions = selectPath(powerpin, graph_sp, target, source, blockinfo.BlockName, blockinfo.BlockPinName, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+                //            cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
+                SteinerTreeConstruction(false , solutions,current, constraint , voltage , powerpin , blockinfo.BlockName , blockinfo.BlockPinName, steinerTree);
+                fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH ,true );
+                saveMultiPinCandidates(powerpin, solutions);
+                def_gen.toOutputDef();
+                delete [] graph_sp ;
+                init = false ;
+            }
 //            Simulation();
         }
 //        optimize(steinerTree);
