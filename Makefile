@@ -69,6 +69,12 @@ run_case15:
 	time ./$(OUTPUT_NAME) TestCase/test/test11/test11.v TestCase/test/test11/test11_input.def TestCase/test/test11/tech.lef TestCase/test/test11/blocks.lef TestCase/test/test11/initial_files test11_output.def test11.sp output_files
 run_case16:	
 	time ./$(OUTPUT_NAME) TestCase/test/test12/test12.v TestCase/test/test12/test12_input.def TestCase/test/test12/tech.lef TestCase/test/test12/blocks.lef TestCase/test/test12/initial_files test12_output.def test12.sp output_files
+run_case_new_1:	
+	time ./$(OUTPUT_NAME) TestCase/2017/case_new/case3.v TestCase/2017/case_new/case3_input.def TestCase/2017/case_new/tech.lef TestCase/2017/case_new/blocks.lef TestCase/2017/case_new/initial_files_1 case_new_output.def case_new.sp output_files
+run_case_new_2:	
+	time ./$(OUTPUT_NAME) TestCase/2017/case_new/case3.v TestCase/2017/case_new/case3_input.def TestCase/2017/case_new/tech.lef TestCase/2017/case_new/blocks.lef TestCase/2017/case_new/initial_files_2 case_new_output.def case_new.sp output_files
+run_case_new_3:	
+	time ./$(OUTPUT_NAME) TestCase/2017/case_new/case3.v TestCase/2017/case_new/case3_input.def TestCase/2017/case_new/tech.lef TestCase/2017/case_new/blocks.lef TestCase/2017/case_new/initial_files_3 case_new_output.def case_new.sp output_files
 
 .PHONY : clean
 clean:
