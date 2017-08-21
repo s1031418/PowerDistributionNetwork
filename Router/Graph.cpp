@@ -83,6 +83,7 @@ void Graph::erase(vector<Coordinate3D> coordinates)
     for(auto encodeString : history)
     {
         auto it = LUT.find(encodeString) ;
+        it->second->fanIn->fanOut.pop_back();
         if( !LUT[encodeString]->isSteiner )
         {
             Vertex * vertex = LUT[encodeString];
@@ -364,9 +365,13 @@ void Graph::insert(Coordinate3D source , Coordinate3D target, double length )
     nextVertex->length = length ;
     nextVertex->fanIn = frontVertex ;
     bool insert = true;
+    if(nextVertex == NULL) assert(0);
     for(int i = 0 ; i < frontVertex->fanOut.size() ; i++)
+    {
+        if( frontVertex->fanOut[i] == NULL ) assert(0);
         if(frontVertex->fanOut[i]->coordinate == nextVertex->coordinate )
             insert = false ;
+    }
     if(insert) frontVertex->fanOut.push_back(nextVertex);
     encodeString = encode(target);
     LUT.insert(make_pair(encodeString, nextVertex));

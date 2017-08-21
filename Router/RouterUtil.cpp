@@ -68,6 +68,19 @@ void RouterUtil::InitBlockMap()
         blockCoordinate.upperMetal = upper ;
         BlockMap.insert(make_pair(component.first, blockCoordinate));
     }
+    int middle = DIEAREA.pt2.x / 2 ;
+    for(auto block : BlockMap)
+    {
+        if( block.second.RightUp.x <= middle )
+            leftBlockMap.insert(make_pair(block.first, block.second));
+        else if( block.second.LeftDown.x >= middle )
+            rightBlockMap.insert(make_pair(block.first, block.second));
+        else if( block.second.LeftDown.x <= middle && block.second.RightUp.x >= middle )
+        {
+            leftBlockMap.insert(make_pair(block.first, block.second));
+            rightBlockMap.insert(make_pair(block.first, block.second));
+        }
+    }
 }
 
 RouterUtil::~RouterUtil()

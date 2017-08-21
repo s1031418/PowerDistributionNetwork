@@ -1424,7 +1424,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(double constraint , double curre
 //                legalizeAllOrient(coordinate3D, graph_sp , width , spacing , originWidth);
 //        }
 //        graph_sp->Dijkstra(target);
-        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += (multiPinCandidates[powerPin].size()/20) )
+        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += (multiPinCandidates[powerPin].size()/3) )
         {
             if( i > multiPinCandidates[powerPin].size()  ) break;
             Coordinate3D candidate = multiPinCandidates[powerPin][i];
@@ -2090,6 +2090,7 @@ void RouterV4::InitGrids(string source , double width , double spacing , bool cu
 //    clock_t Start = clock();
     
     if(cutGrid)CutGrid(width, spacing);
+    
     for(auto h : SpecialHorizontal)
         Horizontal.insert(h);
     for(auto v : SpecialVertical)
@@ -2117,19 +2118,61 @@ void RouterV4::InitGrids(string source , double width , double spacing , bool cu
             via.LeftDown.y = grid.startpoint.y - (width * UNITS_DISTANCE / 2 ) ;
             via.RightUp.x = grid.startpoint.x + (width * UNITS_DISTANCE / 2 ) ;
             via.RightUp.y = grid.startpoint.y + (width * UNITS_DISTANCE / 2 ) ;
-            for(auto block : RouterHelper.BlockMap)
+            via.LeftDown.x -= DEFAULTSPACING * UNITS_DISTANCE ;
+            via.LeftDown.y -= DEFAULTSPACING * UNITS_DISTANCE ;
+            via.RightUp.x += DEFAULTSPACING * UNITS_DISTANCE ;
+            via.RightUp.y += DEFAULTSPACING * UNITS_DISTANCE ;
+            int middle = DIEAREA.pt2.x / 2 ;
+            if( grid.startpoint.x + grid.width <= middle)
             {
-                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
-                updateGrid(crosssWithBlockResult, grid);
+                for( auto block : RouterHelper.leftBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
             }
+            else if( grid.startpoint.x >= middle )
+            {
+                for( auto block : RouterHelper.rightBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+            }
+            else if( grid.startpoint.x + grid.width >= middle &&  grid.startpoint.x <= middle)
+            {
+                for( auto block : RouterHelper.leftBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+                for( auto block : RouterHelper.rightBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+            }
+//            for(auto block : RouterHelper.BlockMap)
+//            {
+////                clock_t Start = clock();
+//                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+//                
+//                updateGrid(crosssWithBlockResult, grid);
+//
+//            }
+            
             for( auto obstacle : obstacles )
             {
+//                clock_t Start = clock();
 //                if( source == obstacle.first ) continue ;
                 for( auto o : obstacle.second )
                 {
                     auto crosssWithObstacleResult = RouterHelper.isCrossWithBlock(rect , via ,o, width , spacing);
                     updateGrid(crosssWithObstacleResult, grid);
                 }
+//                clock_t End = clock();
+//                double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
+//                cout << "obstacles: We cost " << duration << "(s)" << endl;
             }
 //            auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect , grid );
 //            updateGrid(crosssWithBlockResult, grid);
@@ -2143,11 +2186,11 @@ void RouterV4::InitGrids(string source , double width , double spacing , bool cu
         startpoint.y = h ;
         Grids.push_back(temp);
     }
+    
 //    clock_t End = clock();
 //    double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
 //    cout << "Initialize  Grid Graph Done" << endl ;
 //    cout << "We cost " << duration << "(s)" << endl;
-    
 }
 
 
