@@ -870,7 +870,6 @@ void RouterV4::InitPowerPinAndBlockPin(double width , double spacing )
             Block blockPinCoordinate = RouterHelper.getBlock(block,blockPin);
             for(auto powerPinCoordinate : powerPinCoordinates)
             {
-                
                 if( i == ret.first ) getInitSolution(powerPinCoordinate,powerpin,block,blockPin,width,spacing,true );
                 getInitSolution(blockPinCoordinate,powerpin,block,blockPin,width,spacing,false);
             }
@@ -1399,7 +1398,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(double constraint , double curre
     Coordinate3D sourceGrid = translate1D_3D(source);
     Coordinate3D targetGrid = translate1D_3D(target);
     // legalize target
-    legalizeAllOrient(targetGrid, graph_sp , width , spacing , originWidth);
+    legalizeAllLayer(targetGrid, graph_sp , width , spacing , originWidth);
     // first Route
     if( multiPinCandidates[powerPin].empty() )
     {
@@ -1741,7 +1740,7 @@ void RouterV4::Route()
 //        def_gen.toOutputDef();
 //        delete [] graph_sp ;
 //    }
-//    Simulation();
+    Simulation();
 //
 //    
 //    while (!NoPassRoutingLists.empty())
