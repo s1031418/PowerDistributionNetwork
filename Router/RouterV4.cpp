@@ -1424,7 +1424,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(double constraint , double curre
 //                legalizeAllOrient(coordinate3D, graph_sp , width , spacing , originWidth);
 //        }
 //        graph_sp->Dijkstra(target);
-        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += (multiPinCandidates[powerPin].size()/20) )
+        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i ++ )
         {
             if( i > multiPinCandidates[powerPin].size()  ) break;
             Coordinate3D candidate = multiPinCandidates[powerPin][i];
