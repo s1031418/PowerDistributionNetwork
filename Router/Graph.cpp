@@ -121,7 +121,7 @@ double Graph::analysis()
     // penalty constant
     int penaltyParameter = 10000000 ;
     // 超過 2% 會有penalty
-    double penaltyRange = 2 ;
+    double penaltyRange = 1 ;
     for( auto leaf : leafs )
     {
         Vertex * ptr = leaf ;

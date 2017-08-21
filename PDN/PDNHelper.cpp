@@ -540,6 +540,16 @@ void PDNHelper::InitPowerMaps()
         }
         PowerMaps.insert(make_pair(pin.first, temp));
     }
+//    for(auto p : PowerMaps)
+//    {
+//        cout << "name:" << p.first << " ";
+//        for(auto a : p.second)
+//        {
+//            cout << a.BlockPinName << " " << a.LeftDown << " " << a.RightUp << " " ;
+//            cout << a.Direction << endl;
+//        }
+//        
+//    }
 }
 //string PDNHelper::getPowerPinMsg(Point<int> pt)
 //{

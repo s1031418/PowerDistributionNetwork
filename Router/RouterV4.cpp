@@ -418,7 +418,7 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
 //    }
     auto friendlyForm = translateToFriendlyForm(paths);
     
-    Point<int> startPoint = Grids[source.y][source.x].startpoint ;
+    Point<int> startPoint = getAbsolutePoint(source);
     Point<int> oringinTargetPoint = startPoint;
     Point<int> targetPoint = startPoint;
     Direction3D nextDirection = friendlyForm[0].first ;
@@ -814,7 +814,9 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
             solution.z = sourceGrid.z ;
             paths.push_back(solution);
         }
+        SpecialNetsMaps.begin();
         fillSpNetMaps(paths, powerpin, blockName , BlockPinName ,width ,  false );
+        def_gen.toOutputDef();
         vector<Coordinate3D> absolutePoints ;
         for(auto p : paths)
         {
@@ -857,6 +859,8 @@ void RouterV4::InitPowerPinAndBlockPin(double width , double spacing )
             string powerpin = i->first ;
             string block = i->second.BlockName ;
             string blockPin = i->second.BlockPinName ;
+            if(powerpin== "VDD14")
+                cout << "";
             vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerpin);
             // 如果有multiSource 目前hardcode第一個
             Block powerPinCoordinate = powerPinCoordinates[0];
@@ -1667,6 +1671,7 @@ void RouterV4::Route()
     auto innerTreeOrder = ordering.second ;
     
     InitPowerPinAndBlockPin(DEFAULTWIDTH,DEFAULTSPACING);
+    
     for(auto tree : treeOrder)
     {
         Graph * steinerTree = nullptr ;
@@ -1922,6 +1927,8 @@ Coordinate3D RouterV4::getGridCoordinate( Block block  )
     int xCoordinate = ( Vertical.find(x) != Vertical.end() ) ? (int)distance(Vertical.begin(), Vertical.find(pt.x)) + 1 : x;
     int yCoordinate = ( Horizontal.find(y) != Horizontal.end() ) ? (int)distance(Horizontal.begin(), Horizontal.find(pt.y)) + 1 : y ;
     int topLayer = RouterHelper.translateMetalNameToInt( *(--block.Metals.end()) );
+//    if( xCoordinate == Vertical.size()) xCoordinate -= 1 ;
+//    if( yCoordinate == Horizontal.size()) yCoordinate -= 1 ;
     return Coordinate3D(xCoordinate,yCoordinate,topLayer);
 }
 void RouterV4::toGridGraph()
