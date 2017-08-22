@@ -1449,6 +1449,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(double constraint , double curre
         legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
         graph_sp->Dijkstra(target);
         auto paths= graph_sp->getPath(source);
+        if(paths.empty()) return selectedPath; 
         for( auto path : paths )
             selectedPath.push_back(translate1D_3D(path));
         generateSpiceList(selectedPath, powerPin, block , blockPin , width);
