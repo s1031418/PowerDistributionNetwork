@@ -44,11 +44,11 @@ run_case2:
 run_case3:	
 	time ./$(OUTPUT_NAME) TestCase/2016/case3/case3.v TestCase/2016/case3/case3_input.def TestCase/2016/case3/tech.lef TestCase/2016/case3/blocks.lef TestCase/2016/case3/initial_files case3_output.def case3.sp output_files
 run_case4_1:	
-	time ./$(OUTPUT_NAME) TestCase/2017/case4/case4.v TestCase/2017/case4/case4_input.def TestCase/2017/case4/tech.lef TestCase/2017/case4/blocks.lef TestCase/2017/case4/initial_files_1 case4_output.def case4.sp output_files
+	time ./$(OUTPUT_NAME) TestCase/2017/case4/case4.v TestCase/2017/case4/case4_input.def TestCase/2017/case4/tech.lef TestCase/2017/case4/blocks.lef TestCase/2017/case4/initial_files_1 case4_1_output.def case4_1.sp output_files
 run_case4_2:	
-	time ./$(OUTPUT_NAME) TestCase/2017/case4/case4.v TestCase/2017/case4/case4_input.def TestCase/2017/case4/tech.lef TestCase/2017/case4/blocks.lef TestCase/2017/case4/initial_files_2 case4_output.def case4.sp output_files
+	time ./$(OUTPUT_NAME) TestCase/2017/case4/case4.v TestCase/2017/case4/case4_input.def TestCase/2017/case4/tech.lef TestCase/2017/case4/blocks.lef TestCase/2017/case4/initial_files_2 case4_2_output.def case4_2.sp output_files
 run_case4_3:	
-	time ./$(OUTPUT_NAME) TestCase/2017/case4/case4.v TestCase/2017/case4/case4_input.def TestCase/2017/case4/tech.lef TestCase/2017/case4/blocks.lef TestCase/2017/case4/initial_files_3 case4_output.def case4.sp output_files
+	time ./$(OUTPUT_NAME) TestCase/2017/case4/case4.v TestCase/2017/case4/case4_input.def TestCase/2017/case4/tech.lef TestCase/2017/case4/blocks.lef TestCase/2017/case4/initial_files_3 case4_3_output.def case4_3.sp output_files
 run_case5:	
 	time ./$(OUTPUT_NAME) TestCase/test/test1/test1.v TestCase/test/test1/test1_input.def TestCase/test/test1/tech.lef TestCase/test/test1/blocks.lef TestCase/test/test1/initial_files test1_output.def test1.sp output_files
 run_case6:	

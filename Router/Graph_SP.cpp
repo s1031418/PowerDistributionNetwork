@@ -13,13 +13,13 @@
 Graph_SP::Graph_SP()
     :num_vertex(0)
 {
-    DirectionMode = false ;
+    
 }
 Graph_SP::Graph_SP(int n)
     :num_vertex(n)
 {
     AdjList.resize(num_vertex);
-    DirectionMode = false ; 
+    
 }
 void Graph_SP::AddEdge(int from , int to , int weight)
 {
@@ -50,60 +50,23 @@ void Graph_SP::InitalizeSingleSource(int Start)
      
     distance.resize(num_vertex);
     predecessor.resize(num_vertex);
-    turns.resize(num_vertex);
-    predecessorTurns.resize(num_vertex);
+    
     for(int i = 0 ; i < num_vertex ;i++)
     {
         distance[i] = Max_Distance ;
         predecessor[i] = -1;
-        turns[i] = 0;
-        predecessorTurns[i] = Init ;
+        
+        
     }
     distance[Start] = 0 ;
-    predecessorTurns[Start] = TurnUp;
-}
-TurnDirection Graph_SP::getTurnDirection(int diff)
-{
-    if( diff == right ) return TurnRight;
-    else if( diff == up ) return TurnUp;
-    else if( diff == (-1*right) ) return TurnLeft;
-    else if( diff == (-1*up) ) return TurnDown;
-    else if ( diff == top ) return TurnTop ;
-    else if ( diff == -1*(top) )return TurnBottom ;
-    else assert(0);
 }
 
 void Graph_SP::Relax(int from , int to , int weight)
 {
-    
-    if(DirectionMode)
+    if( distance[to] > distance[from] + weight  )
     {
-        int diff = to - from ;
-        TurnDirection turndir = getTurnDirection(diff);
-        if( turndir == TurnTop || turndir == TurnBottom )
-            predecessorTurns[to] = predecessorTurns[from];
-        else
-            predecessorTurns[to] = turndir ;
-        if( predecessorTurns[from] != TurnTop && predecessorTurns[from] != TurnBottom &&
-           predecessorTurns[to] != TurnTop && predecessorTurns[from] != TurnBottom &&
-           predecessorTurns[from] != predecessorTurns[to] ) turns[to]++;
-        if( distance[to] > distance[from] + weight  )
-        {
-            distance[to] = distance[from] + weight  ;
-            predecessor[to] = from ;
-        }
-        else if(  distance[to] == distance[from] + weight && turns[to] > turns[from] )
-        {
-            predecessor[to] = from ;  
-        }
-    }
-    else
-    {
-        if( distance[to] > distance[from] + weight  )
-        {
-            distance[to] = distance[from] + weight ;
-            predecessor[to] = from ;
-        }
+        distance[to] = distance[from] + weight ;
+        predecessor[to] = from ;
     }
 }
 void Graph_SP::Prim(int Start)
@@ -164,23 +127,7 @@ void Graph_SP::UpdateWeight( int from , int to , int newWeight )
             it->second = newWeight ; 
     }
 }
-void Graph_SP::SetRight(int Right)
-{
-    right = Right;
-}
-void Graph_SP::SetUp(int Up)
-{
-    up = Up ;
-}
 
-void Graph_SP::SetDirectionMode(bool mode)
-{
-    DirectionMode = mode ;
-}
-void Graph_SP::SetTop(int Top)
-{
-    top = Top ;
-}
 void Graph_SP::Dijkstra(int Start )
 {
     InitalizeSingleSource(Start);

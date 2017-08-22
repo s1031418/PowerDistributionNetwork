@@ -83,6 +83,14 @@ private:
     // key: vdd_source 
     map<string,vector<BlockCoordinate>> obstacles;
     
+//    map<string,BlockCoordinate> leftDownBlockMap ;
+//    
+//    map<string,BlockCoordinate> leftUpBlockMap ;
+//    
+//    map<string,BlockCoordinate> rightDownBlockMap ;
+//    
+//    map<string,BlockCoordinate> rightUpBlockMap ;
+    
     RouterUtil RouterHelper;
     
     string getNgSpiceKey(Coordinate3D coordinate3d);

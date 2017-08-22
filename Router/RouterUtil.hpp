@@ -39,6 +39,18 @@ struct CrossInfo {
     bool viaIsCross = false ;
 };
 
+enum CrossRegion {
+    LeftUp,
+    LeftDown,
+    RightUp,
+    RightDown,
+    LeftUpAndLeftDown,
+    RightUpAndRightDown,
+    LeftUpAndRightUp,
+    LeftDownAndRightDown,
+    Center
+};
+
 class RouterUtil : public PDNHelper 
 {
     
@@ -86,16 +98,19 @@ public:
 
     map<string, BlockCoordinate > BlockMap;
     
-    map<string,BlockCoordinate> leftBlockMap ;
+    map<string,BlockCoordinate> leftDownBlockMap ;
     
-    map<string,BlockCoordinate> rightBlockMap ;
+    map<string,BlockCoordinate> leftUpBlockMap ;
     
+    map<string,BlockCoordinate> rightDownBlockMap ;
+    
+    map<string,BlockCoordinate> rightUpBlockMap ;
     
     int getViaWeight(double area , int layer);
     
     Direction3D upSideDown(Direction3D direction3D);
     
-    
+    CrossRegion getCrossRegion(Rectangle & rect);
     
 private:
     

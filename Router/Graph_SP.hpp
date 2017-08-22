@@ -51,16 +51,6 @@ public:
     
     void AddEdge(int from , int to , int weight);
     
-    void SetRight(int Right);
-    
-    void SetUp(int Up);
-    
-    void SetDirectionMode(bool mode);
-    
-    void SetTop(int Top);
-    
-    TurnDirection getTurnDirection(int diff);
-    
     void PrintDataArray(vector<int> array);
     
     void PrintIntArray(int * array);
@@ -87,14 +77,7 @@ public:
     
 private:
     int num_vertex ;
-    int right ;
-    int up ;
-    int top ;
-    bool DirectionMode ;
-    vector<int> history ;
-    vector<int> turns ;
     vector<int> predecessor , distance ;
-    vector<TurnDirection> predecessorTurns ;
 };
 
 #endif /* Graph_SP_hpp */

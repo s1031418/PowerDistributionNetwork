@@ -106,11 +106,7 @@ Graph_SP * RouterV4::InitGraph_SP(double width , double spacing )
     int Bottom = -1 * Top ;
     
     graph_sp->resize(XSize * YSize * highestMetal);
-    graph_sp->SetRight(Right);
-    graph_sp->SetUp(Up);
-    graph_sp->SetTop(Top);
-    graph_sp->SetDirectionMode(false);
-    
+   
     
     for( int z = lowestMetal ; z <= highestMetal ; z++ )
     {
@@ -1232,6 +1228,8 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(double wi
             string powerpin = i->first ;
             string block = i->second.BlockName ;
             string blockPin = i->second.BlockPinName ;
+            
+//            cout << powerpin << " " << block << " " << blockPin << endl;
             InitGrids(powerpin,width , spacing);
             Graph_SP * graph_sp = InitGraph_SP(width,spacing);
             vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerpin);
@@ -1295,6 +1293,10 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(double wi
             InnerTreeObj innerObj ;
             innerObj.current = I ;
             innerObj.critical = criteria ;
+            if( criteriaOrdering.find(criteria) != criteriaOrdering.end() )
+            {
+                innerObj.critical *= 0.99;
+            }
             criteriaOrdering.insert(make_pair(criteria, p));
             innerTreeOrderMap.insert(make_pair(innerObj, p));
         }
@@ -1686,6 +1688,7 @@ void RouterV4::Route()
             string powerpin = innerTree.source ;
             blockinfo.BlockName = innerTree.target.first ;
             blockinfo.BlockPinName = innerTree.target.second;
+//            cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
             double current = RouterHelper.getCurrent(blockinfo.BlockName, blockinfo.BlockPinName);
             double constraint = RouterHelper.getIRDropConstaint(blockinfo.BlockName, blockinfo.BlockPinName);
             double voltage = stod(VoltageMaps[powerpin]);
@@ -1716,7 +1719,7 @@ void RouterV4::Route()
         }
 //        optimize(steinerTree);
         delete [] steinerTree;
-        Simulation();
+//        Simulation();
 //        widthTable.clear();
     }
 //    InitPowerPinAndBlockPin(DEFAULTWIDTH,DEFAULTSPACING);
@@ -2128,44 +2131,114 @@ void RouterV4::InitGrids(string source , double width , double spacing , bool cu
             via.LeftDown.y -= DEFAULTSPACING * UNITS_DISTANCE ;
             via.RightUp.x += DEFAULTSPACING * UNITS_DISTANCE ;
             via.RightUp.y += DEFAULTSPACING * UNITS_DISTANCE ;
-            int middle = DIEAREA.pt2.x / 2 ;
-            if( grid.startpoint.x + grid.width <= middle)
+            CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
+            if( crossRegion == LeftUp )
             {
-                for( auto block : RouterHelper.leftBlockMap )
+                for( auto block : RouterHelper.leftUpBlockMap )
                 {
                     auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
                     updateGrid(crosssWithBlockResult, grid);
                 }
             }
-            else if( grid.startpoint.x >= middle )
+            else if (crossRegion == LeftDown)
             {
-                for( auto block : RouterHelper.rightBlockMap )
+                for( auto block : RouterHelper.leftDownBlockMap )
                 {
                     auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
                     updateGrid(crosssWithBlockResult, grid);
                 }
             }
-            else if( grid.startpoint.x + grid.width >= middle &&  grid.startpoint.x <= middle)
+            else if( crossRegion == RightUp )
             {
-                for( auto block : RouterHelper.leftBlockMap )
-                {
-                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
-                    updateGrid(crosssWithBlockResult, grid);
-                }
-                for( auto block : RouterHelper.rightBlockMap )
+                for( auto block : RouterHelper.rightUpBlockMap )
                 {
                     auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
                     updateGrid(crosssWithBlockResult, grid);
                 }
             }
-//            for(auto block : RouterHelper.BlockMap)
-//            {
-////                clock_t Start = clock();
-//                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
-//                
-//                updateGrid(crosssWithBlockResult, grid);
-//
-//            }
+            else if( crossRegion == RightDown )
+            {
+                for( auto block : RouterHelper.rightDownBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+            }
+            else if(crossRegion == LeftUpAndLeftDown)
+            {
+                for( auto block : RouterHelper.leftUpBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+                for( auto block : RouterHelper.leftDownBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+            }
+            else if(crossRegion == RightUpAndRightDown)
+            {
+                for( auto block : RouterHelper.rightUpBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+                for( auto block : RouterHelper.rightDownBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+            }
+            else if( crossRegion == LeftDownAndRightDown )
+            {
+                for( auto block : RouterHelper.leftDownBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+                for( auto block : RouterHelper.rightDownBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+            }
+            else if( crossRegion == LeftUpAndRightUp )
+            {
+                for( auto block : RouterHelper.leftUpBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+                for( auto block : RouterHelper.rightUpBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+            }
+            else if(crossRegion == Center)
+            {
+                for( auto block : RouterHelper.leftUpBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+                for( auto block : RouterHelper.rightUpBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+                for( auto block : RouterHelper.leftDownBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+                for( auto block : RouterHelper.rightDownBlockMap )
+                {
+                    auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+                    updateGrid(crosssWithBlockResult, grid);
+                }
+            }
             
             for( auto obstacle : obstacles )
             {

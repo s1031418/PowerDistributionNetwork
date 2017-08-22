@@ -68,21 +68,82 @@ void RouterUtil::InitBlockMap()
         blockCoordinate.upperMetal = upper ;
         BlockMap.insert(make_pair(component.first, blockCoordinate));
     }
-    int middle = DIEAREA.pt2.x / 2 ;
+    int middleX = DIEAREA.pt2.x / 2 ;
+    int middleY = DIEAREA.pt2.y / 2 ;
     for(auto block : BlockMap)
     {
-        if( block.second.RightUp.x <= middle )
-            leftBlockMap.insert(make_pair(block.first, block.second));
-        else if( block.second.LeftDown.x >= middle )
-            rightBlockMap.insert(make_pair(block.first, block.second));
-        else if( block.second.LeftDown.x <= middle && block.second.RightUp.x >= middle )
+        if( block.second.LeftDown.x < middleX && block.second.RightUp.x > middleX && block.second.LeftDown.y < middleY && block.second.RightUp.y > middleY )
         {
-            leftBlockMap.insert(make_pair(block.first, block.second));
-            rightBlockMap.insert(make_pair(block.first, block.second));
+            leftUpBlockMap.insert(make_pair(block.first, block.second));
+            leftDownBlockMap.insert(make_pair(block.first, block.second));
+            rightUpBlockMap.insert(make_pair(block.first, block.second));
+            rightDownBlockMap.insert(make_pair(block.first, block.second));
         }
+        else if( block.second.RightUp.y <= middleY  && block.second.LeftDown.x < middleX && block.second.RightUp.x > middleX )
+        {
+            leftDownBlockMap.insert(make_pair(block.first, block.second));
+            rightDownBlockMap.insert(make_pair(block.first, block.second));
+        }
+        else if( block.second.RightUp.y >= middleY && block.second.LeftDown.x < middleX && block.second.RightUp.x > middleX  )
+        {
+            leftUpBlockMap.insert(make_pair(block.first, block.second));
+            rightUpBlockMap.insert(make_pair(block.first, block.second));
+        }
+        else if(block.second.RightUp.x <= middleX && block.second.LeftDown.y < middleY && block.second.RightUp.y > middleY)
+        {
+            leftUpBlockMap.insert(make_pair(block.first, block.second));
+            leftDownBlockMap.insert(make_pair(block.first, block.second));
+        }
+        else if(block.second.LeftDown.x >= middleX && block.second.LeftDown.y < middleY && block.second.RightUp.y > middleY)
+        {
+            rightUpBlockMap.insert(make_pair(block.first, block.second));
+            rightDownBlockMap.insert(make_pair(block.first, block.second));
+        }
+        else if( block.second.RightUp.x <= middleX && block.second.RightUp.y <= middleY )
+            leftDownBlockMap.insert(make_pair(block.first, block.second));
+        else if( block.second.RightUp.x <= middleX && block.second.LeftDown.y >= middleY )
+            leftUpBlockMap.insert(make_pair(block.first, block.second));
+        else if( block.second.LeftDown.x >= middleX && block.second.RightUp.y <= middleY)
+            rightDownBlockMap.insert(make_pair(block.first, block.second));
+        else if( block.second.LeftDown.x >= middleX && block.second.RightUp.y >= middleY)
+            rightUpBlockMap.insert(make_pair(block.first, block.second));
     }
 }
-
+CrossRegion RouterUtil::getCrossRegion(Rectangle & rect)
+{
+    int middleX = DIEAREA.pt2.x / 2 ;
+    int middleY = DIEAREA.pt2.y / 2 ;
+    
+    if( rect.LeftDown.x < middleX && rect.RightUp.x > middleX && rect.LeftDown.y < middleY && rect.RightUp.y > middleY )
+    {
+        return Center;
+    }
+    else if( rect.RightUp.y <= middleY  && rect.LeftDown.x < middleX && rect.RightUp.x > middleX )
+    {
+        return LeftDownAndRightDown;
+    }
+    else if( rect.RightUp.y >= middleY && rect.LeftDown.x < middleX && rect.RightUp.x > middleX  )
+    {
+        return LeftUpAndRightUp;
+    }
+    else if(rect.RightUp.x <= middleX && rect.LeftDown.y < middleY && rect.RightUp.y > middleY)
+    {
+        return LeftUpAndLeftDown ;
+    }
+    else if(rect.LeftDown.x >= middleX && rect.LeftDown.y < middleY && rect.RightUp.y > middleY)
+    {
+        return RightUpAndRightDown;
+    }
+    else if( rect.RightUp.x <= middleX && rect.RightUp.y <= middleY )
+        return LeftDown;
+    else if( rect.RightUp.x <= middleX && rect.LeftDown.y >= middleY )
+        return LeftUp;
+    else if( rect.LeftDown.x >= middleX && rect.RightUp.y <= middleY)
+        return RightDown;
+    else if( rect.LeftDown.x >= middleX && rect.RightUp.y >= middleY)
+        return RightUp;
+    return Center;
+}
 RouterUtil::~RouterUtil()
 {
     
