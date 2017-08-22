@@ -43,8 +43,12 @@ run_case2:
 	time ./$(OUTPUT_NAME) TestCase/2017/case2/case2.v TestCase/2017/case2/case2_input.def TestCase/2017/case2/tech.lef TestCase/2017/case2/blocks.lef TestCase/2017/case2/initial_files case2_output.def case2.sp output_files 
 run_case3:	
 	time ./$(OUTPUT_NAME) TestCase/2016/case3/case3.v TestCase/2016/case3/case3_input.def TestCase/2016/case3/tech.lef TestCase/2016/case3/blocks.lef TestCase/2016/case3/initial_files case3_output.def case3.sp output_files
-run_case4:	
-	time ./$(OUTPUT_NAME) TestCase/test/test0/test0.v TestCase/test/test0/test0_input.def TestCase/test/test0/tech.lef TestCase/test/test0/blocks.lef TestCase/test/test0/initial_files test0_output.def test0.sp output_files
+run_case4_1:	
+	time ./$(OUTPUT_NAME) TestCase/2017/case4/case4.v TestCase/2017/case4/case4_input.def TestCase/2017/case4/tech.lef TestCase/2017/case4/blocks.lef TestCase/2017/case4/initial_files_1 case4_output.def case4.sp output_files
+run_case4_2:	
+	time ./$(OUTPUT_NAME) TestCase/2017/case4/case4.v TestCase/2017/case4/case4_input.def TestCase/2017/case4/tech.lef TestCase/2017/case4/blocks.lef TestCase/2017/case4/initial_files_2 case4_output.def case4.sp output_files
+run_case4_3:	
+	time ./$(OUTPUT_NAME) TestCase/2017/case4/case4.v TestCase/2017/case4/case4_input.def TestCase/2017/case4/tech.lef TestCase/2017/case4/blocks.lef TestCase/2017/case4/initial_files_3 case4_output.def case4.sp output_files
 run_case5:	
 	time ./$(OUTPUT_NAME) TestCase/test/test1/test1.v TestCase/test/test1/test1_input.def TestCase/test/test1/tech.lef TestCase/test/test1/blocks.lef TestCase/test/test1/initial_files test1_output.def test1.sp output_files
 run_case6:	
@@ -69,12 +73,8 @@ run_case15:
 	time ./$(OUTPUT_NAME) TestCase/test/test11/test11.v TestCase/test/test11/test11_input.def TestCase/test/test11/tech.lef TestCase/test/test11/blocks.lef TestCase/test/test11/initial_files test11_output.def test11.sp output_files
 run_case16:	
 	time ./$(OUTPUT_NAME) TestCase/test/test12/test12.v TestCase/test/test12/test12_input.def TestCase/test/test12/tech.lef TestCase/test/test12/blocks.lef TestCase/test/test12/initial_files test12_output.def test12.sp output_files
-run_case_new_1:	
-	time ./$(OUTPUT_NAME) TestCase/2017/case_new/case3.v TestCase/2017/case_new/case3_input.def TestCase/2017/case_new/tech.lef TestCase/2017/case_new/blocks.lef TestCase/2017/case_new/initial_files_1 case_new_output.def case_new.sp output_files
-run_case_new_2:	
-	time ./$(OUTPUT_NAME) TestCase/2017/case_new/case3.v TestCase/2017/case_new/case3_input.def TestCase/2017/case_new/tech.lef TestCase/2017/case_new/blocks.lef TestCase/2017/case_new/initial_files_2 case_new_output.def case_new.sp output_files
-run_case_new_3:	
-	time ./$(OUTPUT_NAME) TestCase/2017/case_new/case3.v TestCase/2017/case_new/case3_input.def TestCase/2017/case_new/tech.lef TestCase/2017/case_new/blocks.lef TestCase/2017/case_new/initial_files_3 case_new_output.def case_new.sp output_files
+run_case17:	
+	time ./$(OUTPUT_NAME) TestCase/test/test0/test0.v TestCase/test/test0/test0_input.def TestCase/test/test0/tech.lef TestCase/test/test0/blocks.lef TestCase/test/test0/initial_files test0_output.def test0.sp output_files
 
 .PHONY : clean
 clean:
