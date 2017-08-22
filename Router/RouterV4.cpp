@@ -1761,7 +1761,7 @@ void RouterV4::Route()
                         if( lastHigherLayer + 1 <= highestMetal ) lastHigherLayer += 1;
                     }
                     InitGrids(powerpin,DEFAULTWIDTH , DEFAULTSPACING);
-                    Graph_SP * graph_sp = InitGraph_SP(lowestMetal ,highestMetal ,DEFAULTWIDTH,DEFAULTSPACING);
+                    Graph_SP * graph_sp = InitGraph_SP(lastLowerLayer ,lastHigherLayer ,DEFAULTWIDTH,DEFAULTSPACING);
                     Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING );
                     Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING);
                     saveRoutingList(gridToAbsolute(sourceGrid),gridToAbsolute(targetGrid),powerpin,blockinfo);

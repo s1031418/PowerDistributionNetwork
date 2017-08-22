@@ -102,11 +102,11 @@ B_B9 VDD_E 5
 
 
 # The voltage of each power source (V)
-VDD1 1.0
-VDD2 1.0
-VDD3 1.0
-VDD4 1.0
-VDD5 1.0
+VDD1 100.0
+VDD2 100.0
+VDD3 100.0
+VDD4 100.0
+VDD5 100.0
 
 
 # The IR-drop constraint of each power pin (%)
