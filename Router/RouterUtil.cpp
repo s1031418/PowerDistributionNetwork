@@ -84,7 +84,7 @@ void RouterUtil::InitBlockMap()
             leftDownBlockMap.insert(make_pair(block.first, block.second));
             rightDownBlockMap.insert(make_pair(block.first, block.second));
         }
-        else if( block.second.RightUp.y >= middleY && block.second.LeftDown.x < middleX && block.second.RightUp.x > middleX  )
+        else if( block.second.LeftDown.y >= middleY && block.second.LeftDown.x < middleX && block.second.RightUp.x > middleX  )
         {
             leftUpBlockMap.insert(make_pair(block.first, block.second));
             rightUpBlockMap.insert(make_pair(block.first, block.second));
@@ -122,7 +122,7 @@ CrossRegion RouterUtil::getCrossRegion(Rectangle & rect)
     {
         return LeftDownAndRightDown;
     }
-    else if( rect.RightUp.y >= middleY && rect.LeftDown.x < middleX && rect.RightUp.x > middleX  )
+    else if( rect.LeftDown.y >= middleY && rect.LeftDown.x < middleX && rect.RightUp.x > middleX  )
     {
         return LeftUpAndRightUp;
     }

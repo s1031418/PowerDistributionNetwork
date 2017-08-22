@@ -1509,7 +1509,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(double constraint , double curre
 //                legalizeAllOrient(coordinate3D, graph_sp , width , spacing , originWidth);
 //        }
 //        graph_sp->Dijkstra(target);
-        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += multiPinCandidates[powerPin].size()/3  )
+        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += multiPinCandidates[powerPin].size() / 3  )
         {
             if( i > multiPinCandidates[powerPin].size()  ) break;
             Coordinate3D candidate = multiPinCandidates[powerPin][i];
@@ -1803,7 +1803,7 @@ void RouterV4::Route()
                         if( lastHigherLayer + 1 <= highestMetal ) lastHigherLayer += 1;
                     }
                     InitGrids(powerpin,DEFAULTWIDTH , DEFAULTSPACING);
-                    Graph_SP * graph_sp = InitGraph_SP(lastLowerLayer ,lastHigherLayer ,DEFAULTWIDTH,DEFAULTSPACING);
+                    Graph_SP * graph_sp = InitGraph_SP(lowestMetal ,highestMetal ,DEFAULTWIDTH,DEFAULTSPACING);
                     Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING );
                     Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING);
                     saveRoutingList(gridToAbsolute(sourceGrid),gridToAbsolute(targetGrid),powerpin,blockinfo);
