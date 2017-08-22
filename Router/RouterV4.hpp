@@ -81,15 +81,15 @@ private:
     map<string,vector<Coordinate3D>> sourceTargetInitPath;
     
     // key: vdd_source 
-    map<string,vector<BlockCoordinate>> obstacles;
+//    map<string,vector<BlockCoordinate>> obstacles;
     
-//    map<string,BlockCoordinate> leftDownBlockMap ;
-//    
-//    map<string,BlockCoordinate> leftUpBlockMap ;
-//    
-//    map<string,BlockCoordinate> rightDownBlockMap ;
-//    
-//    map<string,BlockCoordinate> rightUpBlockMap ;
+    map<string,vector<BlockCoordinate>> leftDownObstacles ;
+    
+    map<string,vector<BlockCoordinate>> leftUpObstacles ;
+    
+    map<string,vector<BlockCoordinate>> rightDownObstacles ;
+    
+    map<string,vector<BlockCoordinate>> rightUpObstacles ;
     
     RouterUtil RouterHelper;
     
@@ -140,7 +140,7 @@ private:
     
     void InitGrids(string source , double width , double spacing , bool cutGrid = true , vector<int> SpecialHorizontal = vector<int>(),  vector<int> SpecialVertical = vector<int>());
     
-    Graph_SP * InitGraph_SP(double width , double spacing);
+    Graph_SP * InitGraph_SP(int lowerLayer , int higherLayer , double width , double spacing);
     
     int translate3D_1D(Coordinate3D coordinate3d);
     
@@ -209,6 +209,10 @@ private:
     Coordinate3D selectSource(Coordinate3D corner);
     
     Coordinate3D selectTarget(Coordinate3D corner);
+    
+    void insertObstacles(CrossRegion crossRegion, string powerPinName , BlockCoordinate blockCoordinate);
+    
+    void updateGrids(CrossRegion crossRegion , bool blockOrObstacle , Rectangle rect1 , Rectangle via , double width , double spacing , Grid & grid);
 };
 
 #endif /* RouterV4_hpp */

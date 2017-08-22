@@ -121,7 +121,7 @@ void Graph_SP::resize(int n )
 }
 void Graph_SP::UpdateWeight( int from , int to , int newWeight )
 {
-    for(auto it = AdjList[from].begin() ; it != AdjList[from].end() ; it++)
+    for(auto it = AdjList[from].begin() ; it != AdjList[from].end() ; ++it)
     {
         if( it->first == to )
             it->second = newWeight ; 
@@ -136,7 +136,7 @@ void Graph_SP::Dijkstra(int Start )
     while (!minQueue.IsEmpty())
     {
         int u = minQueue.ExtractMin();
-        for(auto it = AdjList[u].begin() ; it != AdjList[u].end() ; it++)
+        for(auto it = AdjList[u].begin() ; it != AdjList[u].end() ; ++it)
         {
             Relax(u, it->first, it->second);
             minQueue.DecreaseKey(it->first, distance[it->first]);

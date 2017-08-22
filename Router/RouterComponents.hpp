@@ -55,7 +55,7 @@ public:
     unsigned int uppermetal = 0 ;
     std::vector<Border> Edges ;
     std::vector<VerticalBorder> verticalEdges ; 
-    std::vector<Rectangle> obstacles;
+//    std::vector<Rectangle> obstacles;
     std::vector<unsigned> capacities ;
     
     // key為metal層

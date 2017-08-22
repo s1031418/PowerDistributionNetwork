@@ -18,6 +18,7 @@
 #include "verilog.hpp"
 #include "PDNHelper.hpp"
 #include <algorithm>
+#include <map>
 using namespace std;
 
 
@@ -112,6 +113,7 @@ public:
     
     CrossRegion getCrossRegion(Rectangle & rect);
     
+    void insertObstacle(CrossRegion crossRegion , map<string,BlockCoordinate> & obstacle );
 private:
     
     
