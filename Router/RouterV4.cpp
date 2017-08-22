@@ -1498,6 +1498,10 @@ vector<Coordinate3D> RouterV4::selectMergePoint(double constraint , double curre
                 steinerTree->reset() ;
             }
         }
+        if( minCostSolutions.empty() )
+        {
+            return minCostSolutions;
+        }
         string key = block ;
         key.append(blockPin);
         auto initTargetPath = sourceTargetInitPath[key] ;
