@@ -83,13 +83,10 @@ private:
     // key: vdd_source 
 //    map<string,vector<BlockCoordinate>> obstacles;
     
-    map<string,vector<BlockCoordinate>> leftDownObstacles ;
+    map<string,vector<BlockCoordinate>> leftObstacles ;
     
-    map<string,vector<BlockCoordinate>> leftUpObstacles ;
+    map<string,vector<BlockCoordinate>> rightObstacles ;
     
-    map<string,vector<BlockCoordinate>> rightDownObstacles ;
-    
-    map<string,vector<BlockCoordinate>> rightUpObstacles ;
     
     RouterUtil RouterHelper;
     

@@ -41,14 +41,8 @@ struct CrossInfo {
 };
 
 enum CrossRegion {
-    LeftUp,
-    LeftDown,
-    RightUp,
-    RightDown,
-    LeftUpAndLeftDown,
-    RightUpAndRightDown,
-    LeftUpAndRightUp,
-    LeftDownAndRightDown,
+    Left ,
+    Right,
     Center
 };
 
@@ -99,13 +93,9 @@ public:
 
     map<string, BlockCoordinate > BlockMap;
     
-    map<string,BlockCoordinate> leftDownBlockMap ;
+    map<string,BlockCoordinate> leftBlockMap ;
     
-    map<string,BlockCoordinate> leftUpBlockMap ;
-    
-    map<string,BlockCoordinate> rightDownBlockMap ;
-    
-    map<string,BlockCoordinate> rightUpBlockMap ;
+    map<string,BlockCoordinate> rightBlockMap ;
     
     int getViaWeight(double area , int layer);
     
