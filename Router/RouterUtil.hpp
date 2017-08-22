@@ -93,9 +93,7 @@ public:
 
     map<string, BlockCoordinate > BlockMap;
     
-    map<string,BlockCoordinate> leftBlockMap ;
     
-    map<string,BlockCoordinate> rightBlockMap ;
     
     int getViaWeight(double area , int layer);
     

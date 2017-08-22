@@ -68,6 +68,9 @@ private:
     OutputFilesGenerator output_gen ;
     // 用來查詢各個點的width
     
+    map<string,BlockCoordinate> leftBlockMap ;
+    
+    map<string,BlockCoordinate> rightBlockMap ;
     
     // 絕對座標＋GridZ
     vector<RoutingPath> currentRoutingLists ;

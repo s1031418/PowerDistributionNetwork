@@ -44,6 +44,26 @@ void RouterV4::InitState()
     lowestMetal = stoi(metals[0].substr(5));
     highestMetal = stoi(metals[metals.size()-1].substr(5));
     SpecialNetsMaps.clear();
+    for(auto block : RouterHelper.BlockMap)
+    {
+        Point<int> leftDown = block.second.LeftDown ;
+        Point<int> rightUp = block.second.RightUp ;
+        leftDown.x -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+        leftDown.y -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+        rightUp.x += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+        rightUp.y += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+        Rectangle rect(leftDown,rightUp);
+        CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
+        if( crossRegion == Left  )
+            leftBlockMap.insert(make_pair(block.first, block.second));
+        else if( crossRegion == Right )
+            rightBlockMap.insert(make_pair(block.first, block.second));
+        else
+        {
+            leftBlockMap.insert(make_pair(block.first, block.second));
+            rightBlockMap.insert(make_pair(block.first, block.second));
+        }
+    }
 }
 int RouterV4::translate3D_1D(Coordinate3D coordinate3d)
 {
@@ -499,7 +519,13 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
             blockCoordinate.RightUp.x += net.ROUNTWIDTH / 2 ;
             blockCoordinate.lowerMetal = layer ;
             blockCoordinate.upperMetal = layer ;
-            Rectangle rect(blockCoordinate.LeftDown , blockCoordinate.RightUp);
+            Point<int> leftDown = blockCoordinate.LeftDown ;
+            Point<int> rightUp = blockCoordinate.RightUp;
+            leftDown.x -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            leftDown.y -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            rightUp.x += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            rightUp.y += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            Rectangle rect(leftDown , rightUp);
             CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
             insertObstacles(crossRegion, powerPinName, blockCoordinate);
 //            if( obstacles.find(powerPinName) == obstacles.end() ) obstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
@@ -525,7 +551,13 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
             blockCoordinate.LeftDown.x -= net.ROUNTWIDTH / 2 ;
             blockCoordinate.lowerMetal = layer ;
             blockCoordinate.upperMetal = layer ;
-            Rectangle rect(blockCoordinate.LeftDown , blockCoordinate.RightUp);
+            Point<int> leftDown = blockCoordinate.LeftDown ;
+            Point<int> rightUp = blockCoordinate.RightUp;
+            leftDown.x -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            leftDown.y -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            rightUp.x += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            rightUp.y += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            Rectangle rect(leftDown , rightUp);
             CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
             insertObstacles(crossRegion, powerPinName, blockCoordinate);
 //            if( obstacles.find(powerPinName) == obstacles.end() ) obstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
@@ -551,7 +583,13 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
             blockCoordinate.LeftDown.y -= net.ROUNTWIDTH / 2 ;
             blockCoordinate.lowerMetal = layer ;
             blockCoordinate.upperMetal = layer ;
-            Rectangle rect(blockCoordinate.LeftDown , blockCoordinate.RightUp);
+            Point<int> leftDown = blockCoordinate.LeftDown ;
+            Point<int> rightUp = blockCoordinate.RightUp;
+            leftDown.x -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            leftDown.y -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            rightUp.x += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            rightUp.y += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            Rectangle rect(leftDown , rightUp);
             CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
             insertObstacles(crossRegion, powerPinName, blockCoordinate);
 //            if( obstacles.find(powerPinName) == obstacles.end() ) obstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
@@ -577,7 +615,13 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
             blockCoordinate.RightUp.y += net.ROUNTWIDTH / 2 ;
             blockCoordinate.lowerMetal = layer ;
             blockCoordinate.upperMetal = layer ;
-            Rectangle rect(blockCoordinate.LeftDown , blockCoordinate.RightUp);
+            Point<int> leftDown = blockCoordinate.LeftDown ;
+            Point<int> rightUp = blockCoordinate.RightUp;
+            leftDown.x -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            leftDown.y -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            rightUp.x += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            rightUp.y += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+            Rectangle rect(leftDown , rightUp);
             CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
             insertObstacles(crossRegion, powerPinName, blockCoordinate);
 //            if( obstacles.find(powerPinName) == obstacles.end() ) obstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
@@ -2183,7 +2227,7 @@ void RouterV4::updateGrids(CrossRegion crossRegion , bool blockOrObstacle , Rect
     {
         if( blockOrObstacle )
         {
-            for( auto block : RouterHelper.leftBlockMap )
+            for( auto block : leftBlockMap )
             {
                 auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
                 updateGrid(crosssWithBlockResult, grid);
@@ -2205,7 +2249,7 @@ void RouterV4::updateGrids(CrossRegion crossRegion , bool blockOrObstacle , Rect
     {
         if( blockOrObstacle )
         {
-            for( auto block : RouterHelper.rightBlockMap )
+            for( auto block : rightBlockMap )
             {
                 auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
                 updateGrid(crosssWithBlockResult, grid);
@@ -2227,12 +2271,12 @@ void RouterV4::updateGrids(CrossRegion crossRegion , bool blockOrObstacle , Rect
     {
         if( blockOrObstacle )
         {
-            for( auto block : RouterHelper.leftBlockMap )
+            for( auto block : leftBlockMap )
             {
                 auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
                 updateGrid(crosssWithBlockResult, grid);
             }
-            for( auto block : RouterHelper.rightBlockMap )
+            for( auto block : rightBlockMap )
             {
                 auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
                 updateGrid(crosssWithBlockResult, grid);

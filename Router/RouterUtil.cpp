@@ -68,20 +68,7 @@ void RouterUtil::InitBlockMap()
         blockCoordinate.upperMetal = upper ;
         BlockMap.insert(make_pair(component.first, blockCoordinate));
     }
-    for(auto block : BlockMap)
-    {
-        Rectangle rect(block.second.LeftDown , block.second.RightUp);
-        CrossRegion crossRegion = getCrossRegion(rect);
-        if( crossRegion == Left  )
-            leftBlockMap.insert(make_pair(block.first, block.second));
-        else if( crossRegion == Right )
-            rightBlockMap.insert(make_pair(block.first, block.second));
-        else
-        {
-            leftBlockMap.insert(make_pair(block.first, block.second));
-            rightBlockMap.insert(make_pair(block.first, block.second));
-        }
-    }
+    
 }
 CrossRegion RouterUtil::getCrossRegion(Rectangle & rect)
 {
