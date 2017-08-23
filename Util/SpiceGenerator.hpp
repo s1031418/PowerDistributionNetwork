@@ -50,7 +50,7 @@ public:
     void setSpiceName(string spiceName);
     void toSpice();
     
-    
+    void simulation();
     const SpiceGenerator & operator=(const SpiceGenerator & right  );
 
 private:

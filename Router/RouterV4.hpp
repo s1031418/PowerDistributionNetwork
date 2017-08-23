@@ -188,7 +188,7 @@ private:
     
     void SteinerTreeReduction(Graph * &steinerTree , vector<Coordinate3D> & terminals);
     
-    vector<Coordinate3D> selectMergePoint(bool multiSource , double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth) ;
+    vector<Coordinate3D> selectMergePoint(bool inverse , bool multiSource , double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth) ;
     
     void InitializeSpiceGen(Graph * steinerTree);
     

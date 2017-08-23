@@ -1413,8 +1413,10 @@ double RouterV4::getMetalUsage(vector<Coordinate3D> solutions , double width)
     }
     return totalMetalUsage;
 }
-vector<Coordinate3D> RouterV4::selectMergePoint(bool multiSource , double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth)
+vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth)
 {
+    // 第一次 為block to power
+    // 接下來為 power to block
     Coordinate3D sourceGrid = translate1D_3D(source);
     Coordinate3D targetGrid = translate1D_3D(target);
     // legalize target
@@ -1467,16 +1469,16 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool multiSource , double constr
                     double metalUsage = getMetalUsage(solutions, width);
                     SpiceGenerator tmp = sp_gen ;
                     tmp.setSpiceName("tmp.sp");
-                    string key = gridToAbsolute(solutions.back()).toString();
+                    string key = (init) ? gridToAbsolute(solutions.front()).toString() : gridToAbsolute(solutions.back()).toString();
                     auto initTargetPath = sourceTargetInitPath[key] ;
-                    tmp.addMultiVdd(powerPin, gridToString(initTargetPath[0],false), voltage);
+                    if(!initTargetPath.empty())tmp.addMultiVdd(powerPin, gridToString(initTargetPath[0],false), voltage);
                     for( auto & Path : initTargetPath )
                     {
                         Path.x = getGridX(Path.x);
                         Path.y = getGridY(Path.y);
                     }
                     genResistance(solutions, powerPin , tmp , width);
-                    genResistance(initTargetPath,powerPin,tmp , width );
+                    if(!initTargetPath.empty())genResistance(initTargetPath,powerPin,tmp , width );
                     tmp.toSpice();
                     tmp.addSpiceCmd();
                     double FOM = getCost("tmp.sp" , metalUsage );
@@ -1495,21 +1497,22 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool multiSource , double constr
                         minCost = FOM ;
                         minCostSolutions = solutions ;
                     }
+                    vector<Coordinate3D> absSolutions ;
+                    for(auto sol : solutions)
+                        absSolutions.push_back(gridToAbsolute(sol));
+                    steinerTree->erase(absSolutions);
+                    steinerTree->reset() ;
                 }
-                vector<Coordinate3D> absSolutions ;
-                for(auto sol : solutions)
-                    absSolutions.push_back(gridToAbsolute(sol));
-                steinerTree->erase(absSolutions);
-                steinerTree->reset() ;
             }
         }
         if( minCostSolutions.empty() )
         {
             return minCostSolutions;
         }
-        string key = gridToAbsolute(minCostSolutions.back()).toString();
+        
         if(!multiSource)
         {
+            string key = gridToAbsolute(minCostSolutions.back()).toString();
             auto initTargetPath = sourceTargetInitPath[key] ;
             sp_gen.addSpiceCurrent(powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(block, blockPin));
             for( auto & Path : initTargetPath )
@@ -1521,14 +1524,15 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool multiSource , double constr
         }
         else
         {
+            string key = (init ) ? gridToAbsolute(minCostSolutions.front()).toString() :gridToAbsolute(minCostSolutions.back()).toString() ;
             auto initSourcePath = sourceTargetInitPath[key] ;
-            sp_gen.addMultiVdd(powerPin, gridToString(initSourcePath[0],false), voltage);
+            if(!initSourcePath.empty())sp_gen.addMultiVdd(powerPin, gridToString(initSourcePath[0],false), voltage);
             for( auto & Path : initSourcePath )
             {
                 Path.x = getGridX(Path.x);
                 Path.y = getGridY(Path.y);
             }
-            genResistance(initSourcePath,powerPin,sp_gen , width);
+            if(!initSourcePath.empty())genResistance(initSourcePath,powerPin,sp_gen , width);
         }
         genResistance(minCostSolutions, powerPin , sp_gen ,width );
         
@@ -1757,7 +1761,9 @@ void RouterV4::Route()
             double voltage = stod(VoltageMaps[powerpin]);
             vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerpin);
             int lastLowerLayer = -1 , lastHigherLayer = -1;
-            bool isMultiSource = false ;
+            bool isMultiSource = (powerPinCoordinates.size() > 1) ? true : false ;
+            bool init = true  ;
+            // block to multiSource
             for(auto powerPinCoordinate : powerPinCoordinates)
             {
                 bool hasSolutions = false ;
@@ -1786,20 +1792,19 @@ void RouterV4::Route()
                     Graph_SP * graph_sp = InitGraph_SP(lastLowerLayer ,lastHigherLayer ,DEFAULTWIDTH,DEFAULTSPACING);
                     Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING );
                     Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING);
-                    //
-                    if(!isMultiSource)saveRoutingList(gridToAbsolute(sourceGrid),gridToAbsolute(targetGrid),powerpin,blockinfo);
-                    else saveRoutingList(gridToAbsolute(targetGrid),gridToAbsolute(sourceGrid),powerpin,blockinfo);
+                    //powerPinCoordinate
+                    saveRoutingList(gridToAbsolute(sourceGrid),gridToAbsolute(targetGrid),powerpin,blockinfo);
                     int source = translate3D_1D(sourceGrid);
                     int target = translate3D_1D(targetGrid);
-                    vector<Coordinate3D> solutions = (!isMultiSource) ? selectMergePoint(isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH) : selectMergePoint(isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, source , target , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
+                    vector<Coordinate3D> solutions = (init) ? selectMergePoint(init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH) : selectMergePoint(init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, source , target , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
                     if( !solutions.empty() )
                     {
-                        SteinerTreeConstruction(false , solutions,current, constraint , voltage , powerpin , blockinfo.BlockName , blockinfo.BlockPinName, steinerTree);
+                        if(!isMultiSource)SteinerTreeConstruction(false , solutions,current, constraint , voltage , powerpin , blockinfo.BlockName , blockinfo.BlockPinName, steinerTree);
                         fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH ,true );
                         saveMultiPinCandidates(powerpin, solutions);
                         def_gen.toOutputDef();
                         hasSolutions = true ;
-                        isMultiSource = true ;
+                        init = false ;
                     }
                     delete [] graph_sp ;
                     
@@ -1808,7 +1813,8 @@ void RouterV4::Route()
 //            Simulation();
         }
 //        optimize(steinerTree);
-        delete [] steinerTree;
+        
+        if( steinerTree != nullptr ) delete [] steinerTree;
 //        Simulation();
 //        widthTable.clear();
     }

@@ -56,7 +56,14 @@ void SpiceGenerator::initSpiceVdd(string vdd , string node , double voltage)
 }
 void SpiceGenerator::addMultiVdd(string vdd , string node , double voltage)
 {
+    bool insert = true ;
     auto iterator = SpiceContainer.find(vdd);
+    for(auto x : iterator->second.voltageLine)
+    {
+        if( x.node == node && x.voltage == voltage )
+            insert = false;
+    }
+    if(!insert) return ; 
     VoltageLine voltageLine ;
     voltageLine.node = node ;
     voltageLine.voltage = voltage ;
