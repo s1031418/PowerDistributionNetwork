@@ -173,7 +173,7 @@ private:
     
     void legalizeAllLayer(Coordinate3D source , Graph_SP * graph_sp , double width , double spacing , double originWidth);
     
-    double getCost(string spiceName);
+    double getCost(string spiceName , double metalUsage);
     
     // 第一個為viaName,第二個為via location set
     pair<string,vector<Point<int>>>  getViaLocation(Nets & net , Point<int> & orginTarget , bool top , double width);
@@ -213,6 +213,8 @@ private:
     void insertObstacles(CrossRegion crossRegion, string powerPinName , BlockCoordinate blockCoordinate);
     
     void updateGrids(CrossRegion crossRegion , bool blockOrObstacle , Rectangle rect1 , Rectangle via , double width , double spacing , Grid & grid);
+    
+    double getMetalUsage(vector<Coordinate3D> solutions , double width);
 };
 
 #endif /* RouterV4_hpp */

@@ -163,8 +163,9 @@ double Graph::analysis()
             int penaltyCount = diff / penaltyRange ;
             cost += ( diff + penaltyCount ) * penaltyParameter ;
         }
-        cost += totalMetalUsage ;
+        
     }
+    cost += totalMetalUsage ;
     return cost;
 }
 void Graph::addLeafInfo(Coordinate3D leaf , string powerPin , string block , string blockPin)
