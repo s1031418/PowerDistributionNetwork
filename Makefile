@@ -77,7 +77,15 @@ run_case17:
 	time ./$(OUTPUT_NAME) TestCase/test/test12/test12.v TestCase/test/test12/test12_input.def TestCase/test/test12/tech.lef TestCase/test/test12/blocks.lef TestCase/test/test12/initial_files test12_output.def test12.sp output_files
 run_case18:	
 	time ./$(OUTPUT_NAME) TestCase/test/test0/test0.v TestCase/test/test0/test0_input.def TestCase/test/test0/tech.lef TestCase/test/test0/blocks.lef TestCase/test/test0/initial_files test0_output.def test0.sp output_files
-
+run_case18:	
+	time ./$(OUTPUT_NAME) TestCase/multi_source/test1/test1.v TestCase/multi_source/test1/test1_input.def TestCase/multi_source/test1/tech.lef TestCase/multi_source/test1/blocks.lef TestCase/multi_source/test1/initial_files multi1_output.def multi1.sp output_files
+run_case19:	
+	time ./$(OUTPUT_NAME) TestCase/multi_source/test2/test2.v TestCase/multi_source/test2/test2_input.def TestCase/multi_source/test2/tech.lef TestCase/multi_source/test2/blocks.lef TestCase/multi_source/test2/initial_files multi1_output.def multi2.sp output_files
+run_case20:
+	time ./$(OUTPUT_NAME) TestCase/multi_source/test3/test3.v TestCase/multi_source/test3/test3_input.def TestCase/multi_source/test3/tech.lef TestCase/multi_source/test3/blocks.lef TestCase/multi_source/test3/initial_files multi3_output.def multi3.sp output_files
+run_case21:
+	time ./$(OUTPUT_NAME) TestCase/multi_source/test4/test4.v TestCase/multi_source/test4/test4_input.def TestCase/multi_source/test4/tech.lef TestCase/multi_source/test4/blocks.lef TestCase/multi_source/test4/initial_files multi4_output.def multi4.sp output_files
+	
 .PHONY : clean
 clean:
 	cd $(LEF_PATH) && make clean
