@@ -1447,7 +1447,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
 //                legalizeAllOrient(coordinate3D, graph_sp , width , spacing , originWidth);
 //        }
 //        graph_sp->Dijkstra(target);
-        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += multiPinCandidates[powerPin].size() / 3  )
+        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += multiPinCandidates[powerPin].size() / 20  )
         {
             if( i > multiPinCandidates[powerPin].size()  ) break;
             Coordinate3D candidate = multiPinCandidates[powerPin][i];
@@ -1806,6 +1806,14 @@ void RouterV4::Route()
                         def_gen.toOutputDef();
                         hasSolutions = true ;
                         init = false ;
+                    }
+                    else
+                    {
+                        if( lastLowerLayer == lowestMetal && lastHigherLayer == highestMetal )
+                        {
+                            
+                            break;
+                        }
                     }
                     delete [] graph_sp ;
                     
