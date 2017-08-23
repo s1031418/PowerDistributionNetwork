@@ -1480,7 +1480,7 @@ void RouterV4::SteinerTreeConstruction( bool isSimulation , vector<Coordinate3D>
     steinerTree->addLeafInfo(*(--absSolutions.end()) , powerPin, block, blockPin);
     
 }
-vector<Coordinate3D> RouterV4::selectMergePoint(double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth)
+vector<Coordinate3D> RouterV4::selectMergePoint(bool multiSource , double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth)
 {
     Coordinate3D sourceGrid = translate1D_3D(source);
     Coordinate3D targetGrid = translate1D_3D(target);
@@ -1783,11 +1783,11 @@ void RouterV4::Route()
             double constraint = RouterHelper.getIRDropConstaint(blockinfo.BlockName, blockinfo.BlockPinName);
             double voltage = stod(VoltageMaps[powerpin]);
             vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerpin);
-            bool init = true ;
             int lastLowerLayer = -1 , lastHigherLayer = -1;
-            bool hasSolutions = false ;
+            bool isMultiSource = false ;
             for(auto powerPinCoordinate : powerPinCoordinates)
             {
+                bool hasSolutions = false ;
                 while (!hasSolutions)
                 {
                     Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
@@ -1816,7 +1816,7 @@ void RouterV4::Route()
                     saveRoutingList(gridToAbsolute(sourceGrid),gridToAbsolute(targetGrid),powerpin,blockinfo);
                     int source = translate3D_1D(sourceGrid);
                     int target = translate3D_1D(targetGrid);
-                    vector<Coordinate3D> solutions = (init ) ? selectMergePoint(constraint , current , voltage , steinerTree , powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH) : selectMergePoint(constraint , current , voltage , steinerTree , powerpin, graph_sp, source , target , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
+                    vector<Coordinate3D> solutions = (!isMultiSource) ? selectMergePoint(isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH) : selectMergePoint(isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, source , target , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
                     if( !solutions.empty() )
                     {
                         SteinerTreeConstruction(false , solutions,current, constraint , voltage , powerpin , blockinfo.BlockName , blockinfo.BlockPinName, steinerTree);
@@ -1824,7 +1824,7 @@ void RouterV4::Route()
                         saveMultiPinCandidates(powerpin, solutions);
                         def_gen.toOutputDef();
                         hasSolutions = true ;
-                        init = false ;
+                        isMultiSource = true ;
                     }
                     delete [] graph_sp ;
                     
