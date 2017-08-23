@@ -1811,7 +1811,7 @@ void RouterV4::Route()
                     {
                         if( lastLowerLayer == lowestMetal && lastHigherLayer == highestMetal )
                         {
-                            
+                            cout << "Real No Solutions" << endl;
                             break;
                         }
                     }
