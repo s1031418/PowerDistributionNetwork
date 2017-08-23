@@ -42,11 +42,25 @@ void SpiceGenerator::addSpiceResistance(string vdd , string node1 , string node2
 }
 void SpiceGenerator::initSpiceVdd(string vdd , string node , double voltage)
 {
-    if( SpiceContainer.find(vdd) != SpiceContainer.end() ) return ;
+    if( SpiceContainer.find(vdd) != SpiceContainer.end() )
+    {
+        cout << "You have already own vdd" << endl; 
+        return ;
+    }
     SpiceModel spiceModel ;
-    spiceModel.voltageLine.node = node ;
-    spiceModel.voltageLine.voltage = voltage ; 
+    VoltageLine voltageLine ;
+    voltageLine.node = node ;
+    voltageLine.voltage = voltage ;
+    spiceModel.voltageLine.push_back(voltageLine);
     SpiceContainer.insert(make_pair(vdd, spiceModel));
+}
+void SpiceGenerator::addMultiVdd(string vdd , string node , double voltage)
+{
+    auto iterator = SpiceContainer.find(vdd);
+    VoltageLine voltageLine ;
+    voltageLine.node = node ;
+    voltageLine.voltage = voltage ;
+    iterator->second.voltageLine.push_back(voltageLine);
 }
 void SpiceGenerator::addSpiceCurrent(string vdd , string node , double current )
 {
@@ -96,10 +110,16 @@ void SpiceGenerator::toSpice()
     fprintf(pFile, "#Comments\n");
     int resistanceCount = 1 ;
     int currentCount = 1;
+    int vddCount = 1 ;
     for( auto Spice : SpiceContainer )
     {
-        // vdd , only one vdd
-        fprintf(pFile, "V_%s_1 %s gnd %g\n" , Spice.first.c_str() , Spice.second.voltageLine.node.c_str() , Spice.second.voltageLine.voltage);
+        // vdd
+        for(auto vdd : Spice.second.voltageLine)
+        {
+            fprintf(pFile, "V_%s_%d %s gnd %g\n" , Spice.first.c_str() ,vddCount ,  vdd.node.c_str() , vdd.voltage);
+            vddCount++;
+//            fprintf(pFile, "V_%s_%d %s gnd %g\n" , Spice.first.c_str() , Spice.second.voltageLine.node.c_str() , Spice.second.voltageLine.voltage);
+        }
         
         // resistance
         for( auto resistance : Spice.second.resistanceSet )

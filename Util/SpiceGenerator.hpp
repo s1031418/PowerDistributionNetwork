@@ -33,7 +33,7 @@ struct VoltageLine {
 
 struct SpiceModel
 {
-    VoltageLine voltageLine;
+    vector<VoltageLine> voltageLine;
     vector<ResistanceLine> resistanceSet ;
     vector<CurrentLine> currentSet ;
 };
@@ -44,6 +44,7 @@ public:
     ~SpiceGenerator();
     void addSpiceResistance(string vdd , string node1 , string node2 , double resistance);
     void initSpiceVdd(string vdd , string node ,  double voltage);
+    void addMultiVdd(string vdd , string node , double voltage);
     void addSpiceCurrent(string vdd , string node , double current );
     void addSpiceCmd();
     void setSpiceName(string spiceName);

@@ -717,8 +717,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
     auto sourceGrid = getGridCoordinate(block);
     string key ;
     key.append(blockName).append(BlockPinName);
-    if( powerpin == "VDD_111b" && blockName == "B6_05" )
-        cout << "";
+    
     if( block.Direction == TOP )
     {
         int blockLength = block.RightUp.y - block.LeftDown.y ;
@@ -748,8 +747,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
             Coordinate3D coordinate3D(pt.x , pt.y , p.z);
             absolutePoints.push_back(coordinate3D);
         }
-        if(source) sourceTargetInitPath.insert(make_pair(powerpin, absolutePoints));
-        else sourceTargetInitPath.insert(make_pair(key, absolutePoints));
+        if(source) sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
+        else sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
         
         for(int i = lowestMetal ; i <= highestMetal ; i++)
         {
@@ -799,8 +798,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
             Coordinate3D coordinate3D(pt.x , pt.y , p.z);
             absolutePoints.push_back(coordinate3D);
         }
-        if(source) sourceTargetInitPath.insert(make_pair(powerpin, absolutePoints));
-        else sourceTargetInitPath.insert(make_pair(key, absolutePoints));
+        if(source) sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
+        else sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
         for(int i = lowestMetal ; i <= highestMetal ; i++)
         {
             BlockCoordinate virtualObstacle ;
@@ -849,8 +848,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
             Coordinate3D coordinate3D(pt.x , pt.y , p.z);
             absolutePoints.push_back(coordinate3D);
         }
-        if(source) sourceTargetInitPath.insert(make_pair(powerpin, absolutePoints));
-        else sourceTargetInitPath.insert(make_pair(key, absolutePoints));
+        if(source) sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
+        else sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
         for(int i = lowestMetal ; i <= highestMetal ; i++)
         {
             BlockCoordinate virtualObstacle ;
@@ -900,8 +899,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
             Coordinate3D coordinate3D(pt.x , pt.y , p.z);
             absolutePoints.push_back(coordinate3D);
         }
-        if(source) sourceTargetInitPath.insert(make_pair(powerpin, absolutePoints));
-        else sourceTargetInitPath.insert(make_pair(key, absolutePoints));
+        if(source) sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
+        else sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
         for(int i = lowestMetal ; i <= highestMetal ; i++)
         {
             BlockCoordinate virtualObstacle ;
@@ -923,7 +922,13 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
     }
     for( auto virtualObstacle : virtualObstacles )
     {
-        Rectangle rect(virtualObstacle.LeftDown,virtualObstacle.RightUp);
+        Point<int> leftDown = virtualObstacle.LeftDown ;
+        Point<int> rightUp = virtualObstacle.RightUp;
+        leftDown.x -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+        leftDown.y -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+        rightUp.x += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+        rightUp.y += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+        Rectangle rect(leftDown,rightUp);
         CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
         insertObstacles(crossRegion, powerpin, virtualObstacle);
 //        obstacles[powerpin].push_back(virtualObstacle);
@@ -1512,7 +1517,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool multiSource , double constr
 //                legalizeAllOrient(coordinate3D, graph_sp , width , spacing , originWidth);
 //        }
 //        graph_sp->Dijkstra(target);
-        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += multiPinCandidates[powerPin].size() / 3  )
+        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += multiPinCandidates[powerPin].size() / 20  )
         {
             if( i > multiPinCandidates[powerPin].size()  ) break;
             Coordinate3D candidate = multiPinCandidates[powerPin][i];
@@ -1529,12 +1534,19 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool multiSource , double constr
                 solutions.push_back(translate1D_3D(path));
             if(!paths.empty())
             {
-                SteinerTreeConstruction(true , solutions, current, constraint, voltage, powerPin, block, blockPin, steinerTree);
-                double FOM = steinerTree->analysis();
-                if( minCost > FOM )
+                if(multiSource)
                 {
-                    minCost = FOM ;
-                    minCostSolutions = solutions ;
+                    
+                }
+                else
+                {
+                    SteinerTreeConstruction(true , solutions, current, constraint, voltage, powerPin, block, blockPin, steinerTree);
+                    double FOM = steinerTree->analysis();
+                    if( minCost > FOM )
+                    {
+                        minCost = FOM ;
+                        minCostSolutions = solutions ;
+                    }
                 }
                 vector<Coordinate3D> absSolutions ;
                 for(auto sol : solutions)
@@ -1547,18 +1559,32 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool multiSource , double constr
         {
             return minCostSolutions;
         }
-        string key = block ;
-        key.append(blockPin);
-        auto initTargetPath = sourceTargetInitPath[key] ;
-        
-        sp_gen.addSpiceCurrent(powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(block, blockPin));
-        for( auto & Path : initTargetPath )
+        if(!multiSource)
         {
-            Path.x = getGridX(Path.x);
-            Path.y = getGridY(Path.y);
+            string targetKey = gridToAbsolute(minCostSolutions.back()).toString();
+            auto initTargetPath = sourceTargetInitPath[targetKey] ;
+            sp_gen.addSpiceCurrent(powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(block, blockPin));
+            for( auto & Path : initTargetPath )
+            {
+                Path.x = getGridX(Path.x);
+                Path.y = getGridY(Path.y);
+            }
+            genResistance(initTargetPath,powerPin,sp_gen , width);
+        }
+        else
+        {
+            string sourceKey = gridToAbsolute(minCostSolutions.front()).toString();
+            auto initSourcePath = sourceTargetInitPath[sourceKey] ;
+            sp_gen.addMultiVdd(powerPin, gridToString(initSourcePath[0],false), voltage);
+            for( auto & Path : initSourcePath )
+            {
+                Path.x = getGridX(Path.x);
+                Path.y = getGridY(Path.y);
+            }
+            genResistance(initSourcePath,powerPin,sp_gen , width);
         }
         genResistance(minCostSolutions, powerPin , sp_gen ,width );
-        genResistance(initTargetPath,powerPin,sp_gen , width);
+        
         return minCostSolutions ;
     }
 
@@ -2006,10 +2032,10 @@ int RouterV4::getGridY(int y)
 }
 void RouterV4::generateSpiceList(vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , double width)
 {
-    string key;
-    key.append(blockName).append(blockPinName);
-    auto initSourcePath = sourceTargetInitPath[powerPinName] ;
-    auto initTargetPath = sourceTargetInitPath[key] ;
+    auto sourceKey = gridToAbsolute(paths[0]).toString();
+    auto targetKey = gridToAbsolute(paths.back()).toString();
+    auto initSourcePath = sourceTargetInitPath[sourceKey] ;
+    auto initTargetPath = sourceTargetInitPath[targetKey] ;
     sp_gen.initSpiceVdd(powerPinName, gridToString(initSourcePath[0],false), stod(VoltageMaps[powerPinName]));
     sp_gen.addSpiceCurrent(powerPinName, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(blockName, blockPinName));
     for( auto & Path : initSourcePath )
