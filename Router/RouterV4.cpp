@@ -1559,10 +1559,10 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool multiSource , double constr
         {
             return minCostSolutions;
         }
+        string key = gridToAbsolute(minCostSolutions.back()).toString();
         if(!multiSource)
         {
-            string targetKey = gridToAbsolute(minCostSolutions.back()).toString();
-            auto initTargetPath = sourceTargetInitPath[targetKey] ;
+            auto initTargetPath = sourceTargetInitPath[key] ;
             sp_gen.addSpiceCurrent(powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(block, blockPin));
             for( auto & Path : initTargetPath )
             {
@@ -1573,8 +1573,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool multiSource , double constr
         }
         else
         {
-            string sourceKey = gridToAbsolute(minCostSolutions.front()).toString();
-            auto initSourcePath = sourceTargetInitPath[sourceKey] ;
+            auto initSourcePath = sourceTargetInitPath[key] ;
             sp_gen.addMultiVdd(powerPin, gridToString(initSourcePath[0],false), voltage);
             for( auto & Path : initSourcePath )
             {
