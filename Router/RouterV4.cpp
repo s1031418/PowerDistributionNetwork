@@ -922,16 +922,16 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
     }
     for( auto virtualObstacle : virtualObstacles )
     {
-        Point<int> leftDown = virtualObstacle.LeftDown ;
-        Point<int> rightUp = virtualObstacle.RightUp;
-        leftDown.x -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
-        leftDown.y -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
-        rightUp.x += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
-        rightUp.y += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
-        Rectangle rect(leftDown,rightUp);
-        CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
-        insertObstacles(crossRegion, powerpin, virtualObstacle);
-//        obstacles[powerpin].push_back(virtualObstacle);
+//        Point<int> leftDown = virtualObstacle.LeftDown ;
+//        Point<int> rightUp = virtualObstacle.RightUp;
+//        leftDown.x -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+//        leftDown.y -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+//        rightUp.x += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+//        rightUp.y += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+//        Rectangle rect(leftDown,rightUp);
+//        CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
+//        insertObstacles(crossRegion, powerpin, virtualObstacle);
+        obstacles[powerpin].push_back(virtualObstacle);
     }
 }
 void RouterV4::InitPowerPinAndBlockPin(double width , double spacing )
