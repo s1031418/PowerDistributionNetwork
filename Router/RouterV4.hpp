@@ -84,11 +84,11 @@ private:
     map<string,vector<Coordinate3D>> sourceTargetInitPath;
     
     // key: vdd_source 
-    map<string,vector<BlockCoordinate>> obstacles;
+//    map<string,vector<BlockCoordinate>> obstacles;
     
-//    map<string,vector<BlockCoordinate>> leftObstacles ;
+    map<string,vector<BlockCoordinate>> leftObstacles ;
     
-//    map<string,vector<BlockCoordinate>> rightObstacles ;
+    map<string,vector<BlockCoordinate>> rightObstacles ;
     
     
     RouterUtil RouterHelper;

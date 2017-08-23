@@ -261,16 +261,16 @@ CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1 , Rectangle via ,  BlockC
     // block 增加boundary的寬度( 1/2 * Width + minimal space )
     rect2.LeftDown = block.LeftDown ;
     rect2.RightUp = block.RightUp ;
-    
+    if( isCross(via, rect2) )
+    {
+        crossinfo.viaIsCross = true ;
+    }
     // 目前minimal space 先 hardcode 2 ，不同層有不同spacing，會浪費resource
     rect2.LeftDown.x -= ((0.5*width + spacing )*UNITS_DISTANCE);
     rect2.LeftDown.y -= ((0.5*width + spacing )*UNITS_DISTANCE);
     rect2.RightUp.x += ((0.5*width + spacing )*UNITS_DISTANCE);
     rect2.RightUp.y += ((0.5*width + spacing )*UNITS_DISTANCE);
-    if( isCross(via, rect2) )
-    {
-        crossinfo.viaIsCross = true ;
-    }
+    
     rect2.LeftDown.x += 1;
     rect2.LeftDown.y += 1;
     rect2.RightUp.x -= 1 ;
