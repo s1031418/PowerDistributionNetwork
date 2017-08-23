@@ -1243,8 +1243,8 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(double wi
             int target = translate3D_1D(targetGrid);
             legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
             vector<Coordinate3D> solutions ;
-            graph_sp->Dijkstra(target);
-            auto paths= graph_sp->getPath(source);
+            graph_sp->Dijkstra(target,source);
+            auto paths= graph_sp->getPath();
             delete [] graph_sp; 
             for( auto path : paths )
                 solutions.push_back(translate1D_3D(path));
@@ -1426,8 +1426,8 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
     {
         vector<Coordinate3D> selectedPath ;
         legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
-        graph_sp->Dijkstra(target);
-        auto paths= graph_sp->getPath(source);
+        graph_sp->Dijkstra(target,source);
+        auto paths= graph_sp->getPath();
         if(paths.empty()) return selectedPath; 
         for( auto path : paths )
             selectedPath.push_back(translate1D_3D(path));
@@ -1456,9 +1456,10 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
                 legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
             else
                 legalizeAllOrient(coordinate3D, graph_sp , width ,spacing , originWidth);
-            graph_sp->Dijkstra(target);
             int mergePoint = translate3D_1D(coordinate3D) ;
-            auto paths = graph_sp->getPath(mergePoint);
+            graph_sp->Dijkstra(target,mergePoint);
+            
+            auto paths = graph_sp->getPath();
             vector<Coordinate3D> solutions ;
             for( auto path : paths )
                 solutions.push_back(translate1D_3D(path));

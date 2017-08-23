@@ -40,67 +40,7 @@ int flute_net::getShortestPathLength(vector<Point<int>> & orders)
     }
     return shortestPath ;
 }
-vector<Point<int>> flute_net::getShortestPathOrder( Point<int> source , Point<int> target )
-{
-    printSteinerTree();
-    vector<Point<int>> orders ;
-    auto index = getSourceTargetIdx(source, target);
-    cout << "source:" << index.first << endl;
-    cout << "target:" << index.second << endl;
-    Graph_SP graph((int)SteinerTree.size()) ;
-    for(int i = 0 ; i < SteinerTree.size() ; i++)
-    {
-        if( i != SteinerTree[i].target )
-        {
-            graph.AddEdge(i, SteinerTree[i].target, 1);
-            graph.AddEdge(SteinerTree[i].target, i , 1);
-        }
-    }
-    graph.Dijkstra(index.first);
-    vector<int> path = graph.getPath(index.second);
-    
-    for(int i = (int)path.size() - 1 ; i >= 0 ; i--)
-    {
-        cout << path[i] << "->" ;
-        Point<int> pt( (int)SteinerTree[ path[i] ].x , (int)SteinerTree[ path[i] ].y) ;
-        orders.push_back(pt);
-    }
-    cout << endl;
-    return orders ;
-//    if( SteinerTree.size() == 2 )
-//    {
-//        return length ;
-//    }
-//    else
-//    {
-//        
-//        auto index = getSourceTargetIdx(source, target);
-////        cout << "Source Index:" << index.first << endl;
-////        cout << "Target Index:" << index.second << endl;
-//        Graph_SP graph((int)SteinerTree.size()) ;
-//        for(int i = 0 ; i < SteinerTree.size() ; i++)
-//        {
-//            if( i != SteinerTree[i].target )
-//            {
-//                graph.AddEdge(i, SteinerTree[i].target, 1);
-//                graph.AddEdge(SteinerTree[i].target, i , 1);
-//            }
-//        }
-//        graph.Dijkstra(index.first);
-//        vector<int> path = graph.getPath(index.second);
-//        int shortestPath = 0 ;
-//        for(int i = (int)path.size() - 1 ; i > 0 ; i--)
-//        {
-//            shortestPath += getManhattanDistance(Point<int>(SteinerTree[path[i]].x , SteinerTree[path[i]].y), Point<int>(SteinerTree[path[i-1]].x , SteinerTree[path[i-1]].y));
-//        }
-//        return shortestPath ;
-////        cout << shortestPath << endl;
-////        cout << endl;
-////        printSteinerTree();
-//    }
-//    assert(0);
-//    return 1;
-}
+
 unsigned flute_net::getManhattanDistance(Point<int> pt1 , Point<int> pt2)
 {
     return abs(pt1.x - pt2.x) + abs(pt1.y - pt2.y) ;

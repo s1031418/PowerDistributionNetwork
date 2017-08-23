@@ -73,17 +73,17 @@ void Graph_SP::Prim(int Start)
 {
     
 }
-vector<int> Graph_SP::getPath( int target )
+vector<int> Graph_SP::getPath(  )
 {
     
     vector<int> Paths ;
-    int pre = predecessor[target];
+    int pre = predecessor[terminal];
     if( pre == -1 )
     {
         cout << "No Solution" << endl;
         return vector<int>();
     }
-    Paths.push_back(target);
+    Paths.push_back(terminal);
     while( pre != -1 )
     {
         Paths.push_back(pre);
@@ -111,7 +111,7 @@ void Graph_SP::Demo()
     g9.AddEdge(3, 1, 4);g9.AddEdge(3, 2, 6);g9.AddEdge(3, 4, 7);g9.AddEdge(3, 5, 3);
     g9.AddEdge(5, 3, 2);g9.AddEdge(5, 4, 8);
     
-    g9.Dijkstra(0);
+//    g9.Dijkstra(0);
     
 }
 void Graph_SP::resize(int n )
@@ -128,14 +128,17 @@ void Graph_SP::UpdateWeight( int from , int to , int newWeight )
     }
 }
 
-void Graph_SP::Dijkstra(int Start )
+void Graph_SP::Dijkstra(int Start , int Target)
 {
+    source = Start ;
+    terminal = Target ; 
     InitalizeSingleSource(Start);
     BinaryHeap minQueue(num_vertex);
     minQueue.BuildMinHeap(distance);
     while (!minQueue.IsEmpty())
     {
         int u = minQueue.ExtractMin();
+        if( u == Target ) break;
         for(auto it = AdjList[u].begin() ; it != AdjList[u].end() ; ++it)
         {
             Relax(u, it->first, it->second);

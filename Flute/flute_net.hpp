@@ -32,7 +32,6 @@ public:
     void printSteinerTree();
     void printDebugMeg();
     void Demo();
-    vector<Point<int>> getShortestPathOrder( Point<int> source , Point<int> target );
     int getShortestPathLength(vector<Point<int>> & orders);
     vector<node> SteinerTree ;
     int length ;

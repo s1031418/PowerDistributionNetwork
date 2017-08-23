@@ -59,11 +59,11 @@ public:
     
     void Relax(int from , int to , int weight);
     
-    void Dijkstra(int Start = 0);
+    void Dijkstra(int Start , int target);
     
     void Prim(int Start  );
     
-    vector<int> getPath( int target );
+    vector<int> getPath(  );
     
     int getShortestPath(int target);
     
@@ -77,6 +77,7 @@ public:
     
 private:
     int num_vertex ;
+    int source , terminal;
     vector<int> predecessor , distance ;
 };
 
