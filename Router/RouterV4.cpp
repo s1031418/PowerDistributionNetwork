@@ -1800,6 +1800,17 @@ void RouterV4::Route()
                     vector<Coordinate3D> solutions = (init) ? selectMergePoint(init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH) : selectMergePoint(init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, source , target , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
                     if( !solutions.empty() )
                     {
+                        if(powerpin == "VDD5" && blockinfo.BlockName == "B_T1" && blockinfo.BlockPinName == "VDD_E" )
+                        {
+                            cout << "";
+                            for(auto sol : solutions)
+                            {
+                                auto a = gridToAbsolute(sol);
+                                cout << a.x << " " << a.y << " " << a.z << endl;
+                            }
+                            cout << endl;
+                            
+                        }
                         if(!isMultiSource)SteinerTreeConstruction(false , solutions,current, constraint , voltage , powerpin , blockinfo.BlockName , blockinfo.BlockPinName, steinerTree);
                         fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH ,true );
                         saveMultiPinCandidates(powerpin, solutions);
@@ -1812,6 +1823,7 @@ void RouterV4::Route()
                         if( lastLowerLayer == lowestMetal && lastHigherLayer == highestMetal )
                         {
                             cout << "Real No Solutions" << endl;
+                            delete [] graph_sp ;
                             break;
                         }
                     }
