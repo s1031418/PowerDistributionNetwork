@@ -59,11 +59,11 @@ public:
     
     void Relax(int from , int to , int weight);
     
-    void Dijkstra(int Start , int target);
+    void Dijkstra(int Start  , int target);
     
     void Prim(int Start  );
     
-    vector<int> getPath(  );
+    vector<int> getPath( );
     
     int getShortestPath(int target);
     
@@ -72,6 +72,8 @@ public:
     void UpdateWeight( int from , int to , int newWeight );
     
     vector<list<pair<int, int>>> AdjList ;
+    
+    void printMessage(int node);
     
     friend class BinaryHeap ;
     

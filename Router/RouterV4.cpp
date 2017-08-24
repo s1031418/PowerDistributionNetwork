@@ -136,6 +136,7 @@ Graph_SP * RouterV4::InitGraph_SP(int lowerLayer , int highLayer , double width 
             {
                 
                 int index = translate3D_1D(Coordinate3D(x,y,z));
+                
                 if( boundList.find(index) == boundList.end() )
                 {
                     if( Grids[y][x].Edges[z].downEdge )
@@ -1451,6 +1452,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
         {
             if( i > multiPinCandidates[powerPin].size()  ) break;
             Coordinate3D candidate = multiPinCandidates[powerPin][i];
+//            Coordinate3D candidate = multiPinCandidates[powerPin][0];
             Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
             if( coordinate3D == sourceGrid )
                 legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
@@ -1505,9 +1507,33 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
                     steinerTree->reset() ;
                 }
             }
+            else
+            {
+//                cout << "Log:" << endl;
+//                cout << "two points:" << target << "," << mergePoint << endl;
+//                cout << target << " points:" << endl;
+//                Coordinate3D targetGrid = translate1D_3D(target);
+//                for(int z = targetGrid.z ; z >= 1  ; z--)
+//                {
+//                    graph_sp->printMessage(translate3D_1D(targetGrid));
+//                    targetGrid.z -= 1 ;
+//                }
+//                
+//                cout << "------------------------------------------------------" << endl;
+//                cout << mergePoint << " points:" << endl;
+//                Coordinate3D mergePointGrid = translate1D_3D(mergePoint);
+//                for(int z = mergePointGrid.z ; z >= 1  ; z--)
+//                {
+//                    graph_sp->printMessage(translate3D_1D(mergePointGrid));
+//                    mergePointGrid.z -= 1 ;
+//                }
+            }
+//            break;
         }
         if( minCostSolutions.empty() )
         {
+            
+            
             return minCostSolutions;
         }
         
@@ -2352,8 +2378,12 @@ void RouterV4::InitGrids(string source , double width , double spacing , bool cu
             via.RightUp.y = grid.startpoint.y + (width * UNITS_DISTANCE / 2 ) ;
             via.LeftDown.x -= DEFAULTSPACING * UNITS_DISTANCE ;
             via.LeftDown.y -= DEFAULTSPACING * UNITS_DISTANCE ;
+            via.LeftDown.x += 1 ;
+            via.LeftDown.y += 1 ;
             via.RightUp.x += DEFAULTSPACING * UNITS_DISTANCE ;
             via.RightUp.y += DEFAULTSPACING * UNITS_DISTANCE ;
+            via.RightUp.x -= 1 ;
+            via.RightUp.y -= 1 ;
             CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
             updateGrids(crossRegion, true, rect, via, width, spacing, grid);
             updateGrids(crossRegion, false, rect, via, width, spacing, grid);

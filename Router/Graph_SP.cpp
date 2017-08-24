@@ -73,7 +73,7 @@ void Graph_SP::Prim(int Start)
 {
     
 }
-vector<int> Graph_SP::getPath(  )
+vector<int> Graph_SP::getPath( )
 {
     
     vector<int> Paths ;
@@ -127,7 +127,13 @@ void Graph_SP::UpdateWeight( int from , int to , int newWeight )
             it->second = newWeight ; 
     }
 }
-
+void Graph_SP::printMessage(int node)
+{
+    for(auto it = AdjList[node].begin() ; it != AdjList[node].end() ; ++it)
+    {
+        cout << node << "->" << it->first << " " << it->second << endl ;
+    }
+}
 void Graph_SP::Dijkstra(int Start , int Target)
 {
     source = Start ;
