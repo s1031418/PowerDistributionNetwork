@@ -1451,8 +1451,8 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
         for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += multiPinCandidates[powerPin].size() / 20  )
         {
             if( i > multiPinCandidates[powerPin].size()  ) break;
-            Coordinate3D candidate = multiPinCandidates[powerPin][i];
-//            Coordinate3D candidate = multiPinCandidates[powerPin][0];
+//            Coordinate3D candidate = multiPinCandidates[powerPin][i];
+            Coordinate3D candidate = multiPinCandidates[powerPin][0];
             Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
             if( coordinate3D == sourceGrid )
                 legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
@@ -1528,7 +1528,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
 //                    mergePointGrid.z -= 1 ;
 //                }
             }
-//            break;
+            break;
         }
         if( minCostSolutions.empty() )
         {
@@ -2391,9 +2391,13 @@ void RouterV4::InitGrids(string source , double width , double spacing , bool cu
             via.RightUp.y += DEFAULTSPACING * UNITS_DISTANCE ;
             via.RightUp.x -= 1 ;
             via.RightUp.y -= 1 ;
+            Rectangle rect2(via.LeftDown , via.RightUp);
+            CrossRegion crossRegionVia = RouterHelper.getCrossRegion(rect2);
             CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
-            updateGrids(crossRegion, true, rect, via, width, spacing, grid);
-            updateGrids(crossRegion, false, rect, via, width, spacing, grid);
+            if( crossRegion == crossRegionVia )updateGrids(crossRegion, true, rect, via, width, spacing, grid);
+            else updateGrids(Center, true, rect, via, width, spacing, grid);
+            if( crossRegion == crossRegionVia ) updateGrids(crossRegion, false, rect, via, width, spacing, grid);
+            else updateGrids(Center, false, rect, via, width, spacing, grid);
 //            for( auto block : RouterHelper.BlockMap )
 //            {
 //                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
