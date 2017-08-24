@@ -2244,17 +2244,24 @@ void RouterV4::updateGrid(CrossInfo result , Grid & grid)
         }
         if( result.viaIsCross )
         {
+            if( result.lowerMetal == result.upperMetal )
+            {
+                grid.verticalEdges[result.lowerMetal].bottomEdge = false;
+                if( result.lowerMetal-1 >= lowestMetal )grid.verticalEdges[result.lowerMetal-1].topEdge = false;
+                grid.verticalEdges[result.lowerMetal].topEdge = false;
+                if( result.lowerMetal+1 <= highestMetal )grid.verticalEdges[result.lowerMetal+1].bottomEdge = false;
+            }
             // top
             if( (z >= result.lowerMetal - 1 ) && ( z < result.upperMetal ) )
             {
                 grid.verticalEdges[z].topEdge = false;
-                grid.verticalEdges[z].bottomEdge = false;
+                if( z+1 <= highestMetal )grid.verticalEdges[z+1].bottomEdge = false;
             }
             // bottom
             if( z > result.lowerMetal && z <= result.upperMetal + 1 )
             {
                 grid.verticalEdges[z].bottomEdge = false;
-                grid.verticalEdges[z].topEdge = false;
+                if( z - 1 >= lowestMetal )grid.verticalEdges[z-1].topEdge = false;
             }
         }
     }
