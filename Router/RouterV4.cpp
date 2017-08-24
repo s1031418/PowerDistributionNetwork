@@ -1745,7 +1745,7 @@ void RouterV4::Route()
     auto ordering = getNetOrdering(DEFAULTWIDTH,DEFAULTSPACING,DEFAULTWIDTH);
     auto treeOrder = ordering.first ;
     auto innerTreeOrder = ordering.second ;
-    
+//    int cnt = 1 ;
     InitPowerPinAndBlockPin(DEFAULTWIDTH,DEFAULTSPACING);
     for(auto tree : treeOrder)
     {
@@ -1831,12 +1831,14 @@ void RouterV4::Route()
                     
                 }
             }
-//            Simulation();
+            
         }
 //        optimize(steinerTree);
         
         if( steinerTree != nullptr ) delete [] steinerTree;
 //        Simulation();
+//        cnt++;
+//        if(cnt == 2 )break;
 //        widthTable.clear();
     }
 //    InitPowerPinAndBlockPin(DEFAULTWIDTH,DEFAULTSPACING);
@@ -2216,10 +2218,18 @@ void RouterV4::updateGrid(CrossInfo result , Grid & grid)
         }
         if( result.viaIsCross )
         {
+            // top
             if( (z >= result.lowerMetal - 1 ) && ( z < result.upperMetal ) )
+            {
                 grid.verticalEdges[z].topEdge = false;
-            if( z > result.lowerMetal && z <= result.upperMetal + 1 )
                 grid.verticalEdges[z].bottomEdge = false;
+            }
+            // bottom
+            if( z > result.lowerMetal && z <= result.upperMetal + 1 )
+            {
+                grid.verticalEdges[z].bottomEdge = false;
+                grid.verticalEdges[z].topEdge = false;
+            }
         }
     }
 }
@@ -2347,9 +2357,17 @@ void RouterV4::InitGrids(string source , double width , double spacing , bool cu
             CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
             updateGrids(crossRegion, true, rect, via, width, spacing, grid);
             updateGrids(crossRegion, false, rect, via, width, spacing, grid);
-//            auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect , grid );
-//            updateGrid(crosssWithBlockResult, grid);
-            // 判斷有沒有跟線有交叉
+//            for( auto block : RouterHelper.BlockMap )
+//            {
+//                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+//                updateGrid(crosssWithBlockResult, grid);
+//            }
+//            // 判斷有沒有跟線有交叉
+//            for( auto block : RouterHelper.BlockMap )
+//            {
+//                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
+//                updateGrid(crosssWithBlockResult, grid);
+//            }
 //            auto crosssWithObstacleResult = RouterHelper.isCrossWithObstacle(rect, source, obstacles , grid );
 //            updateGrid(crosssWithObstacleResult, grid);
             startpoint.x += (CrossPoint.x - startpoint.x) ;
