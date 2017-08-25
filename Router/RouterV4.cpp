@@ -1535,6 +1535,8 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
 //                legalizeAllOrient(coordinate3D, graph_sp , width , spacing , originWidth);
 //        }
 //        graph_sp->Dijkstra(target);
+        // graph_sp 沒有重新把點關回來
+        // 可以寫個function部分點重新 init 
         for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += multiPinCandidates[powerPin].size() / 20  )
         {
             if( i > multiPinCandidates[powerPin].size()  ) break;
@@ -1543,12 +1545,10 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
             Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
             if( coordinate3D == sourceGrid )
             {
-                cout << powerPin << " " << candidate.x << " " << candidate.y << " " << candidate.z << endl;
                 legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
             }
             else
             {
-                cout << "fuck" << endl;
                 legalizeAllOrient(coordinate3D, graph_sp , width ,spacing , originWidth);
             }
             int mergePoint = translate3D_1D(coordinate3D) ;
@@ -1602,6 +1602,37 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
             }
             else
             {
+//                if(mergePoint == source)
+//                {
+//                    cout << "Log:" << endl;
+//                    cout << powerPin << " " << block << " " << blockPin << endl;
+//                    auto gridPoint = translate1D_3D(target) ;
+//                    auto absPoint = gridToAbsolute(gridPoint);
+//                    cout << "absolute point:" << absPoint.x << " " << absPoint.y << " " << absPoint.z << endl;
+//                    cout << "Block Pin:" << endl;
+//                    cout << target << " points:" << endl;
+//                    Coordinate3D targetPointGrid = translate1D_3D(target);
+//                    for(int z = targetPointGrid.z ; z >= 1  ; z--)
+//                    {
+//                        cout << "---------------------"<< endl;
+//                        graph_sp->printMessage(translate3D_1D(targetPointGrid));
+//                        targetPointGrid.z -= 1 ;
+//                    }
+//                    cout << "PowerPin Pin:" << endl;
+//                    cout << mergePoint << " points:" << endl;
+//                    gridPoint = translate1D_3D(mergePoint) ;
+//                    absPoint = gridToAbsolute(gridPoint);
+//                    cout << "absolute point:" << absPoint.x << " " << absPoint.y << " " << absPoint.z << endl;
+//                    cout << mergePoint << " points:" << endl;
+//                    Coordinate3D mergePointGrid = translate1D_3D(mergePoint);
+//                    for(int z = mergePointGrid.z ; z >= 1  ; z--)
+//                    {
+//                        cout << "---------------------"<< endl;
+//                        graph_sp->printMessage(translate3D_1D(mergePointGrid));
+//                        mergePointGrid.z -= 1 ;
+//                    }
+//                    return minCostSolutions;
+//                }
 //                cout << "Log:" << endl;
 //                cout << "two points:" << target << "," << mergePoint << endl;
 //                cout << target << " points:" << endl;
@@ -1929,6 +1960,7 @@ void RouterV4::Route()
                         {
                             cout << "Real No Solutions" << endl;
                             delete [] graph_sp ;
+                            exit(1);
                             break;
                         }
                     }
