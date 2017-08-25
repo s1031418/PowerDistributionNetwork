@@ -262,6 +262,7 @@ Point<int> RouterV4::getAbsolutePoint( Coordinate3D coordinate3d )
 Coordinate3D RouterV4::LegalizeTargetEdge(Block block ,Graph_SP * graph_sp , double width , double spacing )
 {
     vector<Coordinate3D> paths ;
+    
     auto sourceGrid = getGridCoordinate(block);
     Coordinate3D targetGrid = sourceGrid ;
     if( block.Direction == TOP )
@@ -280,12 +281,12 @@ Coordinate3D RouterV4::LegalizeTargetEdge(Block block ,Graph_SP * graph_sp , dou
             paths.push_back(targetGrid);
             nextY = getAbsolutePoint(targetGrid).y ;
         }
-        for(int i = 0 ; i < paths.size() - 1 ; i++)
-        {
-            int current = translate3D_1D(paths[i]);
-            int next = translate3D_1D(paths[i+1]);
-            graph_sp->UpdateWeight(next, current, Grids[paths[i].y][paths[i].x].length);
-        }
+//        for(int i = 0 ; i < paths.size() - 1 ; i++)
+//        {
+//            int current = translate3D_1D(paths[i]);
+//            int next = translate3D_1D(paths[i+1]);
+//            graph_sp->UpdateWeight(next, current, Grids[paths[i].y][paths[i].x].length);
+//        }
     }
     else if(block.Direction == DOWN)
     {
@@ -302,12 +303,12 @@ Coordinate3D RouterV4::LegalizeTargetEdge(Block block ,Graph_SP * graph_sp , dou
             paths.push_back(targetGrid);
             nextY = getAbsolutePoint(targetGrid).y ;
         }
-        for(int i = 0 ; i < paths.size() - 1 ; i++)
-        {
-            int current = translate3D_1D(paths[i]);
-            int next = translate3D_1D(paths[i+1]);
-            graph_sp->UpdateWeight(next, current, Grids[paths[i].y-1][paths[i].x].length);
-        }
+//        for(int i = 0 ; i < paths.size() - 1 ; i++)
+//        {
+//            int current = translate3D_1D(paths[i]);
+//            int next = translate3D_1D(paths[i+1]);
+//            graph_sp->UpdateWeight(next, current, Grids[paths[i].y-1][paths[i].x].length);
+//        }
     }
     else if(block.Direction == RIGHT )
     {
@@ -324,12 +325,12 @@ Coordinate3D RouterV4::LegalizeTargetEdge(Block block ,Graph_SP * graph_sp , dou
             paths.push_back(targetGrid);
             nextX = getAbsolutePoint(targetGrid).x ;
         }
-        for(int i = 0 ; i < paths.size() - 1 ; i++)
-        {
-            int current = translate3D_1D(paths[i]);
-            int next = translate3D_1D(paths[i+1]);
-            graph_sp->UpdateWeight(next, current, Grids[paths[i].y][paths[i].x].width);
-        }
+//        for(int i = 0 ; i < paths.size() - 1 ; i++)
+//        {
+//            int current = translate3D_1D(paths[i]);
+//            int next = translate3D_1D(paths[i+1]);
+//            graph_sp->UpdateWeight(next, current, Grids[paths[i].y][paths[i].x].width);
+//        }
         
     }
     else if(block.Direction == LEFT)
@@ -347,12 +348,12 @@ Coordinate3D RouterV4::LegalizeTargetEdge(Block block ,Graph_SP * graph_sp , dou
             paths.push_back(targetGrid);
             nextX = getAbsolutePoint(targetGrid).x ;
         }
-        for(int i = 0 ; i < paths.size() - 1 ; i++)
-        {
-            int current = translate3D_1D(paths[i]);
-            int next = translate3D_1D(paths[i+1]);
-            graph_sp->UpdateWeight(next, current, Grids[paths[i].y][paths[i].x-1].width);
-        }
+//        for(int i = 0 ; i < paths.size() - 1 ; i++)
+//        {
+//            int current = translate3D_1D(paths[i]);
+//            int next = translate3D_1D(paths[i+1]);
+//            graph_sp->UpdateWeight(next, current, Grids[paths[i].y][paths[i].x-1].width);
+//        }
     }
     return targetGrid ;
 }
@@ -450,11 +451,70 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
 //    Graph g ;
 //    for(auto p : paths)
 //    {
+////        cout << p.x << " " << p.y << " " << p.z << endl;
 //        auto abs = gridToAbsolute(p);
-//        widthTable.insert(make_pair(g.encode(abs), width));
+//        cout << abs.x << " " << abs.y << " " << abs.z << endl;
+////        widthTable.insert(make_pair(g.encode(abs), width));
 //    }
-    auto friendlyForm = translateToFriendlyForm(paths);
     
+    auto friendlyForm = translateToFriendlyForm(paths);
+    // self check
+//    int index = 0 ;
+//    Coordinate3D s = paths[0];
+//    for( auto p : friendlyForm )
+//    {
+//        
+//        if( p.first == 0 )
+//        {
+//            s.y += p.second ;
+//            index += p.second ;
+//            if( s != paths[index])
+//                assert(0);
+//            cout << "UP";
+//        }
+//        if( p.first == 1 )
+//        {
+//            s.y -= p.second ;
+//            index += p.second ;
+//            if( s != paths[index] )
+//                assert(0);
+//            cout << "DOWN";
+//        }
+//        if( p.first == 2 )
+//        {
+//            s.x -= p.second;
+//            index += p.second ;
+//            if( s != paths[index] )
+//                assert(0);
+//            cout << "LEFT";
+//        }
+//        if( p.first == 3 )
+//        {
+//            s.x += p.second;
+//            index += p.second ;
+//            if( s != paths[index] )
+//                assert(0);
+//            cout << "RIGHT";
+//        }
+//        if( p.first == 4 )
+//        {
+//            s.z += p.second;
+//            index += p.second ;
+//            if( s != paths[index] )
+//                assert(0);
+//            cout << "TOP";
+//        }
+//        if( p.first == 5 )
+//        {
+//            s.z -= p.second;
+//            index += p.second ;
+//            if( s != paths[index] )
+//                assert(0);
+//            cout << "BOTTOM";
+//        }
+//        cout << " " << p.second << endl;
+//    }
+//    cout << endl;
     Point<int> startPoint = getAbsolutePoint(source);
     Point<int> oringinTargetPoint = startPoint;
     Point<int> targetPoint = startPoint;
@@ -480,17 +540,7 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
     }
     
     
-//    for( auto p : friendlyForm )
-//    {
-//        if( p.first == 0 )  cout << "UP";
-//        if( p.first == 1 )  cout << "DOWN";
-//        if( p.first == 2 )  cout << "LEFT";
-//        if( p.first == 3 )  cout << "RIGHT";
-//        if( p.first == 4 )  cout << "TOP";
-//        if( p.first == 5 )  cout << "BOTTOM";
-//        cout << " " << p.second << endl;
-//    }
-//    cout << endl;
+
     
     auto Distance = getAbsoluteDistance(friendlyForm, Point<int>(source.x,source.y));
 //    for(auto d : Distance)
@@ -637,6 +687,20 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
                 net.ROUNTWIDTH = 0 ;
                 net.SHAPE = "STRIPE";
                 auto viaSols = getViaLocation(net,oringinTargetPoint , false , width);
+                BlockCoordinate blockCoordinate ;
+                blockCoordinate.lowerMetal = layer;
+                blockCoordinate.upperMetal = layer ;
+                Point<int> leftDown ( oringinTargetPoint.x - (width / 2 * UNITS_DISTANCE) ,  oringinTargetPoint.y - (width / 2 * UNITS_DISTANCE));
+                Point<int> rightUp ( oringinTargetPoint.y + (width / 2 * UNITS_DISTANCE) ,  oringinTargetPoint.y + (width / 2 * UNITS_DISTANCE));
+                blockCoordinate.LeftDown = leftDown ;
+                blockCoordinate.RightUp = rightUp ;
+                leftDown.x -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+                leftDown.y -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+                rightUp.x += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+                rightUp.y += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+                Rectangle rect(leftDown , rightUp);
+                CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
+                insertObstacles(crossRegion, powerPinName, blockCoordinate);
                 net.VIANAME = viaSols.first;
                 for( auto sol : viaSols.second )
                 {
@@ -655,6 +719,20 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
                 net.ROUNTWIDTH = 0 ;
                 net.SHAPE = "STRIPE";
                 auto viaSols = getViaLocation(net,oringinTargetPoint , true ,width );
+                BlockCoordinate blockCoordinate ;
+                blockCoordinate.lowerMetal = layer;
+                blockCoordinate.upperMetal = layer ;
+                Point<int> leftDown ( oringinTargetPoint.x - (width / 2 * UNITS_DISTANCE) ,  oringinTargetPoint.y - (width / 2 * UNITS_DISTANCE));
+                Point<int> rightUp ( oringinTargetPoint.y + (width / 2 * UNITS_DISTANCE) ,  oringinTargetPoint.y + (width / 2 * UNITS_DISTANCE));
+                blockCoordinate.LeftDown = leftDown ;
+                blockCoordinate.RightUp = rightUp ;
+                leftDown.x -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+                leftDown.y -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+                rightUp.x += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+                rightUp.y += (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
+                Rectangle rect(leftDown , rightUp);
+                CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
+                insertObstacles(crossRegion, powerPinName, blockCoordinate);
                 net.VIANAME = viaSols.first;
                 for( auto sol : viaSols.second )
                 {
@@ -699,6 +777,7 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
     }
     
     SpecialNetsMaps.insert(make_pair(powerPinName, specialnet));
+    
 }
 // x y are absolute coordinate 
 string RouterV4::gridToString(Coordinate3D coordinate , bool translate )
@@ -2390,6 +2469,8 @@ void RouterV4::InitGrids(string source , double width , double spacing , bool cu
             grid.width = CrossPoint.x - startpoint.x ;
             grid.length = CrossPoint.y - startpoint.y ;
             grid.startpoint = startpoint ;
+//            if(startpoint.x == 438000 && startpoint.y == 8000)
+//                cout << "";
             // 判斷有沒有跟block有交叉
             Rectangle rect(grid.startpoint , Point<int>( grid.startpoint.x + grid.width , grid.startpoint.y + grid.length ));
             Rectangle via ;
