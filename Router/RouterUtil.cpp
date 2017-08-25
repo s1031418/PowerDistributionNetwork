@@ -264,6 +264,8 @@ CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1 , Rectangle via ,  BlockC
     if( isCross(via, rect2) )
     {
         crossinfo.viaIsCross = true ;
+        crossinfo.lowerMetal = block.lowerMetal ;
+        crossinfo.upperMetal = block.upperMetal ;
     }
     // 目前minimal space 先 hardcode 2 ，不同層有不同spacing，會浪費resource
     rect2.LeftDown.x -= ((0.5*width + spacing )*UNITS_DISTANCE);

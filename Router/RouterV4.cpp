@@ -767,6 +767,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
                 virtualObstacle.lowerMetal = i ;
                 virtualObstacle.upperMetal = i ;
             }
+            else
+                continue;
             virtualObstacles.push_back(virtualObstacle);
         }
     }
@@ -817,6 +819,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
                 virtualObstacle.lowerMetal = i ;
                 virtualObstacle.upperMetal = i ;
             }
+            else
+                continue;
             virtualObstacles.push_back(virtualObstacle);
         }
     }
@@ -867,6 +871,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
                 virtualObstacle.lowerMetal = i ;
                 virtualObstacle.upperMetal = i ;
             }
+            else
+                continue;
             virtualObstacles.push_back(virtualObstacle);
         }
     }
@@ -918,6 +924,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
                 virtualObstacle.lowerMetal = i ;
                 virtualObstacle.upperMetal = i ;
             }
+            else
+                continue;
             virtualObstacles.push_back(virtualObstacle);
         }
     }
@@ -1455,9 +1463,15 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
             Coordinate3D candidate = multiPinCandidates[powerPin][0];
             Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
             if( coordinate3D == sourceGrid )
+            {
+                cout << powerPin << " " << candidate.x << " " << candidate.y << " " << candidate.z << endl;
                 legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
+            }
             else
+            {
+                cout << "fuck" << endl;
                 legalizeAllOrient(coordinate3D, graph_sp , width ,spacing , originWidth);
+            }
             int mergePoint = translate3D_1D(coordinate3D) ;
             graph_sp->Dijkstra(target,mergePoint);
             
@@ -2394,6 +2408,17 @@ void RouterV4::InitGrids(string source , double width , double spacing , bool cu
             Rectangle rect2(via.LeftDown , via.RightUp);
             CrossRegion crossRegionVia = RouterHelper.getCrossRegion(rect2);
             CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
+//            for(auto ob : leftObstacles)
+//            {
+//                for(auto x : ob.second)
+//                    cout << x.lowerMetal << " " << x.upperMetal << endl;
+//            }
+//            cout << endl;
+//            for(auto ob : rightObstacles)
+//            {
+//                for(auto x : ob.second)
+//                    cout << x.lowerMetal << " " << x.upperMetal << endl;
+//            }
             if( crossRegion == crossRegionVia )updateGrids(crossRegion, true, rect, via, width, spacing, grid);
             else updateGrids(Center, true, rect, via, width, spacing, grid);
             if( crossRegion == crossRegionVia ) updateGrids(crossRegion, false, rect, via, width, spacing, grid);
