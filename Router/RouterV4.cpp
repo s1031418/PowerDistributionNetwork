@@ -1958,6 +1958,7 @@ void RouterV4::Route()
                     {
                         if( lastLowerLayer == lowestMetal && lastHigherLayer == highestMetal )
                         {
+                            cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
                             cout << "Real No Solutions" << endl;
                             delete [] graph_sp ;
                             exit(1);
