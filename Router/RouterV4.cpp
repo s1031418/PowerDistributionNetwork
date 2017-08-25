@@ -1538,8 +1538,8 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
         for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += multiPinCandidates[powerPin].size() / 20  )
         {
             if( i > multiPinCandidates[powerPin].size()  ) break;
-//            Coordinate3D candidate = multiPinCandidates[powerPin][i];
-            Coordinate3D candidate = multiPinCandidates[powerPin][0];
+            Coordinate3D candidate = multiPinCandidates[powerPin][i];
+//            Coordinate3D candidate = multiPinCandidates[powerPin][0];
             Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
             if( coordinate3D == sourceGrid )
             {
@@ -1621,12 +1621,9 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
 //                    mergePointGrid.z -= 1 ;
 //                }
             }
-            break;
         }
         if( minCostSolutions.empty() )
         {
-            
-            
             return minCostSolutions;
         }
         
@@ -1919,17 +1916,6 @@ void RouterV4::Route()
                     vector<Coordinate3D> solutions = (init) ? selectMergePoint(init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH) : selectMergePoint(init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, source , target , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
                     if( !solutions.empty() )
                     {
-                        if(powerpin == "VDD5" && blockinfo.BlockName == "B_T1" && blockinfo.BlockPinName == "VDD_E" )
-                        {
-                            cout << "";
-                            for(auto sol : solutions)
-                            {
-                                auto a = gridToAbsolute(sol);
-                                cout << a.x << " " << a.y << " " << a.z << endl;
-                            }
-                            cout << endl;
-                            
-                        }
                         if(!isMultiSource)SteinerTreeConstruction(false , solutions,current, constraint , voltage , powerpin , blockinfo.BlockName , blockinfo.BlockPinName, steinerTree);
                         fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH ,true );
                         saveMultiPinCandidates(powerpin, solutions);
