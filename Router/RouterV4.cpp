@@ -691,7 +691,7 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
                 blockCoordinate.lowerMetal = layer;
                 blockCoordinate.upperMetal = layer ;
                 Point<int> leftDown ( oringinTargetPoint.x - (width / 2 * UNITS_DISTANCE) ,  oringinTargetPoint.y - (width / 2 * UNITS_DISTANCE));
-                Point<int> rightUp ( oringinTargetPoint.y + (width / 2 * UNITS_DISTANCE) ,  oringinTargetPoint.y + (width / 2 * UNITS_DISTANCE));
+                Point<int> rightUp ( oringinTargetPoint.x + (width / 2 * UNITS_DISTANCE) ,  oringinTargetPoint.y + (width / 2 * UNITS_DISTANCE));
                 blockCoordinate.LeftDown = leftDown ;
                 blockCoordinate.RightUp = rightUp ;
                 leftDown.x -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
@@ -723,7 +723,7 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
                 blockCoordinate.lowerMetal = layer;
                 blockCoordinate.upperMetal = layer ;
                 Point<int> leftDown ( oringinTargetPoint.x - (width / 2 * UNITS_DISTANCE) ,  oringinTargetPoint.y - (width / 2 * UNITS_DISTANCE));
-                Point<int> rightUp ( oringinTargetPoint.y + (width / 2 * UNITS_DISTANCE) ,  oringinTargetPoint.y + (width / 2 * UNITS_DISTANCE));
+                Point<int> rightUp ( oringinTargetPoint.x + (width / 2 * UNITS_DISTANCE) ,  oringinTargetPoint.y + (width / 2 * UNITS_DISTANCE));
                 blockCoordinate.LeftDown = leftDown ;
                 blockCoordinate.RightUp = rightUp ;
                 leftDown.x -= (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE ;
