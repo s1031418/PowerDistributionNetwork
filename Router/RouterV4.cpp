@@ -976,7 +976,6 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
             solution.z = sourceGrid.z ;
             paths.push_back(solution);
         }
-        SpecialNetsMaps.begin();
         fillSpNetMaps(paths, powerpin, blockName , BlockPinName ,width ,  false );
         vector<Coordinate3D> absolutePoints ;
         for(auto p : paths)
@@ -1068,7 +1067,7 @@ bool RouterV4::isMultiPin(string powerPin)
 {
     return Connection.count(powerPin) > 1 ;
 }
-void RouterV4::legalizeEdge(Coordinate3D source , Coordinate3D target , Direction3D orient , Graph_SP * graph_sp , double width )
+void RouterV4::legalizeEdge(bool allowIn , Coordinate3D source , Coordinate3D target , Direction3D orient , Graph_SP * graph_sp , double width )
 {
     if( source == target ) return ;
     int cnt = 0 ;
@@ -1081,8 +1080,8 @@ void RouterV4::legalizeEdge(Coordinate3D source , Coordinate3D target , Directio
             target.z -= 1 ;
             int viaWeight = RouterHelper.getViaWeight(width * width, target.z);
             int to = translate3D_1D(target);
-            graph_sp->UpdateWeight(from, to, viaWeight);
-            graph_sp->UpdateWeight(to, from , viaWeight);
+            if( allowIn )graph_sp->UpdateWeight(from, to, viaWeight);
+            if( !allowIn )graph_sp->UpdateWeight(to, from , viaWeight);
         }
     }
     else if( orient == bottomOrient )
@@ -1094,8 +1093,8 @@ void RouterV4::legalizeEdge(Coordinate3D source , Coordinate3D target , Directio
             int viaWeight = RouterHelper.getViaWeight(width * width, target.z);
             target.z += 1 ;
             int to = translate3D_1D(target);
-            graph_sp->UpdateWeight(from, to, viaWeight);
-            graph_sp->UpdateWeight(to, from , viaWeight);
+            if( allowIn )graph_sp->UpdateWeight(from, to, viaWeight);
+            if( !allowIn )graph_sp->UpdateWeight(to, from , viaWeight);
         }
     }
     else if( orient == upOrient )
@@ -1109,8 +1108,8 @@ void RouterV4::legalizeEdge(Coordinate3D source , Coordinate3D target , Directio
             int from = translate3D_1D(target);
             target.y -= 1 ;
             int to = translate3D_1D(target);
-            graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y-1][x].length) * 10000);
-            graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y-1][x].length) * 10000);
+            if( allowIn )graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y-1][x].length) * 10000);
+            if( !allowIn )graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y-1][x].length) * 10000);
         }
     }
     else if (orient == downOrient)
@@ -1124,8 +1123,8 @@ void RouterV4::legalizeEdge(Coordinate3D source , Coordinate3D target , Directio
             int from = translate3D_1D(target);
             target.y += 1 ;
             int to = translate3D_1D(target);
-            graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].length) * 10000);
-            graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].length) * 10000);
+            if( allowIn )graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].length) * 10000);
+            if( !allowIn )graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].length) * 10000);
         }
     }
     else if( orient == leftOrient )
@@ -1139,8 +1138,8 @@ void RouterV4::legalizeEdge(Coordinate3D source , Coordinate3D target , Directio
             int from = translate3D_1D(target);
             target.x += 1 ;
             int to = translate3D_1D(target);
-            graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].width) * 10000);
-            graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].width) * 10000);
+            if( allowIn )graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].width) * 10000);
+            if( !allowIn )graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x].width) * 10000);
         }
     }
     else if( orient == rightOrient)
@@ -1154,32 +1153,32 @@ void RouterV4::legalizeEdge(Coordinate3D source , Coordinate3D target , Directio
             int from = translate3D_1D(target);
             target.x -= 1 ;
             int to = translate3D_1D(target);
-            graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x-1].width) * 10000);
-            graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x-1].width) * 10000);
+            if( allowIn )graph_sp->UpdateWeight(from, to,RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x-1].width) * 10000);
+            if( !allowIn )graph_sp->UpdateWeight(to, from , RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y][x-1].width) * 10000);
         }
     }
     
 }
-void RouterV4::legalizeAllOrient(Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth)
+void RouterV4::legalizeAllOrient(bool allowIn , Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth)
 {
     // top
     auto lastLegal = getLastIlegalCoordinate(topOrient, coordinate , width , spacing , originWidth);
-    legalizeEdge(coordinate, lastLegal, topOrient , graph_sp , width);
+    legalizeEdge(allowIn , coordinate, lastLegal, topOrient , graph_sp , width);
     // bottom
     lastLegal = getLastIlegalCoordinate(bottomOrient, coordinate , width , spacing , originWidth);
-    legalizeEdge(coordinate, lastLegal, bottomOrient , graph_sp , width);
+    legalizeEdge(allowIn , coordinate, lastLegal, bottomOrient , graph_sp , width);
     // up
     lastLegal = getLastIlegalCoordinate(upOrient, coordinate , width , spacing , originWidth);
-    legalizeEdge(coordinate, lastLegal, upOrient , graph_sp , width);
+    legalizeEdge(allowIn , coordinate, lastLegal, upOrient , graph_sp , width);
     // down
     lastLegal = getLastIlegalCoordinate(downOrient, coordinate , width , spacing , originWidth);
-    legalizeEdge(coordinate, lastLegal, downOrient , graph_sp , width);
+    legalizeEdge(allowIn , coordinate, lastLegal, downOrient , graph_sp , width);
     // left
     lastLegal = getLastIlegalCoordinate(leftOrient, coordinate , width , spacing , originWidth);
-    legalizeEdge(coordinate, lastLegal, leftOrient , graph_sp , width);
+    legalizeEdge(allowIn , coordinate, lastLegal, leftOrient , graph_sp , width);
     // right
     lastLegal = getLastIlegalCoordinate(rightOrient, coordinate , width , spacing , originWidth);
-    legalizeEdge(coordinate, lastLegal, rightOrient , graph_sp , width);
+    legalizeEdge(allowIn , coordinate, lastLegal, rightOrient , graph_sp , width);
 }
 Coordinate3D RouterV4::getLastIlegalCoordinate(Direction3D orient , Coordinate3D sourceGrid , double width , double spacing , double originWidth)
 {
@@ -1288,13 +1287,13 @@ void RouterV4::saveRoutingList(Coordinate3D source , Coordinate3D target , strin
     routePath.targetBlockPinName = blockinfo.BlockPinName ;
     currentRoutingLists.push_back(routePath);
 }
-void RouterV4::legalizeAllLayer(Coordinate3D source , Graph_SP * graph_sp , double width , double spacing , double originWidth)
+void RouterV4::legalizeAllLayer(bool allowIn , Coordinate3D source , Graph_SP * graph_sp , double width , double spacing , double originWidth)
 {
     for(int z = lowestMetal ; z <= highestMetal ; z++)
     {
         Coordinate3D temp = source;
         temp.z = z ;
-        legalizeAllOrient(temp, graph_sp ,width ,spacing , originWidth);
+        legalizeAllOrient(allowIn , temp, graph_sp ,width ,spacing , originWidth);
     }
 }
 pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(double width, double spacing , double originWidth)
@@ -1329,7 +1328,6 @@ pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(double wi
             Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp , width , spacing);
             int source = translate3D_1D(sourceGrid);
             int target = translate3D_1D(targetGrid);
-            legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
             vector<Coordinate3D> solutions ;
             graph_sp->Dijkstra(target,source);
             auto paths= graph_sp->getPath();
@@ -1508,12 +1506,12 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
     Coordinate3D sourceGrid = translate1D_3D(source);
     Coordinate3D targetGrid = translate1D_3D(target);
     // legalize target
-    legalizeAllLayer(targetGrid, graph_sp , width , spacing , originWidth);
+    legalizeAllLayer(false , targetGrid, graph_sp , width , spacing , originWidth);
     // first Route
     if( multiPinCandidates[powerPin].empty() )
     {
         vector<Coordinate3D> selectedPath ;
-        legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
+        legalizeAllLayer(true , sourceGrid, graph_sp , width , spacing , originWidth);
         graph_sp->Dijkstra(target,source);
         auto paths= graph_sp->getPath();
         if(paths.empty()) return selectedPath; 
@@ -1546,11 +1544,11 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
             Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
             if( coordinate3D == sourceGrid )
             {
-                legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
+                legalizeAllLayer(true , sourceGrid, graph_sp , width , spacing , originWidth);
             }
             else
             {
-                legalizeAllOrient(coordinate3D, graph_sp , width ,spacing , originWidth);
+                legalizeAllOrient(true , coordinate3D, graph_sp , width ,spacing , originWidth);
             }
             int mergePoint = translate3D_1D(coordinate3D) ;
             graph_sp->Dijkstra(target,mergePoint);
@@ -1899,6 +1897,7 @@ void RouterV4::Route()
     auto innerTreeOrder = ordering.second ;
 //    int cnt = 1 ;
     InitPowerPinAndBlockPin(DEFAULTWIDTH,DEFAULTSPACING);
+    def_gen.toOutputDef();
     for(auto tree : treeOrder)
     {
         Graph * steinerTree = nullptr ;

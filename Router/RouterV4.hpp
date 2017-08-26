@@ -159,19 +159,19 @@ private:
     
     bool isMultiPin(string powerPin);
     
-    void legalizeAllOrient(Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth);
+    void legalizeAllOrient(bool allowIn , Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth);
     
     vector<Coordinate3D> selectPath(string powerPin , Graph_SP * graph_sp , int target , int source , string block , string blockPin , double width , double spacing , double originWidth);
     
     Coordinate3D getLastIlegalCoordinate(Direction3D orient , Coordinate3D sourceGrid , double width , double spacing , double originWidth);
     
-    void legalizeEdge(Coordinate3D source , Coordinate3D target , Direction3D orient , Graph_SP * graph_sp , double width);
+    void legalizeEdge(bool allowIn , Coordinate3D source , Coordinate3D target , Direction3D orient , Graph_SP * graph_sp , double width);
     
     void saveRoutingList(Coordinate3D source , Coordinate3D target , string powerPin , BlockInfo blockinfo);
     
     Coordinate3D gridToAbsolute(Coordinate3D gridCoordinate);
     
-    void legalizeAllLayer(Coordinate3D source , Graph_SP * graph_sp , double width , double spacing , double originWidth);
+    void legalizeAllLayer(bool allowIn , Coordinate3D source , Graph_SP * graph_sp , double width , double spacing , double originWidth);
     
     double getCost(string spiceName , double metalUsage);
     

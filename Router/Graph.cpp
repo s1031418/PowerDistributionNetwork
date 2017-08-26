@@ -117,6 +117,7 @@ double Graph::analysis()
 {
     rectifyCurrent();
     rectifyWidth();
+    double error = 1.05;
     double cost = 0 ;
     double totalMetalUsage = getTotalMetalUsage();
     // penalty constant
@@ -156,7 +157,7 @@ double Graph::analysis()
             }
         }
         double targetV = sourceV - realDrop ;
-        double drop = (sourceV - targetV) / sourceV * 100 ;
+        double drop = (sourceV - targetV) / sourceV * 100 * error;
         if( constraint < drop )
         {
             double diff = drop - constraint ;
