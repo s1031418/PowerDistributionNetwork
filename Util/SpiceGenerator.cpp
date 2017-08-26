@@ -34,11 +34,20 @@ void SpiceGenerator::addSpiceResistance(string vdd , string node1 , string node2
         cout << "You must be initialize vdd first" << endl; 
         return ;
     }
-    ResistanceLine resistanceLine ;
-    resistanceLine.node1 = node1 ;
-    resistanceLine.node2 = node2 ;
-    resistanceLine.resistance = resistance ;
-    SpiceContainer[vdd].resistanceSet.push_back(resistanceLine);
+    bool insert = true ;
+    for(auto resistance : SpiceContainer[vdd].resistanceSet)
+    {
+        if(resistance.node1 == node1 && resistance.node2 == node2)
+            insert = false;
+    }
+    if(insert)
+    {
+        ResistanceLine resistanceLine ;
+        resistanceLine.node1 = node1 ;
+        resistanceLine.node2 = node2 ;
+        resistanceLine.resistance = resistance ;
+        SpiceContainer[vdd].resistanceSet.push_back(resistanceLine);
+    }
 }
 void SpiceGenerator::initSpiceVdd(string vdd , string node , double voltage)
 {

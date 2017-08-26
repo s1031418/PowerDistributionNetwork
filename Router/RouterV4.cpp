@@ -281,6 +281,7 @@ Coordinate3D RouterV4::LegalizeTargetEdge(Block block ,Graph_SP * graph_sp , dou
             paths.push_back(targetGrid);
             nextY = getAbsolutePoint(targetGrid).y ;
         }
+//        RouterHelper.calculateResistance(LayerMaps[RouterHelper.translateIntToMetalName(z)].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, Grids[y-1][x].length) * 10000
 //        for(int i = 0 ; i < paths.size() - 1 ; i++)
 //        {
 //            int current = translate3D_1D(paths[i]);
@@ -1499,7 +1500,7 @@ double RouterV4::getMetalUsage(vector<Coordinate3D> solutions , double width)
     }
     return totalMetalUsage;
 }
-vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth)
+vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinate , Coordinate3D & BlockPinCoordinate , bool init , bool multiSource , double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth)
 {
     // 第一次 為block to power
     // 接下來為 power to block
@@ -1517,7 +1518,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
         if(paths.empty()) return selectedPath; 
         for( auto path : paths )
             selectedPath.push_back(translate1D_3D(path));
-        generateSpiceList(selectedPath, powerPin, block , blockPin , width);
+        generateSpiceList(powerPinCoordinate ,BlockPinCoordinate ,  selectedPath, powerPin, block , blockPin , width);
         return selectedPath ;
     }
     else
@@ -1565,16 +1566,24 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
                     double metalUsage = getMetalUsage(solutions, width);
                     SpiceGenerator tmp = sp_gen ;
                     tmp.setSpiceName("tmp.sp");
-                    string key = (init) ? gridToAbsolute(solutions.front()).toString() : gridToAbsolute(solutions.back()).toString();
-                    auto initTargetPath = sourceTargetInitPath[key] ;
-                    if(!initTargetPath.empty())tmp.addMultiVdd(powerPin, gridToString(initTargetPath[0],false), voltage);
-                    for( auto & Path : initTargetPath )
+                    
+                    string key = powerPinCoordinate.toString();
+                    auto initPowerPath = sourceTargetInitPath[key] ;
+                    auto initBlockPath = sourceTargetInitPath[BlockPinCoordinate.toString()] ;
+                    tmp.addMultiVdd(powerPin, gridToString(powerPinCoordinate,false), voltage);
+                    for( auto & Path : initPowerPath )
+                    {
+                        Path.x = getGridX(Path.x);
+                        Path.y = getGridY(Path.y);
+                    }
+                    for( auto & Path : initBlockPath )
                     {
                         Path.x = getGridX(Path.x);
                         Path.y = getGridY(Path.y);
                     }
                     genResistance(solutions, powerPin , tmp , width);
-                    if(!initTargetPath.empty())genResistance(initTargetPath,powerPin,tmp , width );
+                    genResistance(initPowerPath,powerPin,tmp , width );
+                    genResistance(initBlockPath,powerPin,tmp , width );
                     tmp.toSpice();
                     tmp.addSpiceCmd();
                     double FOM = getCost("tmp.sp" , metalUsage );
@@ -1663,9 +1672,9 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
         
         if(!multiSource)
         {
-            string key = gridToAbsolute(minCostSolutions.back()).toString();
+            string key = BlockPinCoordinate.toString();
             auto initTargetPath = sourceTargetInitPath[key] ;
-            sp_gen.addSpiceCurrent(powerPin, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(block, blockPin));
+            sp_gen.addSpiceCurrent(powerPin, gridToString(BlockPinCoordinate,false), RouterHelper.getCurrent(block, blockPin));
             for( auto & Path : initTargetPath )
             {
                 Path.x = getGridX(Path.x);
@@ -1675,15 +1684,22 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
         }
         else
         {
-            string key = (init ) ? gridToAbsolute(minCostSolutions.front()).toString() :gridToAbsolute(minCostSolutions.back()).toString() ;
-            auto initSourcePath = sourceTargetInitPath[key] ;
-            if(!initSourcePath.empty())sp_gen.addMultiVdd(powerPin, gridToString(initSourcePath[0],false), voltage);
-            for( auto & Path : initSourcePath )
+            string key = powerPinCoordinate.toString();
+            auto initPowerPath = sourceTargetInitPath[key] ;
+            auto initBlockPath = sourceTargetInitPath[BlockPinCoordinate.toString()] ;
+            sp_gen.addMultiVdd(powerPin, gridToString(powerPinCoordinate,false), voltage);
+            for( auto & Path : initPowerPath )
             {
                 Path.x = getGridX(Path.x);
                 Path.y = getGridY(Path.y);
             }
-            if(!initSourcePath.empty())genResistance(initSourcePath,powerPin,sp_gen , width);
+            for( auto & Path : initBlockPath )
+            {
+                Path.x = getGridX(Path.x);
+                Path.y = getGridY(Path.y);
+            }
+            genResistance(initPowerPath,powerPin,sp_gen , width);
+            genResistance(initBlockPath,powerPin,sp_gen , width);
         }
         genResistance(minCostSolutions, powerPin , sp_gen ,width );
         
@@ -1945,13 +1961,17 @@ void RouterV4::Route()
                     Graph_SP * graph_sp = InitGraph_SP(lastLowerLayer ,lastHigherLayer ,DEFAULTWIDTH,DEFAULTSPACING);
                     Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING );
                     Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING);
+//                    sourceGrid = AbsToGrid( RouterHelper.getTerminalPoint(powerPinCoordinate));
+//                    targetGrid = AbsToGrid(RouterHelper.getTerminalPoint(BlockPinCoordinate));
+                    Coordinate3D powerPoint = RouterHelper.getTerminalPoint(powerPinCoordinate);
+                    Coordinate3D BlockPoint = RouterHelper.getTerminalPoint(BlockPinCoordinate);
                     //powerPinCoordinate
-                    if(init)saveRoutingList(RouterHelper.getTerminalPoint(BlockPinCoordinate),powerpin,blockinfo);
+                    if(init)saveRoutingList(BlockPoint,powerpin,blockinfo);
 //                    saveRoutingList(gridToAbsolute(targetGrid),powerpin,blockinfo);
                     int source = translate3D_1D(sourceGrid);
                     int target = translate3D_1D(targetGrid);
                     
-                    vector<Coordinate3D> solutions = (init) ? selectMergePoint(init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH) : selectMergePoint(init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, source , target , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
+                    vector<Coordinate3D> solutions = (init) ? selectMergePoint(powerPoint , BlockPoint , init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH) : selectMergePoint(powerPoint , BlockPoint , init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, source , target , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
                     if( !solutions.empty() )
                     {
                         if(!isMultiSource)SteinerTreeConstruction(false , solutions,current, constraint , voltage , powerpin , blockinfo.BlockName , blockinfo.BlockPinName, steinerTree);
@@ -2004,7 +2024,7 @@ void RouterV4::Route()
             
             
         }
-        optimize(steinerTree);
+//        optimize(steinerTree);
         
         if( steinerTree != nullptr ) delete [] steinerTree;
 //        Simulation();
@@ -2179,14 +2199,14 @@ int RouterV4::getGridY(int y)
     if( Horizontal.find(y) == Horizontal.end() ) return  0 ;
     return (int)distance(Horizontal.begin(), Horizontal.find(y)) + 1 ;
 }
-void RouterV4::generateSpiceList(vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , double width)
+void RouterV4::generateSpiceList(Coordinate3D  powerPinCoordinate , Coordinate3D  BlockPinCoordinate , vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , double width)
 {
-    auto sourceKey = gridToAbsolute(paths[0]).toString();
-    auto targetKey = gridToAbsolute(paths.back()).toString();
+    auto sourceKey = powerPinCoordinate.toString();
+    auto targetKey = BlockPinCoordinate.toString();
     auto initSourcePath = sourceTargetInitPath[sourceKey] ;
     auto initTargetPath = sourceTargetInitPath[targetKey] ;
-    sp_gen.initSpiceVdd(powerPinName, gridToString(initSourcePath[0],false), stod(VoltageMaps[powerPinName]));
-    sp_gen.addSpiceCurrent(powerPinName, gridToString(initTargetPath[0],false), RouterHelper.getCurrent(blockName, blockPinName));
+    sp_gen.initSpiceVdd(powerPinName, gridToString(powerPinCoordinate,false), stod(VoltageMaps[powerPinName]));
+    sp_gen.addSpiceCurrent(powerPinName, gridToString(BlockPinCoordinate,false), RouterHelper.getCurrent(blockName, blockPinName));
     for( auto & Path : initSourcePath )
     {
         Path.x = getGridX(Path.x);

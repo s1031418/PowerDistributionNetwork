@@ -118,7 +118,7 @@ private:
     
     void genResistance(vector<Coordinate3D> & paths , string powerPinName , SpiceGenerator & sp_gen , double width );
     
-    void generateSpiceList(vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , double width );
+    void generateSpiceList(Coordinate3D powerPoint , Coordinate3D blockPoint , vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , double width );
     
     string gridToString(Coordinate3D , bool);
     
@@ -188,7 +188,7 @@ private:
     
     void SteinerTreeReduction(Graph * &steinerTree , vector<Coordinate3D> & terminals);
     
-    vector<Coordinate3D> selectMergePoint(bool inverse , bool multiSource , double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth) ;
+    vector<Coordinate3D> selectMergePoint(Coordinate3D & powerPinCoordinate , Coordinate3D & BlockPinCoordinate , bool inverse , bool multiSource , double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth) ;
     
     void InitializeSpiceGen(Graph * steinerTree);
     
