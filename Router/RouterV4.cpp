@@ -1946,6 +1946,7 @@ void RouterV4::Route()
                     Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING );
                     Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING);
                     //powerPinCoordinate
+                    if(init)saveRoutingList(RouterHelper.getTerminalPoint(BlockPinCoordinate),powerpin,blockinfo);
 //                    saveRoutingList(gridToAbsolute(targetGrid),powerpin,blockinfo);
                     int source = translate3D_1D(sourceGrid);
                     int target = translate3D_1D(targetGrid);
@@ -2001,7 +2002,7 @@ void RouterV4::Route()
                 }
             }
             
-            saveRoutingList(RouterHelper.getTerminalPoint(RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName)),powerpin,blockinfo);
+            
         }
 //        optimize(steinerTree);
         
