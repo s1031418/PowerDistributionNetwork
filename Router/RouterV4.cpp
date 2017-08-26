@@ -1553,8 +1553,6 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
                 legalizeAllOrient(coordinate3D, graph_sp , width ,spacing , originWidth);
             }
             int mergePoint = translate3D_1D(coordinate3D) ;
-            cout << "target:" << target << endl;
-            cout << "mergePoint:" << mergePoint << endl;
             graph_sp->Dijkstra(target,mergePoint);
             
             auto paths = graph_sp->getPath();
