@@ -1252,12 +1252,12 @@ double RouterV4::getCost(string spiceName , double metalUsage)
     ng_spice.initvoltage();
     for( auto routingList : currentRoutingLists )
     {
-        string sourceKey = getNgSpiceKey(routingList.sourceCoordinate) ;
+//        string sourceKey = getNgSpiceKey(routingList.sourceCoordinate) ;
         string targetKey = getNgSpiceKey(routingList.targetCoordinate) ;
-        if( ng_spice.voltages.find(sourceKey) == ng_spice.voltages.end() ) assert(0);
+//        if( ng_spice.voltages.find(sourceKey) == ng_spice.voltages.end() ) assert(0);
         if( ng_spice.voltages.find(targetKey) == ng_spice.voltages.end() ) assert(0);
         
-        double sourceV = ng_spice.voltages[sourceKey];
+        double sourceV = stod(VoltageMaps[routingList.sourceName]);
         double targetV = ng_spice.voltages[targetKey];
         double drop = (sourceV - targetV) / sourceV * 100 ;
         double constaint = RouterHelper.getIRDropConstaint(routingList.targetBlockName, routingList.targetBlockPinName);
@@ -1277,11 +1277,11 @@ Coordinate3D RouterV4::AbsToGrid(Coordinate3D coordinateABS)
 }
 
 // x y
-void RouterV4::saveRoutingList(Coordinate3D source , Coordinate3D target , string powerPin , BlockInfo blockinfo)
+void RouterV4::saveRoutingList(Coordinate3D target , string powerPin , BlockInfo blockinfo)
 {
     RoutingPath routePath;
     routePath.sourceName = powerPin ;
-    routePath.sourceCoordinate = source;
+//    routePath.sourceCoordinate = source;
     routePath.targetCoordinate = target;
     routePath.targetBlockName = blockinfo.BlockName ;
     routePath.targetBlockPinName = blockinfo.BlockPinName ;
@@ -1946,7 +1946,7 @@ void RouterV4::Route()
                     Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING );
                     Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING);
                     //powerPinCoordinate
-                    saveRoutingList(gridToAbsolute(sourceGrid),gridToAbsolute(targetGrid),powerpin,blockinfo);
+//                    saveRoutingList(gridToAbsolute(targetGrid),powerpin,blockinfo);
                     int source = translate3D_1D(sourceGrid);
                     int target = translate3D_1D(targetGrid);
                     
@@ -2001,6 +2001,7 @@ void RouterV4::Route()
                 }
             }
             
+            saveRoutingList(RouterHelper.getTerminalPoint(RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName)),powerpin,blockinfo);
         }
 //        optimize(steinerTree);
         
@@ -2120,9 +2121,9 @@ void RouterV4::Simulation()
     {
 //        Coordinate3D sourceGrid( getGridX(routingList.sourceCoordinate.x) , getGridY(routingList.sourceCoordinate.y) , routingList.sourceCoordinate.z );
 //        Coordinate3D targetGrid( getGridX(routingList.targetCoordinate.x) , getGridY(routingList.targetCoordinate.y) , routingList.targetCoordinate.z );
-        string sourceKey = getNgSpiceKey(routingList.sourceCoordinate) ;
+//        string sourceKey = getNgSpiceKey(routingList.sourceCoordinate) ;
         string targetKey = getNgSpiceKey(routingList.targetCoordinate) ;
-        if( ng_spice.voltages.find(sourceKey) == ng_spice.voltages.end() ) assert(0);
+//        if( ng_spice.voltages.find(sourceKey) == ng_spice.voltages.end() ) assert(0);
         if( ng_spice.voltages.find(targetKey) == ng_spice.voltages.end() ) assert(0);
         double sourceV = stod(VoltageMaps[routingList.sourceName]);
         double targetV = ng_spice.voltages[targetKey];

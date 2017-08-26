@@ -254,6 +254,32 @@ CrossInfo RouterUtil::isCrossWithObstacle( Rectangle rect1  , string source , ma
     }
     return CrossInfo();
 }
+Coordinate3D RouterUtil::getTerminalPoint(Block block)
+{
+    int x = 0, y = 0, z = 0 ;
+    if(block.Direction == TOP)
+    {
+        x = (block.LeftDown.x + block.RightUp.x) / 2 ;
+        y = block.LeftDown.y ;
+    }
+    else if (block.Direction == DOWN)
+    {
+        x = (block.LeftDown.x + block.RightUp.x) / 2 ;
+        y = block.RightUp.y ;
+    }
+    else if(block.Direction == RIGHT)
+    {
+        x = block.LeftDown.x;
+        y = ( block.LeftDown.y + block.RightUp.y ) / 2;
+    }
+    else if(block.Direction == LEFT)
+    {
+        x = block.RightUp.x;
+        y = (block.LeftDown.y + block.RightUp.y ) / 2 ;
+    }
+    z =  translateMetalNameToInt(*(--block.Metals.end()));
+    return Coordinate3D(x,y,z);
+}
 CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1 , Rectangle via ,  BlockCoordinate & block , double width , double spacing)
 {
     CrossInfo crossinfo ;

@@ -34,7 +34,7 @@ using namespace std;
 
 struct RoutingPath {
     string sourceName;
-    Coordinate3D sourceCoordinate ;
+//    Coordinate3D sourceCoordinate ;
     string targetBlockName ;
     string targetBlockPinName; 
     Coordinate3D targetCoordinate ;
@@ -167,7 +167,7 @@ private:
     
     void legalizeEdge(bool allowIn , Coordinate3D source , Coordinate3D target , Direction3D orient , Graph_SP * graph_sp , double width);
     
-    void saveRoutingList(Coordinate3D source , Coordinate3D target , string powerPin , BlockInfo blockinfo);
+    void saveRoutingList(Coordinate3D target , string powerPin , BlockInfo blockinfo);
     
     Coordinate3D gridToAbsolute(Coordinate3D gridCoordinate);
     

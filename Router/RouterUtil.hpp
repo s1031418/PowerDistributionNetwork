@@ -102,6 +102,8 @@ public:
     CrossRegion getCrossRegion(Rectangle & rect);
     
     void insertObstacle(CrossRegion crossRegion , map<string,BlockCoordinate> & obstacle );
+    
+    Coordinate3D getTerminalPoint(Block block);
 private:
     
     
