@@ -827,8 +827,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
             Coordinate3D coordinate3D(pt.x , pt.y , p.z);
             absolutePoints.push_back(coordinate3D);
         }
-        if(source) sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
-        else sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
+        if(source) sourceTargetInitPath.insert(make_pair(absolutePoints.front().toString(), absolutePoints));
+        else sourceTargetInitPath.insert(make_pair(absolutePoints.front().toString(), absolutePoints));
         
         for(int i = lowestMetal ; i <= highestMetal ; i++)
         {
@@ -880,8 +880,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
             Coordinate3D coordinate3D(pt.x , pt.y , p.z);
             absolutePoints.push_back(coordinate3D);
         }
-        if(source) sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
-        else sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
+        if(source) sourceTargetInitPath.insert(make_pair(absolutePoints.front().toString(), absolutePoints));
+        else sourceTargetInitPath.insert(make_pair(absolutePoints.front().toString(), absolutePoints));
         for(int i = lowestMetal ; i <= highestMetal ; i++)
         {
             BlockCoordinate virtualObstacle ;
@@ -932,8 +932,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
             Coordinate3D coordinate3D(pt.x , pt.y , p.z);
             absolutePoints.push_back(coordinate3D);
         }
-        if(source) sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
-        else sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
+        if(source) sourceTargetInitPath.insert(make_pair(absolutePoints.front().toString(), absolutePoints));
+        else sourceTargetInitPath.insert(make_pair(absolutePoints.front().toString(), absolutePoints));
         for(int i = lowestMetal ; i <= highestMetal ; i++)
         {
             BlockCoordinate virtualObstacle ;
@@ -984,8 +984,8 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
             Coordinate3D coordinate3D(pt.x , pt.y , p.z);
             absolutePoints.push_back(coordinate3D);
         }
-        if(source) sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
-        else sourceTargetInitPath.insert(make_pair(absolutePoints.back().toString(), absolutePoints));
+        if(source) sourceTargetInitPath.insert(make_pair(absolutePoints.front().toString(), absolutePoints));
+        else sourceTargetInitPath.insert(make_pair(absolutePoints.front().toString(), absolutePoints));
         for(int i = lowestMetal ; i <= highestMetal ; i++)
         {
             BlockCoordinate virtualObstacle ;
@@ -1897,7 +1897,7 @@ void RouterV4::Route()
     auto innerTreeOrder = ordering.second ;
 //    int cnt = 1 ;
     InitPowerPinAndBlockPin(DEFAULTWIDTH,DEFAULTSPACING);
-    def_gen.toOutputDef();
+    
     for(auto tree : treeOrder)
     {
         Graph * steinerTree = nullptr ;
@@ -2004,7 +2004,7 @@ void RouterV4::Route()
             
             
         }
-//        optimize(steinerTree);
+        optimize(steinerTree);
         
         if( steinerTree != nullptr ) delete [] steinerTree;
 //        Simulation();
