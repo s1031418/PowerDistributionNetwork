@@ -166,7 +166,7 @@ double Graph::analysis()
         
     }
     cost += totalMetalUsage ;
-    return cost;
+    return cost / UNITS_DISTANCE / UNITS_DISTANCE;
 }
 void Graph::addLeafInfo(Coordinate3D leaf , string powerPin , string block , string blockPin)
 {

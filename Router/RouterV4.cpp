@@ -1269,7 +1269,7 @@ double RouterV4::getCost(string spiceName , double metalUsage)
             cost += ( diff + penaltyCount ) * penaltyParameter ;
         }
     }
-    return cost + metalUsage;
+    return (cost + metalUsage) / UNITS_DISTANCE / UNITS_DISTANCE;
 }
 Coordinate3D RouterV4::AbsToGrid(Coordinate3D coordinateABS)
 {
@@ -1539,6 +1539,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
         // 可以寫個function部分點重新 init 
         for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += multiPinCandidates[powerPin].size() / 20  )
         {
+            
             if( i > multiPinCandidates[powerPin].size()  ) break;
             Coordinate3D candidate = multiPinCandidates[powerPin][i];
 //            Coordinate3D candidate = multiPinCandidates[powerPin][0];
@@ -1552,9 +1553,12 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
                 legalizeAllOrient(coordinate3D, graph_sp , width ,spacing , originWidth);
             }
             int mergePoint = translate3D_1D(coordinate3D) ;
+            cout << "target:" << target << endl;
+            cout << "mergePoint:" << mergePoint << endl;
             graph_sp->Dijkstra(target,mergePoint);
             
             auto paths = graph_sp->getPath();
+            
             vector<Coordinate3D> solutions ;
             for( auto path : paths )
                 solutions.push_back(translate1D_3D(path));
@@ -1578,6 +1582,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
                     tmp.toSpice();
                     tmp.addSpiceCmd();
                     double FOM = getCost("tmp.sp" , metalUsage );
+                    if( FOM > INT_MAX ) assert(0);
                     if( minCost > FOM )
                     {
                         minCost = FOM ;
@@ -1588,6 +1593,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
                 {
                     SteinerTreeConstruction(true , solutions, current, constraint, voltage, powerPin, block, blockPin, steinerTree);
                     double FOM = steinerTree->analysis();
+                    if( FOM > INT_MAX ) assert(0);
                     if( minCost > FOM )
                     {
                         minCost = FOM ;
@@ -1602,6 +1608,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
             }
             else
             {
+//                cout << "ksource " << source << endl;
 //                if(mergePoint == source)
 //                {
 //                    cout << "Log:" << endl;
@@ -1631,7 +1638,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(bool init , bool multiSource , d
 //                        graph_sp->printMessage(translate3D_1D(mergePointGrid));
 //                        mergePointGrid.z -= 1 ;
 //                    }
-//                    return minCostSolutions;
+////                    return minCostSolutions;
 //                }
 //                cout << "Log:" << endl;
 //                cout << "two points:" << target << "," << mergePoint << endl;
@@ -1937,6 +1944,7 @@ void RouterV4::Route()
                         if( lastHigherLayer + 1 <= highestMetal ) lastHigherLayer += 1;
                     }
                     InitGrids(powerpin,DEFAULTWIDTH , DEFAULTSPACING);
+//                    cout << lastLowerLayer << " " << lastHigherLayer << endl;
                     Graph_SP * graph_sp = InitGraph_SP(lastLowerLayer ,lastHigherLayer ,DEFAULTWIDTH,DEFAULTSPACING);
                     Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING );
                     Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING);
@@ -1944,6 +1952,7 @@ void RouterV4::Route()
                     saveRoutingList(gridToAbsolute(sourceGrid),gridToAbsolute(targetGrid),powerpin,blockinfo);
                     int source = translate3D_1D(sourceGrid);
                     int target = translate3D_1D(targetGrid);
+                    
                     vector<Coordinate3D> solutions = (init) ? selectMergePoint(init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH) : selectMergePoint(init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, source , target , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
                     if( !solutions.empty() )
                     {
@@ -1956,9 +1965,34 @@ void RouterV4::Route()
                     }
                     else
                     {
+                        
                         if( lastLowerLayer == lowestMetal && lastHigherLayer == highestMetal )
                         {
+                            
                             cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
+                            cout << "source:" << source << endl;
+                            cout << "target:" << target << endl;
+                            graph_sp->Dijkstra(source, target);
+                            auto p = graph_sp->getPath();
+                            if(!p.empty()) assert(0);
+                            cout << "PowerPin:" << endl;
+                            Coordinate3D sourcePointGrid = translate1D_3D(source);
+                            for(int z = sourcePointGrid.z ; z >= 1  ; z--)
+                            {
+                                cout << "---------------------"<< endl;
+                                graph_sp->printMessage(translate3D_1D(sourcePointGrid));
+                                sourcePointGrid.z -= 1 ;
+                            }
+                            cout << "BlockPin:" << endl;
+                            Coordinate3D targetPointGrid = translate1D_3D(target);
+                            for(int z = targetPointGrid.z ; z >= 1  ; z--)
+                            {
+                                cout << "---------------------"<< endl;
+                                graph_sp->printMessage(translate3D_1D(targetPointGrid));
+                                targetPointGrid.z -= 1 ;
+                            }
+//                            graph_sp->printMessage(target);
+                            
                             cout << "Real No Solutions" << endl;
                             delete [] graph_sp ;
                             exit(1);
