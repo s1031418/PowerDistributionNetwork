@@ -9,7 +9,6 @@
 #ifndef RouterV4_hpp
 #define RouterV4_hpp
 
-#include <stdio.h>
 #include "lefrw.h"
 #include "defrw.h"
 #include "Graph_SP.hpp"
