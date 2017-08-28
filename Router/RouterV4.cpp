@@ -1160,6 +1160,27 @@ void RouterV4::legalizeEdge(bool allowIn , Coordinate3D source , Coordinate3D ta
     }
     
 }
+bool RouterV4::isPossibleHasSolutions(Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth)
+{
+    auto lastLegal = getLastIlegalCoordinate(topOrient, coordinate , width , spacing , originWidth);
+    if(graph_sp->isPossiableHasSolution(translate3D_1D(lastLegal))) return true;
+    // bottom
+    lastLegal = getLastIlegalCoordinate(bottomOrient, coordinate , width , spacing , originWidth);
+    if(graph_sp->isPossiableHasSolution(translate3D_1D(lastLegal))) return true;
+    // up
+    lastLegal = getLastIlegalCoordinate(upOrient, coordinate , width , spacing , originWidth);
+    if(graph_sp->isPossiableHasSolution(translate3D_1D(lastLegal))) return true;
+    // down
+    lastLegal = getLastIlegalCoordinate(downOrient, coordinate , width , spacing , originWidth);
+    if(graph_sp->isPossiableHasSolution(translate3D_1D(lastLegal))) return true;
+    // left
+    lastLegal = getLastIlegalCoordinate(leftOrient, coordinate , width , spacing , originWidth);
+    if(graph_sp->isPossiableHasSolution(translate3D_1D(lastLegal))) return true;
+    // right
+    lastLegal = getLastIlegalCoordinate(rightOrient, coordinate , width , spacing , originWidth);
+    if(graph_sp->isPossiableHasSolution(translate3D_1D(lastLegal))) return true;
+    return false;
+}
 void RouterV4::legalizeAllOrient(bool allowIn , Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth)
 {
     // top
@@ -1536,7 +1557,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinat
 //        graph_sp->Dijkstra(target);
         // graph_sp 沒有重新把點關回來
         // 可以寫個function部分點重新 init 
-        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += multiPinCandidates[powerPin].size() / 20  )
+        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += 1  )
         {
             
             if( i > multiPinCandidates[powerPin].size()  ) break;
@@ -1549,15 +1570,21 @@ vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinat
             
 //            Coordinate3D candidate = multiPinCandidates[powerPin][0];
             Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
+            int mergePoint = translate3D_1D(coordinate3D) ;
             if( coordinate3D == sourceGrid )
             {
                 legalizeAllLayer(true , sourceGrid, graph_sp , width , spacing , originWidth);
             }
             else
             {
+                if( !isPossibleHasSolutions(coordinate3D, graph_sp, width, spacing, originWidth) )
+                {
+                    continue ;
+                }
+                
                 legalizeAllOrient(true , coordinate3D, graph_sp , width ,spacing , originWidth);
             }
-            int mergePoint = translate3D_1D(coordinate3D) ;
+            
             graph_sp->Dijkstra(target,mergePoint);
             
             auto paths = graph_sp->getPath();

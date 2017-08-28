@@ -75,6 +75,10 @@ public:
     
     void printMessage(int node);
     
+    bool isPossiableHasSolution(int node);
+    
+    int getWeight(int from , int to );
+    
     friend class BinaryHeap ;
     
 private:

@@ -214,6 +214,8 @@ private:
     void updateGrids(CrossRegion crossRegion , bool blockOrObstacle , Rectangle rect1 , Rectangle via , double width , double spacing , Grid & grid);
     
     double getMetalUsage(vector<Coordinate3D> solutions , double width);
+    
+    bool isPossibleHasSolutions(Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth);
 };
 
 #endif /* RouterV4_hpp */

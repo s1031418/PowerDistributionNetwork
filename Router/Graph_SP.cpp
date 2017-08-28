@@ -134,6 +134,24 @@ void Graph_SP::printMessage(int node)
         cout << node << "->" << it->first << " " << it->second << endl ;
     }
 }
+bool Graph_SP::isPossiableHasSolution(int node)
+{
+    for(auto it = AdjList[node].begin() ; it != AdjList[node].end() ; ++it)
+    {
+        if( getWeight(it->first, node) != Max_Distance )
+            return true ;
+    }
+    return false; 
+}
+int Graph_SP::getWeight(int from , int to )
+{
+    for(auto it = AdjList[from].begin() ; it != AdjList[from].end() ; ++it)
+    {
+        if( it->first == to )
+            return it->second ;
+    }
+    assert(0);
+}
 void Graph_SP::Dijkstra(int Start , int Target)
 {
     source = Start ;
