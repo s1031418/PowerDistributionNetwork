@@ -80,6 +80,8 @@ private:
     
     map<string,vector<Coordinate3D>> multiPinCandidates;
     
+    map<string,vector<Coordinate3D>> normalDistributionCandidates; 
+    
     map<string , Coordinate3D> MagicPoints ;
     
     map<string,vector<Coordinate3D>> sourceTargetInitPath;

@@ -1063,6 +1063,13 @@ void RouterV4::saveMultiPinCandidates(string powerPin , vector<Coordinate3D> sol
         Coordinate3D coordinate = gridToAbsolute(solution);
         multiPinCandidates[powerPin].push_back(coordinate);
     }
+    if( normalDistributionCandidates.find(powerPin) == normalDistributionCandidates.end() ) normalDistributionCandidates.insert(make_pair(powerPin, vector<Coordinate3D>()));
+    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.front()));
+    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 1 / 5  ]));
+    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 2 / 5  ]));
+    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 3 / 5  ]));
+    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 4 / 5  ]));
+    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.back()));
 }
 bool RouterV4::isMultiPin(string powerPin)
 {
@@ -1557,11 +1564,13 @@ vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinat
 //        graph_sp->Dijkstra(target);
         // graph_sp 沒有重新把點關回來
         // 可以寫個function部分點重新 init 
-        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += multiPinCandidates[powerPin].size()/3  )
+//        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += multiPinCandidates[powerPin].size()/3  )
+        for( int i = 0 ; i < normalDistributionCandidates[powerPin].size() ; i++ )
         {
-            
-            if( i > multiPinCandidates[powerPin].size()  ) break;
-            Coordinate3D candidate = multiPinCandidates[powerPin][i];
+//            if( i > multiPinCandidates[powerPin].size()  ) break;
+            if( i > normalDistributionCandidates[powerPin].size()  ) break;
+//            Coordinate3D candidate = multiPinCandidates[powerPin][i];
+            Coordinate3D candidate = normalDistributionCandidates[powerPin][i];
             Point<int> absTarget = getAbsolutePoint(targetGrid);
             Point<int> absCandidate(candidate.x,candidate.y);
             int distance = RouterHelper.getManhattanDistance(absTarget, absCandidate);
@@ -1945,10 +1954,13 @@ void RouterV4::optimize(Graph * steinerTree)
         double minCost = INT_MAX ;
         vector<Coordinate3D> minCostSolutions ;
         Coordinate3D source = multiPinCandidates[powerPin].front() ;
-        for(int i = 2 ; i < multiPinCandidates[powerPin].size() ; i +=  1  )
+//        for(int i = 2 ; i < multiPinCandidates[powerPin].size() ; i +=  1  )
+        for( int i = 0 ; i < normalDistributionCandidates[powerPin].size() ; i++ )
         {
-            if( i > multiPinCandidates[powerPin].size()  ) break;
-            Coordinate3D target = multiPinCandidates[noPassList.sourceName][i];
+//            if( i > multiPinCandidates[powerPin].size()  ) break;
+            if( i > normalDistributionCandidates[powerPin].size()  ) break;
+//            Coordinate3D target = multiPinCandidates[noPassList.sourceName][i];
+            Coordinate3D target = normalDistributionCandidates[noPassList.sourceName][i];
             vector<Coordinate3D> solutions = parallelRoute(powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
             if( !solutions.empty() )
             {
