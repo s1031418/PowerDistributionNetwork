@@ -1519,7 +1519,7 @@ double RouterV4::getMetalUsage(vector<Coordinate3D> solutions , double width)
         double distance = RouterHelper.getManhattanDistance(v1, v2);
         totalMetalUsage += distance * width * weight;
     }
-    return totalMetalUsage;
+    return totalMetalUsage / UNITS_DISTANCE / UNITS_DISTANCE;
 }
 vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinate , Coordinate3D & BlockPinCoordinate , bool init , bool multiSource , double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth)
 {
@@ -1557,7 +1557,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinat
 //        graph_sp->Dijkstra(target);
         // graph_sp 沒有重新把點關回來
         // 可以寫個function部分點重新 init 
-        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += 1  )
+        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += multiPinCandidates[powerPin].size()/3  )
         {
             
             if( i > multiPinCandidates[powerPin].size()  ) break;
@@ -1911,31 +1911,67 @@ Coordinate3D RouterV4::selectTarget(Coordinate3D corner)
 {
     return corner ;
 }
+double RouterV4::getParallelFOM(string spiceName , double metalUsage , double originV)
+{
+    string cmd = "./ngspice " + spiceName + " -o simulation" ;
+    system(cmd.c_str());
+    ngspice ng_spice ;
+    ng_spice.initvoltage();
+    double cost = 0 ;
+    int penaltyParameter = 10000000 ;
+    
+    for( auto noPassList : NoPassRoutingLists )
+    {
+        string targetKey = getNgSpiceKey(noPassList.targetCoordinate) ;
+        if( ng_spice.voltages.find(targetKey) == ng_spice.voltages.end() ) assert(0);
+        double targetV = ng_spice.voltages[targetKey];
+        double slack = targetV - originV ;
+        if( noPassList.diffVoltage > slack  )
+            cost += (noPassList.diffVoltage - slack) * penaltyParameter ;
+    }
+    cost += metalUsage ;
+    return cost / UNITS_DISTANCE / UNITS_DISTANCE;
+}
 void RouterV4::optimize(Graph * steinerTree)
 {
     Simulation();
-    steinerTree->reduction();
-    steinerTree->rectifyCurrent() ;
-    steinerTree->rectifyWidth() ;
-    vector<vector<Vertex *>> traversePaths = steinerTree->traverse() ;
-    if( !NoPassRoutingLists.empty() )
+    while( !NoPassRoutingLists.empty() )
     {
-        for( auto leaf : traversePaths )
+        RoutingPath noPassList = NoPassRoutingLists[0];
+        string powerPin = noPassList.sourceName ;
+        string block = noPassList.targetBlockName ;
+        string blockPin = noPassList.targetBlockPinName ;
+        double originV = noPassList.voltage ;
+        double minCost = INT_MAX ;
+        vector<Coordinate3D> minCostSolutions ;
+        Coordinate3D source = multiPinCandidates[powerPin].front() ;
+        for(int i = 2 ; i < multiPinCandidates[powerPin].size() ; i +=  1  )
         {
-            LeafInfo leafInfo = steinerTree->getLeafInfo();
-            Coordinate3D source = leaf[0]->coordinate ;
-            Coordinate3D target = leaf[leaf.size()-1]->coordinate;
-            vector<Coordinate3D> solutions = parallelRoute(leafInfo.powerPin, leafInfo.block, leafInfo.blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
-            if(solutions.empty())
-                cout << "";
+            if( i > multiPinCandidates[powerPin].size()  ) break;
+            Coordinate3D target = multiPinCandidates[noPassList.sourceName][i];
+            vector<Coordinate3D> solutions = parallelRoute(powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
             if( !solutions.empty() )
             {
-                fillSpNetMaps(solutions, leafInfo.powerPin, leafInfo.block , leafInfo.blockPin , DEFAULTWIDTH , true );
-                def_gen.toOutputDef();
-                genResistance(solutions,leafInfo.powerPin,sp_gen , DEFAULTWIDTH);
-                Simulation();
+                double metalUsage = getMetalUsage(solutions, DEFAULTWIDTH);
+                SpiceGenerator tmp = sp_gen ;
+                tmp.setSpiceName("tmp.sp");
+                genResistance(solutions, powerPin , tmp , DEFAULTWIDTH);
+                tmp.toSpice();
+                tmp.addSpiceCmd();
+                double FOM = getParallelFOM("tmp.sp" , metalUsage , originV);
+                if( FOM > INT_MAX ) assert(0);
+                if( minCost > FOM )
+                {
+                    minCost = FOM ;
+                    minCostSolutions = solutions ;
+                }
             }
         }
+        genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
+        fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
+        saveMultiPinCandidates(powerPin, minCostSolutions);
+        def_gen.toOutputDef();
+        Simulation() ;
     }
 }
 void RouterV4::Route()
@@ -2057,7 +2093,7 @@ void RouterV4::Route()
             
             
         }
-//        optimize(steinerTree);
+        optimize(steinerTree);
         
         if( steinerTree != nullptr ) delete [] steinerTree;
 //        Simulation();
@@ -2122,24 +2158,24 @@ bool RouterV4::isSameLayer(vector<Coordinate3D> & path)
 vector<Coordinate3D> RouterV4::parallelRoute(string powerPin ,string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , double width , double spacing , double originWidth )
 {
     
-//    Graph_SP * graph_sp = new Graph_SP[1];
+    Graph_SP * graph_sp = new Graph_SP[1];
     vector<Coordinate3D> solutions ;
-//    InitGrids(powerPin, DEFAULTWIDTH, DEFAULTSPACING);
-//    graph_sp = InitGraph_SP(DEFAULTWIDTH, DEFAULTSPACING);
-//    Coordinate3D sourceGrid = AbsToGrid(source);
-//    Coordinate3D targetGrid = AbsToGrid(target);
-//    legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
-////    legalizeAllOrient(sourceGrid, graph_sp , width ,spacing , originWidth);
-////    legalizeAllOrient(targetGrid, graph_sp , width , spacing , originWidth);
+    InitGrids(powerPin, DEFAULTWIDTH, DEFAULTSPACING);
+    graph_sp = InitGraph_SP(lowestMetal , highestMetal ,  width, spacing);
+    Coordinate3D sourceGrid = AbsToGrid(source);
+    Coordinate3D targetGrid = AbsToGrid(target);
+    legalizeAllLayer(false , sourceGrid, graph_sp , width , spacing , originWidth);
+//    legalizeAllOrient(sourceGrid, graph_sp , width ,spacing , originWidth);
+    legalizeAllOrient(true , targetGrid, graph_sp , width , spacing , originWidth);
 //    legalizeAllLayer(targetGrid, graph_sp , width , spacing , originWidth);
-//    int source1D = translate3D_1D(sourceGrid);
-//    int target1D = translate3D_1D(targetGrid);
-//    graph_sp->Dijkstra(target1D);
-//    auto paths= graph_sp->getPath(source1D);
-//    delete [] graph_sp ;
-//    if( paths.empty() ) return vector<Coordinate3D>();
-//    for( auto path : paths )
-//        solutions.push_back(translate1D_3D(path));
+    int source1D = translate3D_1D(sourceGrid);
+    int target1D = translate3D_1D(targetGrid);
+    graph_sp->Dijkstra(source1D,target1D);
+    auto paths= graph_sp->getPath();
+    delete [] graph_sp ;
+    if( paths.empty() ) return vector<Coordinate3D>();
+    for( auto path : paths )
+        solutions.push_back(translate1D_3D(path));
     return solutions;
 //    bool sameLayer = isSameLayer(solutions);
 //    fillSpNetMaps(solutions, powerPin, blockName , blockPinName , width , true );
@@ -2183,6 +2219,7 @@ void RouterV4::Simulation()
         double targetV = ng_spice.voltages[targetKey];
         double drop = (sourceV - targetV) / sourceV * 100 ;
         double constaint = RouterHelper.getIRDropConstaint(routingList.targetBlockName, routingList.targetBlockPinName);
+        double expectVoltage = sourceV * (1- constaint/100) ;
         cout << routingList.sourceName << " to " << routingList.targetBlockName << "_" << routingList.targetBlockPinName << " Drop " << drop << "(%) " ;
         if( constaint >= drop )
         {
@@ -2191,6 +2228,8 @@ void RouterV4::Simulation()
         else
         {
             cout << " No Pass" << endl;
+            routingList.voltage = targetV;
+            routingList.diffVoltage = expectVoltage - targetV;
             NoPassRoutingLists.push_back(routingList);
         }
         cout << "IR Drop Constraint:" << constaint << "(%)"<< endl;

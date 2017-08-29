@@ -37,6 +37,8 @@ struct RoutingPath {
     string targetBlockName ;
     string targetBlockPinName; 
     Coordinate3D targetCoordinate ;
+    double voltage ;
+    double diffVoltage ; 
 };
 
 class RouterV4 {
@@ -216,6 +218,8 @@ private:
     double getMetalUsage(vector<Coordinate3D> solutions , double width);
     
     bool isPossibleHasSolutions(Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth);
+    
+    double getParallelFOM(string spiceName , double metalUsage , double originV);
 };
 
 #endif /* RouterV4_hpp */
