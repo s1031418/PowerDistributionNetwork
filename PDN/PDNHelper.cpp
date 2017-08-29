@@ -643,6 +643,10 @@ string PDNHelper::getAlias(string MetalName)
     if( MetalName == "METAL1" ) return "M1";
     assert(0);
 }
+double PDNHelper::getManhattanDistance(Coordinate3D pt1 , Coordinate3D pt2)
+{
+    return abs((int)pt1.x-(int)pt2.x) + abs((int)pt1.y - (int)pt2.y) + abs((int)pt1.z - (int)pt2.z);
+}
 double PDNHelper::getManhattanDistance(Point<int> pt1 , Point<int> pt2)
 {
     return abs(pt1.x-pt2.x) + abs(pt1.y - pt2.y);

@@ -148,12 +148,21 @@ double Graph::analysis()
             bool calulatedVia = ( ptr->coordinate.z != fanIn->coordinate.z ) ? true : false ;
             if( calulatedVia )
             {
+                double minResistance = INT_MAX ;
                 string key = ( ptr->coordinate.z > fanIn->coordinate.z ) ? RouterHelper.translateIntToMetalName(--layer) : RouterHelper.translateIntToMetalName(layer);
+                for( auto via : RouterHelper.ViaInfos[key] )
+                {
+                    int width = via.width ;
+                    int length = via.length ;
+                    int viaArea = width * length ;
+                    if( minResistance > via.resistance / (100 / viaArea))
+                        minResistance = via.resistance / (100 / viaArea) ;
+                }
                 // hard code 第一顆via 未來要改成動態
 //                int width = RouterHelper.ViaInfos[key][0].width ;
 //                int length = RouterHelper.ViaInfos[key][0].length ;
 //                int viaArea = width * length ;
-                realDrop += leafPaths[i]->current * RouterHelper.ViaInfos[key][0].resistance / 100;
+                realDrop += leafPaths[i]->current * minResistance;
             }
         }
         double targetV = sourceV - realDrop ;

@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include "../Parsers/Components.h"
+#include "RouterComponents.hpp"
 #include <cmath>
 #include "../Parsers/lefrw.h"
 #include "../Parsers/defrw.h"
@@ -112,6 +113,9 @@ public:
     string getAlias(string MetalName);
     
     double getManhattanDistance(Point<int> pt1 , Point<int> pt2);
+    
+    // get ManhattanDistance of three points
+    double getManhattanDistance(Coordinate3D pt1 , Coordinate3D pt2);
 };
 
 #endif /* PDNHelper_hpp */

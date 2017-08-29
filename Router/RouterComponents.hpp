@@ -9,7 +9,6 @@
 #ifndef RouterComponents_hpp
 #define RouterComponents_hpp
 
-#include <stdio.h>
 #include "Components.h"
 #include <map>
 #include <vector>

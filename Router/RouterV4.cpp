@@ -1953,7 +1953,20 @@ void RouterV4::optimize(Graph * steinerTree)
         double originV = noPassList.voltage ;
         double minCost = INT_MAX ;
         vector<Coordinate3D> minCostSolutions ;
+//        Coordinate3D target = multiPinCandidates[powerPin].back() ;
+//        map< int , Coordinate3D > sortedCoordinate ;
+//        for( auto candidate : multiPinCandidates[powerPin] )
+//            sortedCoordinate.insert(make_pair(RouterHelper.getManhattanDistance(target, candidate), candidate));
+//        vector<Coordinate3D> sources ;
+        
+        // select source
+//        for(auto candidate : sortedCoordinate)
+//        {
+            // select five candidate and choose minimal resistance
+//            parallelRoute(powerPin, block, blockPin, candidate.second, (--sortedCoordinate.end())->second , DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+//        }
         Coordinate3D source = multiPinCandidates[powerPin].front() ;
+        
 //        for(int i = 2 ; i < multiPinCandidates[powerPin].size() ; i +=  1  )
         for( int i = 0 ; i < normalDistributionCandidates[powerPin].size() ; i++ )
         {

@@ -116,6 +116,8 @@ private:
     
     // get ManhattanDistance of two points
     int getManhattanDistance(Point<int> pt1 , Point<int> pt2);
+    
+    
 };
 
 

@@ -13,7 +13,6 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <cmath>
 
 
 // A technology LEF file contains all of the LEF technology information for a design,
