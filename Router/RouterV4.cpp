@@ -1574,7 +1574,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinat
             Point<int> absTarget = getAbsolutePoint(targetGrid);
             Point<int> absCandidate(candidate.x,candidate.y);
             int distance = RouterHelper.getManhattanDistance(absTarget, absCandidate);
-            if( (distance == 2 * (0.5 * width + spacing) * UNITS_DISTANCE + originWidth * UNITS_DISTANCE)
+            if( (distance <= 2 * (0.5 * width + spacing) * UNITS_DISTANCE + originWidth * UNITS_DISTANCE )
                || (distance == 0 && (targetGrid.z - candidate.z == 2 || targetGrid.z - candidate.z == -2 )) ) continue ;
             
 //            Coordinate3D candidate = multiPinCandidates[powerPin][0];
