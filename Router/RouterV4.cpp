@@ -1936,41 +1936,41 @@ Coordinate3D RouterV4::selectTarget(Coordinate3D corner)
 bool RouterV4::checkLegal(vector<Coordinate3D> solutions)
 {
     if( solutions.empty() ) return false ;
-    vector<Coordinate3D> viaCoordinates ;
-    for(int i = 0 ; i < solutions.size() - 1 ; i++)
-    {
-        auto current = gridToAbsolute(solutions[i]);
-        auto next = gridToAbsolute(solutions[i+1]);
-        if( current.z != next.z )
-        {
-            viaCoordinates.push_back(current);
-            viaCoordinates.push_back(next);
-        }
-    }
-    if( viaCoordinates.empty() ) return true ;
-    vector<Coordinate3D> mustUpdateCoordinates ;
-    for( int i = 0 ; i < viaCoordinates.size() ; i++ )
-    {
-        for(int j = i + 1  ; j < viaCoordinates.size() ; j++)
-        {
-            if( viaCoordinates[i].x == viaCoordinates[j].x &&  viaCoordinates[i].y == viaCoordinates[j].y) continue ;
-            if( viaCoordinates[i].z == viaCoordinates[j].z )
-            {
-                Point<int> leftDown(viaCoordinates[i].x - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE , viaCoordinates[i].y - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
-                Point<int> rightUp(viaCoordinates[i].x + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING )  * UNITS_DISTANCE , viaCoordinates[i].y + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
-                Rectangle rect1(leftDown,rightUp);
-                Point<int> leftDown1(viaCoordinates[j].x - ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y - ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
-                Point<int> rightUp1(viaCoordinates[j].x + ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y + ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
-                Rectangle rect2(leftDown1,rightUp1);
-                if( RouterHelper.isCross(rect1, rect2) )
-                {
-//                    mustUpdateCoordinates.push_back(viaCoordinates[i]);
-//                    cout << "ilegal" << endl;
-                    return false;
-                }
-            }
-        }
-    }
+//    vector<Coordinate3D> viaCoordinates ;
+//    for(int i = 0 ; i < solutions.size() - 1 ; i++)
+//    {
+//        auto current = gridToAbsolute(solutions[i]);
+//        auto next = gridToAbsolute(solutions[i+1]);
+//        if( current.z != next.z )
+//        {
+//            viaCoordinates.push_back(current);
+//            viaCoordinates.push_back(next);
+//        }
+//    }
+//    if( viaCoordinates.empty() ) return true ;
+//    vector<Coordinate3D> mustUpdateCoordinates ;
+//    for( int i = 0 ; i < viaCoordinates.size() ; i++ )
+//    {
+//        for(int j = i + 1  ; j < viaCoordinates.size() ; j++)
+//        {
+//            if( viaCoordinates[i].x == viaCoordinates[j].x &&  viaCoordinates[i].y == viaCoordinates[j].y) continue ;
+//            if( viaCoordinates[i].z == viaCoordinates[j].z )
+//            {
+//                Point<int> leftDown(viaCoordinates[i].x - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE , viaCoordinates[i].y - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
+//                Point<int> rightUp(viaCoordinates[i].x + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING )  * UNITS_DISTANCE , viaCoordinates[i].y + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
+//                Rectangle rect1(leftDown,rightUp);
+//                Point<int> leftDown1(viaCoordinates[j].x - ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y - ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
+//                Point<int> rightUp1(viaCoordinates[j].x + ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y + ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
+//                Rectangle rect2(leftDown1,rightUp1);
+//                if( RouterHelper.isCross(rect1, rect2) )
+//                {
+////                    mustUpdateCoordinates.push_back(viaCoordinates[i]);
+////                    cout << "ilegal" << endl;
+//                    return false;
+//                }
+//            }
+//        }
+//    }
     return true ;
 }
 double RouterV4::getParallelFOM(string spiceName , double metalUsage , double originV)
@@ -2062,6 +2062,22 @@ void RouterV4::optimize(Graph * steinerTree)
             break; 
     }
 }
+vector<Coordinate3D> RouterV4::fixSolution(Graph_SP * graph_sp , vector<Coordinate3D> mustUpdateCoordinates ,vector<Coordinate3D> solutions )
+{
+    for(auto mustUpdateCoordinate : mustUpdateCoordinates)
+    {
+        // update
+    }
+    int source = translate3D_1D(solutions.front());
+    int target = translate3D_1D(solutions.back());
+    graph_sp->Dijkstra(source, target);
+    auto paths = graph_sp->getPath();
+    vector<Coordinate3D> newSolutions ;
+    if( paths.empty() ) return vector<Coordinate3D>();
+    for(auto path : paths)
+        newSolutions.push_back(translate1D_3D(path));
+    return newSolutions ; 
+}
 void RouterV4::Route()
 {
     
@@ -2130,6 +2146,8 @@ void RouterV4::Route()
                     int target = translate3D_1D(targetGrid);
                     
                     vector<Coordinate3D> solutions = (init) ? selectMergePoint(powerPoint , BlockPoint , init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH) : selectMergePoint(powerPoint , BlockPoint , init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, source , target , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
+//                    if(!checkLegal(solutions) && !solutions.empty() )
+//                        fixSolution();
                     if( checkLegal(solutions) )
                     {
                         if(!isMultiSource)SteinerTreeConstruction(false , solutions,current, constraint , voltage , powerpin , blockinfo.BlockName , blockinfo.BlockPinName, steinerTree);
@@ -2183,40 +2201,8 @@ void RouterV4::Route()
             
         }
         optimize(steinerTree);
-        
         if( steinerTree != nullptr ) delete [] steinerTree;
-//        Simulation();
-//        cnt++;
-//        if(cnt == 2 )break;
-//        widthTable.clear();
     }
-//    InitPowerPinAndBlockPin(DEFAULTWIDTH,DEFAULTSPACING);
-//    def_gen.toOutputDef();
-//    GlobalRouter gr ;
-//    auto orders = gr.getNetOrdering();
-//
-//    for(auto order : orders)
-//    {
-//        BlockInfo blockinfo ;
-//        string powerpin = order.second.source ;
-//        blockinfo.BlockName = order.second.target.first ;
-//        blockinfo.BlockPinName = order.second.target.second ;
-//        vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerpin);
-//        Block powerPinCoordinate = powerPinCoordinates[0];
-//        Block BlockPinCoordinate = RouterHelper.getBlock(blockinfo.BlockName, blockinfo.BlockPinName);
-//        InitGrids(powerpin,DEFAULTWIDTH , DEFAULTSPACING);
-//        Graph_SP * graph_sp = InitGraph_SP(DEFAULTWIDTH,DEFAULTSPACING);
-//        Coordinate3D sourceGrid = LegalizeTargetEdge(powerPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING);
-//        Coordinate3D targetGrid = LegalizeTargetEdge(BlockPinCoordinate , graph_sp , DEFAULTWIDTH , DEFAULTSPACING);
-//        saveRoutingList(gridToAbsolute(sourceGrid),gridToAbsolute(targetGrid),powerpin,blockinfo);
-//        int source = translate3D_1D(sourceGrid);
-//        int target = translate3D_1D(targetGrid);
-//        vector<Coordinate3D> solutions = selectPath(powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
-//        fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH,true );
-//        saveMultiPinCandidates(powerpin, solutions);
-//        def_gen.toOutputDef();
-//        delete [] graph_sp ;
-//    }
     Simulation();
 //
 //    

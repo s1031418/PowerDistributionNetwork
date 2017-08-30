@@ -227,7 +227,7 @@ private:
     
     bool checkLegal(vector<Coordinate3D> solutions);
     
-    vector<Coordinate3D> LegalizeSolutions(vector<Coordinate3D> solutions);
+    vector<Coordinate3D> fixSolution(Graph_SP * graph_sp , vector<Coordinate3D> mustUpdateCoordinates ,vector<Coordinate3D> solutions );
 };
 
 #endif /* RouterV4_hpp */
