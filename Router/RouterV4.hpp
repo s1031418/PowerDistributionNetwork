@@ -53,6 +53,7 @@ public:
     
     vector< vector< Grid > > Grids ;
 private:
+    int ileagalcnt =0 ; 
     string spiceName ;
     string defName ;
     string outputfilesName ;
