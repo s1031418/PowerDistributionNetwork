@@ -1575,15 +1575,6 @@ vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinat
     {
         double minCost = INT_MAX;
         vector<Coordinate3D> minCostSolutions ;
-//        for( auto candidate : multiPinCandidates[powerPin] )
-//        {
-//            Coordinate3D coordinate3D( getGridX(candidate.x) , getGridY(candidate.y) , candidate.z );
-//            if( coordinate3D == sourceGrid )
-//                legalizeAllLayer(sourceGrid, graph_sp , width , spacing , originWidth);
-//            else
-//                legalizeAllOrient(coordinate3D, graph_sp , width , spacing , originWidth);
-//        }
-//        graph_sp->Dijkstra(target);
         // graph_sp 沒有重新把點關回來
         // 可以寫個function部分點重新 init 
 //        for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i += multiPinCandidates[powerPin].size()/3  )
@@ -1952,31 +1943,29 @@ bool RouterV4::checkLegal(vector<Coordinate3D> solutions)
         auto next = gridToAbsolute(solutions[i+1]);
         if( current.z != next.z )
         {
-            bool insert = true;
-            for(auto via : viaCoordinates)
-            {
-                if( via.x == current.x && via.y == current.y )
-                    insert = false;
-            }
-            if(insert) viaCoordinates.push_back(current);
+            viaCoordinates.push_back(current);
+            viaCoordinates.push_back(next);
         }
     }
     if( viaCoordinates.empty() ) return true ;
     
     for( int i = 0 ; i < viaCoordinates.size() ; i++ )
     {
-        for(int j = 0 ; j < viaCoordinates.size() ; j++)
+        for(int j = i + 1  ; j < viaCoordinates.size() ; j++)
         {
-            if( viaCoordinates[i] == viaCoordinates[j] ) continue ;
-            Point<int> leftDown(viaCoordinates[i].x - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE , viaCoordinates[i].y - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
-            Point<int> rightUp(viaCoordinates[i].x + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING )  * UNITS_DISTANCE , viaCoordinates[i].y + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
-            Rectangle rect1(leftDown,rightUp);
-            Point<int> leftDown1(viaCoordinates[j].x - ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y - ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
-            Point<int> rightUp1(viaCoordinates[j].x + ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y + ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
-            Rectangle rect2(leftDown1,rightUp1);
-            if( RouterHelper.isCross(rect1, rect2) )
+            if( viaCoordinates[i].x == viaCoordinates[j].x &&  viaCoordinates[i].y == viaCoordinates[j].y) continue ;
+            if( viaCoordinates[i].z == viaCoordinates[j].z )
             {
-                return false;
+                Point<int> leftDown(viaCoordinates[i].x - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE , viaCoordinates[i].y - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
+                Point<int> rightUp(viaCoordinates[i].x + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING )  * UNITS_DISTANCE , viaCoordinates[i].y + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
+                Rectangle rect1(leftDown,rightUp);
+                Point<int> leftDown1(viaCoordinates[j].x - ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y - ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
+                Point<int> rightUp1(viaCoordinates[j].x + ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y + ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
+                Rectangle rect2(leftDown1,rightUp1);
+                if( RouterHelper.isCross(rect1, rect2) )
+                {
+                    return false;
+                }
             }
         }
     }
