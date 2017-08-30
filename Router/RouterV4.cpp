@@ -1513,6 +1513,28 @@ void RouterV4::SteinerTreeConstruction( bool isSimulation , vector<Coordinate3D>
     steinerTree->addLeafInfo(*(--absSolutions.end()) , powerPin, block, blockPin);
     
 }
+double RouterV4::getResistance(vector<Coordinate3D> solutions , double width)
+{
+    double totalResistance = 0 ;
+    for(int i = 0 ; i < solutions.size() - 1 ; i++)
+    {
+        auto current = gridToAbsolute(solutions[i]);
+        auto next = gridToAbsolute(solutions[i+1]);
+        Point<int> v1(current.x , current.y);
+        Point<int> v2(next.x , next.y);
+        double distance = RouterHelper.getManhattanDistance(v1, v2);
+        if(distance != 0 )
+        {
+            totalResistance += RouterHelper.calculateResistance(LayerMaps[ RouterHelper.translateIntToMetalName(current.z) ].RESISTANCE_RPERSQ, width * UNITS_DISTANCE, distance);
+        }
+        else
+        {
+            int z = (current.z < next.z) ? current.z : next.z ;
+            totalResistance += RouterHelper.getViaWeight(width * width, z) / 10000 ;
+        }
+    }
+    return totalResistance ; 
+}
 double RouterV4::getMetalUsage(vector<Coordinate3D> solutions , double width)
 {
     double totalMetalUsage = 0 ;
@@ -1601,7 +1623,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinat
             vector<Coordinate3D> solutions ;
             for( auto path : paths )
                 solutions.push_back(translate1D_3D(path));
-            if(!paths.empty())
+            if( checkLegal(solutions) )
             {
                 if(multiSource)
                 {
@@ -1707,7 +1729,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinat
 //                }
             }
         }
-        if( minCostSolutions.empty() )
+        if( checkLegal(minCostSolutions) )
         {
             return minCostSolutions;
         }
@@ -1920,6 +1942,38 @@ Coordinate3D RouterV4::selectTarget(Coordinate3D corner)
 {
     return corner ;
 }
+bool RouterV4::checkLegal(vector<Coordinate3D> solutions)
+{
+    if( solutions.empty() ) return false ;
+    vector<Coordinate3D> viaCoordinates ;
+    for(int i = 0 ; i < solutions.size() - 1 ; i++)
+    {
+        auto current = gridToAbsolute(solutions[i]);
+        auto next = gridToAbsolute(solutions[i+1]);
+        if( current.z != next.z )
+        {
+            bool insert = true;
+            for(auto via : viaCoordinates)
+            {
+                if( via.x == current.x && via.y == current.y )
+                    insert = false;
+            }
+            if(insert) viaCoordinates.push_back(current);
+        }
+    }
+    Point<int> leftDown(viaCoordinates[0].x - DEFAULTWIDTH / 2 * UNITS_DISTANCE ,viaCoordinates[0].y - DEFAULTWIDTH / 2 * UNITS_DISTANCE );
+    Point<int> rightUp(viaCoordinates[0].x + DEFAULTWIDTH / 2 * UNITS_DISTANCE ,viaCoordinates[0].y + DEFAULTWIDTH / 2 * UNITS_DISTANCE );
+    Rectangle rect1(leftDown,rightUp);
+    
+    for(int i = 1 ; i < viaCoordinates.size() ; i++)
+    {
+        Point<int> leftDown1(viaCoordinates[i].x - DEFAULTWIDTH / 2 * UNITS_DISTANCE ,viaCoordinates[i].y - DEFAULTWIDTH / 2 * UNITS_DISTANCE );
+        Point<int> rightUp1(viaCoordinates[i].x + DEFAULTWIDTH / 2 * UNITS_DISTANCE ,viaCoordinates[i].y + DEFAULTWIDTH / 2 * UNITS_DISTANCE );
+        Rectangle rect2(leftDown1,rightUp1);
+        if( RouterHelper.isCross(rect1, rect2) ) return false;
+    }
+    return true ;
+}
 double RouterV4::getParallelFOM(string spiceName , double metalUsage , double originV)
 {
     string cmd = "./ngspice " + spiceName + " -o simulation" ;
@@ -1953,20 +2007,25 @@ void RouterV4::optimize(Graph * steinerTree)
         double originV = noPassList.voltage ;
         double minCost = INT_MAX ;
         vector<Coordinate3D> minCostSolutions ;
-//        Coordinate3D target = multiPinCandidates[powerPin].back() ;
 //        map< int , Coordinate3D > sortedCoordinate ;
 //        for( auto candidate : multiPinCandidates[powerPin] )
-//            sortedCoordinate.insert(make_pair(RouterHelper.getManhattanDistance(target, candidate), candidate));
-//        vector<Coordinate3D> sources ;
-        
+//            sortedCoordinate.insert(make_pair(RouterHelper.getManhattanDistance(multiPinCandidates[powerPin].front(), candidate), candidate));
+//        map<double , Coordinate3D> possibleSources ;
         // select source
 //        for(auto candidate : sortedCoordinate)
 //        {
-            // select five candidate and choose minimal resistance
-//            parallelRoute(powerPin, block, blockPin, candidate.second, (--sortedCoordinate.end())->second , DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+////             select five candidate and choose minimal resistance
+//            vector<Coordinate3D> solutions = parallelRoute(powerPin, block, blockPin, candidate.second, (--sortedCoordinate.end())->second , DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+//            if(!solutions.empty())
+//            {
+//                double resistance = getResistance(solutions, DEFAULTWIDTH);
+//                possibleSources.insert(make_pair(resistance, candidate.second));
+//                if(possibleSources.size() > 5) break;
+//            }
 //        }
-        Coordinate3D source = multiPinCandidates[powerPin].front() ;
-        
+//
+//        Coordinate3D source = possibleSources.begin()->second ;
+        Coordinate3D source = multiPinCandidates[powerPin].front();
 //        for(int i = 2 ; i < multiPinCandidates[powerPin].size() ; i +=  1  )
         for( int i = 0 ; i < normalDistributionCandidates[powerPin].size() ; i++ )
         {
@@ -1975,7 +2034,7 @@ void RouterV4::optimize(Graph * steinerTree)
 //            Coordinate3D target = multiPinCandidates[noPassList.sourceName][i];
             Coordinate3D target = normalDistributionCandidates[noPassList.sourceName][i];
             vector<Coordinate3D> solutions = parallelRoute(powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
-            if( !solutions.empty() )
+            if( checkLegal(solutions) )
             {
                 double metalUsage = getMetalUsage(solutions, DEFAULTWIDTH);
                 SpiceGenerator tmp = sp_gen ;
@@ -1992,6 +2051,7 @@ void RouterV4::optimize(Graph * steinerTree)
                 }
             }
         }
+        
         genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
         fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
         saveMultiPinCandidates(powerPin, minCostSolutions);
@@ -2017,6 +2077,7 @@ void RouterV4::Route()
             string powerpin = innerTree.source ;
             blockinfo.BlockName = innerTree.target.first ;
             blockinfo.BlockPinName = innerTree.target.second;
+            
 //            cout << powerpin << " " << blockinfo.BlockName << " " << blockinfo.BlockPinName << endl;
             double current = RouterHelper.getCurrent(blockinfo.BlockName, blockinfo.BlockPinName);
             double constraint = RouterHelper.getIRDropConstaint(blockinfo.BlockName, blockinfo.BlockPinName);
@@ -2066,7 +2127,7 @@ void RouterV4::Route()
                     int target = translate3D_1D(targetGrid);
                     
                     vector<Coordinate3D> solutions = (init) ? selectMergePoint(powerPoint , BlockPoint , init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, target , source , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH) : selectMergePoint(powerPoint , BlockPoint , init , isMultiSource , constraint , current , voltage , steinerTree , powerpin, graph_sp, source , target , blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
-                    if( !solutions.empty() )
+                    if( checkLegal(solutions) )
                     {
                         if(!isMultiSource)SteinerTreeConstruction(false , solutions,current, constraint , voltage , powerpin , blockinfo.BlockName , blockinfo.BlockPinName, steinerTree);
                         fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH ,true );
@@ -2647,12 +2708,12 @@ void RouterV4::InitGrids(string source , double width , double spacing , bool cu
             via.LeftDown.y = grid.startpoint.y - (width * UNITS_DISTANCE / 2 ) ;
             via.RightUp.x = grid.startpoint.x + (width * UNITS_DISTANCE / 2 ) ;
             via.RightUp.y = grid.startpoint.y + (width * UNITS_DISTANCE / 2 ) ;
-            via.LeftDown.x -= DEFAULTSPACING * UNITS_DISTANCE ;
-            via.LeftDown.y -= DEFAULTSPACING * UNITS_DISTANCE ;
+            via.LeftDown.x -= ( DEFAULTSPACING) * UNITS_DISTANCE ;
+            via.LeftDown.y -= ( DEFAULTSPACING) * UNITS_DISTANCE ;
             via.LeftDown.x += 1 ;
             via.LeftDown.y += 1 ;
-            via.RightUp.x += DEFAULTSPACING * UNITS_DISTANCE ;
-            via.RightUp.y += DEFAULTSPACING * UNITS_DISTANCE ;
+            via.RightUp.x += (DEFAULTSPACING) * UNITS_DISTANCE ;
+            via.RightUp.y += (DEFAULTSPACING) * UNITS_DISTANCE ;
             via.RightUp.x -= 1 ;
             via.RightUp.y -= 1 ;
             Rectangle rect2(via.LeftDown , via.RightUp);

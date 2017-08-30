@@ -219,9 +219,13 @@ private:
     
     double getMetalUsage(vector<Coordinate3D> solutions , double width);
     
+    double getResistance(vector<Coordinate3D> solutions , double width);
+    
     bool isPossibleHasSolutions(Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth);
     
     double getParallelFOM(string spiceName , double metalUsage , double originV);
+    
+    bool checkLegal(vector<Coordinate3D> solutions); 
 };
 
 #endif /* RouterV4_hpp */
