@@ -1936,40 +1936,40 @@ Coordinate3D RouterV4::selectTarget(Coordinate3D corner)
 bool RouterV4::checkLegal(vector<Coordinate3D> solutions)
 {
     if( solutions.empty() ) return false ;
-//    vector<Coordinate3D> viaCoordinates ;
-//    for(int i = 0 ; i < solutions.size() - 1 ; i++)
-//    {
-//        auto current = gridToAbsolute(solutions[i]);
-//        auto next = gridToAbsolute(solutions[i+1]);
-//        if( current.z != next.z )
-//        {
-//            viaCoordinates.push_back(current);
-//            viaCoordinates.push_back(next);
-//        }
-//    }
-//    if( viaCoordinates.empty() ) return true ;
-//    
-//    for( int i = 0 ; i < viaCoordinates.size() ; i++ )
-//    {
-//        for(int j = i + 1  ; j < viaCoordinates.size() ; j++)
-//        {
-//            if( viaCoordinates[i].x == viaCoordinates[j].x &&  viaCoordinates[i].y == viaCoordinates[j].y) continue ;
-//            if( viaCoordinates[i].z == viaCoordinates[j].z )
-//            {
-//                Point<int> leftDown(viaCoordinates[i].x - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE , viaCoordinates[i].y - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
-//                Point<int> rightUp(viaCoordinates[i].x + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING )  * UNITS_DISTANCE , viaCoordinates[i].y + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
-//                Rectangle rect1(leftDown,rightUp);
-//                Point<int> leftDown1(viaCoordinates[j].x - ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y - ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
-//                Point<int> rightUp1(viaCoordinates[j].x + ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y + ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
-//                Rectangle rect2(leftDown1,rightUp1);
-//                if( RouterHelper.isCross(rect1, rect2) )
-//                {
-//                    
-//                    return false;
-//                }
-//            }
-//        }
-//    }
+    vector<Coordinate3D> viaCoordinates ;
+    for(int i = 0 ; i < solutions.size() - 1 ; i++)
+    {
+        auto current = gridToAbsolute(solutions[i]);
+        auto next = gridToAbsolute(solutions[i+1]);
+        if( current.z != next.z )
+        {
+            viaCoordinates.push_back(current);
+            viaCoordinates.push_back(next);
+        }
+    }
+    if( viaCoordinates.empty() ) return true ;
+    
+    for( int i = 0 ; i < viaCoordinates.size() ; i++ )
+    {
+        for(int j = i + 1  ; j < viaCoordinates.size() ; j++)
+        {
+            if( viaCoordinates[i].x == viaCoordinates[j].x &&  viaCoordinates[i].y == viaCoordinates[j].y) continue ;
+            if( viaCoordinates[i].z == viaCoordinates[j].z )
+            {
+                Point<int> leftDown(viaCoordinates[i].x - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE , viaCoordinates[i].y - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
+                Point<int> rightUp(viaCoordinates[i].x + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING )  * UNITS_DISTANCE , viaCoordinates[i].y + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
+                Rectangle rect1(leftDown,rightUp);
+                Point<int> leftDown1(viaCoordinates[j].x - ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y - ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
+                Point<int> rightUp1(viaCoordinates[j].x + ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y + ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
+                Rectangle rect2(leftDown1,rightUp1);
+                if( RouterHelper.isCross(rect1, rect2) )
+                {
+                    cout << "ilegal" << endl;
+                    return false;
+                }
+            }
+        }
+    }
     return true ;
 }
 double RouterV4::getParallelFOM(string spiceName , double metalUsage , double originV)
@@ -2056,6 +2056,7 @@ void RouterV4::optimize(Graph * steinerTree)
             saveMultiPinCandidates(powerPin, minCostSolutions);
             def_gen.toOutputDef();
             Simulation() ;
+            break;
         }
     }
 }
@@ -2501,6 +2502,8 @@ void RouterV4::CutGrid(double width , double spacing )
         if(y>0 && y <= DIEAREA.pt2.y)Horizontal.insert(y);
         if(x>0 && x <= DIEAREA.pt2.x)Vertical.insert(x);
     }
+    set<int> NotEvictableSetHorizontal = Horizontal ;
+    set<int> NotEvictableSetVertical = Vertical ;
     
     auto blocks = RouterHelper.getBlockRectangle();
     for( auto block : blocks )
@@ -2545,8 +2548,73 @@ void RouterV4::CutGrid(double width , double spacing )
     Vertical.insert(DIEAREA.pt2.x);
     Horizontal.insert(DIEAREA.pt2.y);
     
+    
+    
     if( *Vertical.begin() == DIEAREA.pt1.x ) Vertical.erase(Vertical.begin());
     if( *Horizontal.begin() == DIEAREA.pt1.y ) Horizontal.erase(Horizontal.begin());
+//    int initialHValue = *Horizontal.begin();
+    
+//    int initialVValue = *Vertical.begin();
+    
+//    for(auto h : Horizontal)
+//        cout << h << " " ;
+//    cout << endl;
+//    for(auto it = Horizontal.begin() ; it != Horizontal.end() ; )
+//    {
+////        cout << *it << endl;
+//        if( it != Horizontal.begin() )
+//        {
+//            if( *it - initialHValue < (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE )
+//            {
+//                if( NotEvictableSetHorizontal.find(*it) == NotEvictableSetHorizontal.end() )
+//                {
+//                    it = Horizontal.erase(it);
+//                }
+//                else
+//                {
+//                    initialHValue = *it ;
+//                    it++;
+//                }
+//            }
+//            else
+//            {
+//                initialHValue = *it ;
+//                ++it ;
+//            }
+//        }
+//        else
+//        {
+//            ++it ;
+//        }
+//    }
+//    for(auto it = Vertical.begin() ; it != Vertical.end() ; )
+//    {
+//        //        cout << *it << endl;
+//        if( it != Vertical.begin() )
+//        {
+//            if( *it - initialVValue < (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE )
+//            {
+//                if( NotEvictableSetVertical.find(*it) == NotEvictableSetVertical.end() )
+//                {
+//                    it = Vertical.erase(it);
+//                }
+//                else
+//                {
+//                    initialVValue = *it ;
+//                    it++;
+//                }
+//            }
+//            else
+//            {
+//                initialVValue = *it ;
+//                ++it ;
+//            }
+//        }
+//        else
+//        {
+//            ++it ;
+//        }
+//    }
     
 }
 void RouterV4::updateGrid(CrossInfo result , Grid & grid)
