@@ -1936,39 +1936,40 @@ Coordinate3D RouterV4::selectTarget(Coordinate3D corner)
 bool RouterV4::checkLegal(vector<Coordinate3D> solutions)
 {
     if( solutions.empty() ) return false ;
-    vector<Coordinate3D> viaCoordinates ;
-    for(int i = 0 ; i < solutions.size() - 1 ; i++)
-    {
-        auto current = gridToAbsolute(solutions[i]);
-        auto next = gridToAbsolute(solutions[i+1]);
-        if( current.z != next.z )
-        {
-            viaCoordinates.push_back(current);
-            viaCoordinates.push_back(next);
-        }
-    }
-    if( viaCoordinates.empty() ) return true ;
-    
-    for( int i = 0 ; i < viaCoordinates.size() ; i++ )
-    {
-        for(int j = i + 1  ; j < viaCoordinates.size() ; j++)
-        {
-            if( viaCoordinates[i].x == viaCoordinates[j].x &&  viaCoordinates[i].y == viaCoordinates[j].y) continue ;
-            if( viaCoordinates[i].z == viaCoordinates[j].z )
-            {
-                Point<int> leftDown(viaCoordinates[i].x - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE , viaCoordinates[i].y - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
-                Point<int> rightUp(viaCoordinates[i].x + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING )  * UNITS_DISTANCE , viaCoordinates[i].y + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
-                Rectangle rect1(leftDown,rightUp);
-                Point<int> leftDown1(viaCoordinates[j].x - ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y - ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
-                Point<int> rightUp1(viaCoordinates[j].x + ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y + ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
-                Rectangle rect2(leftDown1,rightUp1);
-                if( RouterHelper.isCross(rect1, rect2) )
-                {
-                    return false;
-                }
-            }
-        }
-    }
+//    vector<Coordinate3D> viaCoordinates ;
+//    for(int i = 0 ; i < solutions.size() - 1 ; i++)
+//    {
+//        auto current = gridToAbsolute(solutions[i]);
+//        auto next = gridToAbsolute(solutions[i+1]);
+//        if( current.z != next.z )
+//        {
+//            viaCoordinates.push_back(current);
+//            viaCoordinates.push_back(next);
+//        }
+//    }
+//    if( viaCoordinates.empty() ) return true ;
+//    
+//    for( int i = 0 ; i < viaCoordinates.size() ; i++ )
+//    {
+//        for(int j = i + 1  ; j < viaCoordinates.size() ; j++)
+//        {
+//            if( viaCoordinates[i].x == viaCoordinates[j].x &&  viaCoordinates[i].y == viaCoordinates[j].y) continue ;
+//            if( viaCoordinates[i].z == viaCoordinates[j].z )
+//            {
+//                Point<int> leftDown(viaCoordinates[i].x - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE , viaCoordinates[i].y - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
+//                Point<int> rightUp(viaCoordinates[i].x + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING )  * UNITS_DISTANCE , viaCoordinates[i].y + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
+//                Rectangle rect1(leftDown,rightUp);
+//                Point<int> leftDown1(viaCoordinates[j].x - ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y - ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
+//                Point<int> rightUp1(viaCoordinates[j].x + ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y + ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
+//                Rectangle rect2(leftDown1,rightUp1);
+//                if( RouterHelper.isCross(rect1, rect2) )
+//                {
+//                    
+//                    return false;
+//                }
+//            }
+//        }
+//    }
     return true ;
 }
 double RouterV4::getParallelFOM(string spiceName , double metalUsage , double originV)
