@@ -1948,7 +1948,7 @@ bool RouterV4::checkLegal(vector<Coordinate3D> solutions)
         }
     }
     if( viaCoordinates.empty() ) return true ;
-    
+    vector<Coordinate3D> mustUpdateCoordinates ;
     for( int i = 0 ; i < viaCoordinates.size() ; i++ )
     {
         for(int j = i + 1  ; j < viaCoordinates.size() ; j++)
@@ -1964,7 +1964,8 @@ bool RouterV4::checkLegal(vector<Coordinate3D> solutions)
                 Rectangle rect2(leftDown1,rightUp1);
                 if( RouterHelper.isCross(rect1, rect2) )
                 {
-                    cout << "ilegal" << endl;
+//                    mustUpdateCoordinates.push_back(viaCoordinates[i]);
+//                    cout << "ilegal" << endl;
                     return false;
                 }
             }
@@ -2056,8 +2057,9 @@ void RouterV4::optimize(Graph * steinerTree)
             saveMultiPinCandidates(powerPin, minCostSolutions);
             def_gen.toOutputDef();
             Simulation() ;
-            break;
         }
+        else
+            break; 
     }
 }
 void RouterV4::Route()

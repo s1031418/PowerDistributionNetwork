@@ -225,7 +225,9 @@ private:
     
     double getParallelFOM(string spiceName , double metalUsage , double originV);
     
-    bool checkLegal(vector<Coordinate3D> solutions); 
+    bool checkLegal(vector<Coordinate3D> solutions);
+    
+    vector<Coordinate3D> LegalizeSolutions(vector<Coordinate3D> solutions);
 };
 
 #endif /* RouterV4_hpp */
