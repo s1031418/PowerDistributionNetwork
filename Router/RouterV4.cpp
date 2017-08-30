@@ -1962,16 +1962,20 @@ bool RouterV4::checkLegal(vector<Coordinate3D> solutions)
         }
     }
     if( viaCoordinates.empty() ) return true ;
-    Point<int> leftDown(viaCoordinates[0].x - DEFAULTWIDTH / 2 * UNITS_DISTANCE ,viaCoordinates[0].y - DEFAULTWIDTH / 2 * UNITS_DISTANCE );
-    Point<int> rightUp(viaCoordinates[0].x + DEFAULTWIDTH / 2 * UNITS_DISTANCE ,viaCoordinates[0].y + DEFAULTWIDTH / 2 * UNITS_DISTANCE );
-    Rectangle rect1(leftDown,rightUp);
     
-    for(int i = 1 ; i < viaCoordinates.size() ; i++)
+    for( int i = 0 ; i < viaCoordinates.size() ; i++ )
     {
-        Point<int> leftDown1(viaCoordinates[i].x - DEFAULTWIDTH / 2 * UNITS_DISTANCE ,viaCoordinates[i].y - DEFAULTWIDTH / 2 * UNITS_DISTANCE );
-        Point<int> rightUp1(viaCoordinates[i].x + DEFAULTWIDTH / 2 * UNITS_DISTANCE ,viaCoordinates[i].y + DEFAULTWIDTH / 2 * UNITS_DISTANCE );
-        Rectangle rect2(leftDown1,rightUp1);
-        if( RouterHelper.isCross(rect1, rect2) ) return false;
+        for(int j = 0 ; j < viaCoordinates.size() ; j++)
+        {
+            if( viaCoordinates[i] == viaCoordinates[j] ) continue ;
+            Point<int> leftDown(viaCoordinates[i].x - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE , viaCoordinates[i].y - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
+            Point<int> rightUp(viaCoordinates[i].x + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING )  * UNITS_DISTANCE , viaCoordinates[i].y + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
+            Rectangle rect1(leftDown,rightUp);
+            Point<int> leftDown1(viaCoordinates[j].x - ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y - ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
+            Point<int> rightUp1(viaCoordinates[j].x + ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y + ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
+            Rectangle rect2(leftDown1,rightUp1);
+            if( RouterHelper.isCross(rect1, rect2) ) return false;
+        }
     }
     return true ;
 }
