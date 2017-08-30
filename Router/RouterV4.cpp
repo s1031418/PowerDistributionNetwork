@@ -1729,7 +1729,7 @@ vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinat
 //                }
             }
         }
-        if( checkLegal(minCostSolutions) )
+        if( !checkLegal(minCostSolutions) )
         {
             return minCostSolutions;
         }
@@ -1961,6 +1961,7 @@ bool RouterV4::checkLegal(vector<Coordinate3D> solutions)
             if(insert) viaCoordinates.push_back(current);
         }
     }
+    if( viaCoordinates.empty() ) return true ;
     Point<int> leftDown(viaCoordinates[0].x - DEFAULTWIDTH / 2 * UNITS_DISTANCE ,viaCoordinates[0].y - DEFAULTWIDTH / 2 * UNITS_DISTANCE );
     Point<int> rightUp(viaCoordinates[0].x + DEFAULTWIDTH / 2 * UNITS_DISTANCE ,viaCoordinates[0].y + DEFAULTWIDTH / 2 * UNITS_DISTANCE );
     Rectangle rect1(leftDown,rightUp);
