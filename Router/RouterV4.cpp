@@ -1974,7 +1974,10 @@ bool RouterV4::checkLegal(vector<Coordinate3D> solutions)
             Point<int> leftDown1(viaCoordinates[j].x - ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y - ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
             Point<int> rightUp1(viaCoordinates[j].x + ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y + ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
             Rectangle rect2(leftDown1,rightUp1);
-            if( RouterHelper.isCross(rect1, rect2) ) return false;
+            if( RouterHelper.isCross(rect1, rect2) )
+            {
+                return false;
+            }
         }
     }
     return true ;
@@ -2056,12 +2059,14 @@ void RouterV4::optimize(Graph * steinerTree)
                 }
             }
         }
-        
-        genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
-        fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
-        saveMultiPinCandidates(powerPin, minCostSolutions);
-        def_gen.toOutputDef();
-        Simulation() ;
+        if( checkLegal(minCostSolutions) )
+        {
+            genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
+            fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
+            saveMultiPinCandidates(powerPin, minCostSolutions);
+            def_gen.toOutputDef();
+            Simulation() ;
+        }
     }
 }
 void RouterV4::Route()
