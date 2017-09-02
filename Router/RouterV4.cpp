@@ -2031,7 +2031,8 @@ void RouterV4::optimize(Graph * steinerTree)
 //    opt1(steinerTree);
     
 //    Simulation();
-    for( auto noPassList : NoPassRoutingLists )
+    auto tmp = NoPassRoutingLists ;
+    for( auto noPassList : tmp )
     {
         string powerPin = noPassList.sourceName ;
         string block = noPassList.targetBlockName ;
