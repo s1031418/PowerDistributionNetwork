@@ -2031,8 +2031,6 @@ void RouterV4::optimize(Graph * steinerTree)
 //    opt1(steinerTree);
     
 //    Simulation();
-    
-    
     while( !NoPassRoutingLists.empty() )
     {
         RoutingPath noPassList = NoPassRoutingLists[0];
@@ -2053,7 +2051,7 @@ void RouterV4::optimize(Graph * steinerTree)
         {
             for( int i = 0 ; i < optAllCandidates.size() ; i += optAllCandidates.size() / 5 )
             {
-                Coordinate3D source = optAllCandidates[0]->coordinate;
+                Coordinate3D source = optAllCandidates[i]->coordinate;
                 for( int j = (i += optAllCandidates.size() / 5) ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
                 {
                     bool sourceAllowAll = false , targetAllowAll = false;
@@ -2101,7 +2099,10 @@ void RouterV4::optimize(Graph * steinerTree)
                     if(optSuccess) break ; 
                 }
             }
+            if(optSuccess == false)
+                break;
         }
+        
 //        for( int i = 0 ; i < optAllCandidates.size() ; i += optAllCandidates.size() / 5 )
 //        {
 //            Coordinate3D source = optAllCandidates[0]->coordinate;
