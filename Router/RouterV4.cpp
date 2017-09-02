@@ -2125,27 +2125,27 @@ void RouterV4::optimize(Graph * steinerTree)
                                 minCostSolutions = solutions ;
                             }
                         }
-                        if( checkLegal(minCostSolutions) )
-                        {
-                            lastSolutions = minCostSolutions ;
-                            genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
-                            fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
-                            //saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
-                            def_gen.toOutputDef();
-                            Simulation() ;
-                            bool find = false ;
-                            for( auto nopass : NoPassRoutingLists )
-                            {
-                                if( nopass.targetBlockName == block && nopass.targetBlockPinName == blockPin )
-                                {
-                                    find = true ;
-                                }
-                            }
-                            if( !find ) optSuccess = true ;
-                        }
-                        else
-                            break;
                     }
+                    if( checkLegal(minCostSolutions) )
+                    {
+                        lastSolutions = minCostSolutions ;
+                        genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
+                        fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
+                        //saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
+                        def_gen.toOutputDef();
+                        Simulation() ;
+                        bool find = false ;
+                        for( auto nopass : NoPassRoutingLists )
+                        {
+                            if( nopass.targetBlockName == block && nopass.targetBlockPinName == blockPin )
+                            {
+                                find = true ;
+                            }
+                        }
+                        if( !find ) optSuccess = true ;
+                    }
+                    else
+                        break;
                 }
 //                continue;
                 // force exit
