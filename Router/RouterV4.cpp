@@ -2038,7 +2038,7 @@ void RouterV4::optimize(Graph * steinerTree)
 {
     // opt stage1
     Simulation();
-    opt1(steinerTree);
+//    opt1(steinerTree);
     
 //    Simulation();
     auto tmp = NoPassRoutingLists ;
@@ -2095,8 +2095,11 @@ void RouterV4::optimize(Graph * steinerTree)
             }
             if( minCostSolutions.empty() )
             {
+                if(source == optAllCandidates.back()->coordinate) break;
+                source = optAllCandidates.back()->coordinate;
+                continue;
                 // force exit
-                break;
+//                break;
             }
             if( checkLegal(minCostSolutions) )
             {
