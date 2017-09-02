@@ -2060,12 +2060,12 @@ void RouterV4::optimize(Graph * steinerTree)
         Coordinate3D powerSource = gridToAbsolute(getOuterCoordinate(powerPinCoordinates[0], DEFAULTWIDTH, DEFAULTSPACING));
         
         auto optAllCandidates = steinerTree->getPath( blockTarget);
-        
+        Coordinate3D source = optAllCandidates[0]->coordinate;
         bool optSuccess = false;
         while (!optSuccess)
         {
             vector<Coordinate3D> minCostSolutions ;
-            Coordinate3D source = optAllCandidates[0]->coordinate;
+            
             for( int j = 0 ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
             {
                 bool sourceAllowAll = false , targetAllowAll = false;
