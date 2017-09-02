@@ -2049,12 +2049,12 @@ void RouterV4::optimize(Graph * steinerTree)
         Coordinate3D powerSource = gridToAbsolute(getOuterCoordinate(powerPinCoordinates[0], DEFAULTWIDTH, DEFAULTSPACING));
         auto optAllCandidates = steinerTree->getPath( blockTarget);
         bool optSuccess = false;
-        while (optSuccess)
+        while (!optSuccess)
         {
             for( int i = 0 ; i < optAllCandidates.size() ; i += optAllCandidates.size() / 5 )
             {
                 Coordinate3D source = optAllCandidates[0]->coordinate;
-                for( int j = 0 ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
+                for( int j = (i += optAllCandidates.size() / 5) ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
                 {
                     bool sourceAllowAll = false , targetAllowAll = false;
                     Coordinate3D target = optAllCandidates[j]->coordinate;
