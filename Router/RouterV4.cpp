@@ -2048,48 +2048,102 @@ void RouterV4::optimize(Graph * steinerTree)
         Coordinate3D blockTarget =  gridToAbsolute( getOuterCoordinate(BlockPinCoordinate, DEFAULTWIDTH, DEFAULTSPACING));
         Coordinate3D powerSource = gridToAbsolute(getOuterCoordinate(powerPinCoordinates[0], DEFAULTWIDTH, DEFAULTSPACING));
         auto optAllCandidates = steinerTree->getPath( blockTarget);
-        for( int i = 0 ; i < optAllCandidates.size() ; i += optAllCandidates.size() / 5 )
+        bool optSuccess = false;
+        while (optSuccess)
         {
-            Coordinate3D source = optAllCandidates[i]->coordinate;
-            for( int j = 0 ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
+            for( int i = 0 ; i < optAllCandidates.size() ; i += optAllCandidates.size() / 5 )
             {
-                bool sourceAllowAll = false , targetAllowAll = false;
-                Coordinate3D target = optAllCandidates[j]->coordinate;
-                int distance = RouterHelper.getManhattanDistance(source, target);
-                if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
-                   || (distance == 0 && (source.z - target.z == 2 || target.z - source.z == -2 )) ) continue ;
-                if( source == powerSource ) sourceAllowAll = true ;
-                if( target == blockTarget ) targetAllowAll = true ;
-                vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
-                if( checkLegal(solutions) )
+                Coordinate3D source = optAllCandidates[0]->coordinate;
+                for( int j = 0 ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
                 {
-                    double metalUsage = getMetalUsage(solutions, DEFAULTWIDTH);
-                    SpiceGenerator tmp = sp_gen ;
-                    tmp.setSpiceName("tmp.sp");
-                    genResistance(solutions, powerPin , tmp , DEFAULTWIDTH);
-                    tmp.toSpice();
-                    tmp.addSpiceCmd();
-                    double FOM = getParallelFOM("tmp.sp" , metalUsage , originV);
-                    if( FOM > INT_MAX ) assert(0);
-                    if( minCost > FOM )
+                    bool sourceAllowAll = false , targetAllowAll = false;
+                    Coordinate3D target = optAllCandidates[j]->coordinate;
+                    int distance = RouterHelper.getManhattanDistance(source, target);
+                    if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
+                       || (distance == 0 && (source.z - target.z == 2 || target.z - source.z == -2 )) ) continue ;
+                    if( source == powerSource ) sourceAllowAll = true ;
+                    if( target == blockTarget ) targetAllowAll = true ;
+                    vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+                    if( checkLegal(solutions) )
                     {
-                        minCost = FOM ;
-                        minCostSolutions = solutions ;
+                        double metalUsage = getMetalUsage(solutions, DEFAULTWIDTH);
+                        SpiceGenerator tmp = sp_gen ;
+                        tmp.setSpiceName("tmp.sp");
+                        genResistance(solutions, powerPin , tmp , DEFAULTWIDTH);
+                        tmp.toSpice();
+                        tmp.addSpiceCmd();
+                        double FOM = getParallelFOM("tmp.sp" , metalUsage , originV);
+                        if( FOM > INT_MAX ) assert(0);
+                        if( minCost > FOM )
+                        {
+                            minCost = FOM ;
+                            minCostSolutions = solutions ;
+                        }
                     }
                 }
+                if( checkLegal(minCostSolutions) )
+                {
+                    i -= optAllCandidates.size() / 5 ;
+                    genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
+                    fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
+                    //saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
+                    def_gen.toOutputDef();
+                    Simulation() ;
+                    bool find = false ;
+                    for( auto noPassList : NoPassRoutingLists )
+                    {
+                        if( noPassList.targetBlockName == block && noPassList.targetBlockPinName == blockPin )
+                        {
+                            find = true ;
+                        }
+                    }
+                    optSuccess = (find) ? false : true ;
+                    if(optSuccess) break ; 
+                }
             }
-            if( checkLegal(minCostSolutions) )
-            {
-                i -= optAllCandidates.size() / 5 ;
-                genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
-                fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
-                //saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
-                def_gen.toOutputDef();
-                Simulation() ;
-            }
+        }
+//        for( int i = 0 ; i < optAllCandidates.size() ; i += optAllCandidates.size() / 5 )
+//        {
+//            Coordinate3D source = optAllCandidates[0]->coordinate;
+//            for( int j = 0 ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
+//            {
+//                bool sourceAllowAll = false , targetAllowAll = false;
+//                Coordinate3D target = optAllCandidates[j]->coordinate;
+//                int distance = RouterHelper.getManhattanDistance(source, target);
+//                if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
+//                   || (distance == 0 && (source.z - target.z == 2 || target.z - source.z == -2 )) ) continue ;
+//                if( source == powerSource ) sourceAllowAll = true ;
+//                if( target == blockTarget ) targetAllowAll = true ;
+//                vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+//                if( checkLegal(solutions) )
+//                {
+//                    double metalUsage = getMetalUsage(solutions, DEFAULTWIDTH);
+//                    SpiceGenerator tmp = sp_gen ;
+//                    tmp.setSpiceName("tmp.sp");
+//                    genResistance(solutions, powerPin , tmp , DEFAULTWIDTH);
+//                    tmp.toSpice();
+//                    tmp.addSpiceCmd();
+//                    double FOM = getParallelFOM("tmp.sp" , metalUsage , originV);
+//                    if( FOM > INT_MAX ) assert(0);
+//                    if( minCost > FOM )
+//                    {
+//                        minCost = FOM ;
+//                        minCostSolutions = solutions ;
+//                    }
+//                }
+//            }
+//            if( checkLegal(minCostSolutions) )
+//            {
+////                i -= optAllCandidates.size() / 5 ;
+//                genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
+//                fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
+//                //saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
+//                def_gen.toOutputDef();
+//                Simulation() ;
+//            }
 //            else
 //                break;
-        }
+//        }
 //        cout << "";
 //        for( int i = 0 ; i < multiPinCandidates[powerPin].size() ; i++ )
 //        {
