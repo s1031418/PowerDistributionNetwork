@@ -2038,14 +2038,13 @@ void RouterV4::optimize(Graph * steinerTree)
 {
     // opt stage1
     Simulation();
-//    opt1(steinerTree);
+    opt1(steinerTree);
     
 //    Simulation();
     auto tmp = NoPassRoutingLists ;
     for( auto noPassList : tmp )
     {
-        for(auto sk : skipLists)
-            cout << sk.targetBlockName << " " << sk.targetBlockPinName << endl;
+
         bool skip = find(noPassList);
         if(skip) continue; 
         string powerPin = noPassList.sourceName ;
@@ -2117,8 +2116,8 @@ void RouterV4::optimize(Graph * steinerTree)
                 if( !find ) optSuccess = true ;
             }
         }
-        if(!optSuccess)
-            skipLists.push_back(noPassList);
+//        if(!optSuccess)
+        skipLists.push_back(noPassList);
     }
 //    vector<RoutingPath> skipLists ;
 //    while( !NoPassRoutingLists.empty() )
@@ -2371,6 +2370,8 @@ void RouterV4::Route()
 //                    targetGrid = AbsToGrid(RouterHelper.getTerminalPoint(BlockPinCoordinate));
                     Coordinate3D powerPoint = RouterHelper.getTerminalPoint(powerPinCoordinate);
                     Coordinate3D BlockPoint = RouterHelper.getTerminalPoint(BlockPinCoordinate);
+                    if( powerpin == "VDD4" && blockinfo.BlockName == "B4_03" && blockinfo.BlockPinName == "VDD_A" )
+                        cout << "";
                     //powerPinCoordinate
                     if(init)saveRoutingList(BlockPoint,powerpin,blockinfo);
 //                    saveRoutingList(gridToAbsolute(targetGrid),powerpin,blockinfo);
