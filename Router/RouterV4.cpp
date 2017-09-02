@@ -2041,61 +2041,48 @@ void RouterV4::optimize(Graph * steinerTree)
         double minCost = INT_MAX ;
         string key = block + blockPin ;
         vector<Coordinate3D> minCostSolutions ;
-//        map< int , Coordinate3D > sortedCoordinate ;
-//        for( auto candidate : multiPinCandidates[powerPin] )
-//            sortedCoordinate.insert(make_pair(RouterHelper.getManhattanDistance(multiPinCandidates[powerPin].front(), candidate), candidate));
-//        map<double , Coordinate3D> possibleSources ;
-        // select source
-//        for(auto candidate : sortedCoordinate)
-//        {
-////             select five candidate and choose minimal resistance
-//            vector<Coordinate3D> solutions = parallelRoute(powerPin, block, blockPin, candidate.second, (--sortedCoordinate.end())->second , DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
-//            if(!solutions.empty())
-//            {
-//                double resistance = getResistance(solutions, DEFAULTWIDTH);
-//                possibleSources.insert(make_pair(resistance, candidate.second));
-//                if(possibleSources.size() > 5) break;
-//            }
-//        }
-
-//        Coordinate3D source = possibleSources.begin()->second ;
-        Coordinate3D source = multiPinCandidates[powerPin].front();
-//        for(int i = 2 ; i < multiPinCandidates[powerPin].size() ; i +=  1  )
-//        cout << normalDistributionCandidates[powerPin].size() << endl;
+        
         for( int i = 0 ; i < mergeCandidates[key].size() ; i++ )
         {
-//            if( i > multiPinCandidates[powerPin].size()  ) break;
-//            if( i > normalDistributionCandidates[powerPin].size()  ) break;
-//            Coordinate3D target = multiPinCandidates[noPassList.sourceName][i];
-            Coordinate3D target = mergeCandidates[key][i];
-            vector<Coordinate3D> solutions = parallelRoute(true,false ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
-            if( checkLegal(solutions) )
+            Coordinate3D source = mergeCandidates[key][i];
+            // select best point
+            for(int j = i ; j < mergeCandidates[key].size() ; j++)
             {
-                double metalUsage = getMetalUsage(solutions, DEFAULTWIDTH);
-                SpiceGenerator tmp = sp_gen ;
-                tmp.setSpiceName("tmp.sp");
-                genResistance(solutions, powerPin , tmp , DEFAULTWIDTH);
-                tmp.toSpice();
-                tmp.addSpiceCmd();
-                double FOM = getParallelFOM("tmp.sp" , metalUsage , originV);
-                if( FOM > INT_MAX ) assert(0);
-                if( minCost > FOM )
+                Coordinate3D target = mergeCandidates[key][j];
+                vector<Coordinate3D> solutions ;
+                if( i == 0 ) solutions = parallelRoute(true,false ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+                else solutions = parallelRoute(false,false ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+                if( checkLegal(solutions) )
                 {
-                    minCost = FOM ;
-                    minCostSolutions = solutions ;
+                    double metalUsage = getMetalUsage(solutions, DEFAULTWIDTH);
+                    SpiceGenerator tmp = sp_gen ;
+                    tmp.setSpiceName("tmp.sp");
+                    genResistance(solutions, powerPin , tmp , DEFAULTWIDTH);
+                    tmp.toSpice();
+                    tmp.addSpiceCmd();
+                    double FOM = getParallelFOM("tmp.sp" , metalUsage , originV);
+                    if( FOM > INT_MAX ) assert(0);
+                    if( minCost > FOM )
+                    {
+                        minCost = FOM ;
+                        minCostSolutions = solutions ;
+                    }
                 }
             }
+            if( checkLegal(minCostSolutions) )
+            {
+                genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
+                fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
+                //saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
+                def_gen.toOutputDef();
+                Simulation() ;
+                if( NoPassRoutingLists.empty() ) break;
+            }
+            else
+            {
+                ;
+            }
         }
-        if( checkLegal(minCostSolutions) )
-        {
-            genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
-            fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
-//            saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
-            def_gen.toOutputDef();
-            Simulation() ;
-        }
-        else
-            break; 
     }
 }
 vector<Coordinate3D> RouterV4::fixSolution(Graph_SP * graph_sp , vector<Coordinate3D> mustUpdateCoordinates ,vector<Coordinate3D> solutions )
