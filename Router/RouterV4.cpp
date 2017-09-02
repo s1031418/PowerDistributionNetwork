@@ -1071,21 +1071,29 @@ Coordinate3D RouterV4::gridToAbsolute(Coordinate3D gridCoordinate)
     coordinateAbs.z = gridCoordinate.z ;
     return coordinateAbs ;
 }
-void RouterV4::saveMultiPinCandidates(string powerPin , vector<Coordinate3D> solutions )
+void RouterV4::saveMultiPinCandidates(string powerPin , string block , string blockPin , vector<Coordinate3D> solutions )
 {
+    string key = block + blockPin ;
     if( multiPinCandidates.find(powerPin) == multiPinCandidates.end() ) multiPinCandidates.insert(make_pair(powerPin, vector<Coordinate3D>()));
     for( auto solution : solutions )
     {
         Coordinate3D coordinate = gridToAbsolute(solution);
         multiPinCandidates[powerPin].push_back(coordinate);
     }
-    if( normalDistributionCandidates.find(powerPin) == normalDistributionCandidates.end() ) normalDistributionCandidates.insert(make_pair(powerPin, vector<Coordinate3D>()));
-    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.front()));
-    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 1 / 5  ]));
-    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 2 / 5  ]));
-    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 3 / 5  ]));
-    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 4 / 5  ]));
-    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.back()));
+    if( mergeCandidates.find(key) == mergeCandidates.end() )  mergeCandidates.insert(make_pair(key, vector<Coordinate3D>()));
+    mergeCandidates[key].push_back(gridToAbsolute(solutions.front()));
+    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 1 / 5  ]));
+    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 2 / 5  ]));
+    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 3 / 5  ]));
+    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 4 / 5  ]));
+    mergeCandidates[key].push_back(gridToAbsolute(solutions.back()));
+//    if( normalDistributionCandidates.find(powerPin) == normalDistributionCandidates.end() ) normalDistributionCandidates.insert(make_pair(powerPin, vector<Coordinate3D>()));
+//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.front()));
+//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 1 / 5  ]));
+//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 2 / 5  ]));
+//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 3 / 5  ]));
+//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 4 / 5  ]));
+//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.back()));
 }
 bool RouterV4::isMultiPin(string powerPin)
 {
@@ -2031,6 +2039,7 @@ void RouterV4::optimize(Graph * steinerTree)
         string blockPin = noPassList.targetBlockPinName ;
         double originV = noPassList.voltage ;
         double minCost = INT_MAX ;
+        string key = block + blockPin ;
         vector<Coordinate3D> minCostSolutions ;
 //        map< int , Coordinate3D > sortedCoordinate ;
 //        for( auto candidate : multiPinCandidates[powerPin] )
@@ -2052,12 +2061,13 @@ void RouterV4::optimize(Graph * steinerTree)
 //        Coordinate3D source = possibleSources.begin()->second ;
         Coordinate3D source = multiPinCandidates[powerPin].front();
 //        for(int i = 2 ; i < multiPinCandidates[powerPin].size() ; i +=  1  )
-        for( int i = 0 ; i < normalDistributionCandidates[powerPin].size() ; i++ )
+//        cout << normalDistributionCandidates[powerPin].size() << endl;
+        for( int i = 0 ; i < mergeCandidates[key].size() ; i++ )
         {
 //            if( i > multiPinCandidates[powerPin].size()  ) break;
-            if( i > normalDistributionCandidates[powerPin].size()  ) break;
+//            if( i > normalDistributionCandidates[powerPin].size()  ) break;
 //            Coordinate3D target = multiPinCandidates[noPassList.sourceName][i];
-            Coordinate3D target = normalDistributionCandidates[noPassList.sourceName][i];
+            Coordinate3D target = mergeCandidates[key][i];
             vector<Coordinate3D> solutions = parallelRoute(true,false ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
             if( checkLegal(solutions) )
             {
@@ -2080,7 +2090,7 @@ void RouterV4::optimize(Graph * steinerTree)
         {
             genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
             fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
-//            saveMultiPinCandidates(powerPin, minCostSolutions);
+//            saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
             def_gen.toOutputDef();
             Simulation() ;
         }
@@ -2182,7 +2192,7 @@ void RouterV4::Route()
                             steinerTree->addLeafInfo( powerpin, blockinfo.BlockName, blockinfo.BlockPinName);
                         }
                         fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH ,true );
-                        saveMultiPinCandidates(powerpin, solutions);
+                        saveMultiPinCandidates(powerpin, blockinfo.BlockName , blockinfo.BlockPinName ,  solutions);
                         def_gen.toOutputDef();
                         hasSolutions = true ;
                         init = false ;
@@ -2319,7 +2329,7 @@ void RouterV4::opt1(Graph * steinerTree)
                 {
                     genResistance(solutions, powerPin , sp_gen ,DEFAULTWIDTH );
                     fillSpNetMaps(solutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
-                    saveMultiPinCandidates(powerPin, solutions);
+                    saveMultiPinCandidates(powerPin,block,blockPin,solutions);
                     def_gen.toOutputDef();
                     Simulation();
                 }
