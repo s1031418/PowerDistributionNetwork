@@ -2061,12 +2061,13 @@ void RouterV4::optimize(Graph * steinerTree)
         
         auto optAllCandidates = steinerTree->getPath( blockTarget);
         Coordinate3D source = optAllCandidates[0]->coordinate;
+        int range = optAllCandidates.size() / 5 ;
         bool optSuccess = false;
         while (!optSuccess)
         {
             vector<Coordinate3D> minCostSolutions ;
             
-            for( int j = 0 ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
+            for( int j = 0 ; j < optAllCandidates.size() ; j += range  )
             {
                 bool sourceAllowAll = false , targetAllowAll = false;
                 Coordinate3D target = optAllCandidates[j]->coordinate;
@@ -2095,7 +2096,11 @@ void RouterV4::optimize(Graph * steinerTree)
             }
             if( minCostSolutions.empty() )
             {
-                if(source == optAllCandidates.back()->coordinate) break;
+                if(source == optAllCandidates.back()->coordinate)
+                {
+                    range = optAllCandidates.size() / 6 ;
+                    break;
+                }
                 source = optAllCandidates.back()->coordinate;
                 continue;
                 // force exit
