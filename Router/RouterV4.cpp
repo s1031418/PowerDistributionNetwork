@@ -2042,9 +2042,9 @@ void RouterV4::optimize(Graph * steinerTree)
         string key = block + blockPin ;
         vector<Coordinate3D> minCostSolutions ;
         
-        for( int i = 0 ; i < mergeCandidates[key].size() ; i++ )
+        for( int i = 0 ; i < multiPinCandidates[powerPin].size() ; i++ )
         {
-            Coordinate3D source = mergeCandidates[key][i];
+            Coordinate3D source = multiPinCandidates[key][i];
             // select best point
             for(int j = i ; j < mergeCandidates[key].size() ; j++)
             {
