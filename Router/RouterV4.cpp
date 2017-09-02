@@ -2051,10 +2051,13 @@ void RouterV4::optimize(Graph * steinerTree)
         for( int i = 0 ; i < optAllCandidates.size() ; i += optAllCandidates.size() / 5 )
         {
             Coordinate3D source = optAllCandidates[i]->coordinate;
-            for( int j = 0 ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
+            for( int j = (i += optAllCandidates.size() / 5) ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
             {
                 bool sourceAllowAll = false , targetAllowAll = false;
                 Coordinate3D target = optAllCandidates[j]->coordinate;
+                int distance = RouterHelper.getManhattanDistance(source, target);
+                if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
+                   || (distance == 0 && (source.z - target.z == 2 || target.z - source.z == -2 )) ) continue ;
                 if( source == powerSource ) sourceAllowAll = true ;
                 if( target == blockTarget ) targetAllowAll = true ;
                 vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
