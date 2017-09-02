@@ -1087,13 +1087,13 @@ void RouterV4::saveMultiPinCandidates(string powerPin , string block , string bl
     mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 3 / 5  ]));
     mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 4 / 5  ]));
     mergeCandidates[key].push_back(gridToAbsolute(solutions.back()));
-//    if( normalDistributionCandidates.find(powerPin) == normalDistributionCandidates.end() ) normalDistributionCandidates.insert(make_pair(powerPin, vector<Coordinate3D>()));
-//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.front()));
-//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 1 / 5  ]));
-//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 2 / 5  ]));
-//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 3 / 5  ]));
-//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 4 / 5  ]));
-//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.back()));
+    if( normalDistributionCandidates.find(powerPin) == normalDistributionCandidates.end() ) normalDistributionCandidates.insert(make_pair(powerPin, vector<Coordinate3D>()));
+    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.front()));
+    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 1 / 5  ]));
+    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 2 / 5  ]));
+    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 3 / 5  ]));
+    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 4 / 5  ]));
+    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.back()));
 }
 bool RouterV4::isMultiPin(string powerPin)
 {
