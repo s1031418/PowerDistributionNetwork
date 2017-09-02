@@ -54,7 +54,7 @@ public:
     void insert(Coordinate3D source , Coordinate3D target , double length );
     vector<Vertex *> getPath(Coordinate3D target);
     void addLeaf(Coordinate3D leaf , double constraint , double current , double voltage);
-    void addLeafInfo(Coordinate3D leaf , string powerPin , string block , string blockPin);
+    void addLeafInfo( string powerPin , string block , string blockPin);
     void setSteriner(Coordinate3D coordinate);
     vector<LeafInfo> getLeafInfos();
     

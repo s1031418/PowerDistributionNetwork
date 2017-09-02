@@ -53,7 +53,7 @@ public:
     
     vector< vector< Grid > > Grids ;
 private:
-    int ileagalcnt =0 ; 
+    
     string spiceName ;
     string defName ;
     string outputfilesName ;
@@ -101,7 +101,7 @@ private:
     
     void fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName ,string blockName , string blockPinName  , double width , bool peek );
     
-    Coordinate3D LegalizeTargetEdge(Block block , Graph_SP * graph_sp , double width , double spacing);
+    Coordinate3D getOuterCoordinate(Block block , double width , double spacing);
     
     double getMetalResistance(int layer);
     
@@ -182,7 +182,7 @@ private:
     // 第一個為viaName,第二個為via location set
     pair<string,vector<Point<int>>>  getViaLocation(Nets & net , Point<int> & orginTarget , bool top , double width);
     
-    vector<Coordinate3D> parallelRoute( string powerPin , string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , double width , double spacing , double originWidth);
+    vector<Coordinate3D> parallelRoute(bool sourceLegalAll , bool targetLegalAll , string powerPin , string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , double width , double spacing , double originWidth);
     
     Coordinate3D AbsToGrid(Coordinate3D coordinateABS);
     
@@ -229,6 +229,8 @@ private:
     bool checkLegal(vector<Coordinate3D> solutions);
     
     vector<Coordinate3D> fixSolution(Graph_SP * graph_sp , vector<Coordinate3D> mustUpdateCoordinates ,vector<Coordinate3D> solutions );
+    
+    void opt1(Graph * steinerTree);
 };
 
 #endif /* RouterV4_hpp */

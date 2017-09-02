@@ -93,7 +93,7 @@ void Graph::erase(vector<Coordinate3D> coordinates)
     }
     history.clear();
     leafs.pop_back();
-    leafQueue.pop();
+    
 }
 double Graph::getTotalMetalUsage()
 {
@@ -178,9 +178,9 @@ double Graph::analysis()
     cost += totalMetalUsage ;
     return cost / UNITS_DISTANCE / UNITS_DISTANCE;
 }
-void Graph::addLeafInfo(Coordinate3D leaf , string powerPin , string block , string blockPin)
+void Graph::addLeafInfo( string powerPin , string block , string blockPin)
 {
-    string encodeString = encode(leaf); 
+    
     LeafInfo leafInfo ;
     leafInfo.powerPin = powerPin ;
     leafInfo.block = block ;
@@ -235,9 +235,11 @@ vector<vector<Vertex *>> Graph::getAllPath()
 }
 void Graph::printAllPath()
 {
+    auto leafInfos = getLeafInfos();
+    int index = 0 ;
     for(auto leaf : leafs)
     {
-        LeafInfo leafInfo = getLeafInfo();
+        auto leafInfo = leafInfos[index];
         vector<Vertex *> path = getPath(leaf->coordinate);
         cout << "coordinate:" << endl ;
         for(auto p : path)
@@ -251,6 +253,7 @@ void Graph::printAllPath()
          }
         cout << leafInfo.powerPin << " " << leafInfo.block << " " << leafInfo.blockPin ;
         cout << endl;
+        index++;
     }
 }
 pair<double, double> Graph::getQuadraticEquation(double a , double b , double c )
@@ -413,7 +416,8 @@ void Graph::reduction()
                 }
                 break ;
             }
-            if( fanIn->isSteiner || fanIn->coordinate.z != ptr->coordinate.z )
+//            if( fanIn->isSteiner || fanIn->coordinate.z != ptr->coordinate.z )
+            if( fanIn->isSteiner  )
             {
                 // reduction
                 node->fanIn = fanIn ;

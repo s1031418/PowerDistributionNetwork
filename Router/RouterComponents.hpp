@@ -65,11 +65,13 @@ public:
 class Coordinate3D {
     
 public:
+    
     Coordinate3D(){};
     Coordinate3D(unsigned X , unsigned Y , unsigned Z) :x(X) , y(Y) , z(Z){};
     unsigned x ;
     unsigned y ;
     unsigned z ;
+    
     bool operator==(const Coordinate3D & right)
     {
         return (this->x == right.x && this->y == right.y && this->z == right.z);
