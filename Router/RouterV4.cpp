@@ -2044,9 +2044,9 @@ void RouterV4::optimize(Graph * steinerTree)
         
         for( int i = 0 ; i < multiPinCandidates[powerPin].size() ; i++ )
         {
-            Coordinate3D source = multiPinCandidates[key][i];
+            Coordinate3D source = multiPinCandidates[powerPin][i];
             // select best point
-            for(int j = i ; j < mergeCandidates[key].size() ; j++)
+            for(int j = 0 ; j < mergeCandidates[key].size() ; j++)
             {
                 Coordinate3D target = mergeCandidates[key][j];
                 vector<Coordinate3D> solutions ;
