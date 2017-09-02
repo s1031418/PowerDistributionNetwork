@@ -2057,7 +2057,7 @@ void RouterV4::optimize(Graph * steinerTree)
         Block BlockPinCoordinate = RouterHelper.getBlock(block,blockPin);
         Coordinate3D blockTarget =  gridToAbsolute( getOuterCoordinate(BlockPinCoordinate, DEFAULTWIDTH, DEFAULTSPACING));
         Coordinate3D powerSource = gridToAbsolute(getOuterCoordinate(powerPinCoordinates[0], DEFAULTWIDTH, DEFAULTSPACING));
-        steinerTree->printAllPath();
+        
         auto optAllCandidates = steinerTree->getPath( blockTarget);
         
         bool optSuccess = false;
@@ -2112,7 +2112,7 @@ void RouterV4::optimize(Graph * steinerTree)
                         find = true ;
                     }
                 }
-                optSuccess = (find) ? false : true ;
+                if( find ) optSuccess = true ;
             }
         }
         if(!optSuccess)
