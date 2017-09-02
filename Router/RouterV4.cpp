@@ -2024,6 +2024,16 @@ double RouterV4::getParallelFOM(string spiceName , double metalUsage , double or
     cost += metalUsage ;
     return cost / UNITS_DISTANCE / UNITS_DISTANCE;
 }
+bool RouterV4::find(RoutingPath routingPath)
+{
+    for(auto skipList : skipLists)
+    {
+        if( skipList.targetBlockName == routingPath.targetBlockName
+           && skipList.targetBlockPinName == routingPath.targetBlockPinName)
+            return true;
+    }
+    return false;
+}
 void RouterV4::optimize(Graph * steinerTree)
 {
     // opt stage1
@@ -2034,6 +2044,8 @@ void RouterV4::optimize(Graph * steinerTree)
     auto tmp = NoPassRoutingLists ;
     for( auto noPassList : tmp )
     {
+        bool skip = find(noPassList);
+        if(skip) continue; 
         string powerPin = noPassList.sourceName ;
         string block = noPassList.targetBlockName ;
         string blockPin = noPassList.targetBlockPinName ;
@@ -2045,7 +2057,9 @@ void RouterV4::optimize(Graph * steinerTree)
         Block BlockPinCoordinate = RouterHelper.getBlock(block,blockPin);
         Coordinate3D blockTarget =  gridToAbsolute( getOuterCoordinate(BlockPinCoordinate, DEFAULTWIDTH, DEFAULTSPACING));
         Coordinate3D powerSource = gridToAbsolute(getOuterCoordinate(powerPinCoordinates[0], DEFAULTWIDTH, DEFAULTSPACING));
+        steinerTree->printAllPath();
         auto optAllCandidates = steinerTree->getPath( blockTarget);
+        
         bool optSuccess = false;
         while (!optSuccess)
         {
@@ -2101,7 +2115,8 @@ void RouterV4::optimize(Graph * steinerTree)
                 optSuccess = (find) ? false : true ;
             }
         }
-
+        if(!optSuccess)
+            skipLists.push_back(noPassList);
     }
 //    vector<RoutingPath> skipLists ;
 //    while( !NoPassRoutingLists.empty() )

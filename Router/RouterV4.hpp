@@ -77,7 +77,9 @@ private:
     // 絕對座標＋GridZ
     vector<RoutingPath> currentRoutingLists ;
     
-    vector<RoutingPath> NoPassRoutingLists ; 
+    vector<RoutingPath> NoPassRoutingLists ;
+    
+    vector<RoutingPath> skipLists;
     
     map<string,vector<Coordinate3D>> multiPinCandidates;
     
@@ -232,7 +234,10 @@ private:
     
     vector<Coordinate3D> fixSolution(Graph_SP * graph_sp , vector<Coordinate3D> mustUpdateCoordinates ,vector<Coordinate3D> solutions );
     
+  
     void opt1(Graph * steinerTree);
+    
+    bool find(RoutingPath routingPath);
 };
 
 #endif /* RouterV4_hpp */
