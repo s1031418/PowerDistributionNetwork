@@ -2049,10 +2049,10 @@ void RouterV4::optimize(Graph * steinerTree)
         bool optSuccess = false;
         while (!optSuccess)
         {
-            for( int i = 0 ; i < optAllCandidates.size() ; i += optAllCandidates.size() / 5 )
-            {
-                Coordinate3D source = optAllCandidates[i]->coordinate;
-                for( int j = (i += optAllCandidates.size() / 5) ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
+//            for( int i = 0 ; i < optAllCandidates.size() ; i += optAllCandidates.size() / 5 )
+//            {
+                Coordinate3D source = optAllCandidates[0]->coordinate;
+                for( int j = 0 ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
                 {
                     bool sourceAllowAll = false , targetAllowAll = false;
                     Coordinate3D target = optAllCandidates[j]->coordinate;
@@ -2081,7 +2081,7 @@ void RouterV4::optimize(Graph * steinerTree)
                 }
                 if( checkLegal(minCostSolutions) )
                 {
-                    i -= optAllCandidates.size() / 5 ;
+//                    i -= optAllCandidates.size() / 5 ;
                     genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
                     fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
                     //saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
@@ -2098,7 +2098,7 @@ void RouterV4::optimize(Graph * steinerTree)
                     optSuccess = (find) ? false : true ;
                     if(optSuccess) break ; 
                 }
-            }
+//            }
             if(optSuccess == false)
                 break;
         }
