@@ -2045,8 +2045,8 @@ void RouterV4::optimize(Graph * steinerTree)
         vector<Coordinate3D> minCostSolutions ;
         vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerPin);
         Block BlockPinCoordinate = RouterHelper.getBlock(block,blockPin);
-        Coordinate3D blockTarget = getOuterCoordinate(BlockPinCoordinate, DEFAULTWIDTH, DEFAULTSPACING);
-        Coordinate3D powerSource = getOuterCoordinate(powerPinCoordinates[0], DEFAULTWIDTH, DEFAULTSPACING);
+        Coordinate3D blockTarget =  gridToAbsolute( getOuterCoordinate(BlockPinCoordinate, DEFAULTWIDTH, DEFAULTSPACING));
+        Coordinate3D powerSource = gridToAbsolute(getOuterCoordinate(powerPinCoordinates[0], DEFAULTWIDTH, DEFAULTSPACING));
         auto optAllCandidates = steinerTree->getPath( gridToAbsolute(blockTarget));
 //        for( int i = 0 ; i < optAllCandidates.size() ; i += optAllCandidates.size() / 5 )
 //        {
@@ -2087,6 +2087,8 @@ void RouterV4::optimize(Graph * steinerTree)
                 def_gen.toOutputDef();
                 Simulation() ;
             }
+            else
+                break;
 //        }
 //        cout << "";
 //        for( int i = 0 ; i < multiPinCandidates[powerPin].size() ; i++ )
