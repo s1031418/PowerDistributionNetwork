@@ -2031,9 +2031,21 @@ void RouterV4::optimize(Graph * steinerTree)
 //    opt1(steinerTree);
     
 //    Simulation();
+    vector<RoutingPath> skipLists ;
     while( !NoPassRoutingLists.empty() )
     {
+        
         RoutingPath noPassList = NoPassRoutingLists[0];
+        bool skip = false;
+        for(auto skiplist : skipLists)
+        {
+            if( noPassList.targetBlockName == skiplist.targetBlockName && noPassList.targetBlockPinName == skiplist.targetBlockPinName )
+            {
+                skip = true;
+                break;
+            }
+        }
+        if(skip) continue ; 
         string powerPin = noPassList.sourceName ;
         string block = noPassList.targetBlockName ;
         string blockPin = noPassList.targetBlockPinName ;
@@ -2101,6 +2113,10 @@ void RouterV4::optimize(Graph * steinerTree)
 //            }
             if(optSuccess == false)
                 break;
+        }
+        if(!optSuccess)
+        {
+            skipLists.push_back(noPassList);
         }
         
 //        for( int i = 0 ; i < optAllCandidates.size() ; i += optAllCandidates.size() / 5 )
