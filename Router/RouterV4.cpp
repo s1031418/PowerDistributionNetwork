@@ -2044,6 +2044,8 @@ void RouterV4::optimize(Graph * steinerTree)
     auto tmp = NoPassRoutingLists ;
     for( auto noPassList : tmp )
     {
+        for(auto sk : skipLists)
+            cout << sk.targetBlockName << " " << sk.targetBlockPinName << endl;
         bool skip = find(noPassList);
         if(skip) continue; 
         string powerPin = noPassList.sourceName ;
@@ -2105,14 +2107,14 @@ void RouterV4::optimize(Graph * steinerTree)
                 def_gen.toOutputDef();
                 Simulation() ;
                 bool find = false ;
-                for( auto noPassList : NoPassRoutingLists )
+                for( auto nopass : NoPassRoutingLists )
                 {
-                    if( noPassList.targetBlockName == block && noPassList.targetBlockPinName == blockPin )
+                    if( nopass.targetBlockName == block && nopass.targetBlockPinName == blockPin )
                     {
                         find = true ;
                     }
                 }
-                if( find ) optSuccess = true ;
+                if( !find ) optSuccess = true ;
             }
         }
         if(!optSuccess)
