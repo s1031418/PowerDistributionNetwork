@@ -2020,7 +2020,7 @@ void RouterV4::optimize(Graph * steinerTree)
 {
     // opt stage1
     Simulation();
-    opt1(steinerTree);
+//    opt1(steinerTree);
     
 //    Simulation();
     while( !NoPassRoutingLists.empty() )
@@ -2051,7 +2051,7 @@ void RouterV4::optimize(Graph * steinerTree)
 
 //        Coordinate3D source = possibleSources.begin()->second ;
         Coordinate3D source = multiPinCandidates[powerPin].front();
-        for(int i = 2 ; i < multiPinCandidates[powerPin].size() ; i +=  1  )
+//        for(int i = 2 ; i < multiPinCandidates[powerPin].size() ; i +=  1  )
         for( int i = 0 ; i < normalDistributionCandidates[powerPin].size() ; i++ )
         {
 //            if( i > multiPinCandidates[powerPin].size()  ) break;
@@ -2080,7 +2080,7 @@ void RouterV4::optimize(Graph * steinerTree)
         {
             genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
             fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
-            saveMultiPinCandidates(powerPin, minCostSolutions);
+//            saveMultiPinCandidates(powerPin, minCostSolutions);
             def_gen.toOutputDef();
             Simulation() ;
         }
