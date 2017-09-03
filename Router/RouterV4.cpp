@@ -2495,9 +2495,9 @@ void RouterV4::Route()
                     
                 }
             }
-            steinerTrees.push_back(steinerTree);
+            
         }
-        
+        steinerTrees.push_back(steinerTree);
 //        LocalRefine(steinerTree);
         
 //        optimize(steinerTrees);
@@ -2505,8 +2505,13 @@ void RouterV4::Route()
     
 //    optimize(steinerTrees);
     Simulation();
+//    delete [] steinerTrees;
+    
     for(auto steinerTree : steinerTrees)
+    {
         if( steinerTree != nullptr ) delete [] steinerTree;
+    }
+    
 //
 //    
 //    while (!NoPassRoutingLists.empty())
