@@ -2749,7 +2749,7 @@ void RouterV4::Simulation()
     
     sort(NoPassRoutingLists.begin(), NoPassRoutingLists.end(), [](const RoutingPath & p1 , const RoutingPath & p2)->bool
                                                 {
-                                                    return p1.diffVoltage < p2.diffPercentage ;
+                                                    return p1.diffPercentage < p2.diffPercentage ;
                                                 });
 //    sort(NoPassRoutingLists.begin(), NoPassRoutingLists.end());
 //    output_gen.toOutputFiles();

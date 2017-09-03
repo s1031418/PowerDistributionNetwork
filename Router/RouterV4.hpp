@@ -39,7 +39,7 @@ struct RoutingPath {
     Coordinate3D targetCoordinate ;
     double voltage ;
     double diffVoltage ;
-    double diffPercentage ; 
+    double diffPercentage = 10000;
 };
 
 class RouterV4 {
