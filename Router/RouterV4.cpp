@@ -2078,7 +2078,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
             }
         }
         auto optAllCandidates = steinerTree->getPath( blockTarget);
-        Coordinate3D source = optAllCandidates[0]->coordinate;
+        Coordinate3D target = optAllCandidates[0]->coordinate;
         bool optSuccess = false;
         while (!optSuccess)
         {
@@ -2087,12 +2087,12 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
             for( int j = 0 ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
             {
                 bool sourceAllowAll = false , targetAllowAll = false;
-                Coordinate3D target = optAllCandidates[j]->coordinate;
+                Coordinate3D source = optAllCandidates[j]->coordinate;
                 int distance = RouterHelper.getManhattanDistance(source, target);
                 if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
                    || (distance == 0 && (source.z - target.z == 2 || target.z - source.z == -2 )) ) continue ;
-                if( source == powerSource ) sourceAllowAll = true ;
-                if( target == blockTarget ) targetAllowAll = true ;
+                if( source == blockTarget ) sourceAllowAll = true ;
+                if( target == powerSource ) targetAllowAll = true ;
                 vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
                 if( checkLegal(solutions) )
                 {
