@@ -168,7 +168,7 @@ void Graph_SP::Dijkstra(int Start , int Target)
     {
         
         int u = minQueue.ExtractMin();
-        if( distance[u] == Max_Distance ) break; 
+        if( distance[u] >= Max_Distance ) break;
         if( u == Target ) break;
         for(auto it = AdjList[u].begin() ; it != AdjList[u].end() ; ++it)
         {
