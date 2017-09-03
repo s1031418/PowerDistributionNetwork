@@ -33,10 +33,10 @@ bool Parsers::isMatch(regex_t & regex , string data)
 vector<string> Parsers::GetParsingString(regex_t & regex , string data , vector<int> GroupIdx)
 {
     
-    regmatch_t match[10];
+    regmatch_t match[100];
     vector<string> tmp ;
     
-    if(regexec(&regex, data.c_str(), 10, match, 0) == 0)
+    if(regexec(&regex, data.c_str(), 100, match, 0) == 0)
     {
         for (int i = 0 ; i < GroupIdx.size(); i++) {
             string str ;
