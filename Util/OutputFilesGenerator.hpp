@@ -23,6 +23,7 @@ struct IRDropLine {
     string blockName ;
     string blockPinName ;
     double dropPercentage ;
+    bool pass ;
 };
 struct MetalUsageLine {
     string MetalName ; // M4 、 M5 ... etc 
@@ -38,8 +39,10 @@ public:
     
     
     void setIRDrop(string BlockName , string BlockPinName , double DropPercentage);
+    void setDebugIRDrop(string BlockName , string BlockPinName , double DropPercentage , bool pass);
     void setOutputFilesName(string outputName);
     void toOutputFiles();
+    void toDebugOutputFiles();
     void clear();
 private:
     string outputfileName ;

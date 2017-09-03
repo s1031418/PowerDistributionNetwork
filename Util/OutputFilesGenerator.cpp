@@ -23,6 +23,15 @@ void OutputFilesGenerator::setOutputFilesName(string outputName)
 {
     outputfileName = outputName ; 
 }
+void OutputFilesGenerator::setDebugIRDrop(string BlockName , string BlockPinName , double DropPercentage , bool pass)
+{
+    IRDropLine irline ;
+    irline.blockName = BlockName ;
+    irline.blockPinName = BlockPinName ;
+    irline.dropPercentage = DropPercentage ;
+    irline.pass = pass;
+    irDropLines.push_back(irline);
+}
 void OutputFilesGenerator::setIRDrop(string BlockName , string BlockPinName , double DropPercentage)
 {
     IRDropLine irline ;
@@ -149,7 +158,45 @@ void OutputFilesGenerator::toOutputFiles()
     }
     fclose(pFile);
 }
-
+void OutputFilesGenerator::toDebugOutputFiles()
+{
+    double TotalMetalUsage = 0 ;
+    calculateMetalUsage();
+    FILE * pFile ;
+    pFile = fopen(outputfileName.c_str(), "w");
+    if( NULL == pFile ) printf("Failed to open file\n");
+    
+    // The metal usage report
+    fprintf(pFile, "The metal usage report\n");
+    for( auto metalLine : metalUsageLines )
+    {
+        fprintf(pFile, "%s %g\n" , metalLine.MetalName.c_str() , metalLine.metalUsage);
+        TotalMetalUsage += (stod(WeightsMaps[metalLine.MetalName]) * metalLine.metalUsage);
+    }
+    fprintf(pFile, "Total %f\n" , TotalMetalUsage);
+    fprintf(pFile, "\n");
+    
+    
+    // The IR drop report
+    fprintf(pFile, "The IR drop of each power pin (%%)\n");
+    int passCnt = 0 ;
+    for(auto irline : irDropLines)
+    {
+        fprintf(pFile, "%s/%s %g" , irline.blockName.c_str() , irline.blockPinName.c_str() , irline.dropPercentage);
+        if( irline.pass )
+        {
+            fprintf(pFile, " pass");
+            passCnt++;
+        }
+        else
+        {
+            fprintf(pFile, " fail");
+        }
+        fprintf(pFile, "\n");
+    }
+    fprintf(pFile, "Pass Count:(%d/%lu)" , passCnt , irDropLines.size());
+    fclose(pFile);
+}
 
 
 

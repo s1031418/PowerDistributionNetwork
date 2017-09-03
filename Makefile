@@ -19,7 +19,7 @@ $(DEF_STATICLIB):
 
 main.o: main.cpp Parsers/lefrw.o
 PDN/PDNHelper.o:PDN/PDNHelper.cpp PDN/PDNHelper.hpp
-Router/RouterV4.o:Router/RouterV4.cpp Router/RouterV4.hpp
+Router/RouterV4.o:Router/RouterV4.cpp Router/RouterV4.hpp Router/InnerTreeObj.h
 Router/GlobalRouter.o:Router/GlobalRouter.cpp Router/GlobalRouter.hpp
 Router/RouterUtil.o:Router/RouterUtil.cpp Router/RouterUtil.hpp
 Router/Graph.o:Router/Graph.cpp Router/Graph.hpp
