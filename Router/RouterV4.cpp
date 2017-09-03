@@ -2084,7 +2084,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
         {
             vector<Coordinate3D> minCostSolutions ;
             
-            for( int j = 0 ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
+            for( int j = (int)optAllCandidates.size() / 5 ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
             {
                 bool sourceAllowAll = false , targetAllowAll = false;
                 Coordinate3D target = optAllCandidates[j]->coordinate;
@@ -2753,7 +2753,7 @@ void RouterV4::Simulation()
                                                 });
     for(auto it = NoPassRoutingLists.begin() ; it != NoPassRoutingLists.end() ; )
     {
-        if( it->diffPercentage > 20 )
+        if( it->diffPercentage > 10 )
             it = NoPassRoutingLists.erase(it);
         else
             it++;
