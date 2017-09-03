@@ -57,7 +57,7 @@ public:
     void addLeafInfo( string powerPin , string block , string blockPin);
     void setSteriner(Coordinate3D coordinate);
     vector<LeafInfo> getLeafInfos();
-    
+    LeafInfo getFirstLeafInfo();
     LeafInfo getLeafInfo();
     // 依照fanout 或 via
     void reduction();

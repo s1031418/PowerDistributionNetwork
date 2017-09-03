@@ -2034,7 +2034,7 @@ bool RouterV4::find(RoutingPath routingPath)
     }
     return false;
 }
-void RouterV4::optimize(Graph * steinerTree)
+void RouterV4::optimize(vector<Graph *> steinerTrees)
 {
     // opt stage1
     Simulation();
@@ -2059,6 +2059,15 @@ void RouterV4::optimize(Graph * steinerTree)
         Coordinate3D blockTarget =  gridToAbsolute( getOuterCoordinate(BlockPinCoordinate, DEFAULTWIDTH, DEFAULTSPACING));
         Coordinate3D powerSource = gridToAbsolute(getOuterCoordinate(powerPinCoordinates[0], DEFAULTWIDTH, DEFAULTSPACING));
         vector<Coordinate3D> lastSolutions ;
+        Graph * steinerTree = nullptr ;
+        for(auto st : steinerTrees)
+        {
+            LeafInfo leafInfo = st->getFirstLeafInfo();
+            if( leafInfo.powerPin == powerPin )
+            {
+                steinerTree = st ;
+            }
+        }
         auto optAllCandidates = steinerTree->getPath( blockTarget);
         Coordinate3D source = optAllCandidates[0]->coordinate;
         bool optSuccess = false;
@@ -2149,7 +2158,7 @@ void RouterV4::optimize(Graph * steinerTree)
 //                }
 //                continue;
                 // force exit
-//                break;
+                break;
             }
             if( checkLegal(minCostSolutions) )
             {
@@ -2371,7 +2380,7 @@ void RouterV4::Route()
     auto innerTreeOrder = ordering.second ;
 //    int cnt = 1 ;
     InitPowerPinAndBlockPin(DEFAULTWIDTH,DEFAULTSPACING);
-    
+    vector<Graph *> steinerTrees ;
     for(auto tree : treeOrder)
     {
         Graph * steinerTree = nullptr ;
@@ -2424,8 +2433,6 @@ void RouterV4::Route()
 //                    targetGrid = AbsToGrid(RouterHelper.getTerminalPoint(BlockPinCoordinate));
                     Coordinate3D powerPoint = RouterHelper.getTerminalPoint(powerPinCoordinate);
                     Coordinate3D BlockPoint = RouterHelper.getTerminalPoint(BlockPinCoordinate);
-                    if( powerpin == "VDD4" && blockinfo.BlockName == "B4_03" && blockinfo.BlockPinName == "VDD_A" )
-                        cout << "";
                     //powerPinCoordinate
                     if(init)saveRoutingList(BlockPoint,powerpin,blockinfo);
 //                    saveRoutingList(gridToAbsolute(targetGrid),powerpin,blockinfo);
@@ -2491,10 +2498,14 @@ void RouterV4::Route()
             
         }
 //        LocalRefine(steinerTree);
-        optimize(steinerTree);
-        if( steinerTree != nullptr ) delete [] steinerTree;
+        steinerTrees.push_back(steinerTree);
+
     }
+    
+    optimize(steinerTrees);
     Simulation();
+    for(auto steinerTree : steinerTrees)
+        if( steinerTree != nullptr ) delete [] steinerTree;
 //
 //    
 //    while (!NoPassRoutingLists.empty())

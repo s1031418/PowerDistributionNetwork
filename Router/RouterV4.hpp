@@ -201,7 +201,7 @@ private:
     void InitializeSpiceGen(Graph * steinerTree);
     
     
-    void optimize(Graph * steinerTree);
+    void optimize(vector<Graph *> steinerTree);
     
     vector<Coordinate3D> getCorner(vector<pair<Direction3D, int>> & friendlyForm , Coordinate3D source );
     

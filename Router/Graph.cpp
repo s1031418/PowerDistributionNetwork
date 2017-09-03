@@ -121,10 +121,10 @@ double Graph::analysis()
     double cost = 0 ;
     double totalMetalUsage = getTotalMetalUsage();
     // penalty constant
-    int penaltyParameter = 10 ;
+    int penaltyParameter = totalMetalUsage  ;
 //    int penaltyParameter = 10000000 ;
     // 超過 2% 會有penalty
-    double penaltyRange = 1 ;
+    double penaltyRange = 5 ;
     for( auto leaf : leafs )
     {
         Vertex * ptr = leaf ;
@@ -177,7 +177,7 @@ double Graph::analysis()
 //                cost += penaltyCount * penaltyParameter ;
 //            }
             
-            cost += ( diff + penaltyCount ) * penaltyParameter ;
+            cost += ( diff + penaltyCount) * penaltyParameter ;
         }
         
     }
@@ -192,6 +192,10 @@ void Graph::addLeafInfo( string powerPin , string block , string blockPin)
     leafInfo.block = block ;
     leafInfo.blockPin = blockPin ;
     leafQueue.push(leafInfo);
+}
+LeafInfo Graph::getFirstLeafInfo()
+{
+    return leafQueue.front() ;
 }
 LeafInfo Graph::getLeafInfo()
 {
