@@ -103,13 +103,18 @@ int Graph_SP::getShortestPath(int target)
 }
 void Graph_SP::Demo()
 {
-    Graph_SP g9(6);
+    Graph_SP g9(4);
 //    Graph_SP g9;
-    g9.AddEdge(0, 1, 8);g9.AddEdge(0, 5, 1);
-    g9.AddEdge(1, 0, 3);g9.AddEdge(1, 2, 1);
-    g9.AddEdge(2, 0, 5);g9.AddEdge(2, 3, 2);g9.AddEdge(2, 4, 2);
-    g9.AddEdge(3, 1, 4);g9.AddEdge(3, 2, 6);g9.AddEdge(3, 4, 7);g9.AddEdge(3, 5, 3);
-    g9.AddEdge(5, 3, 2);g9.AddEdge(5, 4, 8);
+    g9.AddEdge(0, 1, 1);g9.AddEdge(0, 2, 1);
+    g9.AddEdge(1, 0, 1);g9.AddEdge(1, 3, 1);
+    g9.AddEdge(2, 0, 1);g9.AddEdge(2, 3, 1);
+    g9.AddEdge(3, 1, Max_Distance);g9.AddEdge(3, 2, Max_Distance);
+    g9.Dijkstra(3, 0);
+//    g9.AddEdge(0, 1, 8);g9.AddEdge(0, 5, 1);
+//    g9.AddEdge(1, 0, 3);g9.AddEdge(1, 2, 1);
+//    g9.AddEdge(2, 0, 5);g9.AddEdge(2, 3, 2);g9.AddEdge(2, 4, 2);
+//    g9.AddEdge(3, 1, 4);g9.AddEdge(3, 2, 6);g9.AddEdge(3, 4, 7);g9.AddEdge(3, 5, 3);
+//    g9.AddEdge(5, 3, 2);g9.AddEdge(5, 4, 8);
     
 //    g9.Dijkstra(0);
     
@@ -155,13 +160,15 @@ int Graph_SP::getWeight(int from , int to )
 void Graph_SP::Dijkstra(int Start , int Target)
 {
     source = Start ;
-    terminal = Target ; 
+    terminal = Target ;
     InitalizeSingleSource(Start);
     BinaryHeap minQueue(num_vertex);
     minQueue.BuildMinHeap(distance);
     while (!minQueue.IsEmpty())
     {
+        
         int u = minQueue.ExtractMin();
+        if( distance[u] == Max_Distance ) break; 
         if( u == Target ) break;
         for(auto it = AdjList[u].begin() ; it != AdjList[u].end() ; ++it)
         {
