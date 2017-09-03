@@ -1589,9 +1589,9 @@ vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinat
         legalizeAllLayer(true , sourceGrid, graph_sp , width , spacing , originWidth);
         graph_sp->Dijkstra(target,source);
         auto paths= graph_sp->getPath();
-        if(paths.empty()) return selectedPath; 
         for( auto path : paths )
             selectedPath.push_back(translate1D_3D(path));
+        if( !checkLegal(selectedPath) ) return vector<Coordinate3D>();
         generateSpiceList(powerPinCoordinate ,BlockPinCoordinate ,  selectedPath, powerPin, block , blockPin , width);
         return selectedPath ;
     }
@@ -1993,7 +1993,7 @@ bool RouterV4::checkLegal(vector<Coordinate3D> solutions)
                 if( RouterHelper.isCross(rect1, rect2) )
                 {
                     int distance = RouterHelper.getManhattanDistance(viaCoordinates[i], viaCoordinates[j]);
-                    if( distance == DEFAULTWIDTH * UNITS_DISTANCE )
+                    if( distance <= DEFAULTWIDTH * UNITS_DISTANCE )
                         continue;
                     cout << "ilegal" << endl;
                     Point<int> leftDown3(viaCoordinates[i].x - ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[i].y - ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
@@ -2389,7 +2389,7 @@ void RouterV4::Route()
 //    int cnt = 1 ;
     InitPowerPinAndBlockPin(DEFAULTWIDTH,DEFAULTSPACING);
     vector<Graph *> steinerTrees ;
-    cout << treeOrder.size();
+//    cout << treeOrder.size();
     for(auto tree : treeOrder)
     {
         Graph * steinerTree = nullptr ;
@@ -2443,7 +2443,7 @@ void RouterV4::Route()
                     Coordinate3D powerPoint = RouterHelper.getTerminalPoint(powerPinCoordinate);
                     Coordinate3D BlockPoint = RouterHelper.getTerminalPoint(BlockPinCoordinate);
                     //powerPinCoordinate
-                    if(init)saveRoutingList(BlockPoint,powerpin,blockinfo);
+                    
 //                    saveRoutingList(gridToAbsolute(targetGrid),powerpin,blockinfo);
                     int source = translate3D_1D(sourceGrid);
                     int target = translate3D_1D(targetGrid);
@@ -2453,6 +2453,7 @@ void RouterV4::Route()
 //                    fixSolution();
                     if( checkLegal(solutions) )
                     {
+                        saveRoutingList(BlockPoint,powerpin,blockinfo);
                         if(!isMultiSource)
                         {
                             SteinerTreeConstruction(false , solutions,current, constraint , voltage , powerpin , blockinfo.BlockName , blockinfo.BlockPinName, steinerTree);
@@ -2468,16 +2469,16 @@ void RouterV4::Route()
                     {
                         if(!solutions.empty())
                         {
-                            cout << "confirm" << endl;
-                            fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH ,true );
-                            def_gen.toOutputDef();
+//                            cout << "confirm" << endl;
+//                            fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH ,true );
+//                            def_gen.toOutputDef();
 //                            for(auto sol : solutions)
 //                            {
 //                                auto a = gridToAbsolute(sol) ;
 //                                cout << "(" << a.x << "," << a.y << "," << a.z << ")" << "->";
 //                            }
-                            cout << endl;
-                            exit(1);
+//                            cout << endl;
+//                            exit(1);
                         }
                         if( lastLowerLayer == lowestMetal && lastHigherLayer == highestMetal )
                         {
@@ -2709,6 +2710,7 @@ void RouterV4::Simulation()
     system(cmd.c_str());
     ngspice ng_spice ;
     ng_spice.initvoltage();
+//    cout << currentRoutingLists.size() << endl;
     for( auto routingList : currentRoutingLists )
     {
 //        Coordinate3D sourceGrid( getGridX(routingList.sourceCoordinate.x) , getGridY(routingList.sourceCoordinate.y) , routingList.sourceCoordinate.z );
