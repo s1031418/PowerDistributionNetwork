@@ -2053,7 +2053,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
     auto tmp = NoPassRoutingLists ;
     for( auto noPassList : tmp )
     {
-
+        
         bool skip = find(noPassList);
         if(skip) continue; 
         string powerPin = noPassList.sourceName ;
@@ -2751,6 +2751,13 @@ void RouterV4::Simulation()
                                                 {
                                                     return p1.diffPercentage < p2.diffPercentage ;
                                                 });
+    for(auto it = NoPassRoutingLists.begin() ; it != NoPassRoutingLists.end() ; )
+    {
+        if( it->diffPercentage > 20 )
+            it = NoPassRoutingLists.erase(it);
+        else
+            it++;
+    }
 //    sort(NoPassRoutingLists.begin(), NoPassRoutingLists.end());
 //    output_gen.toOutputFiles();
     output_gen.toDebugOutputFiles();

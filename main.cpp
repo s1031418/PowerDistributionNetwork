@@ -57,7 +57,8 @@ int main(int argc,  char * argv[])
     
     RouterV4 router(spiceName,defName,ouputfilesName) ;
     router.Route();
-    
+//    Graph_SP gra ;
+//    gra.Demo();
     
 //    Predictor predictor ;
 //    predictor.estimate();
