@@ -1193,6 +1193,7 @@ void RouterV4::legalizeEdge(bool allowIn , Coordinate3D source , Coordinate3D ta
 }
 bool RouterV4::isPossibleHasSolutions(Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth)
 {
+    
     auto lastLegal = getLastIlegalCoordinate(topOrient, coordinate , width , spacing , originWidth);
     if(graph_sp->isPossiableHasSolution(translate3D_1D(lastLegal))) return true;
     // bottom
@@ -2525,7 +2526,7 @@ void RouterV4::Route()
 //        optimize(steinerTrees);
     }
     // mutlisource 還沒做control
-//    optimize(steinerTrees);
+    optimize(steinerTrees);
     Simulation();
 //    delete [] steinerTrees;
     
@@ -2735,6 +2736,8 @@ void RouterV4::Simulation()
             cout << " No Pass" << endl;
             routingList.voltage = targetV;
             routingList.diffVoltage = expectVoltage - targetV;
+            routingList.diffPercentage = drop - constaint ;
+            
             NoPassRoutingLists.push_back(routingList);
             output_gen.setDebugIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop,false);
         }
@@ -2743,6 +2746,12 @@ void RouterV4::Simulation()
 //        output_gen.setIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop);
         
     }
+    
+    sort(NoPassRoutingLists.begin(), NoPassRoutingLists.end(), [](const RoutingPath & p1 , const RoutingPath & p2)->bool
+                                                {
+                                                    return p1.diffVoltage < p2.diffPercentage ;
+                                                });
+//    sort(NoPassRoutingLists.begin(), NoPassRoutingLists.end());
 //    output_gen.toOutputFiles();
     output_gen.toDebugOutputFiles();
 }

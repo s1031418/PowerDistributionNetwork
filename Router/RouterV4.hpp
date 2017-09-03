@@ -38,7 +38,8 @@ struct RoutingPath {
     string targetBlockPinName; 
     Coordinate3D targetCoordinate ;
     double voltage ;
-    double diffVoltage ; 
+    double diffVoltage ;
+    double diffPercentage ; 
 };
 
 class RouterV4 {
