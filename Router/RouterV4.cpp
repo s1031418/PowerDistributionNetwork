@@ -1960,47 +1960,55 @@ Coordinate3D RouterV4::selectTarget(Coordinate3D corner)
 bool RouterV4::checkLegal(vector<Coordinate3D> solutions)
 {
     if( solutions.empty() ) return false ;
-//    vector<Coordinate3D> viaCoordinates ;
-//    for(int i = 0 ; i < solutions.size() - 1 ; i++)
-//    {
-//        auto current = gridToAbsolute(solutions[i]);
-//        auto next = gridToAbsolute(solutions[i+1]);
-//        if( current.z != next.z )
-//        {
-//            viaCoordinates.push_back(current);
-//            viaCoordinates.push_back(next);
-//        }
-//    }
-//    if( viaCoordinates.empty() ) return true ;
-//    vector<Coordinate3D> mustUpdateCoordinates ;
-//    for( int i = 0 ; i < viaCoordinates.size() ; i++ )
-//    {
-//        for(int j = i + 1  ; j < viaCoordinates.size() ; j++)
-//        {
-//            if( viaCoordinates[i].x == viaCoordinates[j].x &&  viaCoordinates[i].y == viaCoordinates[j].y) continue ;
-//            if( viaCoordinates[i].z == viaCoordinates[j].z )
-//            {
-//                Point<int> leftDown(viaCoordinates[i].x - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE , viaCoordinates[i].y - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
-//                Point<int> rightUp(viaCoordinates[i].x + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING )  * UNITS_DISTANCE , viaCoordinates[i].y + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
-//                leftDown.x += 1 ;
-//                leftDown.y += 1 ;
-//                rightUp.x -= 1 ;
-//                rightUp.y -= 1 ;
-//                Rectangle rect1(leftDown,rightUp);
-//                Point<int> leftDown1(viaCoordinates[j].x - ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y - ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
-//                Point<int> rightUp1(viaCoordinates[j].x + ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y + ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
-//                Rectangle rect2(leftDown1,rightUp1);
-//                if( RouterHelper.isCross(rect1, rect2) )
-//                {
-//                    mustUpdateCoordinates.push_back(viaCoordinates[i]);
-////                    ileagalcnt++;
-////                    cout << "ilegal" << endl;
-//                    return false;
-//                }
-//            }
-//        }
-//    }
-////    return mustUpdateCoordinates;
+    vector<Coordinate3D> viaCoordinates ;
+    for(int i = 0 ; i < solutions.size() - 1 ; i++)
+    {
+        auto current = gridToAbsolute(solutions[i]);
+        auto next = gridToAbsolute(solutions[i+1]);
+        if( current.z != next.z )
+        {
+            viaCoordinates.push_back(current);
+            viaCoordinates.push_back(next);
+        }
+    }
+    if( viaCoordinates.empty() ) return true ;
+    vector<Coordinate3D> mustUpdateCoordinates ;
+    for( int i = 0 ; i < viaCoordinates.size() ; i++ )
+    {
+        for(int j = i + 1  ; j < viaCoordinates.size() ; j++)
+        {
+            if( viaCoordinates[i].x == viaCoordinates[j].x &&  viaCoordinates[i].y == viaCoordinates[j].y) continue ;
+            if( viaCoordinates[i].z == viaCoordinates[j].z )
+            {
+                Point<int> leftDown(viaCoordinates[i].x - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE , viaCoordinates[i].y - ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
+                Point<int> rightUp(viaCoordinates[i].x + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING )  * UNITS_DISTANCE , viaCoordinates[i].y + ( 0.5 * DEFAULTWIDTH + DEFAULTSPACING ) * UNITS_DISTANCE );
+                leftDown.x += 1 ;
+                leftDown.y += 1 ;
+                rightUp.x -= 1 ;
+                rightUp.y -= 1 ;
+                Rectangle rect1(leftDown,rightUp);
+                Point<int> leftDown1(viaCoordinates[j].x - ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y - ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
+                Point<int> rightUp1(viaCoordinates[j].x + ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[j].y + ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
+                Rectangle rect2(leftDown1,rightUp1);
+                if( RouterHelper.isCross(rect1, rect2) )
+                {
+                    int distance = RouterHelper.getManhattanDistance(viaCoordinates[i], viaCoordinates[j]);
+                    if( distance == DEFAULTWIDTH * UNITS_DISTANCE )
+                        continue;
+                    cout << "ilegal" << endl;
+                    Point<int> leftDown3(viaCoordinates[i].x - ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[i].y - ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
+                    Point<int> rightUp3(viaCoordinates[i].x + ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[i].y + ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
+                    cout << leftDown3 << " " << rightUp3 << endl;
+                    cout << rect2.LeftDown << " " << rect2.RightUp << endl;
+                    mustUpdateCoordinates.push_back(viaCoordinates[i]);
+//                    ileagalcnt++;
+//                    cout << "ilegal" << endl;
+                    return false;
+                }
+            }
+        }
+    }
+//    return mustUpdateCoordinates;
     return true ;
 }
 double RouterV4::getParallelFOM(string spiceName , double metalUsage , double originV)
@@ -2458,6 +2466,19 @@ void RouterV4::Route()
                     }
                     else
                     {
+                        if(!solutions.empty())
+                        {
+                            cout << "confirm" << endl;
+                            fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH ,true );
+                            def_gen.toOutputDef();
+//                            for(auto sol : solutions)
+//                            {
+//                                auto a = gridToAbsolute(sol) ;
+//                                cout << "(" << a.x << "," << a.y << "," << a.z << ")" << "->";
+//                            }
+                            cout << endl;
+                            exit(1);
+                        }
                         if( lastLowerLayer == lowestMetal && lastHigherLayer == highestMetal )
                         {
                             
@@ -2502,7 +2523,7 @@ void RouterV4::Route()
         
 //        optimize(steinerTrees);
     }
-    
+    // mutlisource 還沒做control
 //    optimize(steinerTrees);
     Simulation();
 //    delete [] steinerTrees;
