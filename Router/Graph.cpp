@@ -121,8 +121,8 @@ double Graph::analysis()
     double cost = 0 ;
     double totalMetalUsage = getTotalMetalUsage();
     // penalty constant
-    int penaltyParameter = totalMetalUsage  ;
-//    int penaltyParameter = 10000000 ;
+//    int penaltyParameter = totalMetalUsage  ;
+    int penaltyParameter = 10000000 ;
     // 超過 2% 會有penalty
     double penaltyRange = 5 ;
     for( auto leaf : leafs )
