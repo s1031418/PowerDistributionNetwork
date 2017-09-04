@@ -76,6 +76,7 @@ public:
     {
         return (this->x == right.x && this->y == right.y && this->z == right.z);
     }
+    
     const Coordinate3D & operator=(const Coordinate3D & right  )
     {
         if( this != &right )

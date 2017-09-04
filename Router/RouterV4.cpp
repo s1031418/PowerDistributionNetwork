@@ -2095,8 +2095,14 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
         for( auto path : paths )
             optAllCandidates.push_back(path->coordinate);
         vector<Coordinate3D> candidates ;
-        for( int j = (int)optAllCandidates.size() / 5 ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
-            candidates.push_back(optAllCandidates[j]);
+        set<int> indexes ;
+        for( int i = (int)optAllCandidates.size()/5 ; i < optAllCandidates.size() ; i += ceil((double)optAllCandidates.size()/5) )
+        {
+            indexes.insert(i);
+        }
+        indexes.insert((int)optAllCandidates.size()-1);
+        for(auto index : indexes)
+            candidates.push_back(optAllCandidates[index]);
         Coordinate3D source = optAllCandidates.front();
         bool optSuccess = false;
         while (!optSuccess)
@@ -2108,11 +2114,15 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                 
                 bool sourceAllowAll = false , targetAllowAll = false;
                 Coordinate3D target = candidates[j];
+                RoutingPair routingPair(source,target) ;
+                auto iterator = NoSolutionSet.find(routingPair);
+                if( iterator != NoSolutionSet.end() ) continue ;
                 int distance = RouterHelper.getManhattanDistance(source, target);
                 if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
                    || (distance == 0 && (source.z - target.z == 2 || target.z - source.z == -2 )) ) continue ;
                 if( source == powerSource ) sourceAllowAll = true ;
                 if( target == blockTarget ) targetAllowAll = true ;
+                
                 vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
                 if( checkLegal(solutions) )
                 {
@@ -2130,6 +2140,11 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                         minCostSolutions = solutions ;
                     }
                 }
+                else
+                {
+                    NoSolutionSet.insert(RoutingPair(source,target));
+                    NoSolutionSet.insert(RoutingPair(target,source));
+                }
             }
             
             if( minCostSolutions.empty() )
@@ -2145,6 +2160,9 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                     {
                         bool sourceAllowAll = false , targetAllowAll = false;
                         Coordinate3D target = candidates[t];
+                        RoutingPair routingPair(source,target) ;
+                        auto iterator = NoSolutionSet.find(routingPair);
+                        if( iterator != NoSolutionSet.end() ) continue ;
                         int distance = RouterHelper.getManhattanDistance(source, target);
                         if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
                            || (distance == 0 && (source.z - target.z == 2 || target.z - source.z == -2 )) ) continue ;
@@ -2166,6 +2184,11 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                                 minCost = FOM ;
                                 minCostSolutions = solutions ;
                             }
+                        }
+                        else
+                        {
+                            NoSolutionSet.insert(RoutingPair(source,target));
+                            NoSolutionSet.insert(RoutingPair(target,source));
                         }
                     }
                     if( checkLegal(minCostSolutions) )
