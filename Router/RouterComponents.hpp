@@ -76,7 +76,27 @@ public:
     {
         return (this->x == right.x && this->y == right.y && this->z == right.z);
     }
-    
+    bool operator<(const Coordinate3D & right)
+    {
+        if( this->x > right.x )
+            return true ;
+        else if( this->x < right.x )
+            return false;
+        else
+        {
+            if( this->y > right.y )
+                return true ;
+            else if( this->y < right.y )
+                return false;
+            else
+            {
+                if( this->z > right.z )
+                    return true ;
+                else
+                    return false ;
+            }
+        }
+    }
     const Coordinate3D & operator=(const Coordinate3D & right  )
     {
         if( this != &right )

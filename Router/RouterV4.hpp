@@ -42,39 +42,6 @@ struct RoutingPath {
     double diffPercentage = 10000;
 };
 
-struct RoutingPair
-{
-    RoutingPair(Coordinate3D a , Coordinate3D b)
-    {
-        pair1 = a ;
-        pair2 = b ;
-    }
-    Coordinate3D pair1 ;
-    Coordinate3D pair2 ;
-};
-struct RoutingPairComparator {
-    bool operator()(const RoutingPair & lhs, const RoutingPair & rhs) const
-    {
-        if( lhs.pair1.x > rhs.pair2.x )
-            return true ;
-        else if( lhs.pair1.x < rhs.pair2.x )
-            return false;
-        else
-        {
-            if( lhs.pair1.y > rhs.pair2.y )
-                return true ;
-            else if( lhs.pair1.y < rhs.pair2.y )
-                return false;
-            else
-            {
-                if( lhs.pair1.z > rhs.pair2.z )
-                    return true ;
-                else
-                    return false ;
-            }
-        }
-    }
-};
 
 class RouterV4 {
     
@@ -105,7 +72,7 @@ private:
     OutputFilesGenerator output_gen ;
     // 用來查詢各個點的width
     
-    set<RoutingPair,RoutingPairComparator> NoSolutionSet ; 
+    set<string> NoSolutionSet ;
     
     map<string,BlockCoordinate> leftBlockMap ;
     

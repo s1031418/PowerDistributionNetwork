@@ -2114,9 +2114,13 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                 
                 bool sourceAllowAll = false , targetAllowAll = false;
                 Coordinate3D target = candidates[j];
-                RoutingPair routingPair(source,target) ;
-                auto iterator = NoSolutionSet.find(routingPair);
-                if( iterator != NoSolutionSet.end() ) continue ;
+                string key = source.toString() + target.toString() ;
+                auto iterator = NoSolutionSet.find(key);
+                if( iterator != NoSolutionSet.end() )
+                {
+                    cout << "find1" << endl;
+                    continue ;
+                }
                 int distance = RouterHelper.getManhattanDistance(source, target);
                 if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
                    || (distance == 0 && (source.z - target.z == 2 || target.z - source.z == -2 )) ) continue ;
@@ -2142,8 +2146,10 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                 }
                 else
                 {
-                    NoSolutionSet.insert(RoutingPair(source,target));
-                    NoSolutionSet.insert(RoutingPair(target,source));
+                    string key1 = source.toString() + target.toString() ;
+                    string key2 = target.toString() + source.toString() ;
+                    NoSolutionSet.insert(key1);
+                    NoSolutionSet.insert(key2);
                 }
             }
             
@@ -2160,9 +2166,13 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                     {
                         bool sourceAllowAll = false , targetAllowAll = false;
                         Coordinate3D target = candidates[t];
-                        RoutingPair routingPair(source,target) ;
-                        auto iterator = NoSolutionSet.find(routingPair);
-                        if( iterator != NoSolutionSet.end() ) continue ;
+                        string key = source.toString() + target.toString() ;
+                        auto iterator = NoSolutionSet.find(key);
+                        if( iterator != NoSolutionSet.end() )
+                        {
+                            cout << "find2" << endl;
+                            continue ;
+                        }
                         int distance = RouterHelper.getManhattanDistance(source, target);
                         if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
                            || (distance == 0 && (source.z - target.z == 2 || target.z - source.z == -2 )) ) continue ;
@@ -2187,8 +2197,10 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                         }
                         else
                         {
-                            NoSolutionSet.insert(RoutingPair(source,target));
-                            NoSolutionSet.insert(RoutingPair(target,source));
+                            string key1 = source.toString() + target.toString() ;
+                            string key2 = target.toString() + source.toString() ;
+                            NoSolutionSet.insert(key1);
+                            NoSolutionSet.insert(key2);
                         }
                     }
                     if( checkLegal(minCostSolutions) )
