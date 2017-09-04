@@ -2140,10 +2140,10 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                 {
                     double minCost = INT_MAX ;
                     vector<Coordinate3D> minCostSolutions ;
-                    for(int i = 0 ; i < multiPinCandidates[powerPin].size() ; i+= multiPinCandidates[powerPin].size() / 100)
+                    for( int t = 0 ; t < candidates.size() ; t ++  )
                     {
                         bool sourceAllowAll = false , targetAllowAll = false;
-                        Coordinate3D target = multiPinCandidates[powerPin][i];
+                        Coordinate3D target = candidates[t];
                         int distance = RouterHelper.getManhattanDistance(source, target);
                         if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
                            || (distance == 0 && (source.z - target.z == 2 || target.z - source.z == -2 )) ) continue ;
@@ -2171,7 +2171,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                     {
                         genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
                         fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
-                        //saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
+                        saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
                         def_gen.toOutputDef();
                         Simulation() ;
                         bool find = false ;
@@ -2183,6 +2183,18 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                             }
                         }
                         if( !find ) optSuccess = true ;
+                        if( !optSuccess )
+                        {
+                            for(auto mergeCandidate : mergeCandidates[block+blockPin])
+                            {
+                                auto it = find_if(candidates.begin(), candidates.end(), [mergeCandidate]( Coordinate3D & coordinate)
+                                                  {
+                                                      return (coordinate == mergeCandidate) ;
+                                                  });
+                                if( *it == blockTarget ) continue;
+                                if( it == candidates.end() ) candidates.push_back(mergeCandidate);
+                            }
+                        }
                     }
                     else
                         break;
@@ -2215,7 +2227,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                                 {
                                     return (coordinate == mergeCandidate) ;
                                 });
-                        if( *it == source ) continue;
+                        if( *it == powerSource ) continue;
                         if( it == candidates.end() ) candidates.push_back(mergeCandidate);
                     }
                 }
