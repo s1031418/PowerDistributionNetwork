@@ -2138,6 +2138,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                 source = optAllCandidates.back();
                 while (!optSuccess)
                 {
+                    cout << "exchange " << endl;
                     double minCost = INT_MAX ;
                     vector<Coordinate3D> minCostSolutions ;
                     for( int t = 0 ; t < candidates.size() ; t ++  )

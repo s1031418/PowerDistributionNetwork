@@ -645,7 +645,7 @@ string PDNHelper::getAlias(string MetalName)
 }
 double PDNHelper::getManhattanDistance(Coordinate3D pt1 , Coordinate3D pt2)
 {
-    return abs((int)pt1.x-(int)pt2.x) + abs((int)pt1.y - (int)pt2.y) + abs((int)pt1.z - (int)pt2.z);
+    return abs((int)pt1.x-(int)pt2.x) + abs((int)pt1.y - (int)pt2.y) ;
 }
 double PDNHelper::getManhattanDistance(Point<int> pt1 , Point<int> pt2)
 {
