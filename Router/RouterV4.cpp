@@ -1073,35 +1073,99 @@ Coordinate3D RouterV4::gridToAbsolute(Coordinate3D gridCoordinate)
 }
 void RouterV4::saveMultiPinCandidates(string powerPin , string block , string blockPin , vector<Coordinate3D> solutions )
 {
+    map<int,Coordinate3D> distanceTable ;
+    int cuttingRange = 5 ;
+    Coordinate3D source , target ;
+    source = gridToAbsolute(solutions.front());
+    target = gridToAbsolute(solutions.back());
+    int manhattanDistance = RouterHelper.getManhattanDistance(source, target);
+    int range = manhattanDistance / cuttingRange ;
+    
     mergeCandidates.clear();
     string key = block + blockPin ;
     if( multiPinCandidates.find(powerPin) == multiPinCandidates.end() ) multiPinCandidates.insert(make_pair(powerPin, vector<Coordinate3D>()));
     for( auto solution : solutions )
     {
         Coordinate3D coordinate = gridToAbsolute(solution);
+        distanceTable.insert(make_pair(RouterHelper.getManhattanDistance(source, coordinate), solution));
         multiPinCandidates[powerPin].push_back(coordinate);
     }
+    
     if( mergeCandidates.find(key) == mergeCandidates.end() )  mergeCandidates.insert(make_pair(key, vector<Coordinate3D>()));
+    
+    int minDistance[5] = { INT_MAX , INT_MAX , INT_MAX, INT_MAX , INT_MAX };
+    Coordinate3D minCandidate[5] ;
     set<int> indexes ;
-    for( int i = 0 ; i < solutions.size() ; i += ceil((double)solutions.size()/5) )
+    
+    for( auto distance : distanceTable )
     {
-        indexes.insert(i);
+        if( minDistance[0] > abs(distance.first - range))
+        {
+            minDistance[0] = abs(distance.first - range) ;
+            minCandidate[0] = distance.second;
+        }
+        if( minDistance[1] > abs(distance.first - range * 2) )
+        {
+            minDistance[1] = abs(distance.first - range * 2) ;
+            minCandidate[1] = distance.second;
+        }
+        if( minDistance[2] > abs(distance.first - range * 3 ))
+        {
+            minDistance[2] = abs(distance.first - range * 3 ) ;
+            minCandidate[2] = distance.second;
+        }
+        if( minDistance[3] > abs(distance.first - range * 4 ) )
+        {
+            minDistance[3] = abs(distance.first - range * 4 );
+            minCandidate[3] = distance.second;
+        }
+        if( minDistance[4] > abs(distance.first - range * 5 ))
+        {
+            minDistance[4] = abs(distance.first - range * 5 ) ;
+            minCandidate[4] = distance.second;
+        }
     }
-    for(auto index : indexes)
-        mergeCandidates[key].push_back(gridToAbsolute(solutions[index]));
-//    mergeCandidates[key].push_back(gridToAbsolute(solutions.front()));
-//    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 1 / 5  ]));
-//    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 2 / 5  ]));
-//    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 3 / 5  ]));
-//    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 4 / 5  ]));
-//    mergeCandidates[key].push_back(gridToAbsolute(solutions.back()));
+    mergeCandidates[key].push_back(gridToAbsolute(solutions.front()));
+    mergeCandidates[key].push_back(gridToAbsolute(solutions.back()));
+    for(int i = 0 ; i < 5 ; i++)
+    {
+        bool insert = true ;
+        Coordinate3D absCoordinate = gridToAbsolute(minCandidate[i]) ;
+        for( int j = 0 ; j < mergeCandidates[key].size() ; j ++)
+        {
+            if( mergeCandidates[key][j] == absCoordinate )
+            {
+                insert = false ;
+                break;
+            }
+        }
+        if( insert ) mergeCandidates[key].push_back(absCoordinate);
+    }
+    
     if( normalDistributionCandidates.find(powerPin) == normalDistributionCandidates.end() ) normalDistributionCandidates.insert(make_pair(powerPin, vector<Coordinate3D>()));
     normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.front()));
-    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 1 / 5  ]));
-    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 2 / 5  ]));
-    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 3 / 5  ]));
-    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 4 / 5  ]));
     normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.back()));
+    for(int i = 0 ; i < 5 ; i++)
+    {
+        bool insert = true ;
+        Coordinate3D absCoordinate = gridToAbsolute(minCandidate[i]) ;
+        for( int j = 0 ; j < normalDistributionCandidates[powerPin].size() ; j ++)
+        {
+            if( normalDistributionCandidates[powerPin][j] == absCoordinate )
+            {
+                insert = false ;
+                break;
+            }
+        }
+        if( insert ) normalDistributionCandidates[powerPin].push_back(absCoordinate);
+    }
+    
+//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.front()));
+//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 1 / 5  ]));
+//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 2 / 5  ]));
+//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 3 / 5  ]));
+//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 4 / 5  ]));
+//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.back()));
 }
 bool RouterV4::isMultiPin(string powerPin)
 {
