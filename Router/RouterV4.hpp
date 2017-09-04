@@ -229,7 +229,7 @@ private:
     
     bool isPossibleHasSolutions(Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth);
     
-    double getParallelFOM(string spiceName , double metalUsage , double originV);
+    double getParallelFOM(string spiceName , double metalUsage );
     
     bool checkLegal(vector<Coordinate3D> solutions);
     

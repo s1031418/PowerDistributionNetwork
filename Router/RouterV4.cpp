@@ -1073,6 +1073,7 @@ Coordinate3D RouterV4::gridToAbsolute(Coordinate3D gridCoordinate)
 }
 void RouterV4::saveMultiPinCandidates(string powerPin , string block , string blockPin , vector<Coordinate3D> solutions )
 {
+    mergeCandidates.clear();
     string key = block + blockPin ;
     if( multiPinCandidates.find(powerPin) == multiPinCandidates.end() ) multiPinCandidates.insert(make_pair(powerPin, vector<Coordinate3D>()));
     for( auto solution : solutions )
@@ -1081,12 +1082,19 @@ void RouterV4::saveMultiPinCandidates(string powerPin , string block , string bl
         multiPinCandidates[powerPin].push_back(coordinate);
     }
     if( mergeCandidates.find(key) == mergeCandidates.end() )  mergeCandidates.insert(make_pair(key, vector<Coordinate3D>()));
-    mergeCandidates[key].push_back(gridToAbsolute(solutions.front()));
-    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 1 / 5  ]));
-    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 2 / 5  ]));
-    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 3 / 5  ]));
-    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 4 / 5  ]));
-    mergeCandidates[key].push_back(gridToAbsolute(solutions.back()));
+    set<int> indexes ;
+    for( int i = 0 ; i < solutions.size() ; i += ceil((double)solutions.size()/5) )
+    {
+        indexes.insert(i);
+    }
+    for(auto index : indexes)
+        mergeCandidates[key].push_back(gridToAbsolute(solutions[index]));
+//    mergeCandidates[key].push_back(gridToAbsolute(solutions.front()));
+//    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 1 / 5  ]));
+//    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 2 / 5  ]));
+//    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 3 / 5  ]));
+//    mergeCandidates[key].push_back(gridToAbsolute(solutions[ solutions.size() * 4 / 5  ]));
+//    mergeCandidates[key].push_back(gridToAbsolute(solutions.back()));
     if( normalDistributionCandidates.find(powerPin) == normalDistributionCandidates.end() ) normalDistributionCandidates.insert(make_pair(powerPin, vector<Coordinate3D>()));
     normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.front()));
     normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 1 / 5  ]));
@@ -2012,7 +2020,7 @@ bool RouterV4::checkLegal(vector<Coordinate3D> solutions)
 //    return mustUpdateCoordinates;
     return true ;
 }
-double RouterV4::getParallelFOM(string spiceName , double metalUsage , double originV)
+double RouterV4::getParallelFOM(string spiceName , double metalUsage )
 {
     string cmd = "./ngspice " + spiceName + " -o simulation" ;
     system(cmd.c_str());
@@ -2026,7 +2034,7 @@ double RouterV4::getParallelFOM(string spiceName , double metalUsage , double or
         string targetKey = getNgSpiceKey(noPassList.targetCoordinate) ;
         if( ng_spice.voltages.find(targetKey) == ng_spice.voltages.end() ) assert(0);
         double targetV = ng_spice.voltages[targetKey];
-        double slack = targetV - originV ;
+        double slack = targetV - noPassList.voltage ;
         if( noPassList.diffVoltage > slack  )
             cost += (noPassList.diffVoltage - slack) * penaltyParameter ;
     }
@@ -2059,14 +2067,13 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
         string block = noPassList.targetBlockName ;
         string blockPin = noPassList.targetBlockPinName ;
         double originV = noPassList.voltage ;
-        double minCost = INT_MAX ;
+        
         string key = block + blockPin ;
         
         vector<Block> powerPinCoordinates = RouterHelper.getPowerPinCoordinate(powerPin);
         Block BlockPinCoordinate = RouterHelper.getBlock(block,blockPin);
         Coordinate3D blockTarget =  gridToAbsolute( getOuterCoordinate(BlockPinCoordinate, DEFAULTWIDTH, DEFAULTSPACING));
         Coordinate3D powerSource = gridToAbsolute(getOuterCoordinate(powerPinCoordinates[0], DEFAULTWIDTH, DEFAULTSPACING));
-        vector<Coordinate3D> lastSolutions ;
         Graph * steinerTree = nullptr ;
         for(auto st : steinerTrees)
         {
@@ -2080,17 +2087,24 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
         // 處理multi source
         // multisource
 //        if( steinerTree == nullptr )
-        auto optAllCandidates = steinerTree->getPath( blockTarget) ;
-        Coordinate3D source = optAllCandidates[0]->coordinate;
+        auto paths = steinerTree->getPath( blockTarget) ;
+        vector<Coordinate3D> optAllCandidates ;
+        for( auto path : paths )
+            optAllCandidates.push_back(path->coordinate);
+        vector<Coordinate3D> candidates ;
+        for( int j = (int)optAllCandidates.size() / 5 ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
+            candidates.push_back(optAllCandidates[j]);
+        Coordinate3D source = optAllCandidates[0];
         bool optSuccess = false;
         while (!optSuccess)
         {
             vector<Coordinate3D> minCostSolutions ;
-            
-            for( int j = (int)optAllCandidates.size() / 5 ; j < optAllCandidates.size() ; j += optAllCandidates.size() / 5  )
+            double minCost = INT_MAX ;
+            for( int j = 0 ; j < candidates.size() ; j ++  )
             {
+                
                 bool sourceAllowAll = false , targetAllowAll = false;
-                Coordinate3D target = optAllCandidates[j]->coordinate;
+                Coordinate3D target = candidates[j];
                 int distance = RouterHelper.getManhattanDistance(source, target);
                 if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
                    || (distance == 0 && (source.z - target.z == 2 || target.z - source.z == -2 )) ) continue ;
@@ -2105,7 +2119,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                     genResistance(solutions, powerPin , tmp , DEFAULTWIDTH);
                     tmp.toSpice();
                     tmp.addSpiceCmd();
-                    double FOM = getParallelFOM("tmp.sp" , metalUsage , originV);
+                    double FOM = getParallelFOM("tmp.sp" , metalUsage);
                     if( FOM > INT_MAX ) assert(0);
                     if( minCost > FOM )
                     {
@@ -2114,6 +2128,8 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                     }
                 }
             }
+            for( int j = 0 ; j < candidates.size() ; j ++  )
+                cout << candidates[j].x << " " << candidates[j].y << " " << candidates[j].z << endl;
             if( minCostSolutions.empty() )
             {
 //                source = optAllCandidates.back()->coordinate;
@@ -2173,7 +2189,6 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
             }
             if( checkLegal(minCostSolutions) )
             {
-                lastSolutions = minCostSolutions ;
                 genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
                 fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
                 saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
@@ -2188,6 +2203,18 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                     }
                 }
                 if( !find ) optSuccess = true ;
+//                if( !optSuccess )
+//                {
+//                    for(auto mergeCandidate : mergeCandidates[block+blockPin])
+//                    {
+//                        auto it = find_if(candidates.begin(), candidates.end(), [mergeCandidate]( Coordinate3D & coordinate)
+//                                {
+//                                    return (coordinate == mergeCandidate) ;
+//                                });
+//                        if( *it == source ) continue;
+//                        if( it == candidates.end() ) candidates.push_back(mergeCandidate);
+//                    }
+//                }
             }
         }
 //        if(!optSuccess)
