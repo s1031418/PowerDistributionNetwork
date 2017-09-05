@@ -242,6 +242,8 @@ private:
     void opt1(Graph * steinerTree);
     
     bool find(RoutingPath routingPath);
+    
+    vector<Coordinate3D> getSplitVertexes( bool gridOrAbs , int cuttingSegement , vector<Coordinate3D> &  solutions );
 };
 
 #endif /* RouterV4_hpp */

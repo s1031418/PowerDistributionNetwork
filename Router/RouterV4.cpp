@@ -1071,15 +1071,56 @@ Coordinate3D RouterV4::gridToAbsolute(Coordinate3D gridCoordinate)
     coordinateAbs.z = gridCoordinate.z ;
     return coordinateAbs ;
 }
+vector<Coordinate3D> RouterV4::getSplitVertexes( bool gridOrAbs , int cuttingSegement , vector<Coordinate3D> &  solutions )
+{
+    vector<Coordinate3D> absSolutions ;
+    map<int,Coordinate3D> distanceTable ;
+    Coordinate3D source , target ;
+    if( gridOrAbs )
+    {
+        source = gridToAbsolute(solutions.front());
+        target = gridToAbsolute(solutions.back());
+        for( auto sol : solutions )
+        {
+            Coordinate3D abs = gridToAbsolute(sol) ;
+            absSolutions.push_back(abs);
+            distanceTable.insert(make_pair(RouterHelper.getManhattanDistance(source, abs), abs));
+        }
+    }
+    else
+    {
+        source = solutions.front() ;
+        target = solutions.back() ;
+        for( auto sol : solutions )
+        {
+            absSolutions.push_back(sol);
+            distanceTable.insert(make_pair(RouterHelper.getManhattanDistance(source, sol), sol));
+        }
+    }
+    source = absSolutions.front();
+    target = absSolutions.back();
+    int manhattanDistance = RouterHelper.getManhattanDistance(source, target);
+    int range = manhattanDistance / cuttingSegement ;
+    vector<int> minDistance(cuttingSegement);
+    for(auto & x : minDistance)
+        x = INT_MAX;
+    vector<Coordinate3D> minCandidates(cuttingSegement);
+    
+    for( auto distance : distanceTable )
+    {
+        for( int i = 0 ; i < cuttingSegement ; i++ )
+        {
+            if(minDistance[i] > abs(distance.first - range * ( i + 1)))
+            {
+                minDistance[i] = abs(distance.first - range * ( i + 1)) ;
+                minCandidates[i] = distance.second;
+            }
+        }
+    }
+    return minCandidates ;
+}
 void RouterV4::saveMultiPinCandidates(string powerPin , string block , string blockPin , vector<Coordinate3D> solutions )
 {
-    map<int,Coordinate3D> distanceTable ;
-    int cuttingRange = 5 ;
-    Coordinate3D source , target ;
-    source = gridToAbsolute(solutions.front());
-    target = gridToAbsolute(solutions.back());
-    int manhattanDistance = RouterHelper.getManhattanDistance(source, target);
-    int range = manhattanDistance / cuttingRange ;
     
     mergeCandidates.clear();
     string key = block + blockPin ;
@@ -1087,84 +1128,50 @@ void RouterV4::saveMultiPinCandidates(string powerPin , string block , string bl
     for( auto solution : solutions )
     {
         Coordinate3D coordinate = gridToAbsolute(solution);
-        distanceTable.insert(make_pair(RouterHelper.getManhattanDistance(source, coordinate), solution));
         multiPinCandidates[powerPin].push_back(coordinate);
     }
     
     if( mergeCandidates.find(key) == mergeCandidates.end() )  mergeCandidates.insert(make_pair(key, vector<Coordinate3D>()));
     
-    int minDistance[5] = { INT_MAX , INT_MAX , INT_MAX, INT_MAX , INT_MAX };
-    Coordinate3D minCandidate[5] ;
+    int mergeCandidateCuttingRange = 5 ;
     
-    for( auto distance : distanceTable )
-    {
-        if( minDistance[0] > abs(distance.first - range))
-        {
-            minDistance[0] = abs(distance.first - range) ;
-            minCandidate[0] = distance.second;
-        }
-        if( minDistance[1] > abs(distance.first - range * 2) )
-        {
-            minDistance[1] = abs(distance.first - range * 2) ;
-            minCandidate[1] = distance.second;
-        }
-        if( minDistance[2] > abs(distance.first - range * 3 ))
-        {
-            minDistance[2] = abs(distance.first - range * 3 ) ;
-            minCandidate[2] = distance.second;
-        }
-        if( minDistance[3] > abs(distance.first - range * 4 ) )
-        {
-            minDistance[3] = abs(distance.first - range * 4 );
-            minCandidate[3] = distance.second;
-        }
-        if( minDistance[4] > abs(distance.first - range * 5 ))
-        {
-            minDistance[4] = abs(distance.first - range * 5 ) ;
-            minCandidate[4] = distance.second;
-        }
-    }
+    auto mergeSpiltVertexs = getSplitVertexes(true, mergeCandidateCuttingRange, solutions);
+    
     mergeCandidates[key].push_back(gridToAbsolute(solutions.front()));
     mergeCandidates[key].push_back(gridToAbsolute(solutions.back()));
-    for(int i = 0 ; i < 5 ; i++)
+    for( auto spiltVertex : mergeSpiltVertexs )
     {
         bool insert = true ;
-        Coordinate3D absCoordinate = gridToAbsolute(minCandidate[i]) ;
         for( int j = 0 ; j < mergeCandidates[key].size() ; j ++)
         {
-            if( mergeCandidates[key][j] == absCoordinate )
+            if( mergeCandidates[key][j] == spiltVertex )
             {
-                insert = false ;
+                insert = false;
                 break;
             }
         }
-        if( insert ) mergeCandidates[key].push_back(absCoordinate);
+        if(insert) mergeCandidates[key].push_back(spiltVertex);
     }
     
     if( normalDistributionCandidates.find(powerPin) == normalDistributionCandidates.end() ) normalDistributionCandidates.insert(make_pair(powerPin, vector<Coordinate3D>()));
+    int normalDistributionCandidatesCuttingRange = 5 ;
+    auto normalSpiltVertexs = getSplitVertexes(true, normalDistributionCandidatesCuttingRange, solutions);
+    
     normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.front()));
     normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.back()));
-    for(int i = 0 ; i < 5 ; i++)
+    for( auto spiltVertex : normalSpiltVertexs )
     {
         bool insert = true ;
-        Coordinate3D absCoordinate = gridToAbsolute(minCandidate[i]) ;
         for( int j = 0 ; j < normalDistributionCandidates[powerPin].size() ; j ++)
         {
-            if( normalDistributionCandidates[powerPin][j] == absCoordinate )
+            if( normalDistributionCandidates[powerPin][j] == spiltVertex )
             {
-                insert = false ;
+                insert = false;
                 break;
             }
         }
-        if( insert ) normalDistributionCandidates[powerPin].push_back(absCoordinate);
+        if(insert) normalDistributionCandidates[powerPin].push_back(spiltVertex);
     }
-    
-//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.front()));
-//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 1 / 5  ]));
-//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 2 / 5  ]));
-//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 3 / 5  ]));
-//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions[ solutions.size() * 4 / 5  ]));
-//    normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.back()));
 }
 bool RouterV4::isMultiPin(string powerPin)
 {
@@ -2122,6 +2129,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
     
 //    Simulation();
     auto tmp = NoPassRoutingLists ;
+    
     for( auto noPassList : tmp )
     {
         bool skip = find(noPassList);
@@ -2155,60 +2163,31 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
 //        if( steinerTree == nullptr )
         auto paths = steinerTree->getPath( blockTarget) ;
         vector<Coordinate3D> optAllCandidates ;
-        map<int,Coordinate3D> distanceTable ;
+        int masterBranchCuttingRange = 5 ;
+        
         for( auto path : paths )
         {
             optAllCandidates.push_back(path->coordinate);
-            distanceTable.insert(make_pair(RouterHelper.getManhattanDistance(optAllCandidates.front(), path->coordinate), path->coordinate));
         }
-        vector<Coordinate3D> candidates ;
-        int manhattanDistance = RouterHelper.getManhattanDistance(optAllCandidates.front(), optAllCandidates.back());
-        int range = manhattanDistance / 5 ;
-        int minDistance[5] = { INT_MAX , INT_MAX , INT_MAX, INT_MAX , INT_MAX };
-        Coordinate3D minCandidate[5] ;
+        auto masterBranchSpiltVertexes = getSplitVertexes(false, masterBranchCuttingRange, optAllCandidates);
         
-        for( auto distance : distanceTable )
-        {
-            if( minDistance[0] > abs(distance.first - range))
-            {
-                minDistance[0] = abs(distance.first - range) ;
-                minCandidate[0] = distance.second;
-            }
-            if( minDistance[1] > abs(distance.first - range * 2) )
-            {
-                minDistance[1] = abs(distance.first - range * 2) ;
-                minCandidate[1] = distance.second;
-            }
-            if( minDistance[2] > abs(distance.first - range * 3 ))
-            {
-                minDistance[2] = abs(distance.first - range * 3 ) ;
-                minCandidate[2] = distance.second;
-            }
-            if( minDistance[3] > abs(distance.first - range * 4 ) )
-            {
-                minDistance[3] = abs(distance.first - range * 4 );
-                minCandidate[3] = distance.second;
-            }
-            if( minDistance[4] > abs(distance.first - range * 5 ))
-            {
-                minDistance[4] = abs(distance.first - range * 5 ) ;
-                minCandidate[4] = distance.second;
-            }
-        }
+        vector<Coordinate3D> candidates ;
+        
+        
         candidates.push_back(optAllCandidates.back());
-        for(int i = 0 ; i < 5 ; i++)
+        candidates.push_back(optAllCandidates.front());
+        for( auto spiltVertex : masterBranchSpiltVertexes )
         {
             bool insert = true ;
-            Coordinate3D absCoordinate = minCandidate[i] ;
             for( int j = 0 ; j < candidates.size() ; j ++)
             {
-                if( candidates[j] == absCoordinate )
+                if( candidates[j] == spiltVertex )
                 {
-                    insert = false ;
+                    insert = false;
                     break;
                 }
             }
-            if( insert ) candidates.push_back(absCoordinate);
+            if(insert) candidates.push_back(spiltVertex);
         }
         
         Coordinate3D source = optAllCandidates.front();
