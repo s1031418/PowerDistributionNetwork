@@ -2318,18 +2318,18 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                             }
                         }
                         if( !find ) optSuccess = true ;
-                        if( !optSuccess )
-                        {
-                            for(auto mergeCandidate : mergeCandidates[block+blockPin])
-                            {
-                                auto it = find_if(candidates.begin(), candidates.end(), [mergeCandidate]( Coordinate3D & coordinate)
-                                                  {
-                                                      return (coordinate == mergeCandidate) ;
-                                                  });
-                                if( *it == blockTarget ) continue;
-                                if( it == candidates.end() ) candidates.push_back(mergeCandidate);
-                            }
-                        }
+//                        if( !optSuccess )
+//                        {
+//                            for(auto mergeCandidate : mergeCandidates[block+blockPin])
+//                            {
+//                                auto it = find_if(candidates.begin(), candidates.end(), [mergeCandidate]( Coordinate3D & coordinate)
+//                                                  {
+//                                                      return (coordinate == mergeCandidate) ;
+//                                                  });
+//                                if( *it == blockTarget ) continue;
+//                                if( it == candidates.end() ) candidates.push_back(mergeCandidate);
+//                            }
+//                        }
                     }
                     else
                         break;
@@ -2355,18 +2355,18 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                     }
                 }
                 if( !find ) optSuccess = true ;
-                if( !optSuccess )
-                {
-                    for(auto mergeCandidate : mergeCandidates[block+blockPin])
-                    {
-                        auto it = find_if(candidates.begin(), candidates.end(), [mergeCandidate]( Coordinate3D & coordinate)
-                                {
-                                    return (coordinate == mergeCandidate) ;
-                                });
-                        if( *it == powerSource ) continue;
-                        if( it == candidates.end() ) candidates.push_back(mergeCandidate);
-                    }
-                }
+//                if( !optSuccess )
+//                {
+//                    for(auto mergeCandidate : mergeCandidates[block+blockPin])
+//                    {
+//                        auto it = find_if(candidates.begin(), candidates.end(), [mergeCandidate]( Coordinate3D & coordinate)
+//                                {
+//                                    return (coordinate == mergeCandidate) ;
+//                                });
+//                        if( *it == powerSource ) continue;
+//                        if( it == candidates.end() ) candidates.push_back(mergeCandidate);
+//                    }
+//                }
             }
         }
 //        if(!optSuccess)
