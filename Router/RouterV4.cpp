@@ -1095,7 +1095,6 @@ void RouterV4::saveMultiPinCandidates(string powerPin , string block , string bl
     
     int minDistance[5] = { INT_MAX , INT_MAX , INT_MAX, INT_MAX , INT_MAX };
     Coordinate3D minCandidate[5] ;
-    set<int> indexes ;
     
     for( auto distance : distanceTable )
     {
@@ -2156,17 +2155,62 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
 //        if( steinerTree == nullptr )
         auto paths = steinerTree->getPath( blockTarget) ;
         vector<Coordinate3D> optAllCandidates ;
+        map<int,Coordinate3D> distanceTable ;
         for( auto path : paths )
-            optAllCandidates.push_back(path->coordinate);
-        vector<Coordinate3D> candidates ;
-        set<int> indexes ;
-        for( int i = (int)optAllCandidates.size()/5 ; i < optAllCandidates.size() ; i += ceil((double)optAllCandidates.size()/5) )
         {
-            indexes.insert(i);
+            optAllCandidates.push_back(path->coordinate);
+            distanceTable.insert(make_pair(RouterHelper.getManhattanDistance(optAllCandidates.front(), path->coordinate), path->coordinate));
         }
-        indexes.insert((int)optAllCandidates.size()-1);
-        for(auto index : indexes)
-            candidates.push_back(optAllCandidates[index]);
+        vector<Coordinate3D> candidates ;
+        int manhattanDistance = RouterHelper.getManhattanDistance(optAllCandidates.front(), optAllCandidates.back());
+        int range = manhattanDistance / 5 ;
+        int minDistance[5] = { INT_MAX , INT_MAX , INT_MAX, INT_MAX , INT_MAX };
+        Coordinate3D minCandidate[5] ;
+        
+        for( auto distance : distanceTable )
+        {
+            if( minDistance[0] > abs(distance.first - range))
+            {
+                minDistance[0] = abs(distance.first - range) ;
+                minCandidate[0] = distance.second;
+            }
+            if( minDistance[1] > abs(distance.first - range * 2) )
+            {
+                minDistance[1] = abs(distance.first - range * 2) ;
+                minCandidate[1] = distance.second;
+            }
+            if( minDistance[2] > abs(distance.first - range * 3 ))
+            {
+                minDistance[2] = abs(distance.first - range * 3 ) ;
+                minCandidate[2] = distance.second;
+            }
+            if( minDistance[3] > abs(distance.first - range * 4 ) )
+            {
+                minDistance[3] = abs(distance.first - range * 4 );
+                minCandidate[3] = distance.second;
+            }
+            if( minDistance[4] > abs(distance.first - range * 5 ))
+            {
+                minDistance[4] = abs(distance.first - range * 5 ) ;
+                minCandidate[4] = distance.second;
+            }
+        }
+        candidates.push_back(optAllCandidates.back());
+        for(int i = 0 ; i < 5 ; i++)
+        {
+            bool insert = true ;
+            Coordinate3D absCoordinate = minCandidate[i] ;
+            for( int j = 0 ; j < candidates.size() ; j ++)
+            {
+                if( candidates[j] == absCoordinate )
+                {
+                    insert = false ;
+                    break;
+                }
+            }
+            if( insert ) candidates.push_back(absCoordinate);
+        }
+        
         Coordinate3D source = optAllCandidates.front();
         bool optSuccess = false;
         while (!optSuccess)
