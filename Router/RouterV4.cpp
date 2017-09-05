@@ -2121,6 +2121,19 @@ bool RouterV4::find(RoutingPath routingPath)
     }
     return false;
 }
+void RouterV4::updateNoPassLists()
+{
+//    bool
+    for(auto it = NoPassRoutingLists.begin() ; it != NoPassRoutingLists.end() ; )
+    {
+        bool isfind = find(*it);
+        if( isfind )
+            it = NoPassRoutingLists.erase(it);
+        else
+            it++ ;
+    }
+    
+}
 void RouterV4::optimize(vector<Graph *> steinerTrees)
 {
     // opt stage1
@@ -2128,12 +2141,11 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
 //    opt1(steinerTree);
     
 //    Simulation();
-    auto tmp = NoPassRoutingLists ;
     
-    for( auto noPassList : tmp )
+    
+    while (!NoPassRoutingLists.empty())
     {
-        bool skip = find(noPassList);
-        if(skip) continue; 
+        RoutingPath noPassList = NoPassRoutingLists.front();
         string powerPin = noPassList.sourceName ;
         string block = noPassList.targetBlockName ;
         string blockPin = noPassList.targetBlockPinName ;
@@ -2324,6 +2336,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                 }
 //                continue;
                 // force exit
+                skipLists.push_back(noPassList);
                 break;
             }
             if( checkLegal(minCostSolutions) )
@@ -2357,7 +2370,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
             }
         }
 //        if(!optSuccess)
-        skipLists.push_back(noPassList);
+        updateNoPassLists();
     }
 //    vector<RoutingPath> skipLists ;
 //    while( !NoPassRoutingLists.empty() )
@@ -2880,7 +2893,7 @@ void RouterV4::Simulation()
     ngspice ng_spice ;
     ng_spice.initvoltage();
 //    cout << currentRoutingLists.size() << endl;
-    for( auto routingList : currentRoutingLists )
+    for( auto  routingList : currentRoutingLists )
     {
 //        Coordinate3D sourceGrid( getGridX(routingList.sourceCoordinate.x) , getGridY(routingList.sourceCoordinate.y) , routingList.sourceCoordinate.z );
 //        Coordinate3D targetGrid( getGridX(routingList.targetCoordinate.x) , getGridY(routingList.targetCoordinate.y) , routingList.targetCoordinate.z );

@@ -244,6 +244,8 @@ private:
     bool find(RoutingPath routingPath);
     
     vector<Coordinate3D> getSplitVertexes( bool gridOrAbs , int cuttingSegement , vector<Coordinate3D> &  solutions );
+    
+    void updateNoPassLists();
 };
 
 #endif /* RouterV4_hpp */
