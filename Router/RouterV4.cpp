@@ -458,7 +458,10 @@ void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName
     if( create )
         specialnet.DESTINATIONMAPS.insert(make_pair(blockName, blockPinName));
     else
-        iter->second.DESTINATIONMAPS.insert(make_pair(blockName, blockPinName));
+    {
+        if( iter->second.DESTINATIONMAPS.find(blockName) == iter->second.DESTINATIONMAPS.end() )
+            iter->second.DESTINATIONMAPS.insert(make_pair(blockName, blockPinName));
+    }
     specialnet.USE = "POWER";
     
     
@@ -1155,7 +1158,7 @@ void RouterV4::saveMultiPinCandidates(string powerPin , string block , string bl
 //    }
     
     if( normalDistributionCandidates.find(powerPin) == normalDistributionCandidates.end() ) normalDistributionCandidates.insert(make_pair(powerPin, vector<Coordinate3D>()));
-    int normalDistributionCandidatesCuttingRange = 5 ;
+    int normalDistributionCandidatesCuttingRange = 20 ;
     auto normalSpiltVertexs = getSplitVertexes(true, normalDistributionCandidatesCuttingRange, solutions);
     
     normalDistributionCandidates[powerPin].push_back(gridToAbsolute(solutions.front()));
@@ -2168,6 +2171,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
     while (!NoPassRoutingLists.empty())
     {
         RoutingPath noPassList = NoPassRoutingLists.front();
+        
         string powerPin = noPassList.sourceName ;
         string block = noPassList.targetBlockName ;
         string blockPin = noPassList.targetBlockPinName ;
@@ -2217,7 +2221,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
         }
         
         
-        int masterBranchCuttingRange = 5 ;
+        int masterBranchCuttingRange = 20 ;
         
         
         auto masterBranchSpiltVertexes = getSplitVertexes(false, masterBranchCuttingRange, optAllCandidates);
@@ -2226,7 +2230,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
         
         for( auto power : powerSources )
             candidates.push_back(power);
-        candidates.push_back(blockTarget);
+        
         
         for( auto spiltVertex : masterBranchSpiltVertexes )
         {
@@ -2241,14 +2245,15 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
             }
             if(insert) candidates.push_back(spiltVertex);
         }
-        
+//        candidates.push_back(blockTarget);
         Coordinate3D source = sourcesOrder[0];
         bool optSuccess = false;
         while (!optSuccess)
         {
             vector<Coordinate3D> minCostSolutions ;
             double minCost = INT_MAX ;
-            for( int j = 0 ; j < candidates.size() ; j ++  )
+//            for( int j = 0 ; j < candidates.size() ; j ++  )
+            for(int j = (int)candidates.size() - 1 ; j >= 0 ; j--)
             {
                 
                 bool sourceAllowAll = false , targetAllowAll = false;
@@ -2280,6 +2285,10 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                     {
                         minCost = FOM ;
                         minCostSolutions = solutions ;
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
                 else
@@ -2329,6 +2338,8 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                                 minCost = FOM ;
                                 minCostSolutions = solutions ;
                             }
+                            else
+                                break;
                         }
                         else
                         {
