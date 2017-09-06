@@ -1128,6 +1128,7 @@ void RouterV4::saveMultiPinCandidates(string powerPin , string block , string bl
     for( auto solution : solutions )
     {
         Coordinate3D coordinate = gridToAbsolute(solution);
+//        cout << coordinate.x << " " << coordinate.y << " " << coordinate.z << endl;
         multiPinCandidates[powerPin].push_back(coordinate);
     }
     
@@ -2172,15 +2173,25 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
         }
         // 處理multi source
         // multisource
-//        if( steinerTree == nullptr )
-        auto paths = steinerTree->getPath( blockTarget) ;
+        bool isMultiSource = ( steinerTree == nullptr ) ? true : false ;
         vector<Coordinate3D> optAllCandidates ;
-        int masterBranchCuttingRange = 5 ;
+        if( isMultiSource )
+        {
+            
+        }
+        else
+        {
+            
+        }
+        auto paths = steinerTree->getPath( blockTarget) ;
+        
         
         for( auto path : paths )
-        {
             optAllCandidates.push_back(path->coordinate);
-        }
+        
+        int masterBranchCuttingRange = 5 ;
+        
+        
         auto masterBranchSpiltVertexes = getSplitVertexes(false, masterBranchCuttingRange, optAllCandidates);
         
         vector<Coordinate3D> candidates ;
@@ -2217,7 +2228,6 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                 auto iterator = NoSolutionSet.find(key);
                 if( iterator != NoSolutionSet.end() )
                 {
-                    cout << "find1" << endl;
                     continue ;
                 }
                 int distance = RouterHelper.getManhattanDistance(source, target);
@@ -2258,7 +2268,6 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                 source = optAllCandidates.back();
                 while (!optSuccess)
                 {
-                    cout << "exchange " << endl;
                     double minCost = INT_MAX ;
                     vector<Coordinate3D> minCostSolutions ;
                     for( int t = 0 ; t < candidates.size() ; t ++  )
@@ -2269,7 +2278,6 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                         auto iterator = NoSolutionSet.find(key);
                         if( iterator != NoSolutionSet.end() )
                         {
-                            cout << "find2" << endl;
                             continue ;
                         }
                         int distance = RouterHelper.getManhattanDistance(source, target);
@@ -2307,7 +2315,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                         genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
                         fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
                         saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
-                        def_gen.toOutputDef();
+//                        def_gen.toOutputDef();
                         Simulation() ;
                         bool find = false ;
                         for( auto nopass : NoPassRoutingLists )
@@ -2344,7 +2352,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                 genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
                 fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
                 saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
-                def_gen.toOutputDef();
+//                def_gen.toOutputDef();
                 Simulation() ;
                 bool find = false ;
                 for( auto nopass : NoPassRoutingLists )
@@ -2643,7 +2651,7 @@ void RouterV4::Route()
                         }
                         fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH ,true );
                         saveMultiPinCandidates(powerpin, blockinfo.BlockName , blockinfo.BlockPinName ,  solutions);
-                        def_gen.toOutputDef();
+//                        def_gen.toOutputDef();
                         hasSolutions = true ;
                         init = false ;
                     }
@@ -2710,7 +2718,7 @@ void RouterV4::Route()
     optimize(steinerTrees);
     Simulation();
 //    delete [] steinerTrees;
-    
+    def_gen.toOutputDef();
     for(auto steinerTree : steinerTrees)
     {
         if( steinerTree != nullptr ) delete [] steinerTree;
@@ -3060,7 +3068,10 @@ void RouterV4::CutGrid(double width , double spacing )
 {
     Horizontal.clear();
     Vertical.clear();
-    
+    int x_LowerBound = DIEAREA.pt1.x + (0.5*width + spacing) * UNITS_DISTANCE ;
+    int x_UpperBound = DIEAREA.pt2.x - (0.5*width + spacing) * UNITS_DISTANCE ;
+    int y_LowerBound = DIEAREA.pt1.y + (0.5*width + spacing) * UNITS_DISTANCE ;
+    int y_UpperBound = DIEAREA.pt2.y - (0.5*width + spacing) * UNITS_DISTANCE ;
     auto powerInfos = RouterHelper.getPowerPinInfo() ;
     auto blockPinInfos = RouterHelper.getBlockPinInfo() ;
     int x = 0 , y = 0 ;
@@ -3092,8 +3103,8 @@ void RouterV4::CutGrid(double width , double spacing )
             x = powerinfo.RightUp.x;
             y = (powerinfo.LeftDown.y + powerinfo.RightUp.y ) / 2 ;
         }
-        if(y>0 && y <= DIEAREA.pt2.y)Horizontal.insert(y);
-        if(x>0 && x <= DIEAREA.pt2.x)Vertical.insert(x);
+        if(y >= y_LowerBound && y <= y_UpperBound)Horizontal.insert(y);
+        if(x >= x_LowerBound && x <= x_UpperBound)Vertical.insert(x);
     }
     for(auto blockpininfo : blockPinInfos)
     {
@@ -3117,8 +3128,8 @@ void RouterV4::CutGrid(double width , double spacing )
             x = blockpininfo.RightUp.x;
             y = (blockpininfo.LeftDown.y + blockpininfo.RightUp.y ) / 2 ;
         }
-        if(y>0 && y <= DIEAREA.pt2.y)Horizontal.insert(y);
-        if(x>0 && x <= DIEAREA.pt2.x)Vertical.insert(x);
+        if(y >= y_LowerBound && y <= y_UpperBound)Horizontal.insert(y);
+        if(x >= x_LowerBound && x <= x_UpperBound)Vertical.insert(x);
     }
     set<int> NotEvictableSetHorizontal = Horizontal ;
     set<int> NotEvictableSetVertical = Vertical ;
@@ -3130,10 +3141,10 @@ void RouterV4::CutGrid(double width , double spacing )
         int rightX = block.RightUp.x + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
         int downY = block.LeftDown.y - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
         int upY = block.RightUp.y + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-        if( downY > 0 && downY <= DIEAREA.pt2.y )Horizontal.insert(downY);
-        if( upY > 0 && upY <= DIEAREA.pt2.y)Horizontal.insert(upY);
-        if( leftX > 0 && leftX <= DIEAREA.pt2.x)Vertical.insert(leftX);
-        if( rightX > 0 && rightX <= DIEAREA.pt2.x)Vertical.insert(rightX);
+        if( downY >= y_LowerBound && downY <= y_UpperBound )Horizontal.insert(downY);
+        if( upY >= y_LowerBound && upY <= y_UpperBound)Horizontal.insert(upY);
+        if( leftX >= x_LowerBound && leftX <= x_UpperBound)Vertical.insert(leftX);
+        if( rightX >= x_LowerBound && rightX <= x_UpperBound)Vertical.insert(rightX);
     }
     for( auto key : leftObstacles )
     {
@@ -3143,10 +3154,10 @@ void RouterV4::CutGrid(double width , double spacing )
             int rightX = block.RightUp.x + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
             int downY = block.LeftDown.y - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
             int upY = block.RightUp.y + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-            if( downY > 0 && downY <= DIEAREA.pt2.y )Horizontal.insert(downY);
-            if( upY > 0 && upY <= DIEAREA.pt2.y)Horizontal.insert(upY);
-            if( leftX > 0 && leftX <= DIEAREA.pt2.x)Vertical.insert(leftX);
-            if( rightX > 0 && rightX <= DIEAREA.pt2.x)Vertical.insert(rightX);
+            if( downY >= y_LowerBound && downY <= y_UpperBound )Horizontal.insert(downY);
+            if( upY >= y_LowerBound && upY <= y_UpperBound)Horizontal.insert(upY);
+            if( leftX >= x_LowerBound && leftX <= x_UpperBound)Vertical.insert(leftX);
+            if( rightX >= x_LowerBound && rightX <= x_UpperBound)Vertical.insert(rightX);
         }
     }
     for( auto key : rightObstacles )
@@ -3157,19 +3168,19 @@ void RouterV4::CutGrid(double width , double spacing )
             int rightX = block.RightUp.x + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
             int downY = block.LeftDown.y - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
             int upY = block.RightUp.y + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-            if( downY > 0 && downY <= DIEAREA.pt2.y )Horizontal.insert(downY);
-            if( upY > 0 && upY <= DIEAREA.pt2.y)Horizontal.insert(upY);
-            if( leftX > 0 && leftX <= DIEAREA.pt2.x)Vertical.insert(leftX);
-            if( rightX > 0 && rightX <= DIEAREA.pt2.x)Vertical.insert(rightX);
+            if( downY >= y_LowerBound && downY <= y_UpperBound )Horizontal.insert(downY);
+            if( upY >= y_LowerBound && upY <= y_UpperBound)Horizontal.insert(upY);
+            if( leftX >= x_LowerBound && leftX <= x_UpperBound)Vertical.insert(leftX);
+            if( rightX >= x_LowerBound && rightX <= x_UpperBound)Vertical.insert(rightX);
         }
     }
-    Vertical.insert(DIEAREA.pt2.x);
-    Horizontal.insert(DIEAREA.pt2.y);
+//    Vertical.insert(DIEAREA.pt2.x);
+//    Horizontal.insert(DIEAREA.pt2.y);
     
     
     
-    if( *Vertical.begin() == DIEAREA.pt1.x ) Vertical.erase(Vertical.begin());
-    if( *Horizontal.begin() == DIEAREA.pt1.y ) Horizontal.erase(Horizontal.begin());
+//    if( *Vertical.begin() == DIEAREA.pt1.x ) Vertical.erase(Vertical.begin());
+//    if( *Horizontal.begin() == DIEAREA.pt1.y ) Horizontal.erase(Horizontal.begin());
 //    int initialHValue = *Horizontal.begin();
     
 //    int initialVValue = *Vertical.begin();
