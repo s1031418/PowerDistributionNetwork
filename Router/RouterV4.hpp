@@ -246,6 +246,8 @@ private:
     vector<Coordinate3D> getSplitVertexes( bool gridOrAbs , int cuttingSegement , vector<Coordinate3D> &  solutions );
     
     void updateNoPassLists();
+    
+    bool allowALL( Coordinate3D & coordinate ,  vector<Coordinate3D> & powers , Coordinate3D & target ) ;
 };
 
 #endif /* RouterV4_hpp */
