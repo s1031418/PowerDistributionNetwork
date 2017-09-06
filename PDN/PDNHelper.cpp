@@ -146,7 +146,7 @@ vector<Block> PDNHelper::getBlockPinInfo()
 }
 void PDNHelper::InitBlockMaps()
 {
-    for( auto component : ComponentMaps )
+    for( auto & component : ComponentMaps )
     {
 //        auto blockCoordinate = getBlockCoordinate(component.second.STARTPOINT.x, component.second.STARTPOINT.y, MacroMaps[component.second.MACROTYPE].WIDTH * UNITS_DISTANCE, MacroMaps[component.second.MACROTYPE].LENGTH * UNITS_DISTANCE, component.second.ORIENT);
         Point<int> BlockLeftDown = component.second.STARTPOINT ;
