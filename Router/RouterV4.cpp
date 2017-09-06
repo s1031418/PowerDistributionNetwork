@@ -3068,10 +3068,10 @@ void RouterV4::CutGrid(double width , double spacing )
 {
     Horizontal.clear();
     Vertical.clear();
-    int x_LowerBound = DIEAREA.pt1.x + (0.5*width + spacing) * UNITS_DISTANCE ;
-    int x_UpperBound = DIEAREA.pt2.x - (0.5*width + spacing) * UNITS_DISTANCE ;
-    int y_LowerBound = DIEAREA.pt1.y + (0.5*width + spacing) * UNITS_DISTANCE ;
-    int y_UpperBound = DIEAREA.pt2.y - (0.5*width + spacing) * UNITS_DISTANCE ;
+//    int x_LowerBound = DIEAREA.pt1.x + (0.5*width + spacing) * UNITS_DISTANCE ;
+//    int x_UpperBound = DIEAREA.pt2.x - (0.5*width + spacing) * UNITS_DISTANCE ;
+//    int y_LowerBound = DIEAREA.pt1.y + (0.5*width + spacing) * UNITS_DISTANCE ;
+//    int y_UpperBound = DIEAREA.pt2.x - (0.5*width + spacing) * UNITS_DISTANCE ;
     auto powerInfos = RouterHelper.getPowerPinInfo() ;
     auto blockPinInfos = RouterHelper.getBlockPinInfo() ;
     int x = 0 , y = 0 ;
@@ -3103,8 +3103,8 @@ void RouterV4::CutGrid(double width , double spacing )
             x = powerinfo.RightUp.x;
             y = (powerinfo.LeftDown.y + powerinfo.RightUp.y ) / 2 ;
         }
-        if(y >= y_LowerBound && y <= y_UpperBound)Horizontal.insert(y);
-        if(x >= x_LowerBound && x <= x_UpperBound)Vertical.insert(x);
+        if(y>0 && y <= DIEAREA.pt2.y)Horizontal.insert(y);
+        if(x>0 && x <= DIEAREA.pt2.x)Vertical.insert(x);
     }
     for(auto blockpininfo : blockPinInfos)
     {
@@ -3128,8 +3128,8 @@ void RouterV4::CutGrid(double width , double spacing )
             x = blockpininfo.RightUp.x;
             y = (blockpininfo.LeftDown.y + blockpininfo.RightUp.y ) / 2 ;
         }
-        if(y >= y_LowerBound && y <= y_UpperBound)Horizontal.insert(y);
-        if(x >= x_LowerBound && x <= x_UpperBound)Vertical.insert(x);
+        if(y>0 && y <= DIEAREA.pt2.y)Horizontal.insert(y);
+        if(x>0 && x <= DIEAREA.pt2.x)Vertical.insert(x);
     }
     set<int> NotEvictableSetHorizontal = Horizontal ;
     set<int> NotEvictableSetVertical = Vertical ;
@@ -3141,10 +3141,10 @@ void RouterV4::CutGrid(double width , double spacing )
         int rightX = block.RightUp.x + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
         int downY = block.LeftDown.y - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
         int upY = block.RightUp.y + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-        if( downY >= y_LowerBound && downY <= y_UpperBound )Horizontal.insert(downY);
-        if( upY >= y_LowerBound && upY <= y_UpperBound)Horizontal.insert(upY);
-        if( leftX >= x_LowerBound && leftX <= x_UpperBound)Vertical.insert(leftX);
-        if( rightX >= x_LowerBound && rightX <= x_UpperBound)Vertical.insert(rightX);
+        if( downY > 0 && downY <= DIEAREA.pt2.y )Horizontal.insert(downY);
+        if( upY > 0 && upY <= DIEAREA.pt2.y)Horizontal.insert(upY);
+        if( leftX > 0 && leftX <= DIEAREA.pt2.x)Vertical.insert(leftX);
+        if( rightX > 0 && rightX <= DIEAREA.pt2.x)Vertical.insert(rightX);
     }
     for( auto key : leftObstacles )
     {
@@ -3154,10 +3154,10 @@ void RouterV4::CutGrid(double width , double spacing )
             int rightX = block.RightUp.x + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
             int downY = block.LeftDown.y - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
             int upY = block.RightUp.y + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-            if( downY >= y_LowerBound && downY <= y_UpperBound )Horizontal.insert(downY);
-            if( upY >= y_LowerBound && upY <= y_UpperBound)Horizontal.insert(upY);
-            if( leftX >= x_LowerBound && leftX <= x_UpperBound)Vertical.insert(leftX);
-            if( rightX >= x_LowerBound && rightX <= x_UpperBound)Vertical.insert(rightX);
+            if( downY > 0 && downY <= DIEAREA.pt2.y )Horizontal.insert(downY);
+            if( upY > 0 && upY <= DIEAREA.pt2.y)Horizontal.insert(upY);
+            if( leftX > 0 && leftX <= DIEAREA.pt2.x)Vertical.insert(leftX);
+            if( rightX > 0 && rightX <= DIEAREA.pt2.x)Vertical.insert(rightX);
         }
     }
     for( auto key : rightObstacles )
@@ -3168,19 +3168,19 @@ void RouterV4::CutGrid(double width , double spacing )
             int rightX = block.RightUp.x + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
             int downY = block.LeftDown.y - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
             int upY = block.RightUp.y + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-            if( downY >= y_LowerBound && downY <= y_UpperBound )Horizontal.insert(downY);
-            if( upY >= y_LowerBound && upY <= y_UpperBound)Horizontal.insert(upY);
-            if( leftX >= x_LowerBound && leftX <= x_UpperBound)Vertical.insert(leftX);
-            if( rightX >= x_LowerBound && rightX <= x_UpperBound)Vertical.insert(rightX);
+            if( downY > 0 && downY <= DIEAREA.pt2.y )Horizontal.insert(downY);
+            if( upY > 0 && upY <= DIEAREA.pt2.y)Horizontal.insert(upY);
+            if( leftX > 0 && leftX <= DIEAREA.pt2.x)Vertical.insert(leftX);
+            if( rightX > 0 && rightX <= DIEAREA.pt2.x)Vertical.insert(rightX);
         }
     }
-//    Vertical.insert(DIEAREA.pt2.x);
-//    Horizontal.insert(DIEAREA.pt2.y);
+    Vertical.insert(DIEAREA.pt2.x);
+    Horizontal.insert(DIEAREA.pt2.y);
     
     
     
-//    if( *Vertical.begin() == DIEAREA.pt1.x ) Vertical.erase(Vertical.begin());
-//    if( *Horizontal.begin() == DIEAREA.pt1.y ) Horizontal.erase(Horizontal.begin());
+    if( *Vertical.begin() == DIEAREA.pt1.x ) Vertical.erase(Vertical.begin());
+    if( *Horizontal.begin() == DIEAREA.pt1.y ) Horizontal.erase(Horizontal.begin());
 //    int initialHValue = *Horizontal.begin();
     
 //    int initialVValue = *Vertical.begin();
