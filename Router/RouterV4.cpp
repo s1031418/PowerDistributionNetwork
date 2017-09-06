@@ -1126,12 +1126,13 @@ void RouterV4::saveMultiPinCandidates(string powerPin , string block , string bl
 {
     
 //    mergeCandidates.clear();
-//    string key = block + blockPin ;
+    string key = block + blockPin ;
     if( multiPinCandidates.find(powerPin) == multiPinCandidates.end() ) multiPinCandidates.insert(make_pair(powerPin, vector<Coordinate3D>()));
+    multiPinCandidates[powerPin].push_back(Coordinate3D(1,1,1));
 //    for( auto solution : solutions )
 //    {
 //        Coordinate3D coordinate = gridToAbsolute(solution);
-//        cout << coordinate.x << " " << coordinate.y << " " << coordinate.z << endl;
+////        cout << coordinate.x << " " << coordinate.y << " " << coordinate.z << endl;
 //        multiPinCandidates[powerPin].push_back(coordinate);
 //    }
     
