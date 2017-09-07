@@ -57,6 +57,7 @@ void RouterV4::InitState()
     }
     DEFAULTWIDTH = MinWidth ;
     DEFAULTSPACING = MaxSpacing;
+    numOfThreads = thread::hardware_concurrency();
     lowestMetal = stoi(metals[0].substr(5));
     highestMetal = stoi(metals[metals.size()-1].substr(5));
     SpecialNetsMaps.clear();
@@ -3441,23 +3442,23 @@ void RouterV4::InitGrids(string source , int width , int spacing , bool cutGrid,
 //            if(startpoint.x == 438000 && startpoint.y == 8000)
 //                cout << "";
             // 判斷有沒有跟block有交叉
-            Rectangle rect(grid.startpoint , Point<int>( grid.startpoint.x + grid.width , grid.startpoint.y + grid.length ));
-            Rectangle via ;
-            via.LeftDown.x = grid.startpoint.x - ((width >> 1) * UNITS_DISTANCE  ) ;
-            via.LeftDown.y = grid.startpoint.y - ((width >> 1) * UNITS_DISTANCE  ) ;
-            via.RightUp.x = grid.startpoint.x + ((width >> 1) * UNITS_DISTANCE   ) ;
-            via.RightUp.y = grid.startpoint.y + ((width >> 1) * UNITS_DISTANCE   ) ;
-            via.LeftDown.x -= ( DEFAULTSPACING) * UNITS_DISTANCE ;
-            via.LeftDown.y -= ( DEFAULTSPACING) * UNITS_DISTANCE ;
-            via.LeftDown.x += 1 ;
-            via.LeftDown.y += 1 ;
-            via.RightUp.x += (DEFAULTSPACING) * UNITS_DISTANCE ;
-            via.RightUp.y += (DEFAULTSPACING) * UNITS_DISTANCE ;
-            via.RightUp.x -= 1 ;
-            via.RightUp.y -= 1 ;
-            Rectangle rect2(via.LeftDown , via.RightUp);
-            CrossRegion crossRegionVia = RouterHelper.getCrossRegion(rect2);
-            CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
+//            Rectangle rect(grid.startpoint , Point<int>( grid.startpoint.x + grid.width , grid.startpoint.y + grid.length ));
+//            Rectangle via ;
+//            via.LeftDown.x = grid.startpoint.x - ((width >> 1) * UNITS_DISTANCE  ) ;
+//            via.LeftDown.y = grid.startpoint.y - ((width >> 1) * UNITS_DISTANCE  ) ;
+//            via.RightUp.x = grid.startpoint.x + ((width >> 1) * UNITS_DISTANCE   ) ;
+//            via.RightUp.y = grid.startpoint.y + ((width >> 1) * UNITS_DISTANCE   ) ;
+//            via.LeftDown.x -= ( DEFAULTSPACING) * UNITS_DISTANCE ;
+//            via.LeftDown.y -= ( DEFAULTSPACING) * UNITS_DISTANCE ;
+//            via.LeftDown.x += 1 ;
+//            via.LeftDown.y += 1 ;
+//            via.RightUp.x += (DEFAULTSPACING) * UNITS_DISTANCE ;
+//            via.RightUp.y += (DEFAULTSPACING) * UNITS_DISTANCE ;
+//            via.RightUp.x -= 1 ;
+//            via.RightUp.y -= 1 ;
+//            Rectangle rect2(via.LeftDown , via.RightUp);
+//            CrossRegion crossRegionVia = RouterHelper.getCrossRegion(rect2);
+//            CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
 //            for(auto ob : leftObstacles)
 //            {
 //                for(auto x : ob.second)
@@ -3469,10 +3470,10 @@ void RouterV4::InitGrids(string source , int width , int spacing , bool cutGrid,
 //                for(auto x : ob.second)
 //                    cout << x.lowerMetal << " " << x.upperMetal << endl;
 //            }
-            if( crossRegion == crossRegionVia )updateGrids(crossRegion, true, rect, via, width, spacing, grid);
-            else updateGrids(Center, true, rect, via, width, spacing, grid);
-            if( crossRegion == crossRegionVia ) updateGrids(crossRegion, false, rect, via, width, spacing, grid);
-            else updateGrids(Center, false, rect, via, width, spacing, grid);
+//            if( crossRegion == crossRegionVia )updateGrids(crossRegion, true, rect, via, width, spacing, grid);
+//            else updateGrids(Center, true, rect, via, width, spacing, grid);
+//            if( crossRegion == crossRegionVia ) updateGrids(crossRegion, false, rect, via, width, spacing, grid);
+//            else updateGrids(Center, false, rect, via, width, spacing, grid);
 //            for( auto block : RouterHelper.BlockMap )
 //            {
 //                auto crosssWithBlockResult = RouterHelper.isCrossWithBlock(rect, via , block.second , width , spacing);
@@ -3493,7 +3494,33 @@ void RouterV4::InitGrids(string source , int width , int spacing , bool cutGrid,
         startpoint.y = h ;
         Grids.push_back(temp);
     }
-    
+    for( int y = 0 ; y < Grids.size() ; y++ )
+    {
+        for(int x = 0 ; x < Grids[y].size() ; x++)
+        {
+            Rectangle rect(Grids[y][x].startpoint , Point<int>( Grids[y][x].startpoint.x + Grids[y][x].width , Grids[y][x].startpoint.y + Grids[y][x].length ));
+            Rectangle via ;
+            via.LeftDown.x = Grids[y][x].startpoint.x - ((width >> 1) * UNITS_DISTANCE  ) ;
+            via.LeftDown.y = Grids[y][x].startpoint.y - ((width >> 1) * UNITS_DISTANCE  ) ;
+            via.RightUp.x = Grids[y][x].startpoint.x + ((width >> 1) * UNITS_DISTANCE   ) ;
+            via.RightUp.y = Grids[y][x].startpoint.y + ((width >> 1) * UNITS_DISTANCE   ) ;
+            via.LeftDown.x -= ( DEFAULTSPACING) * UNITS_DISTANCE ;
+            via.LeftDown.y -= ( DEFAULTSPACING) * UNITS_DISTANCE ;
+            via.LeftDown.x += 1 ;
+            via.LeftDown.y += 1 ;
+            via.RightUp.x += (DEFAULTSPACING) * UNITS_DISTANCE ;
+            via.RightUp.y += (DEFAULTSPACING) * UNITS_DISTANCE ;
+            via.RightUp.x -= 1 ;
+            via.RightUp.y -= 1 ;
+            Rectangle rect2(via.LeftDown , via.RightUp);
+            CrossRegion crossRegionVia = RouterHelper.getCrossRegion(rect2);
+            CrossRegion crossRegion = RouterHelper.getCrossRegion(rect);
+            if( crossRegion == crossRegionVia )updateGrids(crossRegion, true, rect, via, width, spacing, Grids[y][x]);
+            else updateGrids(Center, true, rect, via, width, spacing, Grids[y][x]);
+            if( crossRegion == crossRegionVia ) updateGrids(crossRegion, false, rect, via, width, spacing, Grids[y][x]);
+            else updateGrids(Center, false, rect, via, width, spacing, Grids[y][x]);
+        }
+    }
 //    clock_t End = clock();
 //    double duration = (End - Start) / (double)CLOCKS_PER_SEC ;
 //    cout << "Initialize  Grid Graph Done" << endl ;

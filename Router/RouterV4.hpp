@@ -28,6 +28,7 @@
 #include "OutputFilesGenerator.hpp"
 #include "Graph.hpp"
 #include "InnerTreeObj.h"
+#include <thread>
 using namespace std;
 
 
@@ -55,7 +56,7 @@ public:
     
     vector< vector< Grid > > Grids ;
 private:
-    
+    unsigned numOfThreads; 
     string spiceName ;
     string defName ;
     string outputfilesName ;
