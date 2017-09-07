@@ -98,12 +98,9 @@ private:
     // key: vdd_source 
 //    map<string,vector<BlockCoordinate>> obstacles;
     
-//    map<string,vector<BlockCoordinate>> leftObstacles ;
-    vector<BlockCoordinate> leftObstacles;
+    map<string,vector<BlockCoordinate>> leftObstacles ;
     
-    vector<BlockCoordinate> rightObstacles;
-    
-//    map<string,vector<BlockCoordinate>> rightObstacles ;
+    map<string,vector<BlockCoordinate>> rightObstacles ;
     
     
     RouterUtil RouterHelper;
@@ -149,7 +146,7 @@ private:
     
     void InitState();
     
-    void updateGrid(CrossInfo result , Grid  & grid );
+    void updateGrid(CrossInfo & result , Grid  & grid );
     
     void CutGrid(double width , double spacing);
     
@@ -227,7 +224,7 @@ private:
     
     void insertObstacles(CrossRegion crossRegion, string powerPinName , BlockCoordinate blockCoordinate);
     
-    void updateGrids(CrossRegion crossRegion , bool blockOrObstacle , Rectangle rect1 , Rectangle via , double width , double spacing , Grid & grid);
+    void updateGrids(CrossRegion  crossRegion , bool blockOrObstacle , Rectangle & rect1 , Rectangle &  via , double width , double spacing , Grid & grid);
     
     double getMetalUsage(vector<Coordinate3D> solutions , double width);
     

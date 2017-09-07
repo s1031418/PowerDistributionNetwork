@@ -280,7 +280,7 @@ Coordinate3D RouterUtil::getTerminalPoint(Block block)
     z =  translateMetalNameToInt(*(--block.Metals.end()));
     return Coordinate3D(x,y,z);
 }
-CrossInfo RouterUtil::isCrossWithBlock(Rectangle rect1 , Rectangle via ,  BlockCoordinate & block , double width , double spacing)
+CrossInfo RouterUtil::isCrossWithBlock(Rectangle & rect1  , Rectangle &  via ,  BlockCoordinate & block , double width , double spacing)
 {
     CrossInfo crossinfo ;
     Rectangle rect2 ;

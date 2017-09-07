@@ -106,9 +106,9 @@ public:
     
     void InitViaInfos();
     
-    int getCrossArea(Rectangle rect1 , Rectangle rect2);
+    int getCrossArea(Rectangle & rect1 , Rectangle & rect2);
     
-    bool isCross(Rectangle rect1 , Rectangle rect2);
+    bool isCross(Rectangle & rect1 , Rectangle & rect2);
     
     string getAlias(string MetalName);
     
@@ -118,5 +118,26 @@ public:
     double getManhattanDistance(Coordinate3D pt1 , Coordinate3D pt2);
 };
 
+
+inline bool PDNHelper::isCross(Rectangle & rect1 , Rectangle & rect2)
+{
+    //    pair<int, int> rect1Center = make_pair( ( rect1.LeftDown.x + rect1.RightUp.x ) / 2 , ( rect1.LeftDown.y + rect1.RightUp.y ) / 2 );
+    //    pair<int, int> rect2Center = make_pair( ( rect2.LeftDown.x + rect2.RightUp.x ) / 2 , ( rect2.LeftDown.y + rect2.RightUp.y ) / 2 );
+    //    int verticalDistance = abs(rect1Center.second - rect2Center.second);
+    //    int horizontalDistance = abs(rect1Center.first - rect2Center.first);
+    //    int rect1Width = rect1.RightUp.x - rect1.LeftDown.x ;
+    //    int rect1Height = rect1.RightUp.y - rect1.LeftDown.y ;
+    //    int rect2Width = rect2.RightUp.x - rect2.LeftDown.x ;
+    //    int rect2Height = rect2.RightUp.y - rect2.LeftDown.y ;
+    //    int verticalThreshold = (rect1Height + rect2Height)/2 ;
+    //    int horizontalThreshold = (rect1Width + rect2Width)/2 ;
+    if( abs((( rect1.LeftDown.y + rect1.RightUp.y ) >> 1)  - (( rect2.LeftDown.y + rect2.RightUp.y ) >> 1 )) > (rect1.RightUp.y - rect1.LeftDown.y + rect2.RightUp.y - rect2.LeftDown.y) >> 1
+       || abs((( rect1.LeftDown.x + rect1.RightUp.x ) >> 1) - (( rect2.LeftDown.x + rect2.RightUp.x ) >> 1)) > (rect1.RightUp.x - rect1.LeftDown.x + rect2.RightUp.x - rect2.LeftDown.x) >> 1 )
+        return false ;
+    return true ;
+    //    if( verticalDistance > verticalThreshold || horizontalDistance > horizontalThreshold )
+    //        return false ;
+    //    return true ;
+}
 #endif /* PDNHelper_hpp */
 
