@@ -1173,6 +1173,7 @@ void RouterV4::saveMultiPinCandidates(string powerPin , string block , string bl
 //        if(insert) mergeCandidates[key].push_back(spiltVertex);
 //    }
     
+    
     if( normalDistributionCandidates.find(powerPin) == normalDistributionCandidates.end() ) normalDistributionCandidates.insert(make_pair(powerPin, vector<Coordinate3D>()));
     int normalDistributionCandidatesCuttingRange = 20 ;
     auto normalSpiltVertexs = getSplitVertexes(true, normalDistributionCandidatesCuttingRange, solutions);
