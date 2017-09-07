@@ -1146,9 +1146,10 @@ void RouterV4::saveMultiPinCandidates(string powerPin , string block , string bl
             Coordinate3D next = solutions[i+1] ;
             if( (current.x == next.x && current.y != next.y) || (current.y == next.y && current.x != next.x) )
             {
+                mergeCandidates[key].push_back(current);
                 break;
             }
-            mergeCandidates[key].push_back(current);
+            
         }
     }
 //
