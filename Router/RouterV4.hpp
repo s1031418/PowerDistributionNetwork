@@ -168,7 +168,7 @@ private:
     vector<int> getAbsoluteDistance(vector<pair<Direction3D, int>> & friendlyPaths , Point<int> startPoint);
     
     // 傳入grid座標，轉成絕對座標存起來
-    void saveMultiPinCandidates(string powerPin , string block , string blockPin , vector<Coordinate3D> solutions );
+    void saveMultiPinCandidates(string powerPin , string block , string blockPin , vector<Coordinate3D> solutions , bool parallel );
     
     bool isMultiPin(string powerPin);
     

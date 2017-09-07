@@ -1123,7 +1123,7 @@ vector<Coordinate3D> RouterV4::getSplitVertexes( bool gridOrAbs , int cuttingSeg
     }
     return minCandidates ;
 }
-void RouterV4::saveMultiPinCandidates(string powerPin , string block , string blockPin , vector<Coordinate3D> solutions )
+void RouterV4::saveMultiPinCandidates(string powerPin , string block , string blockPin , vector<Coordinate3D> solutions , bool parallel )
 {
     
 //    mergeCandidates.clear();
@@ -1136,9 +1136,22 @@ void RouterV4::saveMultiPinCandidates(string powerPin , string block , string bl
 ////        cout << coordinate.x << " " << coordinate.y << " " << coordinate.z << endl;
 //        multiPinCandidates[powerPin].push_back(coordinate);
 //    }
-    
-//    if( mergeCandidates.find(key) == mergeCandidates.end() )  mergeCandidates.insert(make_pair(key, vector<Coordinate3D>()));
-//    
+    if( parallel )
+    {
+        if( mergeCandidates.find(key) == mergeCandidates.end() )  mergeCandidates.insert(make_pair(key, vector<Coordinate3D>()));
+        vector<Coordinate3D> firstCorner ;
+        for(int i = 0 ; i < solutions.size() ; i++)
+        {
+            Coordinate3D current = solutions[i] ;
+            Coordinate3D next = solutions[i+1] ;
+            if( (current.x == next.x && current.y != next.y) || (current.y == next.y && current.x != next.x) )
+            {
+                break;
+            }
+            mergeCandidates[key].push_back(current);
+        }
+    }
+//
 //    int mergeCandidateCuttingRange = 5 ;
 //    
 //    auto mergeSpiltVertexs = getSplitVertexes(true, mergeCandidateCuttingRange, solutions);
@@ -2355,7 +2368,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                     {
                         genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
                         fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
-                        saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
+                        saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions , true );
                         //                        def_gen.toOutputDef();
                         Simulation() ;
                         bool find = false ;
@@ -2367,33 +2380,64 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                             }
                         }
                         if( !find ) optSuccess = true ;
-                        //                        if( !optSuccess )
-                        //                        {
-                        //                            for(auto mergeCandidate : mergeCandidates[block+blockPin])
-                        //                            {
-                        //                                auto it = find_if(candidates.begin(), candidates.end(), [mergeCandidate]( Coordinate3D & coordinate)
-                        //                                                  {
-                        //                                                      return (coordinate == mergeCandidate) ;
-                        //                                                  });
-                        //                                if( *it == blockTarget ) continue;
-                        //                                if( it == candidates.end() ) candidates.push_back(mergeCandidate);
-                        //                            }
-                        //                        }
                     }
                     else
+                    {
+                        // sort
+                        while (!optSuccess)
+                        {
+                            
+                            sort( mergeCandidates[block + blockPin].begin() , mergeCandidates[block + blockPin].end() , [this , source](Coordinate3D & c1 , Coordinate3D & c2 )->bool
+                                 {
+                                     return this->RouterHelper.getManhattanDistance(source, c1) > this->RouterHelper.getManhattanDistance(source, c2) ;
+                                 });
+                            for( auto mergeCandidate : mergeCandidates[block + blockPin] )
+                            {
+                                bool sourceAllowAll = false , targetAllowAll = false;
+                                string key = source.toString() + mergeCandidate.toString() ;
+                                auto iterator = NoSolutionSet.find(key);
+                                if( iterator != NoSolutionSet.end() )
+                                {
+                                    continue ;
+                                }
+                                int distance = RouterHelper.getManhattanDistance(source, mergeCandidate);
+                                if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
+                                   || (distance == 0 && (source.z - mergeCandidate.z == 2 || mergeCandidate.z - source.z == -2 )) ) continue ;
+                                if( allowALL( source , powerSources , blockTarget ) ) sourceAllowAll = true ;
+                                if( allowALL( mergeCandidate , powerSources , blockTarget ) ) targetAllowAll = true ;
+                                vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, mergeCandidate, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+                                if( checkLegal(solutions) )
+                                {
+                                    genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
+                                    fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
+                                    Simulation() ;
+                                    bool find = false ;
+                                    for( auto nopass : NoPassRoutingLists )
+                                    {
+                                        if( nopass.targetBlockName == block && nopass.targetBlockPinName == blockPin )
+                                        {
+                                            find = true ;
+                                        }
+                                    }
+                                    if( !find ) optSuccess = true ;
+                                }
+                            }
+                            break;
+                        }
                         break;
+                    }
                 }
                 
 //                continue;
                 // force exit
-                skipLists.push_back(noPassList);
+                if(!optSuccess)skipLists.push_back(noPassList);
                 break;
             }
             if( checkLegal(minCostSolutions) )
             {
                 genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
                 fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
-                saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions);
+                saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions , true );
 //                def_gen.toOutputDef();
                 Simulation() ;
                 bool find = false ;
@@ -2692,7 +2736,7 @@ void RouterV4::Route()
                             steinerTree->addLeafInfo( powerpin, blockinfo.BlockName, blockinfo.BlockPinName);
                         }
                         fillSpNetMaps(solutions, powerpin, blockinfo.BlockName , blockinfo.BlockPinName , DEFAULTWIDTH ,true );
-                        saveMultiPinCandidates(powerpin, blockinfo.BlockName , blockinfo.BlockPinName ,  solutions);
+                        saveMultiPinCandidates(powerpin, blockinfo.BlockName , blockinfo.BlockPinName ,  solutions , false);
 //                        def_gen.toOutputDef();
                         hasSolutions = true ;
                         init = false ;
@@ -2852,7 +2896,7 @@ void RouterV4::opt1(Graph * steinerTree)
                 {
                     genResistance(solutions, powerPin , sp_gen ,DEFAULTWIDTH );
                     fillSpNetMaps(solutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
-                    saveMultiPinCandidates(powerPin,block,blockPin,solutions);
+                    saveMultiPinCandidates(powerPin,block,blockPin,solutions,false);
                     def_gen.toOutputDef();
                     Simulation();
                 }
