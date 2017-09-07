@@ -59,7 +59,7 @@ public:
     // 第一個為是不是屬於這個Block，第二個這個Block Name
     pair<bool, string> IsBlock(Point<int> LeftDown , Point<int> RightUp);
     
-    CrossInfo isCrossWithBlock(Rectangle & rect1 , Rectangle & via , BlockCoordinate & block , double width , double spacing);
+    CrossInfo isCrossWithBlock(Rectangle & rect1 , Rectangle & via , BlockCoordinate & block , int width , int spacing);
     
     // first : whether cross with block
     // second: if cross , the lower metal of this block

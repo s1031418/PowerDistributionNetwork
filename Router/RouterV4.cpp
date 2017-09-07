@@ -126,7 +126,7 @@ void RouterV4::InitBoundList()
         }
     }
 }
-Graph_SP * RouterV4::InitGraph_SP(int lowerLayer , int highLayer , double width , double spacing )
+Graph_SP * RouterV4::InitGraph_SP(int lowerLayer , int highLayer , int width , int spacing )
 {
 //    cout << "Begin Initialize 3D Shortest Path Graph ..." << endl;
 //    clock_t Start = clock();
@@ -275,7 +275,7 @@ Point<int> RouterV4::getAbsolutePoint( Coordinate3D coordinate3d )
     int Y = ( y != 0 ) ? *std::next(Horizontal.begin(), y-1) : 0 ;
     return Point<int>(X,Y);
 }
-Coordinate3D RouterV4::getOuterCoordinate(Block block  , double width , double spacing )
+Coordinate3D RouterV4::getOuterCoordinate(Block block  , int width , int spacing )
 {
     vector<Coordinate3D> paths ;
     
@@ -374,7 +374,7 @@ Coordinate3D RouterV4::getOuterCoordinate(Block block  , double width , double s
     }
     return targetGrid ;
 }
-pair<string,vector<Point<int>>>  RouterV4::getViaLocation(Nets & net , Point<int> & orginTarget , bool top , double width)
+pair<string,vector<Point<int>>>  RouterV4::getViaLocation(Nets & net , Point<int> & orginTarget , bool top , int width)
 {
     ViaInfo viaInfo ;
     vector<Point<int>> viaLocation ;
@@ -439,7 +439,7 @@ void RouterV4::insertObstacles(CrossRegion crossRegion , string powerPinName , B
         rightObstacles[powerPinName].push_back(blockCoordinate);
     }
 }
-void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , double width ,  bool peek )
+void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , int width ,  bool peek )
 {
 //    for(auto p : paths)
 //        cout << p.x << " " << p.y << " " << p.z << endl;
@@ -809,7 +809,7 @@ string RouterV4::gridToString(Coordinate3D coordinate , bool translate )
     result.append("_").append(to_string(x)).append("_").append(to_string(y));
     return result ;
 }
-void RouterV4::getInitSolution(Block block  , string powerpin, string blockName , string BlockPinName , double width  , double spacing ,  bool source)
+void RouterV4::getInitSolution(Block block  , string powerpin, string blockName , string BlockPinName , int width  , int spacing ,  bool source)
 {
     // Virtual Obstacles 還沒存入multipinCandidate
     vector<BlockCoordinate> virtualObstacles ;
@@ -1041,7 +1041,7 @@ void RouterV4::getInitSolution(Block block  , string powerpin, string blockName 
 //        obstacles[powerpin].push_back(virtualObstacle);
     }
 }
-void RouterV4::InitPowerPinAndBlockPin(double width , double spacing )
+void RouterV4::InitPowerPinAndBlockPin(int width , int spacing )
 {
     InitGrids("", width , spacing );
 
@@ -1182,7 +1182,7 @@ bool RouterV4::isMultiPin(string powerPin)
 {
     return Connection.count(powerPin) > 1 ;
 }
-void RouterV4::legalizeEdge(bool allowIn , Coordinate3D source , Coordinate3D target , Direction3D orient , Graph_SP * graph_sp , double width )
+void RouterV4::legalizeEdge(bool allowIn , Coordinate3D source , Coordinate3D target , Direction3D orient , Graph_SP * graph_sp , int width )
 {
     if( source == target ) return ;
     int cnt = 0 ;
@@ -1274,7 +1274,7 @@ void RouterV4::legalizeEdge(bool allowIn , Coordinate3D source , Coordinate3D ta
     }
     
 }
-bool RouterV4::isPossibleHasSolutions(Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth)
+bool RouterV4::isPossibleHasSolutions(Coordinate3D coordinate , Graph_SP * graph_sp , int width , int spacing , int originWidth)
 {
     
     auto lastLegal = getLastIlegalCoordinate(topOrient, coordinate , width , spacing , originWidth);
@@ -1296,7 +1296,7 @@ bool RouterV4::isPossibleHasSolutions(Coordinate3D coordinate , Graph_SP * graph
     if(graph_sp->isPossiableHasSolution(translate3D_1D(lastLegal))) return true;
     return false;
 }
-void RouterV4::legalizeAllOrient(bool allowIn , Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth)
+void RouterV4::legalizeAllOrient(bool allowIn , Coordinate3D coordinate , Graph_SP * graph_sp , int width , int spacing , int originWidth)
 {
     // top
     auto lastLegal = getLastIlegalCoordinate(topOrient, coordinate , width , spacing , originWidth);
@@ -1317,7 +1317,7 @@ void RouterV4::legalizeAllOrient(bool allowIn , Coordinate3D coordinate , Graph_
     lastLegal = getLastIlegalCoordinate(rightOrient, coordinate , width , spacing , originWidth);
     legalizeEdge(allowIn , coordinate, lastLegal, rightOrient , graph_sp , width);
 }
-Coordinate3D RouterV4::getLastIlegalCoordinate(Direction3D orient , Coordinate3D sourceGrid , double width , double spacing , double originWidth)
+Coordinate3D RouterV4::getLastIlegalCoordinate(Direction3D orient , Coordinate3D sourceGrid , int width , int spacing , int originWidth)
 {
     Coordinate3D targetGrid = sourceGrid ;
     if( orient == topOrient )
@@ -1424,7 +1424,7 @@ void RouterV4::saveRoutingList(Coordinate3D target , string powerPin , BlockInfo
     routePath.targetBlockPinName = blockinfo.BlockPinName ;
     currentRoutingLists.push_back(routePath);
 }
-void RouterV4::legalizeAllLayer(bool allowIn , Coordinate3D source , Graph_SP * graph_sp , double width , double spacing , double originWidth)
+void RouterV4::legalizeAllLayer(bool allowIn , Coordinate3D source , Graph_SP * graph_sp , int width , int spacing , int originWidth)
 {
     for(int z = lowestMetal ; z <= highestMetal ; z++)
     {
@@ -1433,7 +1433,7 @@ void RouterV4::legalizeAllLayer(bool allowIn , Coordinate3D source , Graph_SP * 
         legalizeAllOrient(allowIn , temp, graph_sp ,width ,spacing , originWidth);
     }
 }
-pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(double width, double spacing , double originWidth)
+pair<vector<string>,map<string,vector<Path>>> RouterV4::getNetOrdering(int width, int spacing , int originWidth)
 {
     cout << "Begin determine Net Ordering ..." << endl;
     clock_t Start = clock();
@@ -1621,7 +1621,7 @@ void RouterV4::SteinerTreeConstruction( bool isSimulation , vector<Coordinate3D>
     
     
 }
-double RouterV4::getResistance(vector<Coordinate3D> solutions , double width)
+double RouterV4::getResistance(vector<Coordinate3D> solutions , int width)
 {
     double totalResistance = 0 ;
     for(int i = 0 ; i < solutions.size() - 1 ; i++)
@@ -1643,7 +1643,7 @@ double RouterV4::getResistance(vector<Coordinate3D> solutions , double width)
     }
     return totalResistance ; 
 }
-double RouterV4::getMetalUsage(vector<Coordinate3D> solutions , double width)
+double RouterV4::getMetalUsage(vector<Coordinate3D> solutions , int width)
 {
     double totalMetalUsage = 0 ;
     for(int i = 0 ; i < solutions.size() - 1 ; i++)
@@ -1658,7 +1658,7 @@ double RouterV4::getMetalUsage(vector<Coordinate3D> solutions , double width)
     }
     return totalMetalUsage / UNITS_DISTANCE / UNITS_DISTANCE;
 }
-vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinate , Coordinate3D & BlockPinCoordinate , bool init , bool multiSource , double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth)
+vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinate , Coordinate3D & BlockPinCoordinate , bool init , bool multiSource , double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , int width , int spacing , int originWidth)
 {
     // 第一次 為block to power
     // 接下來為 power to block
@@ -2888,7 +2888,7 @@ bool RouterV4::isSameLayer(vector<Coordinate3D> & path)
     return true;
 }
 // coordindate 為 絕對座標 + Z
-vector<Coordinate3D> RouterV4::parallelRoute(bool sourceLegalAll , bool targetLegalAll , string powerPin , string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , double width , double spacing , double originWidth)
+vector<Coordinate3D> RouterV4::parallelRoute(bool sourceLegalAll , bool targetLegalAll , string powerPin , string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , int width , int spacing , int originWidth)
 {
     
     Graph_SP * graph_sp = new Graph_SP[1];
@@ -2997,7 +2997,7 @@ double RouterV4::getMetalResistance(int layer)
 {
     return LayerMaps[RouterHelper.translateIntToMetalName(layer)].RESISTANCE_RPERSQ ;
 }
-void RouterV4::genResistance(vector<Coordinate3D> & paths , string powerPinName , SpiceGenerator & spiceGenerator , double width )
+void RouterV4::genResistance(vector<Coordinate3D> & paths , string powerPinName , SpiceGenerator & spiceGenerator , int width )
 {
     for(int i = 0 ; i < paths.size() - 1 ; i++)
     {
@@ -3026,7 +3026,7 @@ int RouterV4::getGridY(int y)
     if( Horizontal.find(y) == Horizontal.end() ) return  0 ;
     return (int)distance(Horizontal.begin(), Horizontal.find(y)) + 1 ;
 }
-void RouterV4::generateSpiceList(Coordinate3D  powerPinCoordinate , Coordinate3D  BlockPinCoordinate , vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , double width)
+void RouterV4::generateSpiceList(Coordinate3D  powerPinCoordinate , Coordinate3D  BlockPinCoordinate , vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , int width)
 {
     auto sourceKey = powerPinCoordinate.toString();
     auto targetKey = BlockPinCoordinate.toString();
@@ -3106,7 +3106,7 @@ void RouterV4::toGridGraph()
     
 }
 
-void RouterV4::CutGrid(double width , double spacing )
+void RouterV4::CutGrid(int width , int spacing )
 {
     Horizontal.clear();
     Vertical.clear();
@@ -3328,7 +3328,7 @@ void RouterV4::updateGrid(CrossInfo & result , Grid & grid)
         }
     }
 }
-void RouterV4::updateGrids(CrossRegion  crossRegion , bool blockOrObstacle , Rectangle &  rect , Rectangle & via , double width , double spacing , Grid & grid)
+void RouterV4::updateGrids(CrossRegion  crossRegion , bool blockOrObstacle , Rectangle &  rect , Rectangle & via , int width , int spacing , Grid & grid)
 {
     if( crossRegion == Left )
     {
@@ -3410,7 +3410,7 @@ void RouterV4::updateGrids(CrossRegion  crossRegion , bool blockOrObstacle , Rec
         }
     }
 }
-void RouterV4::InitGrids(string source , double width , double spacing , bool cutGrid, vector<int> SpecialHorizontal ,  vector<int> SpecialVertical )
+void RouterV4::InitGrids(string source , int width , int spacing , bool cutGrid, vector<int> SpecialHorizontal ,  vector<int> SpecialVertical )
 {
     Grids.clear();
 //    cout << "Begin Initialize  Grid Graph ..." << endl;
@@ -3443,10 +3443,10 @@ void RouterV4::InitGrids(string source , double width , double spacing , bool cu
             // 判斷有沒有跟block有交叉
             Rectangle rect(grid.startpoint , Point<int>( grid.startpoint.x + grid.width , grid.startpoint.y + grid.length ));
             Rectangle via ;
-            via.LeftDown.x = grid.startpoint.x - (width * UNITS_DISTANCE / 2 ) ;
-            via.LeftDown.y = grid.startpoint.y - (width * UNITS_DISTANCE / 2 ) ;
-            via.RightUp.x = grid.startpoint.x + (width * UNITS_DISTANCE / 2 ) ;
-            via.RightUp.y = grid.startpoint.y + (width * UNITS_DISTANCE / 2 ) ;
+            via.LeftDown.x = grid.startpoint.x - ((width >> 1) * UNITS_DISTANCE  ) ;
+            via.LeftDown.y = grid.startpoint.y - ((width >> 1) * UNITS_DISTANCE  ) ;
+            via.RightUp.x = grid.startpoint.x + ((width >> 1) * UNITS_DISTANCE   ) ;
+            via.RightUp.y = grid.startpoint.y + ((width >> 1) * UNITS_DISTANCE   ) ;
             via.LeftDown.x -= ( DEFAULTSPACING) * UNITS_DISTANCE ;
             via.LeftDown.y -= ( DEFAULTSPACING) * UNITS_DISTANCE ;
             via.LeftDown.x += 1 ;

@@ -63,8 +63,8 @@ private:
     set<int> Horizontal ;
     int lowestMetal ;
     int highestMetal ;
-    double DEFAULTWIDTH = 10 ;
-    double DEFAULTSPACING = 2 ;
+    int DEFAULTWIDTH = 10 ;
+    int DEFAULTSPACING = 2 ;
     set<int> boundList ;
     
     SpiceGenerator sp_gen ;
@@ -107,9 +107,9 @@ private:
     
     string getNgSpiceKey(Coordinate3D coordinate3d);
     
-    void fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName ,string blockName , string blockPinName  , double width , bool peek );
+    void fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName ,string blockName , string blockPinName  , int width , bool peek );
     
-    Coordinate3D getOuterCoordinate(Block block , double width , double spacing);
+    Coordinate3D getOuterCoordinate(Block block , int width , int spacing);
     
     double getMetalResistance(int layer);
     
@@ -128,9 +128,9 @@ private:
     
     void BlockTopBottom(Graph_SP * graph_sp);
     
-    void genResistance(vector<Coordinate3D> & paths , string powerPinName , SpiceGenerator & sp_gen , double width );
+    void genResistance(vector<Coordinate3D> & paths , string powerPinName , SpiceGenerator & sp_gen , int width );
     
-    void generateSpiceList(Coordinate3D powerPoint , Coordinate3D blockPoint , vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , double width );
+    void generateSpiceList(Coordinate3D powerPoint , Coordinate3D blockPoint , vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , int width );
     
     string gridToString(Coordinate3D , bool);
     
@@ -140,19 +140,19 @@ private:
     
     void BlockGridCoordinate( Graph_SP * graph_sp , Block & block);
     
-    void InitPowerPinAndBlockPin(double width , double spacing );
+    void InitPowerPinAndBlockPin(int width , int spacing );
     
-    void getInitSolution(Block powerBlock  , string powerpin, string blockName , string BlockPinName , double width , double spacing , bool source );
+    void getInitSolution(Block powerBlock  , string powerpin, string blockName , string BlockPinName , int width , int spacing , bool source );
     
     void InitState();
     
     void updateGrid(CrossInfo & result , Grid  & grid );
     
-    void CutGrid(double width , double spacing);
+    void CutGrid(int width , int spacing);
     
-    void InitGrids(string source , double width , double spacing , bool cutGrid = true , vector<int> SpecialHorizontal = vector<int>(),  vector<int> SpecialVertical = vector<int>());
+    void InitGrids(string source , int width , int spacing , bool cutGrid = true , vector<int> SpecialHorizontal = vector<int>(),  vector<int> SpecialVertical = vector<int>());
     
-    Graph_SP * InitGraph_SP(int lowerLayer , int higherLayer , double width , double spacing);
+    Graph_SP * InitGraph_SP(int lowerLayer , int higherLayer , int width , int spacing);
     
     int translate3D_1D(Coordinate3D coordinate3d);
     
@@ -171,36 +171,36 @@ private:
     
     bool isMultiPin(string powerPin);
     
-    void legalizeAllOrient(bool allowIn , Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth);
+    void legalizeAllOrient(bool allowIn , Coordinate3D coordinate , Graph_SP * graph_sp , int width , int spacing , int originWidth);
     
-    vector<Coordinate3D> selectPath(string powerPin , Graph_SP * graph_sp , int target , int source , string block , string blockPin , double width , double spacing , double originWidth);
+    vector<Coordinate3D> selectPath(string powerPin , Graph_SP * graph_sp , int target , int source , string block , string blockPin , int width , int spacing , int originWidth);
     
-    Coordinate3D getLastIlegalCoordinate(Direction3D orient , Coordinate3D sourceGrid , double width , double spacing , double originWidth);
+    Coordinate3D getLastIlegalCoordinate(Direction3D orient , Coordinate3D sourceGrid , int width , int spacing , int originWidth);
     
-    void legalizeEdge(bool allowIn , Coordinate3D source , Coordinate3D target , Direction3D orient , Graph_SP * graph_sp , double width);
+    void legalizeEdge(bool allowIn , Coordinate3D source , Coordinate3D target , Direction3D orient , Graph_SP * graph_sp , int width);
     
     void saveRoutingList(Coordinate3D target , string powerPin , BlockInfo blockinfo);
     
     Coordinate3D gridToAbsolute(Coordinate3D gridCoordinate);
     
-    void legalizeAllLayer(bool allowIn , Coordinate3D source , Graph_SP * graph_sp , double width , double spacing , double originWidth);
+    void legalizeAllLayer(bool allowIn , Coordinate3D source , Graph_SP * graph_sp , int width , int spacing , int originWidth);
     
     double getCost(string spiceName , double metalUsage);
     
     // 第一個為viaName,第二個為via location set
-    pair<string,vector<Point<int>>>  getViaLocation(Nets & net , Point<int> & orginTarget , bool top , double width);
+    pair<string,vector<Point<int>>>  getViaLocation(Nets & net , Point<int> & orginTarget , bool top , int width);
     
-    vector<Coordinate3D> parallelRoute(bool sourceLegalAll , bool targetLegalAll , string powerPin , string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , double width , double spacing , double originWidth);
+    vector<Coordinate3D> parallelRoute(bool sourceLegalAll , bool targetLegalAll , string powerPin , string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , int width , int spacing , int originWidth);
     
     Coordinate3D AbsToGrid(Coordinate3D coordinateABS);
     
-    pair<vector<string>,map<string,vector<Path>>> getNetOrdering(double width, double spacing , double originWidth);
+    pair<vector<string>,map<string,vector<Path>>> getNetOrdering(int width, int spacing , int originWidth);
     
     void SteinerTreeConstruction(bool isSimulation ,  vector<Coordinate3D> & solutions , double current , double constraint , double voltage , string powerPin , string block , string blockPin , Graph * & steinerTree);
     
     void SteinerTreeReduction(Graph * &steinerTree , vector<Coordinate3D> & terminals);
     
-    vector<Coordinate3D> selectMergePoint(Coordinate3D & powerPinCoordinate , Coordinate3D & BlockPinCoordinate , bool inverse , bool multiSource , double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , double width , double spacing , double originWidth) ;
+    vector<Coordinate3D> selectMergePoint(Coordinate3D & powerPinCoordinate , Coordinate3D & BlockPinCoordinate , bool inverse , bool multiSource , double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , int width , int spacing , int originWidth) ;
     
     void InitializeSpiceGen(Graph * steinerTree);
     
@@ -224,13 +224,13 @@ private:
     
     void insertObstacles(CrossRegion crossRegion, string powerPinName , BlockCoordinate blockCoordinate);
     
-    void updateGrids(CrossRegion  crossRegion , bool blockOrObstacle , Rectangle & rect1 , Rectangle &  via , double width , double spacing , Grid & grid);
+    void updateGrids(CrossRegion  crossRegion , bool blockOrObstacle , Rectangle & rect1 , Rectangle &  via , int width , int spacing , Grid & grid);
     
-    double getMetalUsage(vector<Coordinate3D> solutions , double width);
+    double getMetalUsage(vector<Coordinate3D> solutions , int width);
     
-    double getResistance(vector<Coordinate3D> solutions , double width);
+    double getResistance(vector<Coordinate3D> solutions , int width);
     
-    bool isPossibleHasSolutions(Coordinate3D coordinate , Graph_SP * graph_sp , double width , double spacing , double originWidth);
+    bool isPossibleHasSolutions(Coordinate3D coordinate , Graph_SP * graph_sp , int width , int spacing , int originWidth);
     
     double getParallelFOM(string spiceName , double metalUsage );
     

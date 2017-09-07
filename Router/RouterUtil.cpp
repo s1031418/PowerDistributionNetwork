@@ -280,7 +280,7 @@ Coordinate3D RouterUtil::getTerminalPoint(Block block)
     z =  translateMetalNameToInt(*(--block.Metals.end()));
     return Coordinate3D(x,y,z);
 }
-CrossInfo RouterUtil::isCrossWithBlock(Rectangle & rect1  , Rectangle &  via ,  BlockCoordinate & block , double width , double spacing)
+CrossInfo RouterUtil::isCrossWithBlock(Rectangle & rect1  , Rectangle &  via ,  BlockCoordinate & block , int width , int spacing)
 {
     CrossInfo crossinfo ;
     Rectangle rect2 ;
@@ -294,10 +294,10 @@ CrossInfo RouterUtil::isCrossWithBlock(Rectangle & rect1  , Rectangle &  via ,  
         crossinfo.upperMetal = block.upperMetal ;
     }
     // 目前minimal space 先 hardcode 2 ，不同層有不同spacing，會浪費resource
-    rect2.LeftDown.x -= ((0.5*width + spacing )*UNITS_DISTANCE);
-    rect2.LeftDown.y -= ((0.5*width + spacing )*UNITS_DISTANCE);
-    rect2.RightUp.x += ((0.5*width + spacing )*UNITS_DISTANCE);
-    rect2.RightUp.y += ((0.5*width + spacing )*UNITS_DISTANCE);
+    rect2.LeftDown.x -= (((width>>1) + spacing )*UNITS_DISTANCE);
+    rect2.LeftDown.y -= (((width>>1) + spacing )*UNITS_DISTANCE);
+    rect2.RightUp.x += (((width>>1) + spacing )*UNITS_DISTANCE);
+    rect2.RightUp.y += (((width>>1) + spacing )*UNITS_DISTANCE);
     
     rect2.LeftDown.x += 1;
     rect2.LeftDown.y += 1;
