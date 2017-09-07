@@ -423,20 +423,24 @@ void RouterV4::insertObstacles(CrossRegion crossRegion , string powerPinName , B
 {
     if( crossRegion == Left )
     {
-        if( leftObstacles.find(powerPinName) == leftObstacles.end() ) leftObstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
-        leftObstacles[powerPinName].push_back(blockCoordinate);
+//        if( leftObstacles.find(powerPinName) == leftObstacles.end() ) leftObstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
+//        leftObstacles[powerPinName].push_back(blockCoordinate);
+        leftObstacles.push_back(blockCoordinate);
     }
     else if (crossRegion == Right)
     {
-        if( rightObstacles.find(powerPinName) == rightObstacles.end() ) rightObstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
-        rightObstacles[powerPinName].push_back(blockCoordinate);
+//        if( rightObstacles.find(powerPinName) == rightObstacles.end() ) rightObstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
+//        rightObstacles[powerPinName].push_back(blockCoordinate);
+        rightObstacles.push_back(blockCoordinate);
     }
     else
     {
-        if( leftObstacles.find(powerPinName) == leftObstacles.end() ) leftObstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
-        leftObstacles[powerPinName].push_back(blockCoordinate);
-        if( rightObstacles.find(powerPinName) == rightObstacles.end() ) rightObstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
-        rightObstacles[powerPinName].push_back(blockCoordinate);
+//        if( leftObstacles.find(powerPinName) == leftObstacles.end() ) leftObstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
+//        leftObstacles[powerPinName].push_back(blockCoordinate);
+//        if( rightObstacles.find(powerPinName) == rightObstacles.end() ) rightObstacles.insert(make_pair(powerPinName, vector<BlockCoordinate>()));
+//        rightObstacles[powerPinName].push_back(blockCoordinate);
+        leftObstacles.push_back(blockCoordinate);
+        rightObstacles.push_back(blockCoordinate);
     }
 }
 void RouterV4::fillSpNetMaps( vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , double width ,  bool peek )
@@ -3188,33 +3192,33 @@ void RouterV4::CutGrid(double width , double spacing )
         if( leftX >= x_LowerBound && leftX <= x_UpperBound)Vertical.insert(leftX);
         if( rightX >= x_LowerBound && rightX <= x_UpperBound)Vertical.insert(rightX);
     }
-    for( auto& key : leftObstacles )
+    for( auto& block : leftObstacles )
     {
-        for(auto & block : key.second)
-        {
-            int leftX = block.LeftDown.x - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-            int rightX = block.RightUp.x + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-            int downY = block.LeftDown.y - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-            int upY = block.RightUp.y + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-            if( downY >= y_LowerBound && downY <= y_UpperBound )Horizontal.insert(downY);
-            if( upY >= y_LowerBound && upY <= y_UpperBound)Horizontal.insert(upY);
-            if( leftX >= x_LowerBound && leftX <= x_UpperBound)Vertical.insert(leftX);
-            if( rightX >= x_LowerBound && rightX <= x_UpperBound)Vertical.insert(rightX);
-        }
+//        for(auto & block : key.second)
+//        {
+        int leftX = block.LeftDown.x - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
+        int rightX = block.RightUp.x + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
+        int downY = block.LeftDown.y - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
+        int upY = block.RightUp.y + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
+        if( downY >= y_LowerBound && downY <= y_UpperBound )Horizontal.insert(downY);
+        if( upY >= y_LowerBound && upY <= y_UpperBound)Horizontal.insert(upY);
+        if( leftX >= x_LowerBound && leftX <= x_UpperBound)Vertical.insert(leftX);
+        if( rightX >= x_LowerBound && rightX <= x_UpperBound)Vertical.insert(rightX);
+//        }
     }
-    for( auto & key : rightObstacles )
+    for( auto & block : rightObstacles )
     {
-        for(auto & block : key.second)
-        {
-            int leftX = block.LeftDown.x - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-            int rightX = block.RightUp.x + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-            int downY = block.LeftDown.y - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-            int upY = block.RightUp.y + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
-            if( downY >= y_LowerBound && downY <= y_UpperBound )Horizontal.insert(downY);
-            if( upY >= y_LowerBound && upY <= y_UpperBound)Horizontal.insert(upY);
-            if( leftX >= x_LowerBound && leftX <= x_UpperBound)Vertical.insert(leftX);
-            if( rightX >= x_LowerBound && rightX <= x_UpperBound)Vertical.insert(rightX);
-        }
+//        for(auto & block : key.second)
+//        {
+        int leftX = block.LeftDown.x - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
+        int rightX = block.RightUp.x + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
+        int downY = block.LeftDown.y - (( 0.5 * width + spacing ) * UNITS_DISTANCE);
+        int upY = block.RightUp.y + (( 0.5 * width + spacing ) * UNITS_DISTANCE);
+        if( downY >= y_LowerBound && downY <= y_UpperBound )Horizontal.insert(downY);
+        if( upY >= y_LowerBound && upY <= y_UpperBound)Horizontal.insert(upY);
+        if( leftX >= x_LowerBound && leftX <= x_UpperBound)Vertical.insert(leftX);
+        if( rightX >= x_LowerBound && rightX <= x_UpperBound)Vertical.insert(rightX);
+//        }
     }
     Vertical.insert(DIEAREA.pt2.x);
     Horizontal.insert(DIEAREA.pt2.y);
@@ -3342,13 +3346,13 @@ void RouterV4::updateGrids(CrossRegion crossRegion , bool blockOrObstacle , Rect
         }
         else
         {
-            for( auto & obstacle : leftObstacles )
+            for( auto & o : leftObstacles )
             {
-                for( auto & o : obstacle.second )
-                {
-                    auto crosssWithObstacleResult = RouterHelper.isCrossWithBlock(rect , via ,o, width , spacing);
-                    updateGrid(crosssWithObstacleResult, grid);
-                }
+//                for( auto & o : obstacle.second )
+//                {
+                auto crosssWithObstacleResult = RouterHelper.isCrossWithBlock(rect , via ,o, width , spacing);
+                updateGrid(crosssWithObstacleResult, grid);
+//                }
             }
         }
     }
@@ -3364,13 +3368,13 @@ void RouterV4::updateGrids(CrossRegion crossRegion , bool blockOrObstacle , Rect
         }
         else
         {
-            for( auto & obstacle : rightObstacles )
+            for( auto & o : rightObstacles )
             {
-                for( auto & o : obstacle.second )
-                {
+//                for( auto & o : obstacle.second )
+//                {
                     auto crosssWithObstacleResult = RouterHelper.isCrossWithBlock(rect , via ,o, width , spacing);
                     updateGrid(crosssWithObstacleResult, grid);
-                }
+//                }
             }
         }
     }
@@ -3391,21 +3395,21 @@ void RouterV4::updateGrids(CrossRegion crossRegion , bool blockOrObstacle , Rect
         }
         else
         {
-            for( auto & obstacle : leftObstacles )
+            for( auto & o : leftObstacles )
             {
-                for( auto & o : obstacle.second )
-                {
+//                for( auto & o : obstacle.second )
+//                {
                     auto crosssWithObstacleResult = RouterHelper.isCrossWithBlock(rect , via ,o, width , spacing);
                     updateGrid(crosssWithObstacleResult, grid);
-                }
+//                }
             }
-            for( auto & obstacle : rightObstacles )
+            for( auto & o : rightObstacles )
             {
-                for( auto & o : obstacle.second )
-                {
+//                for( auto & o : obstacle.second )
+//                {
                     auto crosssWithObstacleResult = RouterHelper.isCrossWithBlock(rect , via ,o, width , spacing);
                     updateGrid(crosssWithObstacleResult, grid);
-                }
+//                }
             }
         }
     }

@@ -593,7 +593,7 @@ Point<int> PDNHelper::getCenter( Point<int> LeftDown , Point<int> RightUp )
 {
     return Point<int>( ( LeftDown.x + RightUp.x ) / 2 , ( LeftDown.y + RightUp.y) / 2 ); 
 }
-bool PDNHelper::isCross(Rectangle rect1 , Rectangle rect2)
+bool PDNHelper::isCross(Rectangle rect1 , Rectangle rect2) 
 {
     pair<int, int> rect1Center = make_pair( ( rect1.LeftDown.x + rect1.RightUp.x ) / 2 , ( rect1.LeftDown.y + rect1.RightUp.y ) / 2 );
     pair<int, int> rect2Center = make_pair( ( rect2.LeftDown.x + rect2.RightUp.x ) / 2 , ( rect2.LeftDown.y + rect2.RightUp.y ) / 2 );

@@ -98,9 +98,12 @@ private:
     // key: vdd_source 
 //    map<string,vector<BlockCoordinate>> obstacles;
     
-    map<string,vector<BlockCoordinate>> leftObstacles ;
+//    map<string,vector<BlockCoordinate>> leftObstacles ;
+    vector<BlockCoordinate> leftObstacles;
     
-    map<string,vector<BlockCoordinate>> rightObstacles ;
+    vector<BlockCoordinate> rightObstacles;
+    
+//    map<string,vector<BlockCoordinate>> rightObstacles ;
     
     
     RouterUtil RouterHelper;
