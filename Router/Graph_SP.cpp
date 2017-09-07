@@ -80,7 +80,7 @@ vector<int> Graph_SP::getPath( )
     int pre = predecessor[terminal];
     if( pre == -1 )
     {
-        cout << "No Solution" << endl;
+//        cout << "No Solution" << endl;
         return vector<int>();
     }
     Paths.push_back(terminal);

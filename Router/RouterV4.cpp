@@ -1136,22 +1136,22 @@ void RouterV4::saveMultiPinCandidates(string powerPin , string block , string bl
 ////        cout << coordinate.x << " " << coordinate.y << " " << coordinate.z << endl;
 //        multiPinCandidates[powerPin].push_back(coordinate);
 //    }
-    if( parallel )
-    {
-        if( mergeCandidates.find(key) == mergeCandidates.end() )  mergeCandidates.insert(make_pair(key, vector<Coordinate3D>()));
-        vector<Coordinate3D> firstCorner ;
-        for(int i = 0 ; i < solutions.size() ; i++)
-        {
-            Coordinate3D current = solutions[i] ;
-            Coordinate3D next = solutions[i+1] ;
-            if( (current.x == next.x && current.y != next.y) || (current.y == next.y && current.x != next.x) )
-            {
-                mergeCandidates[key].push_back(current);
-                break;
-            }
-            
-        }
-    }
+//    if( parallel )
+//    {
+//        if( mergeCandidates.find(key) == mergeCandidates.end() )  mergeCandidates.insert(make_pair(key, vector<Coordinate3D>()));
+//        vector<Coordinate3D> firstCorner ;
+//        for(int i = 0 ; i < solutions.size() ; i++)
+//        {
+//            Coordinate3D current = solutions[i] ;
+//            Coordinate3D next = solutions[i+1] ;
+//            if( (current.x == next.x && current.y != next.y) || (current.y == next.y && current.x != next.x) )
+//            {
+//                mergeCandidates[key].push_back(current);
+//                break;
+//            }
+//            
+//        }
+//    }
 //
 //    int mergeCandidateCuttingRange = 5 ;
 //    
@@ -2385,50 +2385,50 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                     else
                     {
                         // sort
-                        while (!optSuccess)
-                        {
-                            
-                            sort( mergeCandidates[block + blockPin].begin() , mergeCandidates[block + blockPin].end() , [this , source](Coordinate3D & c1 , Coordinate3D & c2 )->bool
-                                 {
-                                     return this->RouterHelper.getManhattanDistance(source, c1) > this->RouterHelper.getManhattanDistance(source, c2) ;
-                                 });
-                            for( auto mergeCandidate : mergeCandidates[block + blockPin] )
-                            {
-                                bool sourceAllowAll = false , targetAllowAll = false;
-                                string key = source.toString() + mergeCandidate.toString() ;
-                                auto iterator = NoSolutionSet.find(key);
-                                if( iterator != NoSolutionSet.end() )
-                                {
-                                    continue ;
-                                }
-                                int distance = RouterHelper.getManhattanDistance(source, mergeCandidate);
-                                if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
-                                   || (distance == 0 && (source.z - mergeCandidate.z == 2 || mergeCandidate.z - source.z == -2 )) ) continue ;
-                                if( allowALL( source , powerSources , blockTarget ) ) sourceAllowAll = true ;
-                                if( allowALL( mergeCandidate , powerSources , blockTarget ) ) targetAllowAll = true ;
-                                vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, mergeCandidate, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
-                                if( checkLegal(solutions) )
-                                {
-                                    genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
-                                    fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
-                                    Simulation() ;
-                                    bool find = false ;
-                                    for( auto nopass : NoPassRoutingLists )
-                                    {
-                                        if( nopass.targetBlockName == block && nopass.targetBlockPinName == blockPin )
-                                        {
-                                            find = true ;
-                                        }
-                                    }
-                                    if( !find )
-                                    {
-                                        optSuccess = true ;
-                                        break; 
-                                    }
-                                }
-                            }
-                            break;
-                        }
+//                        while (!optSuccess)
+//                        {
+//                            
+//                            sort( mergeCandidates[block + blockPin].begin() , mergeCandidates[block + blockPin].end() , [this , source](Coordinate3D & c1 , Coordinate3D & c2 )->bool
+//                                 {
+//                                     return this->RouterHelper.getManhattanDistance(source, c1) > this->RouterHelper.getManhattanDistance(source, c2) ;
+//                                 });
+//                            for( auto mergeCandidate : mergeCandidates[block + blockPin] )
+//                            {
+//                                bool sourceAllowAll = false , targetAllowAll = false;
+//                                string key = source.toString() + mergeCandidate.toString() ;
+//                                auto iterator = NoSolutionSet.find(key);
+//                                if( iterator != NoSolutionSet.end() )
+//                                {
+//                                    continue ;
+//                                }
+//                                int distance = RouterHelper.getManhattanDistance(source, mergeCandidate);
+//                                if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
+//                                   || (distance == 0 && (source.z - mergeCandidate.z == 2 || mergeCandidate.z - source.z == -2 )) ) continue ;
+//                                if( allowALL( source , powerSources , blockTarget ) ) sourceAllowAll = true ;
+//                                if( allowALL( mergeCandidate , powerSources , blockTarget ) ) targetAllowAll = true ;
+//                                vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, mergeCandidate, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+//                                if( checkLegal(solutions) )
+//                                {
+//                                    genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
+//                                    fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
+//                                    Simulation() ;
+//                                    bool find = false ;
+//                                    for( auto nopass : NoPassRoutingLists )
+//                                    {
+//                                        if( nopass.targetBlockName == block && nopass.targetBlockPinName == blockPin )
+//                                        {
+//                                            find = true ;
+//                                        }
+//                                    }
+//                                    if( !find )
+//                                    {
+//                                        optSuccess = true ;
+//                                        break;
+//                                    }
+//                                }
+//                            }
+//                            break;
+//                        }
                         break;
                     }
                 }
