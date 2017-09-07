@@ -2420,7 +2420,11 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                                             find = true ;
                                         }
                                     }
-                                    if( !find ) optSuccess = true ;
+                                    if( !find )
+                                    {
+                                        optSuccess = true ;
+                                        break; 
+                                    }
                                 }
                             }
                             break;
