@@ -29,7 +29,6 @@ RouterV4::RouterV4(string spice, string def , string output)
 }
 RouterV4::~RouterV4()
 {
-    
 }
 
 void RouterV4::InitState()
@@ -55,6 +54,7 @@ void RouterV4::InitState()
         if( MaxSpacing < layer.second.SPACING )
             MaxSpacing = layer.second.SPACING ;
     }
+    
     DEFAULTWIDTH = MinWidth ;
     DEFAULTSPACING = MaxSpacing;
     lowestMetal = stoi(metals[0].substr(5));
@@ -2319,9 +2319,10 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                 optAllCandidates.push_back(path->coordinate);
         }
         
-        
+//        Connection.size()
         int masterBranchCuttingRange = ( ComponentMaps.size() + PinMaps.size() > 80  ) ? 5 : 20 ;
-        
+//        if( Connection.size() == 100 )
+//            masterBranchCuttingRange
         
         auto masterBranchSpiltVertexes = getSplitVertexes(false, masterBranchCuttingRange, optAllCandidates);
         
@@ -2392,7 +2393,8 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                     }
                     else
                     {
-                        break;
+                        if(!isMultiSource)
+                            break;
                     }
                 }
                 else
@@ -2445,7 +2447,10 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                                 minCostSolutions = solutions ;
                             }
                             else
-                                break;
+                            {
+                                if(!isMultiSource)
+                                    break;
+                            }
                         }
                         else
                         {
