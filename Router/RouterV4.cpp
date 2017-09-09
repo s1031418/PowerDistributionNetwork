@@ -2504,6 +2504,8 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                                 if( allowALL( source , powerSources , blockTarget ) ) sourceAllowAll = true ;
                                 if( allowALL( target , powerSources , blockTarget ) ) targetAllowAll = true ;
                                 vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH , graph_sp);
+                                Coordinate3D gridTarget = AbsToGrid(target);
+                                reInit(graph_sp, gridTarget);
                                 if( checkLegal(solutions) )
                                 {
                                     genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
