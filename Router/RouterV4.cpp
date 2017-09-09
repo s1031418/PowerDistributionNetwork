@@ -2523,17 +2523,16 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                                     if( !find ) optSuccess = true ;
                                     if(!optSuccess)
                                     {
-                                        InitGrids(powerPin, DEFAULTWIDTH, DEFAULTSPACING);
-                                        graph_sp = new Graph_SP[1];
-                                        graph_sp = InitGraph_SP(lowestMetal , highestMetal , DEFAULTWIDTH, DEFAULTSPACING);
                                         bool possible = false;
                                         for(int z = lowestMetal ; z <= highestMetal ; z++)
                                         {
                                             Coordinate3D coordinate(source.x , source.y , z);
-                                            possible = isPossibleHasSolutions(coordinate, graph_sp, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
-                                            if( possible )
+                                            if( isPossibleHasSolutions(coordinate, graph_sp, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH) )
                                             {
                                                 possible = true ;
+                                                InitGrids(powerPin, DEFAULTWIDTH, DEFAULTSPACING);
+                                                graph_sp = new Graph_SP[1];
+                                                graph_sp = InitGraph_SP(lowestMetal , highestMetal , DEFAULTWIDTH, DEFAULTSPACING);
                                                 break;
                                             }
                                         }
