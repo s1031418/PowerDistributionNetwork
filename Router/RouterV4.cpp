@@ -2321,8 +2321,8 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
         
 //        Connection.size()
         int masterBranchCuttingRange = ( ComponentMaps.size() + PinMaps.size() > 80  ) ? 5 : 20 ;
-//        if( Connection.size() == 100 )
-//            masterBranchCuttingRange
+        if( Connection.size() == 100 )
+            masterBranchCuttingRange = 35 ; 
         
         auto masterBranchSpiltVertexes = getSplitVertexes(false, masterBranchCuttingRange, optAllCandidates);
         
