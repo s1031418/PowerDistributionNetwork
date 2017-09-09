@@ -56,17 +56,6 @@ int main(int argc,  char * argv[])
     
     RouterV4 router(spiceName,defName,ouputfilesName) ;
     router.Route();
-//    Graph_SP gra ;
-//    gra.Demo();
-    
-//    Predictor predictor ;
-//    predictor.estimate();
-//    string str = "3123314341234";
-//    Graph graph ;
-//    auto a = graph.decode(str);
-//    cout << a.x << " " << a.y << " " << a.z << endl;
-//    cout << str.compare( graph.encode(a) ) << endl;
-//    int x = stoi(temp);
     delete[] lefargv;
     delete[] defargv ;
     return 0;
