@@ -2322,7 +2322,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
 //        Connection.size()
         int masterBranchCuttingRange = ( ComponentMaps.size() + PinMaps.size() > 80  ) ? 5 : 20 ;
         if( Connection.size() == 100 )
-            masterBranchCuttingRange = 35 ; 
+            masterBranchCuttingRange = 35 ;
         
         auto masterBranchSpiltVertexes = getSplitVertexes(false, masterBranchCuttingRange, optAllCandidates);
         
@@ -2879,7 +2879,7 @@ void RouterV4::Simulation()
         if( constaint >= drop )
         {
             cout << " Pass" << endl;
-            output_gen.setDebugIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop,true);
+//            output_gen.setDebugIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop,true);
         }
         else
         {
@@ -2889,11 +2889,11 @@ void RouterV4::Simulation()
             routingList.diffPercentage = drop - constaint ;
             
             NoPassRoutingLists.push_back(routingList);
-            output_gen.setDebugIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop,false);
+//            output_gen.setDebugIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop,false);
         }
         cout << "IR Drop Constraint:" << constaint << "(%)"<< endl;
         cout << endl;
-//        output_gen.setIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop);
+        output_gen.setIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop);
         
     }
     
@@ -2909,8 +2909,8 @@ void RouterV4::Simulation()
             it++;
     }
 //    sort(NoPassRoutingLists.begin(), NoPassRoutingLists.end());
-//    output_gen.toOutputFiles();
-    output_gen.toDebugOutputFiles();
+    output_gen.toOutputFiles();
+//    output_gen.toDebugOutputFiles();
 }
 double RouterV4::getMetalResistance(int layer)
 {
