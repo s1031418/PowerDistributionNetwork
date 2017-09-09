@@ -1,4 +1,5 @@
 
+
 module top (VDD1, VDD2, VDD3, VDD4, VDD5, VDD6 );
   input VDD1, VDD2, VDD3, VDD4, VDD5, VDD6;
 
@@ -9,10 +10,12 @@ module top (VDD1, VDD2, VDD3, VDD4, VDD5, VDD6 );
 
   block3 B3_01 ( .VDD_A(VDD3) );
  
-  block6 B6_01 ( .VDD_A(VDD4) ); 
-  block6 B6_02 ( .VDD_A(VDD4) );
-  block6 B6_03 ( .VDD_A(VDD4) );
-  block6 B6_04 ( .VDD_A(VDD4) );
+  block4 B4_01 ( .VDD_A(VDD4) ); 
+  block4 B4_02 ( .VDD_A(VDD4) );
+  block4 B4_03 ( .VDD_A(VDD4) );
+  block4 B4_04 ( .VDD_A(VDD4) );
+  block4 B4_05 ( .VDD_A(VDD4) );
+  block4 B4_06 ( .VDD_A(VDD4) );
 
 
   block5 B5_01 ( .VDD_A(VDD5), .VDD_B(VDD6) );

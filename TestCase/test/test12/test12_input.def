@@ -1,6 +1,6 @@
-# C:/Users/Eydi/Documents/School things/CAD Contest/2017test case/test/test12/test12_input.def
-# Created by Glade release version 4.6.3 compiled on May 19 2017 09:38:54
-# Run by Eydi on host LHT at Tue Jul 11 21:08:35 2017
+# C:/Users/user/Documents/CAD contest/test case/test6/test6_input.def
+# Created by Glade release version 4.6.6 compiled on Jun 25 2017 06:59:31
+# Run by user on host LHT at Fri Jun 30 20:38:19 2017
 
 VERSION 5.7 ;
 NAMESCASESENSITIVE ON ;
@@ -19,26 +19,22 @@ END PROPERTYDEFINITIONS
 
 DIEAREA ( 0 0 ) ( 3500000 2000000 ) ;
 
-COMPONENTS 19 ;
-  - B4_01 block4 + PLACED ( 3051300 529000 ) FW ;
-  - B3_01 block3 + PLACED ( 136200 76500 ) S ;
-  - B5_02 block5 + FIXED ( 1086000 442700 ) FW ;
-  - B2_02 block2 + PLACED ( 67300 1325000 ) FN ;
-  - B4_06 block4 + PLACED ( 2584300 181800 ) FW ;
-  - B7_01 block7 + FIXED ( 2122500 90600 ) W ;
-  - B5_04 block5 + FIXED ( 1056600 1048400 ) FE ;
-  - B4_04 block4 + PLACED ( 2320700 454200 ) E ;
-  - B5_01 block5 + PLACED ( 1012900 1378100 ) W ;
-  - B5_05 block5 + FIXED ( 1039900 848400 ) W ;
-  - B8_01 block8 + FIXED ( 771000 304800 ) W ;
-  - B5_03 block5 + FIXED ( 987500 1578100 ) FE ;
-  - B6_01 block6 + FIXED ( 798000 75000 ) N ;
-  - B8_03 block8 + FIXED ( 2810700 304800 ) W ;
-  - B4_02 block4 + PLACED ( 2906800 230300 ) FW ;
-  - B4_03 block4 + PLACED ( 2357500 860700 ) E ;
-  - B4_05 block4 + FIXED ( 2736800 848300 ) E ;
-  - B2_01 block2 + FIXED ( 0 665600 ) S ;
-  - B1_01 block1 + FIXED ( 2425500 1427600 ) N ;
+COMPONENTS 15 ;
+  - B4_01 block8 + PLACED ( 1584100 1889200 ) FW ;
+  - B3_01 block6 + PLACED ( 68600 600200 ) S ;
+  - B5_02 block9 + FIXED ( 1086000 442700 ) FW ;
+  - B2_02 block8 + PLACED ( 85800 1073700 ) FE ;
+  - B4_06 block8 + PLACED ( 2596700 1891900 ) FW ;
+  - B5_04 block9 + FIXED ( 2135200 809700 ) FE ;
+  - B4_04 block8 + PLACED ( 1029500 1887200 ) W ;
+  - B5_01 block9 + PLACED ( 1012900 1378100 ) W ;
+  - B5_05 block9 + FIXED ( 1039900 848400 ) W ;
+  - B5_03 block9 + FIXED ( 2105200 1289500 ) FE ;
+  - B4_02 block8 + PLACED ( 2104100 1894800 ) FW ;
+  - B4_03 block8 + PLACED ( 35900 1879100 ) W ;
+  - B4_05 block8 + FIXED ( 580200 1887100 ) W ;
+  - B2_01 block8 + FIXED ( 93200 1348200 ) E ;
+  - B1_01 block9 + FIXED ( 3172900 760500 ) N ;
 END COMPONENTS
 
 PINS 6 ;

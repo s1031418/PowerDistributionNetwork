@@ -192,64 +192,35 @@ END block5
 MACRO block6
   CLASS BLOCK ;
   ORIGIN 0 0 ;
-  SIZE 200 BY 1000 ;
+  SIZE 300 BY 300 ;
   SYMMETRY X Y R90 ;
 
   PIN VDD_A
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL4 ;
-       RECT 0 200 5 250 ;
     LAYER METAL5 ;
-       RECT 0 200 5 250 ;
+       RECT 0 100 5 200 ;
+    LAYER METAL6 ;
+       RECT 0 100 5 200 ;
     END
   END VDD_A
-  PIN VDD_B
-    DIRECTION INOUT ;
-    USE POWER ;
-    PORT
-    LAYER METAL4 ;
-       RECT 0 400 5 450 ;
-    LAYER METAL5 ;
-       RECT 0 400 5 450 ;
-    END
-  END VDD_B
 
   OBS
     LAYER METAL1 ;
-       RECT 0 0 200 1000 ;
+       RECT 0 0 300 300 ;
     LAYER METAL2 ;
-       RECT 0 0 200 1000 ;
+       RECT 0 0 300 300 ;
     LAYER METAL3 ;
-       RECT 0 0 200 1000 ;
+       RECT 0 0 300 300 ;
     LAYER METAL4 ;
-       RECT 0 0 200 1000 ;
+       RECT 0 0 300 300 ;
     LAYER METAL5 ;
-       RECT 0 0 200 1000 ;
+       RECT 0 0 300 300 ;
+    LAYER METAL6 ;
+       RECT 0 0 300 300 ;
   END
 END block6
-
-MACRO block8
-  CLASS BLOCK ;
-  ORIGIN 0 0 ;
-  SIZE 1800 BY 900 ;
-  SYMMETRY X Y R90 ;
-
-  PIN VDD_A
-    DIRECTION INOUT ;
-    USE POWER ;
-    PORT
-    LAYER METAL6 ;
-       RECT 0 50 5 70 ;
-    END
-  END VDD_A
-
-  OBS
-    LAYER METAL6 ;
-       RECT 0 0 1800 900 ;
-  END
-END block8
 
 MACRO block7
   CLASS BLOCK ;
@@ -283,6 +254,40 @@ MACRO block7
        RECT 0 0 100 200 ;
   END
 END block7
+
+MACRO block8
+  CLASS BLOCK ;
+  ORIGIN 0 0 ;
+  SIZE 50 BY 300 ;
+  SYMMETRY X Y R90 ;
+
+  PIN VDD_A
+    DIRECTION INOUT ;
+    USE POWER ;
+    PORT
+    LAYER METAL5 ;
+       RECT 0 50 5 70 ;
+    LAYER METAL6 ;
+       RECT 0 50 5 70 ;
+    END
+  END VDD_A
+
+  OBS
+    LAYER METAL1 ;
+       RECT 0 0 50 300 ;
+    LAYER METAL2 ;
+       RECT 0 0 50 300 ;
+    LAYER METAL3 ;
+       RECT 0 0 50 300 ;
+    LAYER METAL4 ;
+       RECT 0 0 50 300 ;
+    LAYER METAL5 ;
+       RECT 0 0 50 300 ;
+    LAYER METAL6 ;
+       RECT 0 0 50 300 ;
+  END
+END block8
+
 
 MACRO block9
   CLASS BLOCK ;

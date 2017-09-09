@@ -20,9 +20,9 @@ MACRO block1
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL3 ;
+    LAYER METAL5 ;
        RECT 0 10 5 60 ;
-    LAYER METAL4 ;
+    LAYER METAL6 ;
        RECT 0 10 5 60 ;
     END 
   END VDD_A
@@ -30,9 +30,9 @@ MACRO block1
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL3 ;
+    LAYER METAL5 ;
        RECT 0 200 5 250 ;
-    LAYER METAL4 ;
+    LAYER METAL6 ;
        RECT 0 200 5 250 ;
     END
   END VDD_B
@@ -45,6 +45,10 @@ MACRO block1
     LAYER METAL3 ;
        RECT 0 0 1000 500 ;
     LAYER METAL4 ;
+       RECT 0 0 1000 500 ;
+    LAYER METAL5 ;
+       RECT 0 0 1000 500 ;
+    LAYER METAL6 ;
        RECT 0 0 1000 500 ;
   END
 END block1
