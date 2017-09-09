@@ -51,7 +51,7 @@ void InitialFileParser::run()
                 
                 // store in data structure
                 regex_t Regex ; // group 1、2、3
-                if ( regcomp(&Regex, "(.*) (.*) (.*)", REG_EXTENDED) ) cerr << "Compile Error";
+                if ( regcomp(&Regex, "([^[:space:]]+)[[:space:]]+([^[:space:]]+)[[:space:]]+([^[:space:]]+)[[:space:]]*", REG_EXTENDED) ) cerr << "Compile Error";
                 if(!isMatch(Regex, Data[i]))
                 {
                     if(end == true)
@@ -82,7 +82,7 @@ void InitialFileParser::run()
                 
                 // store in data structure
                 regex_t Regex ; // group 1、2
-                if ( regcomp(&Regex, "(.*) (.*)", REG_EXTENDED) ) cerr << "Compile Error";
+                if ( regcomp(&Regex, "([^[:space:]]+)[[:space:]]+([^[:space:]]+)[[:space:]]*", REG_EXTENDED) ) cerr << "Compile Error";
                 if(!isMatch(Regex, Data[i]))
                 {
                     if(end == true)
@@ -108,7 +108,7 @@ void InitialFileParser::run()
                 
                 // store in data structure
                 regex_t Regex ; // group 1、2、3
-                if ( regcomp(&Regex, "(.*) (.*) (([[:digit:]]|[.])+)", REG_EXTENDED) ) cerr << "Compile Error";
+                if ( regcomp(&Regex, "([^[:space:]]+)[[:space:]]+([^[:space:]]+)[[:space:]]+(([[:digit:]]|[.])+)[[:space:]]*", REG_EXTENDED) ) cerr << "Compile Error";
                 if(!isMatch(Regex, Data[i]))
                 {
                     if(end == true)
@@ -138,7 +138,7 @@ void InitialFileParser::run()
                 
                 // store in data structure
                 regex_t Regex ; // group 1、2
-                if ( regcomp(&Regex, "(.*) (.*)", REG_EXTENDED) ) cerr << "Compile Error";
+                if ( regcomp(&Regex, "([^[:space:]]+)[[:space:]]+([^[:space:]]+)[[:space:]]*", REG_EXTENDED) ) cerr << "Compile Error";
                 if(!isMatch(Regex, Data[i]))
                 {
                     if(end == true)

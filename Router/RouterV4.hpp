@@ -56,7 +56,7 @@ public:
     
     vector< vector< Grid > > Grids ;
 private:
-    unsigned numOfThreads; 
+    
     string spiceName ;
     string defName ;
     string outputfilesName ;
@@ -114,16 +114,16 @@ private:
     
     double getMetalResistance(int layer);
     
-    Point<int> getAbsolutePoint( Coordinate3D coordinate3d );
+    inline Point<int> getAbsolutePoint( Coordinate3D coordinate3d );
     
     void Simulation();
     
     // absolute point to grid point
-    int getGridX(int x);
+    inline int getGridX(int x);
     
-    int getGridY(int y);
+    inline int getGridY(int y);
     
-    Coordinate3D getGridCoordinate( Block block );
+    inline Coordinate3D getGridCoordinate( Block block );
     
     void InitBoundList();
     
@@ -133,7 +133,7 @@ private:
     
     void generateSpiceList(Coordinate3D powerPoint , Coordinate3D blockPoint , vector<Coordinate3D> & paths , string powerPinName , string blockName , string blockPinName , int width );
     
-    string gridToString(Coordinate3D , bool);
+    inline string gridToString(Coordinate3D , bool);
     
     void AddVirtualObstacle();
     
@@ -155,9 +155,9 @@ private:
     
     Graph_SP * InitGraph_SP(int lowerLayer , int higherLayer , int width , int spacing);
     
-    int translate3D_1D(Coordinate3D coordinate3d);
+    inline int translate3D_1D(Coordinate3D coordinate3d);
     
-    Coordinate3D translate1D_3D(int index);
+    inline Coordinate3D translate1D_3D(int index);
     
     void toGridGraph();
     
@@ -213,9 +213,9 @@ private:
     
     Coordinate3D getNext(Direction3D direction , Coordinate3D corner);
     
-    int gridYToAbs(int gridY);
+    inline int gridYToAbs(int gridY);
     
-    int gridXToAbs(int gridX);
+    inline int gridXToAbs(int gridX);
     
     bool isSameLayer(vector<Coordinate3D> & path);
     

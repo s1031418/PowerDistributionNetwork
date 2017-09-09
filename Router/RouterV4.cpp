@@ -57,7 +57,6 @@ void RouterV4::InitState()
     }
     DEFAULTWIDTH = MinWidth ;
     DEFAULTSPACING = MaxSpacing;
-    numOfThreads = thread::hardware_concurrency();
     lowestMetal = stoi(metals[0].substr(5));
     highestMetal = stoi(metals[metals.size()-1].substr(5));
     SpecialNetsMaps.clear();
@@ -1705,19 +1704,19 @@ void RouterV4::initPoint(Graph_SP * graph_sp , Coordinate3D & grid)
     if( grid.z == lowestMetal )
     {
         if( !Grids[grid.y][grid.x].verticalEdges[grid.z].topEdge )
-            graph_sp->AddEdge(index+Top, index, Max_Distance);
+            graph_sp->UpdateWeight(index+Top, index, Max_Distance);
     }
     else if( grid.z == highestMetal )
     {
         if( !Grids[grid.y][grid.x].verticalEdges[grid.z].bottomEdge )
-            graph_sp->AddEdge(index+Bottom, index, Max_Distance);
+            graph_sp->UpdateWeight(index+Bottom, index, Max_Distance);
     }
     else
     {
         if( !Grids[grid.y][grid.x].verticalEdges[grid.z].topEdge )
-            graph_sp->AddEdge(index+Top, index, Max_Distance);
+            graph_sp->UpdateWeight(index+Top, index, Max_Distance);
         if( !Grids[grid.y][grid.x].verticalEdges[grid.z].bottomEdge )
-            graph_sp->AddEdge(index+Bottom, index, Max_Distance);
+            graph_sp->UpdateWeight(index+Bottom, index, Max_Distance);
     }
 }
 void RouterV4::reInit(Graph_SP * graph_sp , Coordinate3D & grid)
