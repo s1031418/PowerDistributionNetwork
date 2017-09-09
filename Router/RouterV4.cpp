@@ -1675,6 +1675,97 @@ double RouterV4::getMetalUsage(vector<Coordinate3D> solutions , int width)
     }
     return totalMetalUsage / UNITS_DISTANCE / UNITS_DISTANCE;
 }
+void RouterV4::initPoint(Graph_SP * graph_sp , Coordinate3D & grid)
+{
+    int index = translate3D_1D(grid);
+    int YSize = (int)Grids.size()+1 ;
+    int XSize = (int)Grids[0].size()+1;
+    int Up = XSize ;
+    int Right = 1 ;
+    int Top = (XSize) * (YSize);
+    int Left = -1 * Right ;
+    int Down = -1 * Up ;
+    int Bottom = -1 * Top ;
+    if( !Grids[grid.y][grid.x].Edges[grid.z].downEdge )
+    {
+        graph_sp->UpdateWeight(index + Right,index, Max_Distance);
+    }
+    if( !Grids[grid.y][grid.x-1].Edges[grid.z].downEdge )
+    {
+        graph_sp->UpdateWeight(index + Left,index, Max_Distance);
+    }
+    if( !Grids[grid.y][grid.x].Edges[grid.z].leftEdge )
+    {
+        graph_sp->UpdateWeight(index+Up, index, Max_Distance);
+    }
+    if( !Grids[grid.y-1][grid.x].Edges[grid.z].leftEdge )
+    {
+        graph_sp->UpdateWeight(index+Down, index, Max_Distance);
+    }
+    if( grid.z == lowestMetal )
+    {
+        if( !Grids[grid.y][grid.x].verticalEdges[grid.z].topEdge )
+            graph_sp->AddEdge(index+Top, index, Max_Distance);
+    }
+    else if( grid.z == highestMetal )
+    {
+        if( !Grids[grid.y][grid.x].verticalEdges[grid.z].bottomEdge )
+            graph_sp->AddEdge(index+Bottom, index, Max_Distance);
+    }
+    else
+    {
+        if( !Grids[grid.y][grid.x].verticalEdges[grid.z].topEdge )
+            graph_sp->AddEdge(index+Top, index, Max_Distance);
+        if( !Grids[grid.y][grid.x].verticalEdges[grid.z].bottomEdge )
+            graph_sp->AddEdge(index+Bottom, index, Max_Distance);
+    }
+}
+void RouterV4::reInit(Graph_SP * graph_sp , Coordinate3D & grid)
+{
+    // top
+    auto lastLegal = getLastIlegalCoordinate(topOrient, grid , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
+    for(int z = grid.z ; z <= lastLegal.z ; z++)
+    {
+        Coordinate3D coordinate(grid.x , grid.y , z );
+        initPoint(graph_sp, coordinate);
+    }
+    // bottom
+    lastLegal = getLastIlegalCoordinate(bottomOrient, grid , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
+    for(int z = lastLegal.z ; z <= grid.z ; z++)
+    {
+        Coordinate3D coordinate(grid.x , grid.y , z );
+        initPoint(graph_sp, coordinate);
+    }
+    // up
+    lastLegal = getLastIlegalCoordinate(upOrient, grid , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
+    for( int y = grid.y ; y <= lastLegal.y ; y++ )
+    {
+        Coordinate3D coordinate(grid.x , y , grid.z );
+        initPoint(graph_sp, coordinate);
+    }
+    // down
+    lastLegal = getLastIlegalCoordinate(downOrient, grid , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
+    for( int y = lastLegal.y ; y <= grid.y ; y++ )
+    {
+        Coordinate3D coordinate(grid.x , y , grid.z );
+        initPoint(graph_sp, coordinate);
+    }
+    // left
+    lastLegal = getLastIlegalCoordinate(leftOrient, grid , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
+    for( int x = lastLegal.x ; x <= grid.x ; x++ )
+    {
+        Coordinate3D coordinate(x , grid.y , grid.z );
+        initPoint(graph_sp, coordinate);
+    }
+    // right
+    lastLegal = getLastIlegalCoordinate(rightOrient, grid , DEFAULTWIDTH , DEFAULTSPACING , DEFAULTWIDTH);
+    for( int x = grid.x ; x <= lastLegal.x ; x++ )
+    {
+        Coordinate3D coordinate(x , grid.y , grid.z );
+        initPoint(graph_sp, coordinate);
+    }
+    
+}
 vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinate , Coordinate3D & BlockPinCoordinate , bool init , bool multiSource , double constraint , double current , double voltage , Graph * steinerTree , string powerPin , Graph_SP * graph_sp , int target, int source  , string block , string blockPin , int width , int spacing , int originWidth)
 {
     // 第一次 為block to power
@@ -1731,11 +1822,9 @@ vector<Coordinate3D> RouterV4::selectMergePoint(Coordinate3D & powerPinCoordinat
                 
                 legalizeAllOrient(true , coordinate3D, graph_sp , width ,spacing , originWidth);
             }
-            
             graph_sp->Dijkstra(target,mergePoint);
-            
+            reInit(graph_sp, coordinate3D);
             auto paths = graph_sp->getPath();
-            
             vector<Coordinate3D> solutions ;
             for( auto path : paths )
                 solutions.push_back(translate1D_3D(path));
@@ -2178,13 +2267,6 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
     Simulation();
 //    opt1(steinerTree);
     
-//    Simulation();
-//    for(auto nopass : NoPassRoutingLists)
-//    {
-//        cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
-//        cout << nopass.sourceName << " " << nopass.targetBlockName << " " << nopass.targetBlockPinName << endl;
-//        cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
-//    }
     
     while (!NoPassRoutingLists.empty())
     {
@@ -2265,6 +2347,9 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
         }
 //        candidates.push_back(blockTarget);
         Coordinate3D source = sourcesOrder[0];
+        InitGrids(powerPin, DEFAULTWIDTH, DEFAULTSPACING);
+        Graph_SP * graph_sp = new Graph_SP[1];
+        graph_sp = InitGraph_SP(lowestMetal , highestMetal , DEFAULTWIDTH, DEFAULTSPACING);
         bool optSuccess = false;
         while (!optSuccess)
         {
@@ -2288,7 +2373,9 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                 if( allowALL( source , powerSources , blockTarget ) ) sourceAllowAll = true ;
                 if( allowALL( target , powerSources , blockTarget ) ) targetAllowAll = true ;
                 
-                vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+                vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH , graph_sp) ;
+                Coordinate3D gridTarget = AbsToGrid(target);
+                reInit(graph_sp, gridTarget);
                 if( checkLegal(solutions) )
                 {
                     double metalUsage = getMetalUsage(solutions, DEFAULTWIDTH);
@@ -2340,7 +2427,9 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                            || (distance == 0 && (source.z - target.z == 2 || target.z - source.z == -2 )) ) continue ;
                         if( allowALL( source , powerSources , blockTarget ) ) sourceAllowAll = true ;
                         if( allowALL( target , powerSources , blockTarget ) ) targetAllowAll = true ;
-                        vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+                        vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH , graph_sp);
+                        Coordinate3D gridTarget = AbsToGrid(target);
+                        reInit(graph_sp, gridTarget);
                         if( checkLegal(solutions) )
                         {
                             double metalUsage = getMetalUsage(solutions, DEFAULTWIDTH);
@@ -2372,6 +2461,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                         genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
                         fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
                         saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions , true );
+                        delete [] graph_sp ;
                         //                        def_gen.toOutputDef();
                         Simulation() ;
                         bool find = false ;
@@ -2383,54 +2473,15 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                             }
                         }
                         if( !find ) optSuccess = true ;
+                        if(!optSuccess)
+                        {
+                            InitGrids(powerPin, DEFAULTWIDTH, DEFAULTSPACING);
+                            graph_sp = new Graph_SP[1];
+                            graph_sp = InitGraph_SP(lowestMetal , highestMetal , DEFAULTWIDTH, DEFAULTSPACING);
+                        }
                     }
                     else
                     {
-                        // sort
-//                        while (!optSuccess)
-//                        {
-//                            
-//                            sort( mergeCandidates[block + blockPin].begin() , mergeCandidates[block + blockPin].end() , [this , source](Coordinate3D & c1 , Coordinate3D & c2 )->bool
-//                                 {
-//                                     return this->RouterHelper.getManhattanDistance(source, c1) > this->RouterHelper.getManhattanDistance(source, c2) ;
-//                                 });
-//                            for( auto mergeCandidate : mergeCandidates[block + blockPin] )
-//                            {
-//                                bool sourceAllowAll = false , targetAllowAll = false;
-//                                string key = source.toString() + mergeCandidate.toString() ;
-//                                auto iterator = NoSolutionSet.find(key);
-//                                if( iterator != NoSolutionSet.end() )
-//                                {
-//                                    continue ;
-//                                }
-//                                int distance = RouterHelper.getManhattanDistance(source, mergeCandidate);
-//                                if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
-//                                   || (distance == 0 && (source.z - mergeCandidate.z == 2 || mergeCandidate.z - source.z == -2 )) ) continue ;
-//                                if( allowALL( source , powerSources , blockTarget ) ) sourceAllowAll = true ;
-//                                if( allowALL( mergeCandidate , powerSources , blockTarget ) ) targetAllowAll = true ;
-//                                vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, mergeCandidate, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
-//                                if( checkLegal(solutions) )
-//                                {
-//                                    genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
-//                                    fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
-//                                    Simulation() ;
-//                                    bool find = false ;
-//                                    for( auto nopass : NoPassRoutingLists )
-//                                    {
-//                                        if( nopass.targetBlockName == block && nopass.targetBlockPinName == blockPin )
-//                                        {
-//                                            find = true ;
-//                                        }
-//                                    }
-//                                    if( !find )
-//                                    {
-//                                        optSuccess = true ;
-//                                        break;
-//                                    }
-//                                }
-//                            }
-//                            break;
-//                        }
                         break;
                     }
                 }
@@ -2445,6 +2496,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                 genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
                 fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
                 saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions , true );
+                delete [] graph_sp ;
 //                def_gen.toOutputDef();
                 Simulation() ;
                 bool find = false ;
@@ -2456,6 +2508,12 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                     }
                 }
                 if( !find ) optSuccess = true ;
+                if( !optSuccess )
+                {
+                    InitGrids(powerPin, DEFAULTWIDTH, DEFAULTSPACING);
+                    graph_sp = new Graph_SP[1];
+                    graph_sp = InitGraph_SP(lowestMetal , highestMetal , DEFAULTWIDTH, DEFAULTSPACING);
+                }
 //                if( !optSuccess )
 //                {
 //                    for(auto mergeCandidate : mergeCandidates[block+blockPin])
@@ -2895,10 +2953,10 @@ void RouterV4::opt1(Graph * steinerTree)
             {
                 // parallel algorithm
                 vector<Coordinate3D> solutions ;
-                if( lastTarget == outerPower &&  lastSource == outerBlock)
-                    solutions = parallelRoute(true , true , powerPin, block, blockPin, lastSource, lastTarget, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
-                else
-                    solutions = parallelRoute(false , false , powerPin, block, blockPin, lastSource , lastTarget, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+//                if( lastTarget == outerPower &&  lastSource == outerBlock)
+//                    solutions = parallelRoute(true , true , powerPin, block, blockPin, lastSource, lastTarget, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+//                else
+//                    solutions = parallelRoute(false , false , powerPin, block, blockPin, lastSource , lastTarget, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
                 if( checkLegal(solutions) )
                 {
                     genResistance(solutions, powerPin , sp_gen ,DEFAULTWIDTH );
@@ -2940,13 +2998,12 @@ bool RouterV4::isSameLayer(vector<Coordinate3D> & path)
     return true;
 }
 // coordindate 為 絕對座標 + Z
-vector<Coordinate3D> RouterV4::parallelRoute(bool sourceLegalAll , bool targetLegalAll , string powerPin , string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , int width , int spacing , int originWidth)
+vector<Coordinate3D> RouterV4::parallelRoute(bool sourceLegalAll , bool targetLegalAll , string powerPin , string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , int width , int spacing , int originWidth , Graph_SP * graph_sp)
 {
     
-    Graph_SP * graph_sp = new Graph_SP[1];
+    
     vector<Coordinate3D> solutions ;
-    InitGrids(powerPin, DEFAULTWIDTH, DEFAULTSPACING);
-    graph_sp = InitGraph_SP(lowestMetal , highestMetal ,  width, spacing);
+    
     Coordinate3D sourceGrid = AbsToGrid(source);
     Coordinate3D targetGrid = AbsToGrid(target);
     if( sourceLegalAll ) legalizeAllLayer(false , sourceGrid, graph_sp , width , spacing , originWidth);
@@ -2959,7 +3016,6 @@ vector<Coordinate3D> RouterV4::parallelRoute(bool sourceLegalAll , bool targetLe
     int target1D = translate3D_1D(targetGrid);
     graph_sp->Dijkstra(source1D,target1D);
     auto paths= graph_sp->getPath();
-    delete [] graph_sp ;
     if( paths.empty() ) return vector<Coordinate3D>();
     for( auto path : paths )
         solutions.push_back(translate1D_3D(path));

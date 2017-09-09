@@ -5,7 +5,6 @@
 //  Created by Jun-Sheng Wu on 26/04/2017.
 //  Copyright © 2017 Jun-Sheng Wu. All rights reserved.
 //
-
 #include <iostream>
 #include <string>
 #include "lefrw.h"

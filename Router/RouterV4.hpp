@@ -191,7 +191,7 @@ private:
     // 第一個為viaName,第二個為via location set
     pair<string,vector<Point<int>>>  getViaLocation(Nets & net , Point<int> & orginTarget , bool top , int width);
     
-    vector<Coordinate3D> parallelRoute(bool sourceLegalAll , bool targetLegalAll , string powerPin , string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , int width , int spacing , int originWidth);
+    vector<Coordinate3D> parallelRoute(bool sourceLegalAll , bool targetLegalAll , string powerPin , string blockName , string blockPinName , Coordinate3D source , Coordinate3D target , int width , int spacing , int originWidth , Graph_SP * graph_sp);
     
     Coordinate3D AbsToGrid(Coordinate3D coordinateABS);
     
@@ -249,6 +249,10 @@ private:
     void updateNoPassLists();
     
     bool allowALL( Coordinate3D & coordinate ,  vector<Coordinate3D> & powers , Coordinate3D & target ) ;
+    
+    void reInit(Graph_SP * graph_sp , Coordinate3D & grid);
+    
+    void initPoint(Graph_SP * graph_sp , Coordinate3D & grid);
 };
 
 #endif /* RouterV4_hpp */
