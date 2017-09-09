@@ -2508,9 +2508,9 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                                 reInit(graph_sp, gridTarget);
                                 if( checkLegal(solutions) )
                                 {
-                                    genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
-                                    fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
-                                    saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions , true );
+                                    genResistance(solutions, powerPin , sp_gen ,DEFAULTWIDTH );
+                                    fillSpNetMaps(solutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
+                                    saveMultiPinCandidates(powerPin, block , blockPin , solutions , true );
                                     delete [] graph_sp ;
                                     // def_gen.toOutputDef();
                                     Simulation() ;
