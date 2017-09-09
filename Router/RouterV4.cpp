@@ -2874,7 +2874,7 @@ void RouterV4::Simulation()
         if( constaint >= drop )
         {
             cout << " Pass" << endl;
-//            output_gen.setDebugIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop,true);
+            output_gen.setDebugIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop,true);
         }
         else
         {
@@ -2884,11 +2884,11 @@ void RouterV4::Simulation()
             routingList.diffPercentage = drop - constaint ;
             
             NoPassRoutingLists.push_back(routingList);
-//            output_gen.setDebugIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop,false);
+            output_gen.setDebugIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop,false);
         }
         cout << "IR Drop Constraint:" << constaint << "(%)"<< endl;
         cout << endl;
-        output_gen.setIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop);
+//        output_gen.setIRDrop(routingList.targetBlockName, routingList.targetBlockPinName, drop);
         
     }
     
@@ -2904,8 +2904,8 @@ void RouterV4::Simulation()
             it++;
     }
 //    sort(NoPassRoutingLists.begin(), NoPassRoutingLists.end());
-    output_gen.toOutputFiles();
-//    output_gen.toDebugOutputFiles();
+//    output_gen.toOutputFiles();
+    output_gen.toDebugOutputFiles();
 }
 double RouterV4::getMetalResistance(int layer)
 {
