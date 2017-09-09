@@ -2552,6 +2552,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                                 }
                             }
                         }
+                        break;
                     }
                 }
                 
