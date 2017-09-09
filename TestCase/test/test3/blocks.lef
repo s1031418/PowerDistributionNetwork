@@ -120,33 +120,29 @@ END block3
 MACRO block4
   CLASS BLOCK ;
   ORIGIN 0 0 ;
-  SIZE 50 BY 300 ;
+  SIZE 200 BY 200 ;
   SYMMETRY X Y R90 ;
 
   PIN VDD_A
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL5 ;
-       RECT 0 50 5 70 ;
-    LAYER METAL6 ;
-       RECT 0 50 5 70 ;
+    LAYER METAL3 ;
+       RECT 0 80 5 120 ;
+    LAYER METAL4 ;
+       RECT 0 80 5 120 ;
     END
   END VDD_A
 
   OBS
     LAYER METAL1 ;
-       RECT 0 0 50 300 ;
+       RECT 0 0 200 200 ;
     LAYER METAL2 ;
-       RECT 0 0 50 300 ;
+       RECT 0 0 200 200 ;
     LAYER METAL3 ;
-       RECT 0 0 50 300 ;
+       RECT 0 0 200 200 ;
     LAYER METAL4 ;
-       RECT 0 0 50 300 ;
-    LAYER METAL5 ;
-       RECT 0 0 50 300 ;
-    LAYER METAL6 ;
-       RECT 0 0 50 300 ;
+       RECT 0 0 200 200 ;
   END
 END block4
 
@@ -170,9 +166,9 @@ MACRO block5
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL4 ;
-       RECT 0 400 5 450 ;
     LAYER METAL5 ;
+       RECT 0 400 5 450 ;
+    LAYER METAL6 ;
        RECT 0 400 5 450 ;
     END
   END VDD_B
@@ -187,6 +183,8 @@ MACRO block5
     LAYER METAL4 ;
        RECT 0 0 200 1000 ;
     LAYER METAL5 ;
+       RECT 0 0 200 1000 ;
+    LAYER METAL6 ;
        RECT 0 0 200 1000 ;
   END
 END block5
@@ -260,31 +258,36 @@ END block7
 MACRO block8
   CLASS BLOCK ;
   ORIGIN 0 0 ;
-  SIZE 200 BY 200 ;
+  SIZE 50 BY 300 ;
   SYMMETRY X Y R90 ;
 
   PIN VDD_A
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL3 ;
-       RECT 0 80 5 120 ;
-    LAYER METAL4 ;
-       RECT 0 80 5 120 ;
+    LAYER METAL5 ;
+       RECT 0 50 5 70 ;
+    LAYER METAL6 ;
+       RECT 0 50 5 70 ;
     END
   END VDD_A
 
   OBS
     LAYER METAL1 ;
-       RECT 0 0 200 200 ;
+       RECT 0 0 50 300 ;
     LAYER METAL2 ;
-       RECT 0 0 200 200 ;
+       RECT 0 0 50 300 ;
     LAYER METAL3 ;
-       RECT 0 0 200 200 ;
+       RECT 0 0 50 300 ;
     LAYER METAL4 ;
-       RECT 0 0 200 200 ;
+       RECT 0 0 50 300 ;
+    LAYER METAL5 ;
+       RECT 0 0 50 300 ;
+    LAYER METAL6 ;
+       RECT 0 0 50 300 ;
   END
 END block8
+
 
 MACRO block9
   CLASS BLOCK ;

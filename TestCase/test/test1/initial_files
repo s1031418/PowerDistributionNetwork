@@ -1,26 +1,19 @@
 # The current drawn by each power pin (mA)
 B1 VDD_A 5
-B1 VDD_B 2
-B2 VDD_A 3
-B3 VDD_A 2
-B7_1 VDD_A 3
-B7_2 VDD_A 3
-B7_3 VDD_A 3
+B1 VDD_B 5
+B2 VDD_A 5
+B3 VDD_A 5
 
 # The voltage of each power source (V)
 VDD1 1.0
 VDD2 1.0
 VDD3 1.0
-VDD4 1.5
 
 # The IR-drop constraint of each power pin (%)
 B1 VDD_A 1
 B1 VDD_B 1
-B2 VDD_A 1.8 
-B3 VDD_A 1.5
-B7_1 VDD_A 3
-B7_2 VDD_A 3
-B7_3 VDD_A 3
+B2 VDD_A 1
+B3 VDD_A 1
 
 # The weights on metal layers
 M1 2.49

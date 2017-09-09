@@ -201,10 +201,14 @@ MACRO block6
     PORT
     LAYER METAL5 ;
        RECT 0 100 5 200 ;
+    LAYER METAL6 ;
+       RECT 0 100 5 200 ;
     END
   END VDD_A
 
   OBS
+    LAYER METAL1 ;
+       RECT 0 0 300 300 ;
     LAYER METAL2 ;
        RECT 0 0 300 300 ;
     LAYER METAL3 ;
@@ -212,6 +216,8 @@ MACRO block6
     LAYER METAL4 ;
        RECT 0 0 300 300 ;
     LAYER METAL5 ;
+       RECT 0 0 300 300 ;
+    LAYER METAL6 ;
        RECT 0 0 300 300 ;
   END
 END block6

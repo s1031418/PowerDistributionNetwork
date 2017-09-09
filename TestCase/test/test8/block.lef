@@ -1,4 +1,4 @@
-VERSION 5.5 ;
+VERSION 5.7 ;
 NAMESCASESENSITIVE ON ;
 #BUSBITCHARS "d" ;
 #DIVIDERCHAR "/" ;
@@ -225,68 +225,66 @@ END block6
 MACRO block7
   CLASS BLOCK ;
   ORIGIN 0 0 ;
-  SIZE 200 BY 1000 ;
+  SIZE 100 BY 200 ;
   SYMMETRY X Y R90 ;
 
   PIN VDD_A
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL4 ;
-       RECT 0 200 5 250 ;
     LAYER METAL5 ;
-       RECT 0 200 5 250 ;
+       RECT 0 50 5 70 ;
+    LAYER METAL6 ;
+       RECT 0 50 5 70 ;
     END
   END VDD_A
 
   OBS
     LAYER METAL1 ;
-       RECT 0 0 200 1000 ;
+       RECT 0 0 100 200 ;
     LAYER METAL2 ;
-       RECT 0 0 200 1000 ;
+       RECT 0 0 100 200 ;
     LAYER METAL3 ;
-       RECT 0 0 200 1000 ;
+       RECT 0 0 100 200 ;
     LAYER METAL4 ;
-       RECT 0 0 200 1000 ;
+       RECT 0 0 100 200 ;
     LAYER METAL5 ;
-       RECT 0 0 200 1000 ;
+       RECT 0 0 100 200 ;
+    LAYER METAL6 ;
+       RECT 0 0 100 200 ;
   END
 END block7
 
 MACRO block8
   CLASS BLOCK ;
   ORIGIN 0 0 ;
-  SIZE 200 BY 1000 ;
+  SIZE 50 BY 300 ;
   SYMMETRY X Y R90 ;
 
   PIN VDD_A
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL2 ;
-       RECT 0 200 5 250 ;
-    LAYER METAL3 ;
-       RECT 0 200 5 250 ;
+    LAYER METAL5 ;
+       RECT 0 50 5 70 ;
+    LAYER METAL6 ;
+       RECT 0 50 5 70 ;
     END
   END VDD_A
-  PIN VDD_B
-    DIRECTION INOUT ;
-    USE POWER ;
-    PORT
-    LAYER METAL2 ;
-       RECT 0 400 5 450 ;
-    LAYER METAL3 ;
-       RECT 0 400 5 450 ;
-    END
-  END VDD_B
 
   OBS
     LAYER METAL1 ;
-       RECT 0 0 200 1000 ;
+       RECT 0 0 50 300 ;
     LAYER METAL2 ;
-       RECT 0 0 200 1000 ;
+       RECT 0 0 50 300 ;
     LAYER METAL3 ;
-       RECT 0 0 200 1000 ;
+       RECT 0 0 50 300 ;
+    LAYER METAL4 ;
+       RECT 0 0 50 300 ;
+    LAYER METAL5 ;
+       RECT 0 0 50 300 ;
+    LAYER METAL6 ;
+       RECT 0 0 50 300 ;
   END
 END block8
 
@@ -294,26 +292,74 @@ END block8
 MACRO block9
   CLASS BLOCK ;
   ORIGIN 0 0 ;
-  SIZE 700 BY 600 ;
+  SIZE 250 BY 700 ;
   SYMMETRY X Y R90 ;
 
   PIN VDD_A
     DIRECTION INOUT ;
     USE POWER ;
     PORT
-    LAYER METAL1 ;
-       RECT 0 100 5 150 ;
-    LAYER METAL2 ;
-       RECT 0 100 5 150 ;
+    LAYER METAL5 ;
+       RECT 0 150 5 180 ;
+    LAYER METAL6 ;
+       RECT 0 150 5 180 ;
     END
   END VDD_A
+  PIN VDD_B
+    DIRECTION INOUT ;
+    USE POWER ;
+    PORT
+    LAYER METAL5 ;
+       RECT 0 250 5 280 ;
+    LAYER METAL6 ;
+       RECT 0 250 5 280 ;
+    END
+  END VDD_B
+  PIN VDD_C
+    DIRECTION INOUT ;
+    USE POWER ;
+    PORT
+    LAYER METAL5 ;
+       RECT 0 350 5 380 ;
+    LAYER METAL6 ;
+       RECT 0 350 5 380 ;
+    END
+  END VDD_C
+  PIN VDD_D
+    DIRECTION INOUT ;
+    USE POWER ;
+    PORT
+    LAYER METAL5 ;
+       RECT 0 450 5 480 ;
+    LAYER METAL6 ;
+       RECT 0 450 5 480 ;
+    END
+  END VDD_D
+  PIN VDD_E
+    DIRECTION INOUT ;
+    USE POWER ;
+    PORT
+    LAYER METAL5 ;
+       RECT 0 550 5 580 ;
+    LAYER METAL6 ;
+       RECT 0 550 5 580 ;
+    END
+  END VDD_E
 
   OBS
     LAYER METAL1 ;
-       RECT 0 0 700 600 ;
-    LAYER METAL2 ;
-       RECT 0 0 700 600 ;
-  END
+       RECT 0 0 250 700 ;
+    LAYER METAL2 ; 
+       RECT 0 0 250 700 ;
+    LAYER METAL3 ; 
+       RECT 0 0 250 700 ;
+    LAYER METAL4 ;
+       RECT 0 0 250 700 ;
+    LAYER METAL5 ;
+       RECT 0 0 250 700 ;
+    LAYER METAL6 ;
+       RECT 0 0 250 700 ;
+  END  
 END block9
 
 
