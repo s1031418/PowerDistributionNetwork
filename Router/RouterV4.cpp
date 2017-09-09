@@ -1135,12 +1135,12 @@ void RouterV4::saveMultiPinCandidates(string powerPin , string block , string bl
 ////        cout << coordinate.x << " " << coordinate.y << " " << coordinate.z << endl;
 //        multiPinCandidates[powerPin].push_back(coordinate);
 //    }
-//    if( parallel )
-//    {
-//        if( mergeCandidates.find(key) == mergeCandidates.end() )  mergeCandidates.insert(make_pair(key, vector<Coordinate3D>()));
-//        vector<Coordinate3D> firstCorner ;
-//        for(int i = 0 ; i < solutions.size() ; i++)
-//        {
+    if( parallel )
+    {
+        if( mergeCandidates.find(key) == mergeCandidates.end() )  mergeCandidates.insert(make_pair(key, vector<Coordinate3D>()));
+        for(int i = 0 ; i < solutions.size() ; i++)
+        {
+            mergeCandidates[key].push_back(gridToAbsolute(solutions[i]));
 //            Coordinate3D current = solutions[i] ;
 //            Coordinate3D next = solutions[i+1] ;
 //            if( (current.x == next.x && current.y != next.y) || (current.y == next.y && current.x != next.x) )
@@ -1149,8 +1149,8 @@ void RouterV4::saveMultiPinCandidates(string powerPin , string block , string bl
 //                break;
 //            }
 //            
-//        }
-//    }
+        }
+    }
 //
 //    int mergeCandidateCuttingRange = 5 ;
 //    
@@ -2461,7 +2461,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                         fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
                         saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions , true );
                         delete [] graph_sp ;
-                        //                        def_gen.toOutputDef();
+                        // def_gen.toOutputDef();
                         Simulation() ;
                         bool find = false ;
                         for( auto nopass : NoPassRoutingLists )
@@ -2481,7 +2481,76 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                     }
                     else
                     {
-                        break;
+                        bool stop = false;
+                        sort( mergeCandidates[block + blockPin].begin() , mergeCandidates[block + blockPin].end() , [this , source](Coordinate3D & c1 , Coordinate3D & c2 )->bool
+                        {
+                            return this->RouterHelper.getManhattanDistance(source, c1) > this->RouterHelper.getManhattanDistance(source, c2) ;
+                        });
+                        while (!optSuccess || stop)
+                        {
+                            for(int t = 0 ; t < mergeCandidates[block+blockPin].size() ; t++)
+                            {
+                                bool sourceAllowAll = false , targetAllowAll = false;
+                                Coordinate3D target = mergeCandidates[block+blockPin][t];
+                                string key = source.toString() + target.toString() ;
+                                auto iterator = NoSolutionSet.find(key);
+                                if( iterator != NoSolutionSet.end() )
+                                {
+                                    continue ;
+                                }
+                                int distance = RouterHelper.getManhattanDistance(source, target);
+                                if( (distance <= 2 * (0.5 * DEFAULTWIDTH + DEFAULTSPACING) * UNITS_DISTANCE + DEFAULTWIDTH * UNITS_DISTANCE )
+                                   || (distance == 0 && (source.z - target.z == 2 || target.z - source.z == -2 )) ) continue ;
+                                if( allowALL( source , powerSources , blockTarget ) ) sourceAllowAll = true ;
+                                if( allowALL( target , powerSources , blockTarget ) ) targetAllowAll = true ;
+                                vector<Coordinate3D> solutions = parallelRoute(sourceAllowAll,targetAllowAll ,powerPin, block, blockPin, source, target, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH , graph_sp);
+                                if( checkLegal(solutions) )
+                                {
+                                    genResistance(minCostSolutions, powerPin , sp_gen ,DEFAULTWIDTH );
+                                    fillSpNetMaps(minCostSolutions, powerPin, block , blockPin , DEFAULTWIDTH ,true );
+                                    saveMultiPinCandidates(powerPin, block , blockPin , minCostSolutions , true );
+                                    delete [] graph_sp ;
+                                    // def_gen.toOutputDef();
+                                    Simulation() ;
+                                    bool find = false ;
+                                    for( auto nopass : NoPassRoutingLists )
+                                    {
+                                        if( nopass.targetBlockName == block && nopass.targetBlockPinName == blockPin )
+                                        {
+                                            find = true ;
+                                        }
+                                    }
+                                    if( !find ) optSuccess = true ;
+                                    if(!optSuccess)
+                                    {
+                                        InitGrids(powerPin, DEFAULTWIDTH, DEFAULTSPACING);
+                                        graph_sp = new Graph_SP[1];
+                                        graph_sp = InitGraph_SP(lowestMetal , highestMetal , DEFAULTWIDTH, DEFAULTSPACING);
+                                        bool possible = false;
+                                        for(int z = lowestMetal ; z <= highestMetal ; z++)
+                                        {
+                                            Coordinate3D coordinate(source.x , source.y , z);
+                                            possible = isPossibleHasSolutions(coordinate, graph_sp, DEFAULTWIDTH, DEFAULTSPACING, DEFAULTWIDTH);
+                                            if( possible )
+                                            {
+                                                possible = true ;
+                                                break;
+                                            }
+                                        }
+                                        if(!possible)
+                                        {
+                                            stop = true ;
+                                            break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        optSuccess = true ;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 
