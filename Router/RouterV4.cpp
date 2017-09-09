@@ -2185,11 +2185,11 @@ bool RouterV4::checkLegal(vector<Coordinate3D> solutions)
                     int distance = RouterHelper.getManhattanDistance(viaCoordinates[i], viaCoordinates[j]);
                     if( distance <= DEFAULTWIDTH * UNITS_DISTANCE )
                         continue;
-                    cout << "ilegal" << endl;
+//                    cout << "ilegal" << endl;
                     Point<int> leftDown3(viaCoordinates[i].x - ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[i].y - ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
                     Point<int> rightUp3(viaCoordinates[i].x + ( 0.5 * DEFAULTWIDTH  )  * UNITS_DISTANCE ,viaCoordinates[i].y + ( 0.5 * DEFAULTWIDTH  ) * UNITS_DISTANCE );
-                    cout << leftDown3 << " " << rightUp3 << endl;
-                    cout << rect2.LeftDown << " " << rect2.RightUp << endl;
+//                    cout << leftDown3 << " " << rightUp3 << endl;
+//                    cout << rect2.LeftDown << " " << rect2.RightUp << endl;
                     mustUpdateCoordinates.push_back(viaCoordinates[i]);
 //                    ileagalcnt++;
 //                    cout << "ilegal" << endl;
@@ -2486,7 +2486,7 @@ void RouterV4::optimize(vector<Graph *> steinerTrees)
                         {
                             return this->RouterHelper.getManhattanDistance(source, c1) > this->RouterHelper.getManhattanDistance(source, c2) ;
                         });
-                        while (!optSuccess || stop)
+                        while (!optSuccess || !stop)
                         {
                             for(int t = 0 ; t < mergeCandidates[block+blockPin].size() ; t++)
                             {
