@@ -1,0 +1,41 @@
+time ./cadb152 TestCase/2017/case1/case1.v TestCase/2017/case1/case1_input.def TestCase/2017/case1/tech.lef TestCase/2017/case1/blocks.lef TestCase/2017/case1/initial_files case1_output.def case1.sp output_files
+Begin determine Net Ordering ...
+Net Ordering cost 0.01(s)
+VDD1 to B1_VDD_A Drop 1.855(%)  No Pass
+IR Drop Constraint:1(%)
+
+VDD3 to B3_VDD_A Drop 0.516(%)  Pass
+IR Drop Constraint:1.5(%)
+
+VDD3 to B2_VDD_A Drop 1.5234(%)  Pass
+IR Drop Constraint:1.8(%)
+
+VDD2 to B1_VDD_B Drop 0.7708(%)  Pass
+IR Drop Constraint:1(%)
+
+VDD1 to B1_VDD_A Drop 0.9965(%)  Pass
+IR Drop Constraint:1(%)
+
+VDD3 to B3_VDD_A Drop 0.516(%)  Pass
+IR Drop Constraint:1.5(%)
+
+VDD3 to B2_VDD_A Drop 1.5234(%)  Pass
+IR Drop Constraint:1.8(%)
+
+VDD2 to B1_VDD_B Drop 0.7708(%)  Pass
+IR Drop Constraint:1(%)
+
+VDD1 to B1_VDD_A Drop 0.9965(%)  Pass
+IR Drop Constraint:1(%)
+
+VDD3 to B3_VDD_A Drop 0.516(%)  Pass
+IR Drop Constraint:1.5(%)
+
+VDD3 to B2_VDD_A Drop 1.5234(%)  Pass
+IR Drop Constraint:1.8(%)
+
+VDD2 to B1_VDD_B Drop 0.7708(%)  Pass
+IR Drop Constraint:1(%)
+
+0.26user 0.03system 0:00.32elapsed 90%CPU (0avgtext+0avgdata 4840maxresident)k
+0inputs+528outputs (0major+9719minor)pagefaults 0swaps

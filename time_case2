@@ -1,0 +1,1769 @@
+time ./cadb152 TestCase/2017/case2/case2.v TestCase/2017/case2/case2_input.def TestCase/2017/case2/tech.lef TestCase/2017/case2/blocks.lef TestCase/2017/case2/initial_files case2_output.def case2.sp output_files 
+Begin determine Net Ordering ...
+Net Ordering cost 0.38(s)
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.607(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 4.9038(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 4.53571(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 4.15429(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 4.18929(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 3.78714(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 3.80286(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 3.31(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 3.9034(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 3.4912(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 3.82438(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 3.515(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 3.49563(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 3.18375(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.885(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.607(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 4.9038(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 4.53571(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 4.15429(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 4.18929(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 3.78714(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 3.80286(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 3.31(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 3.9034(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 3.4912(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 3.82438(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 3.515(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 3.49563(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.33813(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.8225(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.607(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 4.9038(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 4.53571(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 4.15429(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 4.18929(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 3.71571(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 3.80286(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.96643(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 3.9034(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 3.4912(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 3.82438(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 3.515(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 3.49563(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.33813(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.8225(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.607(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 4.9038(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 4.53571(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 4.15429(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 4.18929(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 3.71571(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 3.80286(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.96643(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 3.9034(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8419(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 3.82438(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 3.515(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 3.49563(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.33813(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.8225(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.607(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 4.9038(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 4.53571(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 4.15429(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 4.18929(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 3.71571(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 3.80286(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.96643(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 3.9034(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8419(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 3.82438(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 3.515(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.34938(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.3525(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.83688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.607(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 4.9038(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 4.53571(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 4.15429(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 4.18929(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 3.71571(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 3.80286(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.96643(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 3.9034(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8419(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 3.82438(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.39875(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.36812(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.36563(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.85(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.607(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 4.9038(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 4.53571(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 4.15429(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 4.18929(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.45643(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 3.80286(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.96643(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 3.9034(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8419(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 3.82438(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.39875(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.36812(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.36563(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.85(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.607(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 4.9038(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 4.45714(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 4.15429(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 4.18929(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.48643(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.36214(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.98286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 3.9034(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8419(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 3.82438(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.39875(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.36812(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.36563(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.85(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.607(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 4.9038(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 4.45714(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 4.15429(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 4.18929(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.48643(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.36214(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.98286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 3.9034(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8419(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.607(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 4.9038(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 4.45714(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 4.15429(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 4.18929(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.48643(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.36214(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.98286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.607(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 4.9038(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 4.45786(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.91429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 4.18929(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.51143(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.38(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.99643(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.607(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 4.9038(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 4.45929(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.93071(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.92143(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.53643(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.39786(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 3.01(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.607(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 4.9038(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 4.45929(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.93286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.92571(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.53857(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.4(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.99071(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.607(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 4.9038(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 2.88429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.94786(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.95143(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.56143(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.37857(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 3.01286(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.607(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 4.9038(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 2.88714(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.94929(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.95429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.56286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.38(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 5.4184(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.507(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 2.9035(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 2.88714(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.94929(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.95429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.56286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.38(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 3.2441(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.5276(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 2.9242(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 2.88714(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.94929(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.95429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.56286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.38(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 2.7651(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 5.5352(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 2.9318(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 2.88714(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.94929(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.95429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.56286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.38(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 2.7886(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 3.3761(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 2.9315(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 2.88714(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.94929(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.95429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.56286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.38(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 5.7625(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 2.7979(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 2.9962(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 2.9314(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 2.88714(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.94929(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.95429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.56286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.38(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 3.11167(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 2.7979(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 2.9962(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 2.9314(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 2.88714(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.94929(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.95429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.56286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.38(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 2.25917(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 6.0012(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 2.7979(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 2.9962(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 2.9314(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 2.88714(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.94929(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.95429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.56286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.38(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 2.25917(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 3.8005(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 2.8298(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 3.0438(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 2.9497(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 2.88714(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.94929(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.95429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.56286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.38(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 2.25917(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 2.9016(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 2.8428(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 3.0632(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 2.9572(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 2.88714(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.94929(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.95429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.56286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.38(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 6.8866(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 2.25917(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 2.9113(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 2.8474(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 2.9764(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 2.957(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 2.88714(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.94929(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.95429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.56286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.38(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 3.8737(%)  No Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 2.25917(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 2.9113(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 2.8474(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 2.9764(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 2.957(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 2.88714(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.94929(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.95429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.56286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.38(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 2.938(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 2.25917(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 2.9113(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 2.8474(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 2.9764(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 2.957(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 2.88714(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.94929(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.95429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.56286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.38(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD1 to B1_01_VDD_A Drop 2.938(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD2 to B1_01_VDD_B Drop 2.25917(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_03_VDD_A Drop 2.9113(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_01_VDD_A Drop 2.8474(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_04_VDD_A Drop 2.9764(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_05_VDD_A Drop 2.957(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD5 to B5_02_VDD_A Drop 1.5854(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_05_VDD_A Drop 2.88714(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_01_VDD_A Drop 2.94929(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_03_VDD_A Drop 2.95429(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_02_VDD_A Drop 2.56286(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_04_VDD_A Drop 2.38(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD4 to B4_06_VDD_A Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_02_VDD_A Drop 2.9004(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B2_01_VDD_A Drop 2.8628(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD3 to B3_01_VDD_A Drop 2.4372(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_03_VDD_B Drop 2.995(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_01_VDD_B Drop 2.41375(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_04_VDD_B Drop 2.38438(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_05_VDD_B Drop 2.37688(%)  Pass
+IR Drop Constraint:3(%)
+
+VDD6 to B5_02_VDD_B Drop 1.86125(%)  Pass
+IR Drop Constraint:3(%)
+
+215.48user 7.41system 3:44.88elapsed 99%CPU (0avgtext+0avgdata 116148maxresident)k
+0inputs+333000outputs (0major+4765652minor)pagefaults 0swaps

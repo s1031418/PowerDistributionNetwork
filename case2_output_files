@@ -1,0 +1,31 @@
+The metal usage report
+M2 1160
+M3 4806
+M4 6679
+M5 141438
+M6 788472
+Total 978530.940000
+
+The IR drop of each power pin (%)
+B1_01/VDD_A 2.938 pass
+B1_01/VDD_B 2.25917 pass
+B5_03/VDD_A 2.9113 pass
+B5_01/VDD_A 2.8474 pass
+B5_04/VDD_A 2.9764 pass
+B5_05/VDD_A 2.957 pass
+B5_02/VDD_A 1.5854 pass
+B4_05/VDD_A 2.88714 pass
+B4_01/VDD_A 2.94929 pass
+B4_03/VDD_A 2.95429 pass
+B4_02/VDD_A 2.56286 pass
+B4_04/VDD_A 2.38 pass
+B4_06/VDD_A 2.995 pass
+B2_02/VDD_A 2.9004 pass
+B2_01/VDD_A 2.8628 pass
+B3_01/VDD_A 2.4372 pass
+B5_03/VDD_B 2.995 pass
+B5_01/VDD_B 2.41375 pass
+B5_04/VDD_B 2.38438 pass
+B5_05/VDD_B 2.37688 pass
+B5_02/VDD_B 1.86125 pass
+Pass Count:(21/21)

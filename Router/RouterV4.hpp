@@ -2,8 +2,6 @@
 //  RouterV4.hpp
 //  EDA_Contest2017(PDN)
 //
-//  Created by 吳峻陞 on 05/07/2017.
-//  Copyright © 2017 吳峻陞. All rights reserved.
 //
 
 #ifndef RouterV4_hpp

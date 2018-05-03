@@ -1,24 +1,23 @@
-/* A Bison parser, made by GNU Bison 2.3.  */
+
+/* A Bison parser, made by GNU Bison 2.4.1.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
-
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   
+      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
-
-   This program is free software; you can redistribute it and/or modify
+   
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -29,7 +28,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-
+   
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -47,7 +46,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.3"
+#define YYBISON_VERSION "2.4.1"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -55,17 +54,191 @@
 /* Pure parsers.  */
 #define YYPURE 0
 
+/* Push parsers.  */
+#define YYPUSH 0
+
+/* Pull parsers.  */
+#define YYPULL 1
+
 /* Using locations.  */
 #define YYLSP_NEEDED 0
 
 /* Substitute the variable and function names.  */
-#define yyparse lefyyparse
-#define yylex   lefyylex
-#define yyerror lefyyerror
-#define yylval  lefyylval
-#define yychar  lefyychar
-#define yydebug lefyydebug
-#define yynerrs lefyynerrs
+#define yyparse         lefyyparse
+#define yylex           lefyylex
+#define yyerror         lefyyerror
+#define yylval          lefyylval
+#define yychar          lefyychar
+#define yydebug         lefyydebug
+#define yynerrs         lefyynerrs
+
+
+/* Copy the first part of user declarations.  */
+
+/* Line 189 of yacc.c  */
+#line 52 "lef.y"
+
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+
+#include "lex.h"
+#include "lefiDefs.hpp"
+#include "lefiUser.hpp"
+#include "lefiUtil.hpp"
+
+#include "lefrData.hpp"
+#include "lefrCallBacks.hpp"
+#include "lefrSettings.hpp"
+
+BEGIN_LEFDEF_PARSER_NAMESPACE
+
+#define LYPROP_ECAP "EDGE_CAPACITANCE"
+
+#define YYINITDEPTH 10000  // pcr 640902 - initialize the yystacksize to 300 
+                           // this may need to increase in a design gets 
+                           // larger and a polygon has around 300 sizes 
+                           // 11/21/2003 - incrreased to 500, design from 
+                           // Artisan is greater than 300, need to find a 
+                           // way to dynamically increase the size 
+                           // 2/10/2004 - increased to 1000 for pcr 686073 
+                           // 3/22/2004 - increased to 2000 for pcr 695879 
+                           // 9/29/2004 - double the size for pcr 746865 
+                           // tried to overwrite the yyoverflow definition 
+                           // it is impossible due to the union structure 
+                           // 10/03/2006 - increased to 10000 for pcr 913695 
+
+#define YYMAXDEPTH 300000  // 1/24/2008 - increased from 150000 
+                           // This value has to be greater than YYINITDEPTH 
+
+
+// Macro to describe how we handle a callback.
+// If the function was set then call it.
+// If the function returns non zero then there was an error
+// so call the error routine and exit.
+#define CALLBACK(func, typ, data) \
+    if (!lefData->lef_errors) { \
+      if (func) { \
+        if ((lefData->lefRetVal = (*func)(typ, data, lefSettings->UserData)) == 0) { \
+        } else { \
+          return lefData->lefRetVal; \
+        } \
+      } \
+    }
+
+#define CHKERR() \
+    if (lefData->lef_errors > 20) { \
+      lefError(1020, "Too many syntax errors."); \
+      lefData->lef_errors = 0; \
+      return 1; \
+    }
+
+// **********************************************************************
+// **********************************************************************
+
+#define C_EQ 0
+#define C_NE 1
+#define C_LT 2
+#define C_LE 3
+#define C_GT 4
+#define C_GE 5
+
+
+int comp_str(char *s1, int op, char *s2)
+{
+    int k = strcmp(s1, s2);
+    switch (op) {
+        case C_EQ: return k == 0;
+        case C_NE: return k != 0;
+        case C_GT: return k >  0;
+        case C_GE: return k >= 0;
+        case C_LT: return k <  0;
+        case C_LE: return k <= 0;
+        }
+    return 0;
+}
+int comp_num(double s1, int op, double s2)
+{
+    double k = s1 - s2;
+    switch (op) {
+        case C_EQ: return k == 0;
+        case C_NE: return k != 0;
+        case C_GT: return k >  0;
+        case C_GE: return k >= 0;
+        case C_LT: return k <  0;
+        case C_LE: return k <= 0;
+        }
+    return 0;
+}
+
+int validNum(int values) {
+    switch (values) {
+        case 100:
+        case 200:
+        case 1000:
+        case 2000:
+             return 1;
+        case 400:
+        case 800:
+        case 4000:
+        case 8000:
+        case 10000:
+        case 20000:
+             if (lefData->versionNum < 5.6) {
+                if (lefCallbacks->UnitsCbk) {
+                  if (lefData->unitsWarnings++ < lefSettings->UnitsWarnings) {
+                    lefData->outMsg = (char*)lefMalloc(10000);
+                    sprintf (lefData->outMsg,
+                       "Error found when processing LEF file '%s'\nUnit %d is a version 5.6 or later syntax\nYour lef file is defined with version %g.",
+                    lefData->lefrFileName, values, lefData->versionNum);
+                    lefError(1501, lefData->outMsg);
+                    lefFree(lefData->outMsg);
+                  }
+                }
+                return 0;
+             } else {
+                return 1;
+             }        
+    }
+    if (lefData->unitsWarnings++ < lefSettings->UnitsWarnings) {
+       lefData->outMsg = (char*)lefMalloc(10000);
+       sprintf (lefData->outMsg,
+          "The value %d defined for LEF UNITS DATABASE MICRONS is invalid\n. Correct value is 100, 200, 400, 800, 1000, 2000, 4000, 8000, 10000, or 20000", values);
+       lefError(1502, lefData->outMsg);
+       lefFree(lefData->outMsg);
+    }
+    CHKERR();
+    return 0;
+}
+
+int zeroOrGt(double values) {
+    if (values < 0)
+      return 0;
+    return 1;
+}
+
+
+
+/* Line 189 of yacc.c  */
+#line 224 "lef.tab.c"
+
+/* Enabling traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+
+/* Enabling verbose error messages.  */
+#ifdef YYERROR_VERBOSE
+# undef YYERROR_VERBOSE
+# define YYERROR_VERBOSE 1
+#else
+# define YYERROR_VERBOSE 0
+#endif
+
+/* Enabling the token table.  */
+#ifndef YYTOKEN_TABLE
+# define YYTOKEN_TABLE 0
+#endif
 
 
 /* Tokens.  */
@@ -501,622 +674,37 @@
      UMINUS = 682
    };
 #endif
-/* Tokens.  */
-#define K_HISTORY 258
-#define K_ABUT 259
-#define K_ABUTMENT 260
-#define K_ACTIVE 261
-#define K_ANALOG 262
-#define K_ARRAY 263
-#define K_AREA 264
-#define K_BLOCK 265
-#define K_BOTTOMLEFT 266
-#define K_BOTTOMRIGHT 267
-#define K_BY 268
-#define K_CAPACITANCE 269
-#define K_CAPMULTIPLIER 270
-#define K_CLASS 271
-#define K_CLOCK 272
-#define K_CLOCKTYPE 273
-#define K_COLUMNMAJOR 274
-#define K_DESIGNRULEWIDTH 275
-#define K_INFLUENCE 276
-#define K_CORE 277
-#define K_CORNER 278
-#define K_COVER 279
-#define K_CPERSQDIST 280
-#define K_CURRENT 281
-#define K_CURRENTSOURCE 282
-#define K_CUT 283
-#define K_DEFAULT 284
-#define K_DATABASE 285
-#define K_DATA 286
-#define K_DIELECTRIC 287
-#define K_DIRECTION 288
-#define K_DO 289
-#define K_EDGECAPACITANCE 290
-#define K_EEQ 291
-#define K_END 292
-#define K_ENDCAP 293
-#define K_FALL 294
-#define K_FALLCS 295
-#define K_FALLT0 296
-#define K_FALLSATT1 297
-#define K_FALLRS 298
-#define K_FALLSATCUR 299
-#define K_FALLTHRESH 300
-#define K_FEEDTHRU 301
-#define K_FIXED 302
-#define K_FOREIGN 303
-#define K_FROMPIN 304
-#define K_GENERATE 305
-#define K_GENERATOR 306
-#define K_GROUND 307
-#define K_HEIGHT 308
-#define K_HORIZONTAL 309
-#define K_INOUT 310
-#define K_INPUT 311
-#define K_INPUTNOISEMARGIN 312
-#define K_COMPONENTPIN 313
-#define K_INTRINSIC 314
-#define K_INVERT 315
-#define K_IRDROP 316
-#define K_ITERATE 317
-#define K_IV_TABLES 318
-#define K_LAYER 319
-#define K_LEAKAGE 320
-#define K_LEQ 321
-#define K_LIBRARY 322
-#define K_MACRO 323
-#define K_MATCH 324
-#define K_MAXDELAY 325
-#define K_MAXLOAD 326
-#define K_METALOVERHANG 327
-#define K_MILLIAMPS 328
-#define K_MILLIWATTS 329
-#define K_MINFEATURE 330
-#define K_MUSTJOIN 331
-#define K_NAMESCASESENSITIVE 332
-#define K_NANOSECONDS 333
-#define K_NETS 334
-#define K_NEW 335
-#define K_NONDEFAULTRULE 336
-#define K_NONINVERT 337
-#define K_NONUNATE 338
-#define K_OBS 339
-#define K_OHMS 340
-#define K_OFFSET 341
-#define K_ORIENTATION 342
-#define K_ORIGIN 343
-#define K_OUTPUT 344
-#define K_OUTPUTNOISEMARGIN 345
-#define K_OVERHANG 346
-#define K_OVERLAP 347
-#define K_OFF 348
-#define K_ON 349
-#define K_OVERLAPS 350
-#define K_PAD 351
-#define K_PATH 352
-#define K_PATTERN 353
-#define K_PICOFARADS 354
-#define K_PIN 355
-#define K_PITCH 356
-#define K_PLACED 357
-#define K_POLYGON 358
-#define K_PORT 359
-#define K_POST 360
-#define K_POWER 361
-#define K_PRE 362
-#define K_PULLDOWNRES 363
-#define K_RECT 364
-#define K_RESISTANCE 365
-#define K_RESISTIVE 366
-#define K_RING 367
-#define K_RISE 368
-#define K_RISECS 369
-#define K_RISERS 370
-#define K_RISESATCUR 371
-#define K_RISETHRESH 372
-#define K_RISESATT1 373
-#define K_RISET0 374
-#define K_RISEVOLTAGETHRESHOLD 375
-#define K_FALLVOLTAGETHRESHOLD 376
-#define K_ROUTING 377
-#define K_ROWMAJOR 378
-#define K_RPERSQ 379
-#define K_SAMENET 380
-#define K_SCANUSE 381
-#define K_SHAPE 382
-#define K_SHRINKAGE 383
-#define K_SIGNAL 384
-#define K_SITE 385
-#define K_SIZE 386
-#define K_SOURCE 387
-#define K_SPACER 388
-#define K_SPACING 389
-#define K_SPECIALNETS 390
-#define K_STACK 391
-#define K_START 392
-#define K_STEP 393
-#define K_STOP 394
-#define K_STRUCTURE 395
-#define K_SYMMETRY 396
-#define K_TABLE 397
-#define K_THICKNESS 398
-#define K_TIEHIGH 399
-#define K_TIELOW 400
-#define K_TIEOFFR 401
-#define K_TIME 402
-#define K_TIMING 403
-#define K_TO 404
-#define K_TOPIN 405
-#define K_TOPLEFT 406
-#define K_TOPRIGHT 407
-#define K_TOPOFSTACKONLY 408
-#define K_TRISTATE 409
-#define K_TYPE 410
-#define K_UNATENESS 411
-#define K_UNITS 412
-#define K_USE 413
-#define K_VARIABLE 414
-#define K_VERTICAL 415
-#define K_VHI 416
-#define K_VIA 417
-#define K_VIARULE 418
-#define K_VLO 419
-#define K_VOLTAGE 420
-#define K_VOLTS 421
-#define K_WIDTH 422
-#define K_X 423
-#define K_Y 424
-#define T_STRING 425
-#define QSTRING 426
-#define NUMBER 427
-#define K_N 428
-#define K_S 429
-#define K_E 430
-#define K_W 431
-#define K_FN 432
-#define K_FS 433
-#define K_FE 434
-#define K_FW 435
-#define K_R0 436
-#define K_R90 437
-#define K_R180 438
-#define K_R270 439
-#define K_MX 440
-#define K_MY 441
-#define K_MXR90 442
-#define K_MYR90 443
-#define K_USER 444
-#define K_MASTERSLICE 445
-#define K_ENDMACRO 446
-#define K_ENDMACROPIN 447
-#define K_ENDVIARULE 448
-#define K_ENDVIA 449
-#define K_ENDLAYER 450
-#define K_ENDSITE 451
-#define K_CANPLACE 452
-#define K_CANNOTOCCUPY 453
-#define K_TRACKS 454
-#define K_FLOORPLAN 455
-#define K_GCELLGRID 456
-#define K_DEFAULTCAP 457
-#define K_MINPINS 458
-#define K_WIRECAP 459
-#define K_STABLE 460
-#define K_SETUP 461
-#define K_HOLD 462
-#define K_DEFINE 463
-#define K_DEFINES 464
-#define K_DEFINEB 465
-#define K_IF 466
-#define K_THEN 467
-#define K_ELSE 468
-#define K_FALSE 469
-#define K_TRUE 470
-#define K_EQ 471
-#define K_NE 472
-#define K_LE 473
-#define K_LT 474
-#define K_GE 475
-#define K_GT 476
-#define K_OR 477
-#define K_AND 478
-#define K_NOT 479
-#define K_DELAY 480
-#define K_TABLEDIMENSION 481
-#define K_TABLEAXIS 482
-#define K_TABLEENTRIES 483
-#define K_TRANSITIONTIME 484
-#define K_EXTENSION 485
-#define K_PROPDEF 486
-#define K_STRING 487
-#define K_INTEGER 488
-#define K_REAL 489
-#define K_RANGE 490
-#define K_PROPERTY 491
-#define K_VIRTUAL 492
-#define K_BUSBITCHARS 493
-#define K_VERSION 494
-#define K_BEGINEXT 495
-#define K_ENDEXT 496
-#define K_UNIVERSALNOISEMARGIN 497
-#define K_EDGERATETHRESHOLD1 498
-#define K_CORRECTIONTABLE 499
-#define K_EDGERATESCALEFACTOR 500
-#define K_EDGERATETHRESHOLD2 501
-#define K_VICTIMNOISE 502
-#define K_NOISETABLE 503
-#define K_EDGERATE 504
-#define K_OUTPUTRESISTANCE 505
-#define K_VICTIMLENGTH 506
-#define K_CORRECTIONFACTOR 507
-#define K_OUTPUTPINANTENNASIZE 508
-#define K_INPUTPINANTENNASIZE 509
-#define K_INOUTPINANTENNASIZE 510
-#define K_CURRENTDEN 511
-#define K_PWL 512
-#define K_ANTENNALENGTHFACTOR 513
-#define K_TAPERRULE 514
-#define K_DIVIDERCHAR 515
-#define K_ANTENNASIZE 516
-#define K_ANTENNAMETALLENGTH 517
-#define K_ANTENNAMETALAREA 518
-#define K_RISESLEWLIMIT 519
-#define K_FALLSLEWLIMIT 520
-#define K_FUNCTION 521
-#define K_BUFFER 522
-#define K_INVERTER 523
-#define K_NAMEMAPSTRING 524
-#define K_NOWIREEXTENSIONATPIN 525
-#define K_WIREEXTENSION 526
-#define K_MESSAGE 527
-#define K_CREATEFILE 528
-#define K_OPENFILE 529
-#define K_CLOSEFILE 530
-#define K_WARNING 531
-#define K_ERROR 532
-#define K_FATALERROR 533
-#define K_RECOVERY 534
-#define K_SKEW 535
-#define K_ANYEDGE 536
-#define K_POSEDGE 537
-#define K_NEGEDGE 538
-#define K_SDFCONDSTART 539
-#define K_SDFCONDEND 540
-#define K_SDFCOND 541
-#define K_MPWH 542
-#define K_MPWL 543
-#define K_PERIOD 544
-#define K_ACCURRENTDENSITY 545
-#define K_DCCURRENTDENSITY 546
-#define K_AVERAGE 547
-#define K_PEAK 548
-#define K_RMS 549
-#define K_FREQUENCY 550
-#define K_CUTAREA 551
-#define K_MEGAHERTZ 552
-#define K_USELENGTHTHRESHOLD 553
-#define K_LENGTHTHRESHOLD 554
-#define K_ANTENNAINPUTGATEAREA 555
-#define K_ANTENNAINOUTDIFFAREA 556
-#define K_ANTENNAOUTPUTDIFFAREA 557
-#define K_ANTENNAAREARATIO 558
-#define K_ANTENNADIFFAREARATIO 559
-#define K_ANTENNACUMAREARATIO 560
-#define K_ANTENNACUMDIFFAREARATIO 561
-#define K_ANTENNAAREAFACTOR 562
-#define K_ANTENNASIDEAREARATIO 563
-#define K_ANTENNADIFFSIDEAREARATIO 564
-#define K_ANTENNACUMSIDEAREARATIO 565
-#define K_ANTENNACUMDIFFSIDEAREARATIO 566
-#define K_ANTENNASIDEAREAFACTOR 567
-#define K_DIFFUSEONLY 568
-#define K_MANUFACTURINGGRID 569
-#define K_FIXEDMASK 570
-#define K_ANTENNACELL 571
-#define K_CLEARANCEMEASURE 572
-#define K_EUCLIDEAN 573
-#define K_MAXXY 574
-#define K_USEMINSPACING 575
-#define K_ROWMINSPACING 576
-#define K_ROWABUTSPACING 577
-#define K_FLIP 578
-#define K_NONE 579
-#define K_ANTENNAPARTIALMETALAREA 580
-#define K_ANTENNAPARTIALMETALSIDEAREA 581
-#define K_ANTENNAGATEAREA 582
-#define K_ANTENNADIFFAREA 583
-#define K_ANTENNAMAXAREACAR 584
-#define K_ANTENNAMAXSIDEAREACAR 585
-#define K_ANTENNAPARTIALCUTAREA 586
-#define K_ANTENNAMAXCUTCAR 587
-#define K_SLOTWIREWIDTH 588
-#define K_SLOTWIRELENGTH 589
-#define K_SLOTWIDTH 590
-#define K_SLOTLENGTH 591
-#define K_MAXADJACENTSLOTSPACING 592
-#define K_MAXCOAXIALSLOTSPACING 593
-#define K_MAXEDGESLOTSPACING 594
-#define K_SPLITWIREWIDTH 595
-#define K_MINIMUMDENSITY 596
-#define K_MAXIMUMDENSITY 597
-#define K_DENSITYCHECKWINDOW 598
-#define K_DENSITYCHECKSTEP 599
-#define K_FILLACTIVESPACING 600
-#define K_MINIMUMCUT 601
-#define K_ADJACENTCUTS 602
-#define K_ANTENNAMODEL 603
-#define K_BUMP 604
-#define K_ENCLOSURE 605
-#define K_FROMABOVE 606
-#define K_FROMBELOW 607
-#define K_IMPLANT 608
-#define K_LENGTH 609
-#define K_MAXVIASTACK 610
-#define K_AREAIO 611
-#define K_BLACKBOX 612
-#define K_MAXWIDTH 613
-#define K_MINENCLOSEDAREA 614
-#define K_MINSTEP 615
-#define K_ORIENT 616
-#define K_OXIDE1 617
-#define K_OXIDE2 618
-#define K_OXIDE3 619
-#define K_OXIDE4 620
-#define K_PARALLELRUNLENGTH 621
-#define K_MINWIDTH 622
-#define K_PROTRUSIONWIDTH 623
-#define K_SPACINGTABLE 624
-#define K_WITHIN 625
-#define K_ABOVE 626
-#define K_BELOW 627
-#define K_CENTERTOCENTER 628
-#define K_CUTSIZE 629
-#define K_CUTSPACING 630
-#define K_DENSITY 631
-#define K_DIAG45 632
-#define K_DIAG135 633
-#define K_MASK 634
-#define K_DIAGMINEDGELENGTH 635
-#define K_DIAGSPACING 636
-#define K_DIAGPITCH 637
-#define K_DIAGWIDTH 638
-#define K_GENERATED 639
-#define K_GROUNDSENSITIVITY 640
-#define K_HARDSPACING 641
-#define K_INSIDECORNER 642
-#define K_LAYERS 643
-#define K_LENGTHSUM 644
-#define K_MICRONS 645
-#define K_MINCUTS 646
-#define K_MINSIZE 647
-#define K_NETEXPR 648
-#define K_OUTSIDECORNER 649
-#define K_PREFERENCLOSURE 650
-#define K_ROWCOL 651
-#define K_ROWPATTERN 652
-#define K_SOFT 653
-#define K_SUPPLYSENSITIVITY 654
-#define K_USEVIA 655
-#define K_USEVIARULE 656
-#define K_WELLTAP 657
-#define K_ARRAYCUTS 658
-#define K_ARRAYSPACING 659
-#define K_ANTENNAAREADIFFREDUCEPWL 660
-#define K_ANTENNAAREAMINUSDIFF 661
-#define K_ANTENNACUMROUTINGPLUSCUT 662
-#define K_ANTENNAGATEPLUSDIFF 663
-#define K_ENDOFLINE 664
-#define K_ENDOFNOTCHWIDTH 665
-#define K_EXCEPTEXTRACUT 666
-#define K_EXCEPTSAMEPGNET 667
-#define K_EXCEPTPGNET 668
-#define K_LONGARRAY 669
-#define K_MAXEDGES 670
-#define K_NOTCHLENGTH 671
-#define K_NOTCHSPACING 672
-#define K_ORTHOGONAL 673
-#define K_PARALLELEDGE 674
-#define K_PARALLELOVERLAP 675
-#define K_PGONLY 676
-#define K_PRL 677
-#define K_TWOEDGES 678
-#define K_TWOWIDTHS 679
-#define IF 680
-#define LNOT 681
-#define UMINUS 682
 
 
-
-
-/* Copy the first part of user declarations.  */
-#line 52 "lef.y"
-
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
-
-#include "lex.h"
-#include "lefiDefs.hpp"
-#include "lefiUser.hpp"
-#include "lefiUtil.hpp"
-
-#include "lefrData.hpp"
-#include "lefrCallBacks.hpp"
-#include "lefrSettings.hpp"
-
-BEGIN_LEFDEF_PARSER_NAMESPACE
-
-#define LYPROP_ECAP "EDGE_CAPACITANCE"
-
-#define YYINITDEPTH 10000  // pcr 640902 - initialize the yystacksize to 300 
-                           // this may need to increase in a design gets 
-                           // larger and a polygon has around 300 sizes 
-                           // 11/21/2003 - incrreased to 500, design from 
-                           // Artisan is greater than 300, need to find a 
-                           // way to dynamically increase the size 
-                           // 2/10/2004 - increased to 1000 for pcr 686073 
-                           // 3/22/2004 - increased to 2000 for pcr 695879 
-                           // 9/29/2004 - double the size for pcr 746865 
-                           // tried to overwrite the yyoverflow definition 
-                           // it is impossible due to the union structure 
-                           // 10/03/2006 - increased to 10000 for pcr 913695 
-
-#define YYMAXDEPTH 300000  // 1/24/2008 - increased from 150000 
-                           // This value has to be greater than YYINITDEPTH 
-
-
-// Macro to describe how we handle a callback.
-// If the function was set then call it.
-// If the function returns non zero then there was an error
-// so call the error routine and exit.
-#define CALLBACK(func, typ, data) \
-    if (!lefData->lef_errors) { \
-      if (func) { \
-        if ((lefData->lefRetVal = (*func)(typ, data, lefSettings->UserData)) == 0) { \
-        } else { \
-          return lefData->lefRetVal; \
-        } \
-      } \
-    }
-
-#define CHKERR() \
-    if (lefData->lef_errors > 20) { \
-      lefError(1020, "Too many syntax errors."); \
-      lefData->lef_errors = 0; \
-      return 1; \
-    }
-
-// **********************************************************************
-// **********************************************************************
-
-#define C_EQ 0
-#define C_NE 1
-#define C_LT 2
-#define C_LE 3
-#define C_GT 4
-#define C_GE 5
-
-
-int comp_str(char *s1, int op, char *s2)
-{
-    int k = strcmp(s1, s2);
-    switch (op) {
-        case C_EQ: return k == 0;
-        case C_NE: return k != 0;
-        case C_GT: return k >  0;
-        case C_GE: return k >= 0;
-        case C_LT: return k <  0;
-        case C_LE: return k <= 0;
-        }
-    return 0;
-}
-int comp_num(double s1, int op, double s2)
-{
-    double k = s1 - s2;
-    switch (op) {
-        case C_EQ: return k == 0;
-        case C_NE: return k != 0;
-        case C_GT: return k >  0;
-        case C_GE: return k >= 0;
-        case C_LT: return k <  0;
-        case C_LE: return k <= 0;
-        }
-    return 0;
-}
-
-int validNum(int values) {
-    switch (values) {
-        case 100:
-        case 200:
-        case 1000:
-        case 2000:
-             return 1;
-        case 400:
-        case 800:
-        case 4000:
-        case 8000:
-        case 10000:
-        case 20000:
-             if (lefData->versionNum < 5.6) {
-                if (lefCallbacks->UnitsCbk) {
-                  if (lefData->unitsWarnings++ < lefSettings->UnitsWarnings) {
-                    lefData->outMsg = (char*)lefMalloc(10000);
-                    sprintf (lefData->outMsg,
-                       "Error found when processing LEF file '%s'\nUnit %d is a version 5.6 or later syntax\nYour lef file is defined with version %g.",
-                    lefData->lefrFileName, values, lefData->versionNum);
-                    lefError(1501, lefData->outMsg);
-                    lefFree(lefData->outMsg);
-                  }
-                }
-                return 0;
-             } else {
-                return 1;
-             }        
-    }
-    if (lefData->unitsWarnings++ < lefSettings->UnitsWarnings) {
-       lefData->outMsg = (char*)lefMalloc(10000);
-       sprintf (lefData->outMsg,
-          "The value %d defined for LEF UNITS DATABASE MICRONS is invalid\n. Correct value is 100, 200, 400, 800, 1000, 2000, 4000, 8000, 10000, or 20000", values);
-       lefError(1502, lefData->outMsg);
-       lefFree(lefData->outMsg);
-    }
-    CHKERR();
-    return 0;
-}
-
-int zeroOrGt(double values) {
-    if (values < 0)
-      return 0;
-    return 1;
-}
-
-
-
-/* Enabling traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
-
-/* Enabling verbose error messages.  */
-#ifdef YYERROR_VERBOSE
-# undef YYERROR_VERBOSE
-# define YYERROR_VERBOSE 1
-#else
-# define YYERROR_VERBOSE 0
-#endif
-
-/* Enabling the token table.  */
-#ifndef YYTOKEN_TABLE
-# define YYTOKEN_TABLE 0
-#endif
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 194 "lef.y"
 {
+
+/* Line 214 of yacc.c  */
+#line 194 "lef.y"
+
         double    dval ;
         int       integer ;
         char *    string ;
         LefDefParser::lefPOINT  pt;
-}
-/* Line 193 of yacc.c.  */
-#line 1107 "lef.tab.c"
-	YYSTYPE;
+
+
+
+/* Line 214 of yacc.c  */
+#line 696 "lef.tab.c"
+} YYSTYPE;
+# define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
-# define YYSTYPE_IS_TRIVIAL 1
 #endif
-
 
 
 /* Copy the second part of user declarations.  */
 
 
-/* Line 216 of yacc.c.  */
-#line 1120 "lef.tab.c"
+/* Line 264 of yacc.c  */
+#line 708 "lef.tab.c"
 
 #ifdef short
 # undef short
@@ -1166,7 +754,7 @@ typedef short int yytype_int16;
 #define YYSIZE_MAXIMUM ((YYSIZE_T) -1)
 
 #ifndef YY_
-# if defined YYENABLE_NLS && YYENABLE_NLS
+# if YYENABLE_NLS
 #  if ENABLE_NLS
 #   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
 #   define YY_(msgid) dgettext ("bison-runtime", msgid)
@@ -1191,14 +779,14 @@ typedef short int yytype_int16;
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static int
-YYID (int i)
+YYID (int yyi)
 #else
 static int
-YYID (i)
-    int i;
+YYID (yyi)
+    int yyi;
 #endif
 {
-  return i;
+  return yyi;
 }
 #endif
 
@@ -1279,9 +867,9 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
 {
-  yytype_int16 yyss;
-  YYSTYPE yyvs;
-  };
+  yytype_int16 yyss_alloc;
+  YYSTYPE yyvs_alloc;
+};
 
 /* The size of the maximum gap between one aligned stack and the next.  */
 # define YYSTACK_GAP_MAXIMUM (sizeof (union yyalloc) - 1)
@@ -1315,12 +903,12 @@ union yyalloc
    elements in the stack, and YYPTR gives the new location of the
    stack.  Advance YYPTR to a properly aligned location for the next
    stack.  */
-# define YYSTACK_RELOCATE(Stack)					\
+# define YYSTACK_RELOCATE(Stack_alloc, Stack)				\
     do									\
       {									\
 	YYSIZE_T yynewbytes;						\
-	YYCOPY (&yyptr->Stack, Stack, yysize);				\
-	Stack = &yyptr->Stack;						\
+	YYCOPY (&yyptr->Stack_alloc, Stack, yysize);			\
+	Stack = &yyptr->Stack_alloc;					\
 	yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
 	yyptr += yynewbytes / sizeof (*yyptr);				\
       }									\
@@ -2075,100 +1663,102 @@ static const char *const yytname[] =
   "K_PARALLELEDGE", "K_PARALLELOVERLAP", "K_PGONLY", "K_PRL", "K_TWOEDGES",
   "K_TWOWIDTHS", "IF", "LNOT", "'-'", "'+'", "'*'", "'/'", "UMINUS", "';'",
   "'('", "')'", "'='", "'\\n'", "'<'", "'>'", "$accept", "lef_file",
-  "version", "@1", "int_number", "dividerchar", "busbitchars", "rules",
+  "version", "$@1", "int_number", "dividerchar", "busbitchars", "rules",
   "end_library", "rule", "case_sensitivity", "wireextension", "fixedmask",
   "manufacturing", "useminspacing", "clearancemeasure", "clearance_type",
   "spacing_type", "spacing_value", "units_section", "start_units",
-  "units_rules", "units_rule", "layer_rule", "start_layer", "@2",
-  "end_layer", "@3", "layer_options", "layer_option", "@4", "@5", "@6",
-  "@7", "@8", "@9", "@10", "@11", "@12", "@13", "@14", "@15", "@16", "@17",
-  "@18", "@19", "@20", "@21", "@22", "@23", "@24", "@25", "@26", "@27",
-  "@28", "@29", "layer_arraySpacing_long", "layer_arraySpacing_width",
-  "layer_arraySpacing_arraycuts", "layer_arraySpacing_arraycut",
-  "sp_options", "@30", "@31", "@32", "@33", "@34", "@35", "@36",
-  "layer_spacingtable_opts", "layer_spacingtable_opt",
-  "layer_enclosure_type_opt", "layer_enclosure_width_opt", "@37",
-  "layer_enclosure_width_except_opt", "layer_preferenclosure_width_opt",
-  "layer_minimumcut_within", "layer_minimumcut_from",
-  "layer_minimumcut_length", "layer_minstep_options",
-  "layer_minstep_option", "layer_minstep_type", "layer_antenna_pwl", "@38",
-  "layer_diffusion_ratios", "layer_diffusion_ratio", "layer_antenna_duo",
-  "layer_table_type", "layer_frequency", "@39", "@40", "@41",
-  "ac_layer_table_opt", "@42", "@43", "dc_layer_table", "@44",
-  "int_number_list", "number_list", "layer_prop_list", "layer_prop",
-  "current_density_pwl_list", "current_density_pwl", "cap_points",
-  "cap_point", "res_points", "res_point", "layer_type", "layer_direction",
-  "layer_minen_width", "layer_oxide", "layer_sp_parallel_widths",
-  "layer_sp_parallel_width", "@45", "layer_sp_TwoWidths",
-  "layer_sp_TwoWidth", "@46", "layer_sp_TwoWidthsPRL",
-  "layer_sp_influence_widths", "layer_sp_influence_width", "maxstack_via",
-  "@47", "via", "@48", "via_keyword", "start_via", "via_viarule", "@49",
-  "@50", "@51", "via_viarule_options", "via_viarule_option", "@52",
-  "via_option", "via_other_options", "via_more_options",
-  "via_other_option", "@53", "via_prop_list", "via_name_value_pair",
-  "via_foreign", "start_foreign", "@54", "orientation", "via_layer_rule",
-  "via_layer", "@55", "via_geometries", "via_geometry", "@56", "end_via",
-  "@57", "viarule_keyword", "@58", "viarule", "viarule_generate", "@59",
+  "units_rules", "units_rule", "layer_rule", "start_layer", "$@2",
+  "end_layer", "$@3", "layer_options", "layer_option", "$@4", "$@5", "$@6",
+  "$@7", "$@8", "$@9", "$@10", "$@11", "$@12", "$@13", "$@14", "$@15",
+  "$@16", "$@17", "$@18", "$@19", "$@20", "$@21", "$@22", "$@23", "$@24",
+  "$@25", "$@26", "$@27", "$@28", "$@29", "layer_arraySpacing_long",
+  "layer_arraySpacing_width", "layer_arraySpacing_arraycuts",
+  "layer_arraySpacing_arraycut", "sp_options", "$@30", "$@31", "$@32",
+  "$@33", "$@34", "$@35", "$@36", "layer_spacingtable_opts",
+  "layer_spacingtable_opt", "layer_enclosure_type_opt",
+  "layer_enclosure_width_opt", "$@37", "layer_enclosure_width_except_opt",
+  "layer_preferenclosure_width_opt", "layer_minimumcut_within",
+  "layer_minimumcut_from", "layer_minimumcut_length",
+  "layer_minstep_options", "layer_minstep_option", "layer_minstep_type",
+  "layer_antenna_pwl", "$@38", "layer_diffusion_ratios",
+  "layer_diffusion_ratio", "layer_antenna_duo", "layer_table_type",
+  "layer_frequency", "$@39", "$@40", "$@41", "ac_layer_table_opt", "$@42",
+  "$@43", "dc_layer_table", "$@44", "int_number_list", "number_list",
+  "layer_prop_list", "layer_prop", "current_density_pwl_list",
+  "current_density_pwl", "cap_points", "cap_point", "res_points",
+  "res_point", "layer_type", "layer_direction", "layer_minen_width",
+  "layer_oxide", "layer_sp_parallel_widths", "layer_sp_parallel_width",
+  "$@45", "layer_sp_TwoWidths", "layer_sp_TwoWidth", "$@46",
+  "layer_sp_TwoWidthsPRL", "layer_sp_influence_widths",
+  "layer_sp_influence_width", "maxstack_via", "$@47", "via", "$@48",
+  "via_keyword", "start_via", "via_viarule", "$@49", "$@50", "$@51",
+  "via_viarule_options", "via_viarule_option", "$@52", "via_option",
+  "via_other_options", "via_more_options", "via_other_option", "$@53",
+  "via_prop_list", "via_name_value_pair", "via_foreign", "start_foreign",
+  "$@54", "orientation", "via_layer_rule", "via_layer", "$@55",
+  "via_geometries", "via_geometry", "$@56", "end_via", "$@57",
+  "viarule_keyword", "$@58", "viarule", "viarule_generate", "$@59",
   "viarule_generate_default", "viarule_layer_list", "opt_viarule_props",
-  "viarule_props", "viarule_prop", "@60", "viarule_prop_list",
-  "viarule_layer", "via_names", "via_name", "viarule_layer_name", "@61",
-  "viarule_layer_options", "viarule_layer_option", "end_viarule", "@62",
+  "viarule_props", "viarule_prop", "$@60", "viarule_prop_list",
+  "viarule_layer", "via_names", "via_name", "viarule_layer_name", "$@61",
+  "viarule_layer_options", "viarule_layer_option", "end_viarule", "$@62",
   "spacing_rule", "start_spacing", "end_spacing", "spacings", "spacing",
   "samenet_keyword", "maskColor", "irdrop", "start_irdrop", "end_irdrop",
   "ir_tables", "ir_table", "ir_table_values", "ir_table_value",
-  "ir_tablename", "minfeature", "dielectric", "nondefault_rule", "@63",
-  "@64", "@65", "end_nd_rule", "nd_hardspacing", "nd_rules", "nd_rule",
-  "usevia", "useviarule", "mincuts", "nd_prop", "@66", "nd_prop_list",
-  "nd_layer", "@67", "@68", "@69", "@70", "nd_layer_stmts",
-  "nd_layer_stmt", "site", "start_site", "@71", "end_site", "@72",
+  "ir_tablename", "minfeature", "dielectric", "nondefault_rule", "$@63",
+  "$@64", "$@65", "end_nd_rule", "nd_hardspacing", "nd_rules", "nd_rule",
+  "usevia", "useviarule", "mincuts", "nd_prop", "$@66", "nd_prop_list",
+  "nd_layer", "$@67", "$@68", "$@69", "$@70", "nd_layer_stmts",
+  "nd_layer_stmt", "site", "start_site", "$@71", "end_site", "$@72",
   "site_options", "site_option", "site_class", "site_symmetry_statement",
-  "site_symmetries", "site_symmetry", "site_rowpattern_statement", "@73",
-  "site_rowpatterns", "site_rowpattern", "@74", "pt", "macro", "@75",
-  "start_macro", "@76", "end_macro", "@77", "macro_options",
-  "macro_option", "@78", "macro_prop_list", "macro_symmetry_statement",
+  "site_symmetries", "site_symmetry", "site_rowpattern_statement", "$@73",
+  "site_rowpatterns", "site_rowpattern", "$@74", "pt", "macro", "$@75",
+  "start_macro", "$@76", "end_macro", "$@77", "macro_options",
+  "macro_option", "$@78", "macro_prop_list", "macro_symmetry_statement",
   "macro_symmetries", "macro_symmetry", "macro_name_value_pair",
   "macro_class", "class_type", "pad_type", "core_type", "endcap_type",
   "macro_generator", "macro_generate", "macro_source", "macro_power",
-  "macro_origin", "macro_foreign", "macro_fixedMask", "macro_eeq", "@79",
-  "macro_leq", "@80", "macro_site", "macro_site_word", "site_word",
-  "macro_size", "macro_pin", "start_macro_pin", "@81", "end_macro_pin",
-  "@82", "macro_pin_options", "macro_pin_option", "@83", "@84", "@85",
-  "@86", "@87", "@88", "@89", "@90", "@91", "@92", "pin_layer_oxide",
-  "pin_prop_list", "pin_name_value_pair", "electrical_direction",
-  "start_macro_port", "macro_port_class_option", "macro_pin_use",
-  "macro_scan_use", "pin_shape", "geometries", "geometry", "@93", "@94",
-  "geometry_options", "layer_exceptpgnet", "layer_spacing", "firstPt",
-  "nextPt", "otherPts", "via_placement", "@95", "@96", "stepPattern",
-  "sitePattern", "trackPattern", "@97", "@98", "@99", "@100",
-  "trackLayers", "layer_name", "gcellPattern", "macro_obs",
+  "macro_origin", "macro_foreign", "macro_fixedMask", "macro_eeq", "$@79",
+  "macro_leq", "$@80", "macro_site", "macro_site_word", "site_word",
+  "macro_size", "macro_pin", "start_macro_pin", "$@81", "end_macro_pin",
+  "$@82", "macro_pin_options", "macro_pin_option", "$@83", "$@84", "$@85",
+  "$@86", "$@87", "$@88", "$@89", "$@90", "$@91", "$@92",
+  "pin_layer_oxide", "pin_prop_list", "pin_name_value_pair",
+  "electrical_direction", "start_macro_port", "macro_port_class_option",
+  "macro_pin_use", "macro_scan_use", "pin_shape", "geometries", "geometry",
+  "$@93", "$@94", "geometry_options", "layer_exceptpgnet", "layer_spacing",
+  "firstPt", "nextPt", "otherPts", "via_placement", "$@95", "$@96",
+  "stepPattern", "sitePattern", "trackPattern", "$@97", "$@98", "$@99",
+  "$@100", "trackLayers", "layer_name", "gcellPattern", "macro_obs",
   "start_macro_obs", "macro_density", "density_layers", "density_layer",
-  "@101", "@102", "density_layer_rects", "density_layer_rect",
-  "macro_clocktype", "@103", "timing", "start_timing", "end_timing",
-  "timing_options", "timing_option", "@104", "@105", "@106",
+  "$@101", "$@102", "density_layer_rects", "density_layer_rect",
+  "macro_clocktype", "$@103", "timing", "start_timing", "end_timing",
+  "timing_options", "timing_option", "$@104", "$@105", "$@106",
   "one_pin_trigger", "two_pin_trigger", "from_pin_trigger",
   "to_pin_trigger", "delay_or_transition", "list_of_table_entries",
   "table_entry", "list_of_table_axis_dnumbers", "slew_spec", "risefall",
   "unateness", "list_of_from_strings", "list_of_to_strings", "array",
-  "@107", "start_array", "@108", "end_array", "@109", "array_rules",
-  "array_rule", "@110", "@111", "@112", "@113", "@114", "floorplan_start",
-  "floorplan_list", "floorplan_element", "@115", "@116", "cap_list",
-  "one_cap", "msg_statement", "@117", "create_file_statement", "@118",
-  "def_statement", "@119", "@120", "@121", "dtrm", "then", "else",
-  "expression", "b_expr", "s_expr", "relop", "prop_def_section", "@122",
-  "prop_stmts", "prop_stmt", "@123", "@124", "@125", "@126", "@127",
-  "@128", "@129", "@130", "prop_define", "opt_range_second",
-  "opt_endofline", "@131", "opt_endofline_twoedges", "opt_samenetPGonly",
-  "opt_def_range", "opt_def_value", "opt_def_dvalue", "layer_spacing_opts",
-  "layer_spacing_opt", "@132", "layer_spacing_cut_routing", "@133", "@134",
-  "@135", "@136", "@137", "spacing_cut_layer_opt",
-  "opt_adjacentcuts_exceptsame", "opt_layer_name", "@138",
-  "req_layer_name", "@139", "universalnoisemargin", "edgeratethreshold1",
-  "edgeratethreshold2", "edgeratescalefactor", "noisetable", "@140",
+  "$@107", "start_array", "$@108", "end_array", "$@109", "array_rules",
+  "array_rule", "$@110", "$@111", "$@112", "$@113", "$@114",
+  "floorplan_start", "floorplan_list", "floorplan_element", "$@115",
+  "$@116", "cap_list", "one_cap", "msg_statement", "$@117",
+  "create_file_statement", "$@118", "def_statement", "$@119", "$@120",
+  "$@121", "dtrm", "then", "else", "expression", "b_expr", "s_expr",
+  "relop", "prop_def_section", "$@122", "prop_stmts", "prop_stmt", "$@123",
+  "$@124", "$@125", "$@126", "$@127", "$@128", "$@129", "$@130",
+  "prop_define", "opt_range_second", "opt_endofline", "$@131",
+  "opt_endofline_twoedges", "opt_samenetPGonly", "opt_def_range",
+  "opt_def_value", "opt_def_dvalue", "layer_spacing_opts",
+  "layer_spacing_opt", "$@132", "layer_spacing_cut_routing", "$@133",
+  "$@134", "$@135", "$@136", "$@137", "spacing_cut_layer_opt",
+  "opt_adjacentcuts_exceptsame", "opt_layer_name", "$@138",
+  "req_layer_name", "$@139", "universalnoisemargin", "edgeratethreshold1",
+  "edgeratethreshold2", "edgeratescalefactor", "noisetable", "$@140",
   "end_noisetable", "noise_table_list", "noise_table_entry",
-  "output_resistance_entry", "@141", "num_list", "victim_list", "victim",
-  "@142", "vnoiselist", "correctiontable", "@143", "end_correctiontable",
-  "correction_table_list", "correction_table_item", "output_list", "@144",
-  "numo_list", "corr_victim_list", "corr_victim", "@145", "corr_list",
+  "output_resistance_entry", "$@141", "num_list", "victim_list", "victim",
+  "$@142", "vnoiselist", "correctiontable", "$@143", "end_correctiontable",
+  "correction_table_list", "correction_table_item", "output_list", "$@144",
+  "numo_list", "corr_victim_list", "corr_victim", "$@145", "corr_list",
   "input_antenna", "output_antenna", "inout_antenna", "antenna_input",
   "antenna_inout", "antenna_output", "extension_opt", "extension", 0
 };
@@ -3801,7 +3391,7 @@ while (YYID (0))
    we won't break user code: when these are the locations we know.  */
 
 #ifndef YY_LOCATION_PRINT
-# if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
+# if YYLTYPE_IS_TRIVIAL
 #  define YY_LOCATION_PRINT(File, Loc)			\
      fprintf (File, "%d.%d-%d.%d",			\
 	      (Loc).first_line, (Loc).first_column,	\
@@ -3912,17 +3502,20 @@ yy_symbol_print (yyoutput, yytype, yyvaluep)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_stack_print (yytype_int16 *bottom, yytype_int16 *top)
+yy_stack_print (yytype_int16 *yybottom, yytype_int16 *yytop)
 #else
 static void
-yy_stack_print (bottom, top)
-    yytype_int16 *bottom;
-    yytype_int16 *top;
+yy_stack_print (yybottom, yytop)
+    yytype_int16 *yybottom;
+    yytype_int16 *yytop;
 #endif
 {
   YYFPRINTF (stderr, "Stack now");
-  for (; bottom <= top; ++bottom)
-    YYFPRINTF (stderr, " %d", *bottom);
+  for (; yybottom <= yytop; yybottom++)
+    {
+      int yybot = *yybottom;
+      YYFPRINTF (stderr, " %d", yybot);
+    }
   YYFPRINTF (stderr, "\n");
 }
 
@@ -3956,11 +3549,11 @@ yy_reduce_print (yyvsp, yyrule)
   /* The symbols being reduced.  */
   for (yyi = 0; yyi < yynrhs; yyi++)
     {
-      fprintf (stderr, "   $%d = ", yyi + 1);
+      YYFPRINTF (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(yyvsp[(yyi + 1) - (yynrhs)])
 		       		       );
-      fprintf (stderr, "\n");
+      YYFPRINTF (stderr, "\n");
     }
 }
 
@@ -4240,10 +3833,8 @@ yydestruct (yymsg, yytype, yyvaluep)
 	break;
     }
 }
-
 
 /* Prevent warnings from -Wmissing-prototypes.  */
-
 #ifdef YYPARSE_PARAM
 #if defined __STDC__ || defined __cplusplus
 int yyparse (void *YYPARSE_PARAM);
@@ -4259,11 +3850,10 @@ int yyparse ();
 #endif /* ! YYPARSE_PARAM */
 
 
-
-/* The look-ahead symbol.  */
+/* The lookahead symbol.  */
 int yychar;
 
-/* The semantic value of the look-ahead symbol.  */
+/* The semantic value of the lookahead symbol.  */
 YYSTYPE yylval;
 
 /* Number of syntax errors so far.  */
@@ -4271,9 +3861,9 @@ int yynerrs;
 
 
 
-/*----------.
-| yyparse.  |
-`----------*/
+/*-------------------------.
+| yyparse or yypush_parse.  |
+`-------------------------*/
 
 #ifdef YYPARSE_PARAM
 #if (defined __STDC__ || defined __C99__FUNC__ \
@@ -4297,14 +3887,39 @@ yyparse ()
 #endif
 #endif
 {
-  
-  int yystate;
+
+
+    int yystate;
+    /* Number of tokens to shift before error messages enabled.  */
+    int yyerrstatus;
+
+    /* The stacks and their tools:
+       `yyss': related to states.
+       `yyvs': related to semantic values.
+
+       Refer to the stacks thru separate pointers, to allow yyoverflow
+       to reallocate them elsewhere.  */
+
+    /* The state stack.  */
+    yytype_int16 yyssa[YYINITDEPTH];
+    yytype_int16 *yyss;
+    yytype_int16 *yyssp;
+
+    /* The semantic value stack.  */
+    YYSTYPE yyvsa[YYINITDEPTH];
+    YYSTYPE *yyvs;
+    YYSTYPE *yyvsp;
+
+    YYSIZE_T yystacksize;
+
   int yyn;
   int yyresult;
-  /* Number of tokens to shift before error messages enabled.  */
-  int yyerrstatus;
-  /* Look-ahead token as an internal (translated) token number.  */
-  int yytoken = 0;
+  /* Lookahead token as an internal (translated) token number.  */
+  int yytoken;
+  /* The variables used to return semantic value and location from the
+     action routines.  */
+  YYSTYPE yyval;
+
 #if YYERROR_VERBOSE
   /* Buffer for error messages, and its allocated size.  */
   char yymsgbuf[128];
@@ -4312,51 +3927,28 @@ yyparse ()
   YYSIZE_T yymsg_alloc = sizeof yymsgbuf;
 #endif
 
-  /* Three stacks and their tools:
-     `yyss': related to states,
-     `yyvs': related to semantic values,
-     `yyls': related to locations.
-
-     Refer to the stacks thru separate pointers, to allow yyoverflow
-     to reallocate them elsewhere.  */
-
-  /* The state stack.  */
-  yytype_int16 yyssa[YYINITDEPTH];
-  yytype_int16 *yyss = yyssa;
-  yytype_int16 *yyssp;
-
-  /* The semantic value stack.  */
-  YYSTYPE yyvsa[YYINITDEPTH];
-  YYSTYPE *yyvs = yyvsa;
-  YYSTYPE *yyvsp;
-
-
-
 #define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
-
-  YYSIZE_T yystacksize = YYINITDEPTH;
-
-  /* The variables used to return semantic value and location from the
-     action routines.  */
-  YYSTYPE yyval;
-
 
   /* The number of symbols on the RHS of the reduced rule.
      Keep to zero when no symbol should be popped.  */
   int yylen = 0;
+
+  yytoken = 0;
+  yyss = yyssa;
+  yyvs = yyvsa;
+  yystacksize = YYINITDEPTH;
 
   YYDPRINTF ((stderr, "Starting parse\n"));
 
   yystate = 0;
   yyerrstatus = 0;
   yynerrs = 0;
-  yychar = YYEMPTY;		/* Cause a token to be read.  */
+  yychar = YYEMPTY; /* Cause a token to be read.  */
 
   /* Initialize stack pointers.
      Waste one element of value and location stack
      so that they stay on the same level as the state stack.
      The wasted elements are never initialized.  */
-
   yyssp = yyss;
   yyvsp = yyvs;
 
@@ -4386,7 +3978,6 @@ yyparse ()
 	YYSTYPE *yyvs1 = yyvs;
 	yytype_int16 *yyss1 = yyss;
 
-
 	/* Each stack pointer address is followed by the size of the
 	   data in use in that stack, in bytes.  This used to be a
 	   conditional around just the two extra args, but that might
@@ -4394,7 +3985,6 @@ yyparse ()
 	yyoverflow (YY_("memory exhausted"),
 		    &yyss1, yysize * sizeof (*yyssp),
 		    &yyvs1, yysize * sizeof (*yyvsp),
-
 		    &yystacksize);
 
 	yyss = yyss1;
@@ -4417,9 +4007,8 @@ yyparse ()
 	  (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
 	if (! yyptr)
 	  goto yyexhaustedlab;
-	YYSTACK_RELOCATE (yyss);
-	YYSTACK_RELOCATE (yyvs);
-
+	YYSTACK_RELOCATE (yyss_alloc, yyss);
+	YYSTACK_RELOCATE (yyvs_alloc, yyvs);
 #  undef YYSTACK_RELOCATE
 	if (yyss1 != yyssa)
 	  YYSTACK_FREE (yyss1);
@@ -4430,7 +4019,6 @@ yyparse ()
       yyssp = yyss + yysize - 1;
       yyvsp = yyvs + yysize - 1;
 
-
       YYDPRINTF ((stderr, "Stack size increased to %lu\n",
 		  (unsigned long int) yystacksize));
 
@@ -4440,6 +4028,9 @@ yyparse ()
 
   YYDPRINTF ((stderr, "Entering state %d\n", yystate));
 
+  if (yystate == YYFINAL)
+    YYACCEPT;
+
   goto yybackup;
 
 /*-----------.
@@ -4448,16 +4039,16 @@ yyparse ()
 yybackup:
 
   /* Do appropriate processing given the current state.  Read a
-     look-ahead token if we need one and don't already have one.  */
+     lookahead token if we need one and don't already have one.  */
 
-  /* First try to decide what to do without reference to look-ahead token.  */
+  /* First try to decide what to do without reference to lookahead token.  */
   yyn = yypact[yystate];
   if (yyn == YYPACT_NINF)
     goto yydefault;
 
-  /* Not known => get a look-ahead token if don't already have one.  */
+  /* Not known => get a lookahead token if don't already have one.  */
 
-  /* YYCHAR is either YYEMPTY or YYEOF or a valid look-ahead symbol.  */
+  /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
   if (yychar == YYEMPTY)
     {
       YYDPRINTF ((stderr, "Reading a token: "));
@@ -4489,20 +4080,16 @@ yybackup:
       goto yyreduce;
     }
 
-  if (yyn == YYFINAL)
-    YYACCEPT;
-
   /* Count tokens shifted since error; after three, turn off error
      status.  */
   if (yyerrstatus)
     yyerrstatus--;
 
-  /* Shift the look-ahead token.  */
+  /* Shift the lookahead token.  */
   YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
 
-  /* Discard the shifted token unless it is eof.  */
-  if (yychar != YYEOF)
-    yychar = YYEMPTY;
+  /* Discard the shifted token.  */
+  yychar = YYEMPTY;
 
   yystate = yyn;
   *++yyvsp = yylval;
@@ -4542,6 +4129,8 @@ yyreduce:
   switch (yyn)
     {
         case 2:
+
+/* Line 1455 of yacc.c  */
 #line 335 "lef.y"
     {
         // 11/16/2001 - Wanda da Rosa - pcr 408334
@@ -4565,11 +4154,15 @@ yyreduce:
     break;
 
   case 3:
+
+/* Line 1455 of yacc.c  */
 #line 355 "lef.y"
     { lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 4:
+
+/* Line 1455 of yacc.c  */
 #line 356 "lef.y"
     { 
 		 // More than 1 VERSION in lef file within the open file - It's wrong syntax, 
@@ -4611,6 +4204,8 @@ yyreduce:
     break;
 
   case 5:
+
+/* Line 1455 of yacc.c  */
 #line 395 "lef.y"
     {
          // int_number represent 'integer-like' type. It can have fraction and exponent part 
@@ -4630,6 +4225,8 @@ yyreduce:
     break;
 
   case 6:
+
+/* Line 1455 of yacc.c  */
 #line 412 "lef.y"
     {
         if (lefCallbacks->DividerCharCbk) {
@@ -4645,6 +4242,8 @@ yyreduce:
     break;
 
   case 7:
+
+/* Line 1455 of yacc.c  */
 #line 425 "lef.y"
     {
         if (lefCallbacks->BusBitCharsCbk) {
@@ -4660,11 +4259,15 @@ yyreduce:
     break;
 
   case 10:
+
+/* Line 1455 of yacc.c  */
 #line 440 "lef.y"
     { ;}
     break;
 
   case 11:
+
+/* Line 1455 of yacc.c  */
 #line 443 "lef.y"
     {
         if (lefData->versionNum >= 5.6) {
@@ -4675,6 +4278,8 @@ yyreduce:
     break;
 
   case 12:
+
+/* Line 1455 of yacc.c  */
 #line 450 "lef.y"
     {
         lefData->doneLib = 1;
@@ -4687,6 +4292,8 @@ yyreduce:
     break;
 
   case 52:
+
+/* Line 1455 of yacc.c  */
 #line 474 "lef.y"
     {
             if (lefData->versionNum < 5.6) {
@@ -4704,6 +4311,8 @@ yyreduce:
     break;
 
   case 53:
+
+/* Line 1455 of yacc.c  */
 #line 488 "lef.y"
     {
             if (lefData->versionNum < 5.6) {
@@ -4724,6 +4333,8 @@ yyreduce:
     break;
 
   case 54:
+
+/* Line 1455 of yacc.c  */
 #line 506 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -4737,6 +4348,8 @@ yyreduce:
     break;
 
   case 55:
+
+/* Line 1455 of yacc.c  */
 #line 516 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -4750,6 +4363,8 @@ yyreduce:
     break;
 
   case 56:
+
+/* Line 1455 of yacc.c  */
 #line 527 "lef.y"
     { 
        if (lefData->versionNum >= 5.8) {
@@ -4765,6 +4380,8 @@ yyreduce:
     break;
 
   case 57:
+
+/* Line 1455 of yacc.c  */
 #line 540 "lef.y"
     {
       if (lefCallbacks->ManufacturingCbk)
@@ -4774,6 +4391,8 @@ yyreduce:
     break;
 
   case 58:
+
+/* Line 1455 of yacc.c  */
 #line 547 "lef.y"
     {
     if ((strcmp((yyvsp[(2) - (4)].string), "PIN") == 0) && (lefData->versionNum >= 5.6)) {
@@ -4791,41 +4410,57 @@ yyreduce:
     break;
 
   case 59:
+
+/* Line 1455 of yacc.c  */
 #line 562 "lef.y"
     { CALLBACK(lefCallbacks->ClearanceMeasureCbk, lefrClearanceMeasureCbkType, (yyvsp[(2) - (3)].string)); ;}
     break;
 
   case 60:
+
+/* Line 1455 of yacc.c  */
 #line 565 "lef.y"
     {(yyval.string) = (char*)"MAXXY";;}
     break;
 
   case 61:
+
+/* Line 1455 of yacc.c  */
 #line 566 "lef.y"
     {(yyval.string) = (char*)"EUCLIDEAN";;}
     break;
 
   case 62:
+
+/* Line 1455 of yacc.c  */
 #line 569 "lef.y"
     {(yyval.string) = (char*)"OBS";;}
     break;
 
   case 63:
+
+/* Line 1455 of yacc.c  */
 #line 570 "lef.y"
     {(yyval.string) = (char*)"PIN";;}
     break;
 
   case 64:
+
+/* Line 1455 of yacc.c  */
 #line 573 "lef.y"
     {(yyval.integer) = 1;;}
     break;
 
   case 65:
+
+/* Line 1455 of yacc.c  */
 #line 574 "lef.y"
     {(yyval.integer) = 0;;}
     break;
 
   case 66:
+
+/* Line 1455 of yacc.c  */
 #line 577 "lef.y"
     { 
       if (lefCallbacks->UnitsCbk)
@@ -4834,6 +4469,8 @@ yyreduce:
     break;
 
   case 67:
+
+/* Line 1455 of yacc.c  */
 #line 583 "lef.y"
     {
       lefData->lefrUnits.clear();
@@ -4859,36 +4496,50 @@ yyreduce:
     break;
 
   case 70:
+
+/* Line 1455 of yacc.c  */
 #line 610 "lef.y"
     { if (lefCallbacks->UnitsCbk) lefData->lefrUnits.setTime((yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 71:
+
+/* Line 1455 of yacc.c  */
 #line 612 "lef.y"
     { if (lefCallbacks->UnitsCbk) lefData->lefrUnits.setCapacitance((yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 72:
+
+/* Line 1455 of yacc.c  */
 #line 614 "lef.y"
     { if (lefCallbacks->UnitsCbk) lefData->lefrUnits.setResistance((yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 73:
+
+/* Line 1455 of yacc.c  */
 #line 616 "lef.y"
     { if (lefCallbacks->UnitsCbk) lefData->lefrUnits.setPower((yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 74:
+
+/* Line 1455 of yacc.c  */
 #line 618 "lef.y"
     { if (lefCallbacks->UnitsCbk) lefData->lefrUnits.setCurrent((yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 75:
+
+/* Line 1455 of yacc.c  */
 #line 620 "lef.y"
     { if (lefCallbacks->UnitsCbk) lefData->lefrUnits.setVoltage((yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 76:
+
+/* Line 1455 of yacc.c  */
 #line 622 "lef.y"
     { 
       if(validNum((int)(yyvsp[(3) - (4)].dval))) {
@@ -4899,11 +4550,15 @@ yyreduce:
     break;
 
   case 77:
+
+/* Line 1455 of yacc.c  */
 #line 629 "lef.y"
     { if (lefCallbacks->UnitsCbk) lefData->lefrUnits.setFrequency((yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 78:
+
+/* Line 1455 of yacc.c  */
 #line 633 "lef.y"
     { 
       if (lefCallbacks->LayerCbk)
@@ -4912,11 +4567,15 @@ yyreduce:
     break;
 
   case 79:
+
+/* Line 1455 of yacc.c  */
 #line 638 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 80:
+
+/* Line 1455 of yacc.c  */
 #line 639 "lef.y"
     { 
       if (lefData->lefrHasMaxVS) {   // 5.5 
@@ -4951,11 +4610,15 @@ yyreduce:
     break;
 
   case 81:
+
+/* Line 1455 of yacc.c  */
 #line 670 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 82:
+
+/* Line 1455 of yacc.c  */
 #line 671 "lef.y"
     { 
       if (strcmp(lefData->layerName, (yyvsp[(3) - (3)].string)) != 0) {
@@ -5015,16 +4678,22 @@ yyreduce:
     break;
 
   case 83:
+
+/* Line 1455 of yacc.c  */
 #line 728 "lef.y"
     { ;}
     break;
 
   case 84:
+
+/* Line 1455 of yacc.c  */
 #line 730 "lef.y"
     { ;}
     break;
 
   case 85:
+
+/* Line 1455 of yacc.c  */
 #line 734 "lef.y"
     {
        // let setArraySpacingCutSpacing to set the data 
@@ -5032,6 +4701,8 @@ yyreduce:
     break;
 
   case 86:
+
+/* Line 1455 of yacc.c  */
 #line 740 "lef.y"
     {
       if (lefCallbacks->LayerCbk) {
@@ -5042,6 +4713,8 @@ yyreduce:
     break;
 
   case 87:
+
+/* Line 1455 of yacc.c  */
 #line 747 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -5056,6 +4729,8 @@ yyreduce:
     break;
 
   case 88:
+
+/* Line 1455 of yacc.c  */
 #line 758 "lef.y"
     {
       if (lefCallbacks->LayerCbk)
@@ -5065,6 +4740,8 @@ yyreduce:
     break;
 
   case 89:
+
+/* Line 1455 of yacc.c  */
 #line 764 "lef.y"
     {
       if (lefData->versionNum < 5.8) {
@@ -5083,6 +4760,8 @@ yyreduce:
     break;
 
   case 90:
+
+/* Line 1455 of yacc.c  */
 #line 779 "lef.y"
     { 
       if (lefCallbacks->LayerCbk) lefData->lefrLayer.setPitch((yyvsp[(2) - (3)].dval));
@@ -5091,6 +4770,8 @@ yyreduce:
     break;
 
   case 91:
+
+/* Line 1455 of yacc.c  */
 #line 784 "lef.y"
     { 
       if (lefCallbacks->LayerCbk) lefData->lefrLayer.setPitchXY((yyvsp[(2) - (4)].dval), (yyvsp[(3) - (4)].dval));
@@ -5099,6 +4780,8 @@ yyreduce:
     break;
 
   case 92:
+
+/* Line 1455 of yacc.c  */
 #line 789 "lef.y"
     { 
       if (lefCallbacks->LayerCbk) lefData->lefrLayer.setDiagPitch((yyvsp[(2) - (3)].dval));
@@ -5106,6 +4789,8 @@ yyreduce:
     break;
 
   case 93:
+
+/* Line 1455 of yacc.c  */
 #line 793 "lef.y"
     { 
       if (lefCallbacks->LayerCbk) lefData->lefrLayer.setDiagPitchXY((yyvsp[(2) - (4)].dval), (yyvsp[(3) - (4)].dval));
@@ -5113,6 +4798,8 @@ yyreduce:
     break;
 
   case 94:
+
+/* Line 1455 of yacc.c  */
 #line 797 "lef.y"
     {
       if (lefCallbacks->LayerCbk) lefData->lefrLayer.setOffset((yyvsp[(2) - (3)].dval));
@@ -5120,6 +4807,8 @@ yyreduce:
     break;
 
   case 95:
+
+/* Line 1455 of yacc.c  */
 #line 801 "lef.y"
     {
       if (lefCallbacks->LayerCbk) lefData->lefrLayer.setOffsetXY((yyvsp[(2) - (4)].dval), (yyvsp[(3) - (4)].dval));
@@ -5127,6 +4816,8 @@ yyreduce:
     break;
 
   case 96:
+
+/* Line 1455 of yacc.c  */
 #line 805 "lef.y"
     {
       if (lefCallbacks->LayerCbk) lefData->lefrLayer.setDiagWidth((yyvsp[(2) - (3)].dval));
@@ -5134,6 +4825,8 @@ yyreduce:
     break;
 
   case 97:
+
+/* Line 1455 of yacc.c  */
 #line 809 "lef.y"
     {
       if (lefCallbacks->LayerCbk) lefData->lefrLayer.setDiagSpacing((yyvsp[(2) - (3)].dval));
@@ -5141,6 +4834,8 @@ yyreduce:
     break;
 
   case 98:
+
+/* Line 1455 of yacc.c  */
 #line 813 "lef.y"
     {
       if (lefCallbacks->LayerCbk) lefData->lefrLayer.setWidth((yyvsp[(2) - (3)].dval));
@@ -5149,6 +4844,8 @@ yyreduce:
     break;
 
   case 99:
+
+/* Line 1455 of yacc.c  */
 #line 818 "lef.y"
     {
       // Issue an error is this is defined in masterslice
@@ -5168,6 +4865,8 @@ yyreduce:
     break;
 
   case 100:
+
+/* Line 1455 of yacc.c  */
 #line 834 "lef.y"
     {
       lefData->hasSpCenter = 0;       // reset to 0, only once per spacing is allowed 
@@ -5205,11 +4904,15 @@ yyreduce:
     break;
 
   case 101:
+
+/* Line 1455 of yacc.c  */
 #line 868 "lef.y"
     {;}
     break;
 
   case 102:
+
+/* Line 1455 of yacc.c  */
 #line 870 "lef.y"
     {
       if (lefCallbacks->LayerCbk)
@@ -5220,6 +4923,8 @@ yyreduce:
     break;
 
   case 103:
+
+/* Line 1455 of yacc.c  */
 #line 877 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -5234,6 +4939,8 @@ yyreduce:
     break;
 
   case 104:
+
+/* Line 1455 of yacc.c  */
 #line 888 "lef.y"
     {
       lefData->layerDir = 1;
@@ -5251,6 +4958,8 @@ yyreduce:
     break;
 
   case 105:
+
+/* Line 1455 of yacc.c  */
 #line 902 "lef.y"
     {
       if (!lefData->layerRout) {
@@ -5266,6 +4975,8 @@ yyreduce:
     break;
 
   case 106:
+
+/* Line 1455 of yacc.c  */
 #line 914 "lef.y"
     {
       if (!lefData->layerRout) {
@@ -5280,6 +4991,8 @@ yyreduce:
     break;
 
   case 107:
+
+/* Line 1455 of yacc.c  */
 #line 925 "lef.y"
     {
       if (!lefData->layerRout) {
@@ -5295,6 +5008,8 @@ yyreduce:
     break;
 
   case 108:
+
+/* Line 1455 of yacc.c  */
 #line 937 "lef.y"
     {
       if (!lefData->layerRout) {
@@ -5309,6 +5024,8 @@ yyreduce:
     break;
 
   case 109:
+
+/* Line 1455 of yacc.c  */
 #line 948 "lef.y"
     {
       if (!lefData->layerRout) {
@@ -5324,6 +5041,8 @@ yyreduce:
     break;
 
   case 110:
+
+/* Line 1455 of yacc.c  */
 #line 960 "lef.y"
     {
       if (!lefData->layerRout) {
@@ -5339,6 +5058,8 @@ yyreduce:
     break;
 
   case 111:
+
+/* Line 1455 of yacc.c  */
 #line 972 "lef.y"
     {
       if (!lefData->layerRout && (lefData->layerCut || lefData->layerMastOver)) {
@@ -5354,6 +5075,8 @@ yyreduce:
     break;
 
   case 112:
+
+/* Line 1455 of yacc.c  */
 #line 984 "lef.y"
     {
       if (!lefData->layerRout) {
@@ -5369,6 +5092,8 @@ yyreduce:
     break;
 
   case 113:
+
+/* Line 1455 of yacc.c  */
 #line 996 "lef.y"
     {
       if (!lefData->layerRout) {
@@ -5384,6 +5109,8 @@ yyreduce:
     break;
 
   case 114:
+
+/* Line 1455 of yacc.c  */
 #line 1008 "lef.y"
     {
       if (!lefData->layerRout) {
@@ -5399,6 +5126,8 @@ yyreduce:
     break;
 
   case 115:
+
+/* Line 1455 of yacc.c  */
 #line 1021 "lef.y"
     { // 5.3 syntax 
       lefData->use5_3 = 1;
@@ -5429,6 +5158,8 @@ yyreduce:
     break;
 
   case 116:
+
+/* Line 1455 of yacc.c  */
 #line 1048 "lef.y"
     {
       if (lefData->versionNum < 5.2) {
@@ -5451,6 +5182,8 @@ yyreduce:
     break;
 
   case 117:
+
+/* Line 1455 of yacc.c  */
 #line 1067 "lef.y"
     { 
       if (lefData->versionNum < 5.2) {
@@ -5472,6 +5205,8 @@ yyreduce:
     break;
 
   case 118:
+
+/* Line 1455 of yacc.c  */
 #line 1085 "lef.y"
     {
       if (lefData->versionNum < 5.2) {
@@ -5494,11 +5229,15 @@ yyreduce:
     break;
 
   case 119:
+
+/* Line 1455 of yacc.c  */
 #line 1103 "lef.y"
     { lefData->lefDumbMode = 10000000;;}
     break;
 
   case 120:
+
+/* Line 1455 of yacc.c  */
 #line 1104 "lef.y"
     {
       lefData->lefDumbMode = 0;
@@ -5506,6 +5245,8 @@ yyreduce:
     break;
 
   case 121:
+
+/* Line 1455 of yacc.c  */
 #line 1108 "lef.y"
     {
       if (lefData->layerMastOver) {
@@ -5521,6 +5262,8 @@ yyreduce:
     break;
 
   case 122:
+
+/* Line 1455 of yacc.c  */
 #line 1119 "lef.y"
     {
 
@@ -5528,6 +5271,8 @@ yyreduce:
     break;
 
   case 123:
+
+/* Line 1455 of yacc.c  */
 #line 1123 "lef.y"
     {
       if (lefData->layerMastOver) {
@@ -5546,6 +5291,8 @@ yyreduce:
     break;
 
   case 124:
+
+/* Line 1455 of yacc.c  */
 #line 1138 "lef.y"
     {
       if (lefData->layerMastOver) {
@@ -5564,6 +5311,8 @@ yyreduce:
     break;
 
   case 125:
+
+/* Line 1455 of yacc.c  */
 #line 1153 "lef.y"
     {
       if (lefData->layerMastOver) {
@@ -5590,16 +5339,22 @@ yyreduce:
     break;
 
   case 126:
+
+/* Line 1455 of yacc.c  */
 #line 1176 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.addDcCutarea(); ;}
     break;
 
   case 127:
+
+/* Line 1455 of yacc.c  */
 #line 1177 "lef.y"
     {;}
     break;
 
   case 128:
+
+/* Line 1455 of yacc.c  */
 #line 1179 "lef.y"
     {
       if (lefData->layerMastOver) {
@@ -5626,16 +5381,22 @@ yyreduce:
     break;
 
   case 129:
+
+/* Line 1455 of yacc.c  */
 #line 1202 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.addDcWidth(); ;}
     break;
 
   case 130:
+
+/* Line 1455 of yacc.c  */
 #line 1203 "lef.y"
     {;}
     break;
 
   case 131:
+
+/* Line 1455 of yacc.c  */
 #line 1207 "lef.y"
     { // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -5677,6 +5438,8 @@ yyreduce:
     break;
 
   case 132:
+
+/* Line 1455 of yacc.c  */
 #line 1245 "lef.y"
     { // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -5718,11 +5481,15 @@ yyreduce:
     break;
 
   case 133:
+
+/* Line 1455 of yacc.c  */
 #line 1282 "lef.y"
     {;}
     break;
 
   case 134:
+
+/* Line 1455 of yacc.c  */
 #line 1284 "lef.y"
     { // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -5764,6 +5531,8 @@ yyreduce:
     break;
 
   case 135:
+
+/* Line 1455 of yacc.c  */
 #line 1322 "lef.y"
     {  // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -5805,11 +5574,15 @@ yyreduce:
     break;
 
   case 136:
+
+/* Line 1455 of yacc.c  */
 #line 1359 "lef.y"
     {;}
     break;
 
   case 137:
+
+/* Line 1455 of yacc.c  */
 #line 1361 "lef.y"
     { // both 5.3  & 5.4 syntax 
       if (!lefData->layerRout && !lefData->layerCut && lefData->layerMastOver) {
@@ -5827,11 +5600,15 @@ yyreduce:
     break;
 
   case 138:
+
+/* Line 1455 of yacc.c  */
 #line 1374 "lef.y"
     {;}
     break;
 
   case 139:
+
+/* Line 1455 of yacc.c  */
 #line 1376 "lef.y"
     { // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -5873,6 +5650,8 @@ yyreduce:
     break;
 
   case 140:
+
+/* Line 1455 of yacc.c  */
 #line 1414 "lef.y"
     {  // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -5914,11 +5693,15 @@ yyreduce:
     break;
 
   case 141:
+
+/* Line 1455 of yacc.c  */
 #line 1451 "lef.y"
     {;}
     break;
 
   case 142:
+
+/* Line 1455 of yacc.c  */
 #line 1453 "lef.y"
     { // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -5960,6 +5743,8 @@ yyreduce:
     break;
 
   case 143:
+
+/* Line 1455 of yacc.c  */
 #line 1491 "lef.y"
     {  // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -6001,11 +5786,15 @@ yyreduce:
     break;
 
   case 144:
+
+/* Line 1455 of yacc.c  */
 #line 1528 "lef.y"
     {;}
     break;
 
   case 145:
+
+/* Line 1455 of yacc.c  */
 #line 1530 "lef.y"
     { // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -6048,11 +5837,15 @@ yyreduce:
     break;
 
   case 146:
+
+/* Line 1455 of yacc.c  */
 #line 1568 "lef.y"
     {;}
     break;
 
   case 147:
+
+/* Line 1455 of yacc.c  */
 #line 1570 "lef.y"
     { // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -6094,11 +5887,15 @@ yyreduce:
     break;
 
   case 148:
+
+/* Line 1455 of yacc.c  */
 #line 1607 "lef.y"
     {;}
     break;
 
   case 149:
+
+/* Line 1455 of yacc.c  */
 #line 1609 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -6123,6 +5920,8 @@ yyreduce:
     break;
 
   case 150:
+
+/* Line 1455 of yacc.c  */
 #line 1630 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -6147,6 +5946,8 @@ yyreduce:
     break;
 
   case 151:
+
+/* Line 1455 of yacc.c  */
 #line 1651 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -6171,6 +5972,8 @@ yyreduce:
     break;
 
   case 152:
+
+/* Line 1455 of yacc.c  */
 #line 1672 "lef.y"
     {
       if (!lefData->layerRout && !lefData->layerCut) {
@@ -6195,6 +5998,8 @@ yyreduce:
     break;
 
   case 153:
+
+/* Line 1455 of yacc.c  */
 #line 1693 "lef.y"
     {
       if (lefCallbacks->LayerCbk) {
@@ -6205,6 +6010,8 @@ yyreduce:
     break;
 
   case 154:
+
+/* Line 1455 of yacc.c  */
 #line 1699 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -6219,6 +6026,8 @@ yyreduce:
     break;
 
   case 155:
+
+/* Line 1455 of yacc.c  */
 #line 1710 "lef.y"
     { // 5.4 syntax 
       if (lefData->ignoreVersion) {
@@ -6246,6 +6055,8 @@ yyreduce:
     break;
 
   case 156:
+
+/* Line 1455 of yacc.c  */
 #line 1734 "lef.y"
     { // 5.4 syntax 
       if (lefData->ignoreVersion) {
@@ -6273,6 +6084,8 @@ yyreduce:
     break;
 
   case 157:
+
+/* Line 1455 of yacc.c  */
 #line 1758 "lef.y"
     { // 5.4 syntax 
       if (lefData->ignoreVersion) {
@@ -6300,6 +6113,8 @@ yyreduce:
     break;
 
   case 158:
+
+/* Line 1455 of yacc.c  */
 #line 1782 "lef.y"
     { // 5.4 syntax 
       if (lefData->ignoreVersion) {
@@ -6327,6 +6142,8 @@ yyreduce:
     break;
 
   case 159:
+
+/* Line 1455 of yacc.c  */
 #line 1806 "lef.y"
     { // 5.4 syntax 
       if (lefData->ignoreVersion) {
@@ -6354,6 +6171,8 @@ yyreduce:
     break;
 
   case 160:
+
+/* Line 1455 of yacc.c  */
 #line 1830 "lef.y"
     { // 5.4 syntax 
       if (lefData->ignoreVersion) {
@@ -6381,6 +6200,8 @@ yyreduce:
     break;
 
   case 161:
+
+/* Line 1455 of yacc.c  */
 #line 1854 "lef.y"
     { // 5.4 syntax 
       if (lefData->ignoreVersion) {
@@ -6408,6 +6229,8 @@ yyreduce:
     break;
 
   case 162:
+
+/* Line 1455 of yacc.c  */
 #line 1878 "lef.y"
     { // 5.4 syntax 
       if (lefData->ignoreVersion) {
@@ -6434,6 +6257,8 @@ yyreduce:
     break;
 
   case 163:
+
+/* Line 1455 of yacc.c  */
 #line 1901 "lef.y"
     { // 5.4 syntax, pcr 394389 
       if (lefData->ignoreVersion) {
@@ -6455,6 +6280,8 @@ yyreduce:
     break;
 
   case 164:
+
+/* Line 1455 of yacc.c  */
 #line 1919 "lef.y"
     { // 5.4 syntax, pcr 394389 
       if (lefData->ignoreVersion) {
@@ -6476,6 +6303,8 @@ yyreduce:
     break;
 
   case 165:
+
+/* Line 1455 of yacc.c  */
 #line 1937 "lef.y"
     { // 5.4 syntax, pcr 394389 
       if (lefData->ignoreVersion) {
@@ -6497,6 +6326,8 @@ yyreduce:
     break;
 
   case 166:
+
+/* Line 1455 of yacc.c  */
 #line 1955 "lef.y"
     { // 5.4 syntax, pcr 394389 
       if (lefData->ignoreVersion) {
@@ -6518,6 +6349,8 @@ yyreduce:
     break;
 
   case 167:
+
+/* Line 1455 of yacc.c  */
 #line 1973 "lef.y"
     { // 5.4 syntax, pcr 394389 
       if (lefData->ignoreVersion) {
@@ -6539,6 +6372,8 @@ yyreduce:
     break;
 
   case 168:
+
+/* Line 1455 of yacc.c  */
 #line 1991 "lef.y"
     {
       // 5.5 MAXWIDTH, is for routing layer only
@@ -6567,6 +6402,8 @@ yyreduce:
     break;
 
   case 169:
+
+/* Line 1455 of yacc.c  */
 #line 2016 "lef.y"
     {
       // 5.5 MINWIDTH, is for routing layer only
@@ -6595,6 +6432,8 @@ yyreduce:
     break;
 
   case 170:
+
+/* Line 1455 of yacc.c  */
 #line 2041 "lef.y"
     {
       if (lefData->versionNum < 5.5) {
@@ -6614,11 +6453,15 @@ yyreduce:
     break;
 
   case 171:
+
+/* Line 1455 of yacc.c  */
 #line 2056 "lef.y"
     {;}
     break;
 
   case 172:
+
+/* Line 1455 of yacc.c  */
 #line 2058 "lef.y"
     { // pcr 409334 
       if (lefCallbacks->LayerCbk)
@@ -6628,6 +6471,8 @@ yyreduce:
     break;
 
   case 173:
+
+/* Line 1455 of yacc.c  */
 #line 2066 "lef.y"
     {
       if (!lefData->hasLayerMincut) {   // FROMABOVE nor FROMBELOW is set 
@@ -6638,6 +6483,8 @@ yyreduce:
     break;
 
   case 174:
+
+/* Line 1455 of yacc.c  */
 #line 2073 "lef.y"
     {
       if (lefCallbacks->LayerCbk) lefData->lefrLayer.addMinstep((yyvsp[(2) - (2)].dval));
@@ -6645,12 +6492,16 @@ yyreduce:
     break;
 
   case 175:
+
+/* Line 1455 of yacc.c  */
 #line 2077 "lef.y"
     {
     ;}
     break;
 
   case 176:
+
+/* Line 1455 of yacc.c  */
 #line 2080 "lef.y"
     {
       if (lefData->versionNum < 5.5) {
@@ -6670,6 +6521,8 @@ yyreduce:
     break;
 
   case 177:
+
+/* Line 1455 of yacc.c  */
 #line 2096 "lef.y"
     {
       if (lefData->versionNum < 5.5) {
@@ -6697,11 +6550,15 @@ yyreduce:
     break;
 
   case 178:
+
+/* Line 1455 of yacc.c  */
 #line 2119 "lef.y"
     {;}
     break;
 
   case 179:
+
+/* Line 1455 of yacc.c  */
 #line 2122 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -6722,11 +6579,15 @@ yyreduce:
     break;
 
   case 180:
+
+/* Line 1455 of yacc.c  */
 #line 2138 "lef.y"
     {;}
     break;
 
   case 181:
+
+/* Line 1455 of yacc.c  */
 #line 2141 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -6747,11 +6608,15 @@ yyreduce:
     break;
 
   case 182:
+
+/* Line 1455 of yacc.c  */
 #line 2157 "lef.y"
     {;}
     break;
 
   case 183:
+
+/* Line 1455 of yacc.c  */
 #line 2159 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -6773,6 +6638,8 @@ yyreduce:
     break;
 
   case 184:
+
+/* Line 1455 of yacc.c  */
 #line 2177 "lef.y"
     {
       if (!lefData->layerRout) {
@@ -6801,6 +6668,8 @@ yyreduce:
     break;
 
   case 185:
+
+/* Line 1455 of yacc.c  */
 #line 2202 "lef.y"
     {
       // Use the polygon code to retrieve the points for MINSIZE
@@ -6811,6 +6680,8 @@ yyreduce:
     break;
 
   case 186:
+
+/* Line 1455 of yacc.c  */
 #line 2209 "lef.y"
     {
       if (lefCallbacks->LayerCbk) {
@@ -6824,6 +6695,8 @@ yyreduce:
     break;
 
   case 188:
+
+/* Line 1455 of yacc.c  */
 #line 2222 "lef.y"
     {
         if (lefCallbacks->LayerCbk)
@@ -6832,6 +6705,8 @@ yyreduce:
     break;
 
   case 190:
+
+/* Line 1455 of yacc.c  */
 #line 2230 "lef.y"
     {
       if (lefCallbacks->LayerCbk)
@@ -6840,6 +6715,8 @@ yyreduce:
     break;
 
   case 193:
+
+/* Line 1455 of yacc.c  */
 #line 2241 "lef.y"
     {
       if (lefCallbacks->LayerCbk)
@@ -6857,6 +6734,8 @@ yyreduce:
     break;
 
   case 194:
+
+/* Line 1455 of yacc.c  */
 #line 2257 "lef.y"
     { 
       if (lefData->hasInfluence) {  // 5.5 - INFLUENCE table must follow a PARALLEL
@@ -6881,6 +6760,8 @@ yyreduce:
     break;
 
   case 195:
+
+/* Line 1455 of yacc.c  */
 #line 2278 "lef.y"
     {
       lefData->spParallelLength = lefData->lefrLayer.getNumber();
@@ -6889,6 +6770,8 @@ yyreduce:
     break;
 
   case 196:
+
+/* Line 1455 of yacc.c  */
 #line 2283 "lef.y"
     { 
       if (lefCallbacks->LayerCbk) {
@@ -6898,6 +6781,8 @@ yyreduce:
     break;
 
   case 197:
+
+/* Line 1455 of yacc.c  */
 #line 2289 "lef.y"
     { 
       if (lefData->lefrLayer.getNumber() != lefData->spParallelLength) {
@@ -6913,6 +6798,8 @@ yyreduce:
     break;
 
   case 199:
+
+/* Line 1455 of yacc.c  */
 #line 2303 "lef.y"
     {
       if (lefCallbacks->LayerCbk) lefData->lefrLayer.addNumber((yyvsp[(5) - (5)].dval));
@@ -6920,6 +6807,8 @@ yyreduce:
     break;
 
   case 200:
+
+/* Line 1455 of yacc.c  */
 #line 2307 "lef.y"
     {
       if (lefData->hasParallel) { // 5.7 - Either PARALLEL OR TWOWIDTHS per layer
@@ -6944,6 +6833,8 @@ yyreduce:
     break;
 
   case 201:
+
+/* Line 1455 of yacc.c  */
 #line 2328 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -6958,6 +6849,8 @@ yyreduce:
     break;
 
   case 202:
+
+/* Line 1455 of yacc.c  */
 #line 2339 "lef.y"
     {
       if (lefData->hasInfluence) {  // 5.5 - INFLUENCE table must follow a PARALLEL
@@ -6984,6 +6877,8 @@ yyreduce:
     break;
 
   case 206:
+
+/* Line 1455 of yacc.c  */
 #line 2369 "lef.y"
     {
     if (lefCallbacks->LayerCbk)
@@ -6992,21 +6887,29 @@ yyreduce:
     break;
 
   case 207:
+
+/* Line 1455 of yacc.c  */
 #line 2375 "lef.y"
     {(yyval.string) = (char*)"NULL";;}
     break;
 
   case 208:
+
+/* Line 1455 of yacc.c  */
 #line 2376 "lef.y"
     {(yyval.string) = (char*)"ABOVE";;}
     break;
 
   case 209:
+
+/* Line 1455 of yacc.c  */
 #line 2377 "lef.y"
     {(yyval.string) = (char*)"BELOW";;}
     break;
 
   case 211:
+
+/* Line 1455 of yacc.c  */
 #line 2381 "lef.y"
     {
       if (lefCallbacks->LayerCbk) {
@@ -7016,6 +6919,8 @@ yyreduce:
     break;
 
   case 213:
+
+/* Line 1455 of yacc.c  */
 #line 2388 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -7034,6 +6939,8 @@ yyreduce:
     break;
 
   case 215:
+
+/* Line 1455 of yacc.c  */
 #line 2405 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -7052,6 +6959,8 @@ yyreduce:
     break;
 
   case 217:
+
+/* Line 1455 of yacc.c  */
 #line 2422 "lef.y"
     {
       if (lefCallbacks->LayerCbk) {
@@ -7061,6 +6970,8 @@ yyreduce:
     break;
 
   case 219:
+
+/* Line 1455 of yacc.c  */
 #line 2430 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -7079,6 +6990,8 @@ yyreduce:
     break;
 
   case 221:
+
+/* Line 1455 of yacc.c  */
 #line 2447 "lef.y"
     {
       if (lefData->versionNum < 5.5) {
@@ -7101,6 +7014,8 @@ yyreduce:
     break;
 
   case 222:
+
+/* Line 1455 of yacc.c  */
 #line 2466 "lef.y"
     {
       if (lefData->versionNum < 5.5) {
@@ -7122,6 +7037,8 @@ yyreduce:
     break;
 
   case 224:
+
+/* Line 1455 of yacc.c  */
 #line 2486 "lef.y"
     {   
       if (lefData->versionNum < 5.5) {
@@ -7142,6 +7059,8 @@ yyreduce:
     break;
 
   case 227:
+
+/* Line 1455 of yacc.c  */
 #line 2508 "lef.y"
     {
     if (lefCallbacks->LayerCbk) lefData->lefrLayer.addMinstepType((yyvsp[(1) - (1)].string));
@@ -7149,6 +7068,8 @@ yyreduce:
     break;
 
   case 228:
+
+/* Line 1455 of yacc.c  */
 #line 2512 "lef.y"
     {
     if (lefCallbacks->LayerCbk) lefData->lefrLayer.addMinstepLengthsum((yyvsp[(2) - (2)].dval));
@@ -7156,6 +7077,8 @@ yyreduce:
     break;
 
   case 229:
+
+/* Line 1455 of yacc.c  */
 #line 2516 "lef.y"
     {
     if (lefData->versionNum < 5.7) {
@@ -7171,27 +7094,37 @@ yyreduce:
     break;
 
   case 230:
+
+/* Line 1455 of yacc.c  */
 #line 2529 "lef.y"
     {(yyval.string) = (char*)"INSIDECORNER";;}
     break;
 
   case 231:
+
+/* Line 1455 of yacc.c  */
 #line 2530 "lef.y"
     {(yyval.string) = (char*)"OUTSIDECORNER";;}
     break;
 
   case 232:
+
+/* Line 1455 of yacc.c  */
 #line 2531 "lef.y"
     {(yyval.string) = (char*)"STEP";;}
     break;
 
   case 233:
+
+/* Line 1455 of yacc.c  */
 #line 2535 "lef.y"
     { if (lefCallbacks->LayerCbk)
           lefData->lefrLayer.setAntennaValue(lefData->antennaType, (yyvsp[(1) - (1)].dval)); ;}
     break;
 
   case 234:
+
+/* Line 1455 of yacc.c  */
 #line 2538 "lef.y"
     { if (lefCallbacks->LayerCbk) { // require min 2 points, set the 1st 2 
           if (lefData->lefrAntennaPWLPtr) {
@@ -7207,6 +7140,8 @@ yyreduce:
     break;
 
   case 235:
+
+/* Line 1455 of yacc.c  */
 #line 2550 "lef.y"
     { 
         if (lefCallbacks->LayerCbk) {
@@ -7217,6 +7152,8 @@ yyreduce:
     break;
 
   case 238:
+
+/* Line 1455 of yacc.c  */
 #line 2563 "lef.y"
     { if (lefCallbacks->LayerCbk)
       lefData->lefrAntennaPWLPtr->addAntennaPWL((yyvsp[(1) - (1)].pt).x, (yyvsp[(1) - (1)].pt).y);
@@ -7224,6 +7161,8 @@ yyreduce:
     break;
 
   case 240:
+
+/* Line 1455 of yacc.c  */
 #line 2569 "lef.y"
     { 
         lefData->use5_4 = 1;
@@ -7259,41 +7198,57 @@ yyreduce:
     break;
 
   case 241:
+
+/* Line 1455 of yacc.c  */
 #line 2602 "lef.y"
     {(yyval.string) = (char*)"PEAK";;}
     break;
 
   case 242:
+
+/* Line 1455 of yacc.c  */
 #line 2603 "lef.y"
     {(yyval.string) = (char*)"AVERAGE";;}
     break;
 
   case 243:
+
+/* Line 1455 of yacc.c  */
 #line 2604 "lef.y"
     {(yyval.string) = (char*)"RMS";;}
     break;
 
   case 244:
+
+/* Line 1455 of yacc.c  */
 #line 2608 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.addNumber((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 245:
+
+/* Line 1455 of yacc.c  */
 #line 2610 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.addAcFrequency(); ;}
     break;
 
   case 246:
+
+/* Line 1455 of yacc.c  */
 #line 2613 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.addNumber((yyvsp[(9) - (9)].dval)); ;}
     break;
 
   case 247:
+
+/* Line 1455 of yacc.c  */
 #line 2615 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.addAcTableEntry(); ;}
     break;
 
   case 249:
+
+/* Line 1455 of yacc.c  */
 #line 2619 "lef.y"
     {
       if (!lefData->layerCut) {
@@ -7309,11 +7264,15 @@ yyreduce:
     break;
 
   case 250:
+
+/* Line 1455 of yacc.c  */
 #line 2631 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.addAcCutarea(); ;}
     break;
 
   case 251:
+
+/* Line 1455 of yacc.c  */
 #line 2633 "lef.y"
     {
       if (!lefData->layerRout) {
@@ -7329,31 +7288,43 @@ yyreduce:
     break;
 
   case 252:
+
+/* Line 1455 of yacc.c  */
 #line 2645 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.addAcWidth(); ;}
     break;
 
   case 253:
+
+/* Line 1455 of yacc.c  */
 #line 2649 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.addNumber((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 254:
+
+/* Line 1455 of yacc.c  */
 #line 2651 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.addDcTableEntry(); ;}
     break;
 
   case 256:
+
+/* Line 1455 of yacc.c  */
 #line 2655 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.addNumber((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 258:
+
+/* Line 1455 of yacc.c  */
 #line 2659 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.addNumber((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 261:
+
+/* Line 1455 of yacc.c  */
 #line 2668 "lef.y"
     {
       if (lefCallbacks->LayerCbk) {
@@ -7365,6 +7336,8 @@ yyreduce:
     break;
 
   case 262:
+
+/* Line 1455 of yacc.c  */
 #line 2676 "lef.y"
     {
       if (lefCallbacks->LayerCbk) {
@@ -7376,6 +7349,8 @@ yyreduce:
     break;
 
   case 263:
+
+/* Line 1455 of yacc.c  */
 #line 2684 "lef.y"
     {
       char temp[32];
@@ -7389,86 +7364,120 @@ yyreduce:
     break;
 
   case 264:
+
+/* Line 1455 of yacc.c  */
 #line 2696 "lef.y"
     { ;}
     break;
 
   case 265:
+
+/* Line 1455 of yacc.c  */
 #line 2698 "lef.y"
     { ;}
     break;
 
   case 266:
+
+/* Line 1455 of yacc.c  */
 #line 2701 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.setCurrentPoint((yyvsp[(2) - (4)].dval), (yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 269:
+
+/* Line 1455 of yacc.c  */
 #line 2709 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.setCapacitancePoint((yyvsp[(2) - (4)].dval), (yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 271:
+
+/* Line 1455 of yacc.c  */
 #line 2714 "lef.y"
     { ;}
     break;
 
   case 272:
+
+/* Line 1455 of yacc.c  */
 #line 2717 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.setResistancePoint((yyvsp[(2) - (4)].dval), (yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 273:
+
+/* Line 1455 of yacc.c  */
 #line 2720 "lef.y"
     {(yyval.string) = (char*)"ROUTING"; lefData->layerRout = 1;;}
     break;
 
   case 274:
+
+/* Line 1455 of yacc.c  */
 #line 2721 "lef.y"
     {(yyval.string) = (char*)"CUT"; lefData->layerCut = 1;;}
     break;
 
   case 275:
+
+/* Line 1455 of yacc.c  */
 #line 2722 "lef.y"
     {(yyval.string) = (char*)"OVERLAP"; lefData->layerMastOver = 1;;}
     break;
 
   case 276:
+
+/* Line 1455 of yacc.c  */
 #line 2723 "lef.y"
     {(yyval.string) = (char*)"MASTERSLICE"; lefData->layerMastOver = 1;;}
     break;
 
   case 277:
+
+/* Line 1455 of yacc.c  */
 #line 2724 "lef.y"
     {(yyval.string) = (char*)"VIRTUAL";;}
     break;
 
   case 278:
+
+/* Line 1455 of yacc.c  */
 #line 2725 "lef.y"
     {(yyval.string) = (char*)"IMPLANT";;}
     break;
 
   case 279:
+
+/* Line 1455 of yacc.c  */
 #line 2728 "lef.y"
     {(yyval.string) = (char*)"HORIZONTAL";;}
     break;
 
   case 280:
+
+/* Line 1455 of yacc.c  */
 #line 2729 "lef.y"
     {(yyval.string) = (char*)"VERTICAL";;}
     break;
 
   case 281:
+
+/* Line 1455 of yacc.c  */
 #line 2730 "lef.y"
     {(yyval.string) = (char*)"DIAG45";;}
     break;
 
   case 282:
+
+/* Line 1455 of yacc.c  */
 #line 2731 "lef.y"
     {(yyval.string) = (char*)"DIAG135";;}
     break;
 
   case 284:
+
+/* Line 1455 of yacc.c  */
 #line 2735 "lef.y"
     {
     if (lefCallbacks->LayerCbk)
@@ -7477,6 +7486,8 @@ yyreduce:
     break;
 
   case 285:
+
+/* Line 1455 of yacc.c  */
 #line 2742 "lef.y"
     {
     if (lefCallbacks->LayerCbk)
@@ -7485,6 +7496,8 @@ yyreduce:
     break;
 
   case 286:
+
+/* Line 1455 of yacc.c  */
 #line 2747 "lef.y"
     {
     if (lefCallbacks->LayerCbk)
@@ -7493,6 +7506,8 @@ yyreduce:
     break;
 
   case 287:
+
+/* Line 1455 of yacc.c  */
 #line 2752 "lef.y"
     {
     if (lefCallbacks->LayerCbk)
@@ -7501,6 +7516,8 @@ yyreduce:
     break;
 
   case 288:
+
+/* Line 1455 of yacc.c  */
 #line 2757 "lef.y"
     {
     if (lefCallbacks->LayerCbk)
@@ -7509,16 +7526,22 @@ yyreduce:
     break;
 
   case 289:
+
+/* Line 1455 of yacc.c  */
 #line 2763 "lef.y"
     { ;}
     break;
 
   case 290:
+
+/* Line 1455 of yacc.c  */
 #line 2765 "lef.y"
     { ;}
     break;
 
   case 291:
+
+/* Line 1455 of yacc.c  */
 #line 2768 "lef.y"
     { 
       if (lefCallbacks->LayerCbk) {
@@ -7528,21 +7551,29 @@ yyreduce:
     break;
 
   case 292:
+
+/* Line 1455 of yacc.c  */
 #line 2774 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.addSpParallelWidthSpacing(); ;}
     break;
 
   case 293:
+
+/* Line 1455 of yacc.c  */
 #line 2777 "lef.y"
     { ;}
     break;
 
   case 294:
+
+/* Line 1455 of yacc.c  */
 #line 2779 "lef.y"
     { ;}
     break;
 
   case 295:
+
+/* Line 1455 of yacc.c  */
 #line 2782 "lef.y"
     {
        if (lefCallbacks->LayerCbk) lefData->lefrLayer.addNumber((yyvsp[(4) - (4)].dval));
@@ -7550,6 +7581,8 @@ yyreduce:
     break;
 
   case 296:
+
+/* Line 1455 of yacc.c  */
 #line 2786 "lef.y"
     {
       if (lefCallbacks->LayerCbk)
@@ -7558,6 +7591,8 @@ yyreduce:
     break;
 
   case 297:
+
+/* Line 1455 of yacc.c  */
 #line 2792 "lef.y"
     { 
         (yyval.dval) = -1; // cannot use 0, since PRL number can be 0 
@@ -7566,6 +7601,8 @@ yyreduce:
     break;
 
   case 298:
+
+/* Line 1455 of yacc.c  */
 #line 2797 "lef.y"
     { 
         (yyval.dval) = (yyvsp[(2) - (2)].dval); 
@@ -7574,21 +7611,29 @@ yyreduce:
     break;
 
   case 299:
+
+/* Line 1455 of yacc.c  */
 #line 2803 "lef.y"
     { ;}
     break;
 
   case 300:
+
+/* Line 1455 of yacc.c  */
 #line 2805 "lef.y"
     { ;}
     break;
 
   case 301:
+
+/* Line 1455 of yacc.c  */
 #line 2808 "lef.y"
     { if (lefCallbacks->LayerCbk) lefData->lefrLayer.addSpInfluence((yyvsp[(2) - (6)].dval), (yyvsp[(4) - (6)].dval), (yyvsp[(6) - (6)].dval)); ;}
     break;
 
   case 302:
+
+/* Line 1455 of yacc.c  */
 #line 2811 "lef.y"
     {
       if (!lefData->lefrHasLayer) {  // 5.5 
@@ -7628,11 +7673,15 @@ yyreduce:
     break;
 
   case 303:
+
+/* Line 1455 of yacc.c  */
 #line 2846 "lef.y"
     {lefData->lefDumbMode = 2; lefData->lefNoNum= 2;;}
     break;
 
   case 304:
+
+/* Line 1455 of yacc.c  */
 #line 2848 "lef.y"
     {
       if (!lefData->lefrHasLayer) {  // 5.5 
@@ -7661,11 +7710,15 @@ yyreduce:
     break;
 
   case 305:
+
+/* Line 1455 of yacc.c  */
 #line 2873 "lef.y"
     { lefData->hasViaRule_layer = 0; ;}
     break;
 
   case 306:
+
+/* Line 1455 of yacc.c  */
 #line 2874 "lef.y"
     { 
       if (lefCallbacks->ViaCbk) {
@@ -7678,11 +7731,15 @@ yyreduce:
     break;
 
   case 307:
+
+/* Line 1455 of yacc.c  */
 #line 2884 "lef.y"
     { lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 308:
+
+/* Line 1455 of yacc.c  */
 #line 2887 "lef.y"
     {
       // 0 is nodefault 
@@ -7695,6 +7752,8 @@ yyreduce:
     break;
 
   case 309:
+
+/* Line 1455 of yacc.c  */
 #line 2896 "lef.y"
     {
       // 1 is default 
@@ -7706,6 +7765,8 @@ yyreduce:
     break;
 
   case 310:
+
+/* Line 1455 of yacc.c  */
 #line 2904 "lef.y"
     {
       // 2 is generated 
@@ -7717,16 +7778,22 @@ yyreduce:
     break;
 
   case 311:
+
+/* Line 1455 of yacc.c  */
 #line 2912 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 312:
+
+/* Line 1455 of yacc.c  */
 #line 2914 "lef.y"
     {lefData->lefDumbMode = 3; lefData->lefNoNum = 1; ;}
     break;
 
   case 313:
+
+/* Line 1455 of yacc.c  */
 #line 2917 "lef.y"
     {
        if (lefData->versionNum < 5.6) {
@@ -7749,6 +7816,8 @@ yyreduce:
     break;
 
   case 317:
+
+/* Line 1455 of yacc.c  */
 #line 2943 "lef.y"
     {
        if (lefCallbacks->ViaCbk) lefData->lefrVia.setRowCol((int)(yyvsp[(2) - (4)].dval), (int)(yyvsp[(3) - (4)].dval));
@@ -7756,6 +7825,8 @@ yyreduce:
     break;
 
   case 318:
+
+/* Line 1455 of yacc.c  */
 #line 2947 "lef.y"
     {
        if (lefCallbacks->ViaCbk) lefData->lefrVia.setOrigin((yyvsp[(2) - (4)].dval), (yyvsp[(3) - (4)].dval));
@@ -7763,6 +7834,8 @@ yyreduce:
     break;
 
   case 319:
+
+/* Line 1455 of yacc.c  */
 #line 2951 "lef.y"
     {
        if (lefCallbacks->ViaCbk) lefData->lefrVia.setOffset((yyvsp[(2) - (6)].dval), (yyvsp[(3) - (6)].dval), (yyvsp[(4) - (6)].dval), (yyvsp[(5) - (6)].dval));
@@ -7770,11 +7843,15 @@ yyreduce:
     break;
 
   case 320:
+
+/* Line 1455 of yacc.c  */
 #line 2954 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 321:
+
+/* Line 1455 of yacc.c  */
 #line 2955 "lef.y"
     {
        if (lefCallbacks->ViaCbk) lefData->lefrVia.setPattern((yyvsp[(3) - (4)].string));
@@ -7782,32 +7859,44 @@ yyreduce:
     break;
 
   case 327:
+
+/* Line 1455 of yacc.c  */
 #line 2972 "lef.y"
     { ;}
     break;
 
   case 328:
+
+/* Line 1455 of yacc.c  */
 #line 2974 "lef.y"
     { ;}
     break;
 
   case 329:
+
+/* Line 1455 of yacc.c  */
 #line 2976 "lef.y"
     { if (lefCallbacks->ViaCbk) lefData->lefrVia.setResistance((yyvsp[(2) - (3)].dval)); ;}
     break;
 
   case 330:
+
+/* Line 1455 of yacc.c  */
 #line 2977 "lef.y"
     { lefData->lefDumbMode = 1000000; ;}
     break;
 
   case 331:
+
+/* Line 1455 of yacc.c  */
 #line 2978 "lef.y"
     { lefData->lefDumbMode = 0;
     ;}
     break;
 
   case 332:
+
+/* Line 1455 of yacc.c  */
 #line 2981 "lef.y"
     { 
       if (lefData->versionNum < 5.6) {
@@ -7820,6 +7909,8 @@ yyreduce:
     break;
 
   case 335:
+
+/* Line 1455 of yacc.c  */
 #line 2997 "lef.y"
     { 
       char temp[32];
@@ -7833,6 +7924,8 @@ yyreduce:
     break;
 
   case 336:
+
+/* Line 1455 of yacc.c  */
 #line 3007 "lef.y"
     {
       if (lefCallbacks->ViaCbk) {
@@ -7844,6 +7937,8 @@ yyreduce:
     break;
 
   case 337:
+
+/* Line 1455 of yacc.c  */
 #line 3015 "lef.y"
     {
       if (lefCallbacks->ViaCbk) {
@@ -7855,6 +7950,8 @@ yyreduce:
     break;
 
   case 338:
+
+/* Line 1455 of yacc.c  */
 #line 3025 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -7867,6 +7964,8 @@ yyreduce:
     break;
 
   case 339:
+
+/* Line 1455 of yacc.c  */
 #line 3034 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -7879,6 +7978,8 @@ yyreduce:
     break;
 
   case 340:
+
+/* Line 1455 of yacc.c  */
 #line 3043 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -7891,6 +7992,8 @@ yyreduce:
     break;
 
   case 341:
+
+/* Line 1455 of yacc.c  */
 #line 3052 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -7903,106 +8006,148 @@ yyreduce:
     break;
 
   case 342:
+
+/* Line 1455 of yacc.c  */
 #line 3061 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum= 1;;}
     break;
 
   case 343:
+
+/* Line 1455 of yacc.c  */
 #line 3062 "lef.y"
     { (yyval.string) = (yyvsp[(3) - (3)].string); ;}
     break;
 
   case 344:
+
+/* Line 1455 of yacc.c  */
 #line 3065 "lef.y"
     {(yyval.integer) = 0;;}
     break;
 
   case 345:
+
+/* Line 1455 of yacc.c  */
 #line 3066 "lef.y"
     {(yyval.integer) = 1;;}
     break;
 
   case 346:
+
+/* Line 1455 of yacc.c  */
 #line 3067 "lef.y"
     {(yyval.integer) = 2;;}
     break;
 
   case 347:
+
+/* Line 1455 of yacc.c  */
 #line 3068 "lef.y"
     {(yyval.integer) = 3;;}
     break;
 
   case 348:
+
+/* Line 1455 of yacc.c  */
 #line 3069 "lef.y"
     {(yyval.integer) = 4;;}
     break;
 
   case 349:
+
+/* Line 1455 of yacc.c  */
 #line 3070 "lef.y"
     {(yyval.integer) = 5;;}
     break;
 
   case 350:
+
+/* Line 1455 of yacc.c  */
 #line 3071 "lef.y"
     {(yyval.integer) = 6;;}
     break;
 
   case 351:
+
+/* Line 1455 of yacc.c  */
 #line 3072 "lef.y"
     {(yyval.integer) = 7;;}
     break;
 
   case 352:
+
+/* Line 1455 of yacc.c  */
 #line 3073 "lef.y"
     {(yyval.integer) = 0;;}
     break;
 
   case 353:
+
+/* Line 1455 of yacc.c  */
 #line 3074 "lef.y"
     {(yyval.integer) = 1;;}
     break;
 
   case 354:
+
+/* Line 1455 of yacc.c  */
 #line 3075 "lef.y"
     {(yyval.integer) = 2;;}
     break;
 
   case 355:
+
+/* Line 1455 of yacc.c  */
 #line 3076 "lef.y"
     {(yyval.integer) = 3;;}
     break;
 
   case 356:
+
+/* Line 1455 of yacc.c  */
 #line 3077 "lef.y"
     {(yyval.integer) = 4;;}
     break;
 
   case 357:
+
+/* Line 1455 of yacc.c  */
 #line 3078 "lef.y"
     {(yyval.integer) = 5;;}
     break;
 
   case 358:
+
+/* Line 1455 of yacc.c  */
 #line 3079 "lef.y"
     {(yyval.integer) = 6;;}
     break;
 
   case 359:
+
+/* Line 1455 of yacc.c  */
 #line 3080 "lef.y"
     {(yyval.integer) = 7;;}
     break;
 
   case 360:
+
+/* Line 1455 of yacc.c  */
 #line 3083 "lef.y"
     { ;}
     break;
 
   case 361:
+
+/* Line 1455 of yacc.c  */
 #line 3085 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 362:
+
+/* Line 1455 of yacc.c  */
 #line 3086 "lef.y"
     {
       if (lefCallbacks->ViaCbk) lefData->lefrVia.addLayer((yyvsp[(3) - (4)].string));
@@ -8012,6 +8157,8 @@ yyreduce:
     break;
 
   case 365:
+
+/* Line 1455 of yacc.c  */
 #line 3099 "lef.y"
     { 
       if (lefCallbacks->ViaCbk) {
@@ -8028,6 +8175,8 @@ yyreduce:
     break;
 
   case 366:
+
+/* Line 1455 of yacc.c  */
 #line 3112 "lef.y"
     {
       lefData->lefrGeometriesPtr = (lefiGeometries*)lefMalloc(sizeof(lefiGeometries));
@@ -8037,6 +8186,8 @@ yyreduce:
     break;
 
   case 367:
+
+/* Line 1455 of yacc.c  */
 #line 3118 "lef.y"
     { 
       if (lefCallbacks->ViaCbk) {
@@ -8057,11 +8208,15 @@ yyreduce:
     break;
 
   case 368:
+
+/* Line 1455 of yacc.c  */
 #line 3135 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 369:
+
+/* Line 1455 of yacc.c  */
 #line 3136 "lef.y"
     { 
       // 10/17/2001 - Wanda da Rosa, PCR 404149
@@ -8098,11 +8253,15 @@ yyreduce:
     break;
 
   case 370:
+
+/* Line 1455 of yacc.c  */
 #line 3169 "lef.y"
     { lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 371:
+
+/* Line 1455 of yacc.c  */
 #line 3170 "lef.y"
     { 
       if (lefCallbacks->ViaRuleCbk) lefData->lefrViaRule.setName((yyvsp[(3) - (3)].string));
@@ -8114,6 +8273,8 @@ yyreduce:
     break;
 
   case 372:
+
+/* Line 1455 of yacc.c  */
 #line 3180 "lef.y"
     {
       if (lefData->viaRuleLayer == 0 || lefData->viaRuleLayer > 2) {
@@ -8133,6 +8294,8 @@ yyreduce:
     break;
 
   case 373:
+
+/* Line 1455 of yacc.c  */
 #line 3198 "lef.y"
     {
       lefData->isGenerate = 1;
@@ -8140,6 +8303,8 @@ yyreduce:
     break;
 
   case 374:
+
+/* Line 1455 of yacc.c  */
 #line 3202 "lef.y"
     {
       if (lefData->viaRuleLayer == 0) {
@@ -8166,6 +8331,8 @@ yyreduce:
     break;
 
   case 376:
+
+/* Line 1455 of yacc.c  */
 #line 3227 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -8185,17 +8352,23 @@ yyreduce:
     break;
 
   case 383:
+
+/* Line 1455 of yacc.c  */
 #line 3258 "lef.y"
     { lefData->lefDumbMode = 10000000;;}
     break;
 
   case 384:
+
+/* Line 1455 of yacc.c  */
 #line 3259 "lef.y"
     { lefData->lefDumbMode = 0;
     ;}
     break;
 
   case 387:
+
+/* Line 1455 of yacc.c  */
 #line 3269 "lef.y"
     {
       if (lefCallbacks->ViaRuleCbk) {
@@ -8207,6 +8380,8 @@ yyreduce:
     break;
 
   case 388:
+
+/* Line 1455 of yacc.c  */
 #line 3277 "lef.y"
     {
       if (lefCallbacks->ViaRuleCbk) {
@@ -8218,6 +8393,8 @@ yyreduce:
     break;
 
   case 389:
+
+/* Line 1455 of yacc.c  */
 #line 3285 "lef.y"
     {
       char temp[32];
@@ -8231,6 +8408,8 @@ yyreduce:
     break;
 
   case 390:
+
+/* Line 1455 of yacc.c  */
 #line 3296 "lef.y"
     {
       // 10/18/2001 - Wanda da Rosa PCR 404181
@@ -8263,16 +8442,22 @@ yyreduce:
     break;
 
   case 393:
+
+/* Line 1455 of yacc.c  */
 #line 3332 "lef.y"
     { if (lefCallbacks->ViaRuleCbk) lefData->lefrViaRule.addViaName((yyvsp[(2) - (3)].string)); ;}
     break;
 
   case 394:
+
+/* Line 1455 of yacc.c  */
 #line 3334 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 395:
+
+/* Line 1455 of yacc.c  */
 #line 3335 "lef.y"
     { if (lefCallbacks->ViaRuleCbk) lefData->lefrViaRule.setLayer((yyvsp[(3) - (4)].string));
       lefData->viaRuleHasDir = 0;
@@ -8281,6 +8466,8 @@ yyreduce:
     break;
 
   case 398:
+
+/* Line 1455 of yacc.c  */
 #line 3347 "lef.y"
     {
       if (lefData->viaRuleHasEnc) {
@@ -8303,6 +8490,8 @@ yyreduce:
     break;
 
   case 399:
+
+/* Line 1455 of yacc.c  */
 #line 3366 "lef.y"
     { 
       if (lefData->viaRuleHasEnc) {
@@ -8325,6 +8514,8 @@ yyreduce:
     break;
 
   case 400:
+
+/* Line 1455 of yacc.c  */
 #line 3385 "lef.y"
     {
       if (lefData->versionNum < 5.5) {
@@ -8364,27 +8555,37 @@ yyreduce:
     break;
 
   case 401:
+
+/* Line 1455 of yacc.c  */
 #line 3421 "lef.y"
     { if (lefCallbacks->ViaRuleCbk) lefData->lefrViaRule.setWidth((yyvsp[(2) - (5)].dval),(yyvsp[(4) - (5)].dval)); ;}
     break;
 
   case 402:
+
+/* Line 1455 of yacc.c  */
 #line 3423 "lef.y"
     { if (lefCallbacks->ViaRuleCbk)
         lefData->lefrViaRule.setRect((yyvsp[(2) - (4)].pt).x, (yyvsp[(2) - (4)].pt).y, (yyvsp[(3) - (4)].pt).x, (yyvsp[(3) - (4)].pt).y); ;}
     break;
 
   case 403:
+
+/* Line 1455 of yacc.c  */
 #line 3426 "lef.y"
     { if (lefCallbacks->ViaRuleCbk) lefData->lefrViaRule.setSpacing((yyvsp[(2) - (5)].dval),(yyvsp[(4) - (5)].dval)); ;}
     break;
 
   case 404:
+
+/* Line 1455 of yacc.c  */
 #line 3428 "lef.y"
     { if (lefCallbacks->ViaRuleCbk) lefData->lefrViaRule.setResistance((yyvsp[(2) - (3)].dval)); ;}
     break;
 
   case 405:
+
+/* Line 1455 of yacc.c  */
 #line 3430 "lef.y"
     {
       if (!lefData->viaRuleHasDir) {
@@ -8418,6 +8619,8 @@ yyreduce:
     break;
 
   case 406:
+
+/* Line 1455 of yacc.c  */
 #line 3460 "lef.y"
     {
       // 2/19/2004 - Enforced the rule that METALOVERHANG can only be defined
@@ -8448,11 +8651,15 @@ yyreduce:
     break;
 
   case 407:
+
+/* Line 1455 of yacc.c  */
 #line 3487 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 408:
+
+/* Line 1455 of yacc.c  */
 #line 3488 "lef.y"
     {
       if ((lefData->isGenerate) && (lefCallbacks->ViaRuleCbk) && lefData->lefrViaRule.numLayers() >= 3) {         
@@ -8489,11 +8696,15 @@ yyreduce:
     break;
 
   case 409:
+
+/* Line 1455 of yacc.c  */
 #line 3522 "lef.y"
     { ;}
     break;
 
   case 410:
+
+/* Line 1455 of yacc.c  */
 #line 3525 "lef.y"
     {
       lefData->hasSamenet = 0;
@@ -8518,6 +8729,8 @@ yyreduce:
     break;
 
   case 411:
+
+/* Line 1455 of yacc.c  */
 #line 3547 "lef.y"
     {
       if ((lefData->versionNum < 5.6) || (!lefData->ndRule)) {
@@ -8533,6 +8746,8 @@ yyreduce:
     break;
 
   case 414:
+
+/* Line 1455 of yacc.c  */
 #line 3565 "lef.y"
     {
       if ((lefData->versionNum < 5.6) || (!lefData->ndRule)) {
@@ -8550,6 +8765,8 @@ yyreduce:
     break;
 
   case 415:
+
+/* Line 1455 of yacc.c  */
 #line 3579 "lef.y"
     {
       if ((lefData->versionNum < 5.6) || (!lefData->ndRule)) {
@@ -8567,26 +8784,36 @@ yyreduce:
     break;
 
   case 416:
+
+/* Line 1455 of yacc.c  */
 #line 3595 "lef.y"
     { lefData->lefDumbMode = 2; lefData->lefNoNum = 2; lefData->hasSamenet = 1; ;}
     break;
 
   case 417:
+
+/* Line 1455 of yacc.c  */
 #line 3599 "lef.y"
     { (yyval.integer) = 0; ;}
     break;
 
   case 418:
+
+/* Line 1455 of yacc.c  */
 #line 3601 "lef.y"
     { (yyval.integer) = (int)(yyvsp[(2) - (2)].dval); ;}
     break;
 
   case 419:
+
+/* Line 1455 of yacc.c  */
 #line 3604 "lef.y"
     { ;}
     break;
 
   case 420:
+
+/* Line 1455 of yacc.c  */
 #line 3607 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -8600,6 +8827,8 @@ yyreduce:
     break;
 
   case 421:
+
+/* Line 1455 of yacc.c  */
 #line 3618 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -8610,6 +8839,8 @@ yyreduce:
     break;
 
   case 424:
+
+/* Line 1455 of yacc.c  */
 #line 3632 "lef.y"
     { 
       if (lefData->versionNum < 5.4) {
@@ -8620,16 +8851,22 @@ yyreduce:
     break;
 
   case 427:
+
+/* Line 1455 of yacc.c  */
 #line 3645 "lef.y"
     { if (lefCallbacks->IRDropCbk) lefData->lefrIRDrop.setValues((yyvsp[(1) - (2)].dval), (yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 428:
+
+/* Line 1455 of yacc.c  */
 #line 3648 "lef.y"
     { if (lefCallbacks->IRDropCbk) lefData->lefrIRDrop.setTableName((yyvsp[(2) - (2)].string)); ;}
     break;
 
   case 429:
+
+/* Line 1455 of yacc.c  */
 #line 3651 "lef.y"
     {
     lefData->hasMinfeature = 1;
@@ -8646,6 +8883,8 @@ yyreduce:
     break;
 
   case 430:
+
+/* Line 1455 of yacc.c  */
 #line 3665 "lef.y"
     {
     if (lefData->versionNum < 5.4) {
@@ -8659,11 +8898,15 @@ yyreduce:
     break;
 
   case 431:
+
+/* Line 1455 of yacc.c  */
 #line 3675 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 432:
+
+/* Line 1455 of yacc.c  */
 #line 3676 "lef.y"
     {
     (void)lefSetNonDefault((yyvsp[(3) - (3)].string));
@@ -8677,11 +8920,15 @@ yyreduce:
     break;
 
   case 433:
+
+/* Line 1455 of yacc.c  */
 #line 3686 "lef.y"
     {lefData->lefNdRule = 1;;}
     break;
 
   case 434:
+
+/* Line 1455 of yacc.c  */
 #line 3687 "lef.y"
     {
     // 10/18/2001 - Wanda da Rosa, PCR 404189
@@ -8714,6 +8961,8 @@ yyreduce:
     break;
 
   case 435:
+
+/* Line 1455 of yacc.c  */
 #line 3717 "lef.y"
     {
       if ((lefData->nonDefaultRuleName) && (*lefData->nonDefaultRuleName != '\0'))
@@ -8722,6 +8971,8 @@ yyreduce:
     break;
 
   case 436:
+
+/* Line 1455 of yacc.c  */
 #line 3722 "lef.y"
     {
       if (strcmp(lefData->nonDefaultRuleName, (yyvsp[(2) - (2)].string)) != 0) {
@@ -8744,6 +8995,8 @@ yyreduce:
     break;
 
   case 438:
+
+/* Line 1455 of yacc.c  */
 #line 3745 "lef.y"
     {
        if (lefData->versionNum < 5.6) {
@@ -8764,6 +9017,8 @@ yyreduce:
     break;
 
   case 448:
+
+/* Line 1455 of yacc.c  */
 #line 3778 "lef.y"
     {
        if (lefData->versionNum < 5.6) {
@@ -8783,6 +9038,8 @@ yyreduce:
     break;
 
   case 449:
+
+/* Line 1455 of yacc.c  */
 #line 3795 "lef.y"
     {
        if (lefData->versionNum < 5.6) {
@@ -8804,6 +9061,8 @@ yyreduce:
     break;
 
   case 450:
+
+/* Line 1455 of yacc.c  */
 #line 3814 "lef.y"
     {
        if (lefData->versionNum < 5.6) {
@@ -8825,17 +9084,23 @@ yyreduce:
     break;
 
   case 451:
+
+/* Line 1455 of yacc.c  */
 #line 3832 "lef.y"
     { lefData->lefDumbMode = 10000000;;}
     break;
 
   case 452:
+
+/* Line 1455 of yacc.c  */
 #line 3833 "lef.y"
     { lefData->lefDumbMode = 0;
     ;}
     break;
 
   case 455:
+
+/* Line 1455 of yacc.c  */
 #line 3843 "lef.y"
     {
       if (lefCallbacks->NonDefaultCbk) {
@@ -8847,6 +9112,8 @@ yyreduce:
     break;
 
   case 456:
+
+/* Line 1455 of yacc.c  */
 #line 3851 "lef.y"
     {
       if (lefCallbacks->NonDefaultCbk) {
@@ -8858,6 +9125,8 @@ yyreduce:
     break;
 
   case 457:
+
+/* Line 1455 of yacc.c  */
 #line 3859 "lef.y"
     {
       if (lefCallbacks->NonDefaultCbk) {
@@ -8871,11 +9140,15 @@ yyreduce:
     break;
 
   case 458:
+
+/* Line 1455 of yacc.c  */
 #line 3869 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 459:
+
+/* Line 1455 of yacc.c  */
 #line 3870 "lef.y"
     {
     if (lefCallbacks->NonDefaultCbk) lefData->lefrNonDefault.addLayer((yyvsp[(3) - (3)].string));
@@ -8888,6 +9161,8 @@ yyreduce:
     break;
 
   case 460:
+
+/* Line 1455 of yacc.c  */
 #line 3879 "lef.y"
     { 
     lefData->ndLayerWidth = 1;
@@ -8896,11 +9171,15 @@ yyreduce:
     break;
 
   case 461:
+
+/* Line 1455 of yacc.c  */
 #line 3883 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 462:
+
+/* Line 1455 of yacc.c  */
 #line 3884 "lef.y"
     {
     if (strcmp(lefData->layerName, (yyvsp[(12) - (12)].string)) != 0) {
@@ -8944,6 +9223,8 @@ yyreduce:
     break;
 
   case 465:
+
+/* Line 1455 of yacc.c  */
 #line 3932 "lef.y"
     {
       lefData->ndLayerSpace = 1;
@@ -8952,12 +9233,16 @@ yyreduce:
     break;
 
   case 466:
+
+/* Line 1455 of yacc.c  */
 #line 3937 "lef.y"
     { if (lefCallbacks->NonDefaultCbk)
          lefData->lefrNonDefault.addWireExtension((yyvsp[(2) - (3)].dval)); ;}
     break;
 
   case 467:
+
+/* Line 1455 of yacc.c  */
 #line 3940 "lef.y"
     {
       if (lefData->ignoreVersion) {
@@ -8984,6 +9269,8 @@ yyreduce:
     break;
 
   case 468:
+
+/* Line 1455 of yacc.c  */
 #line 3964 "lef.y"
     {
       if (lefData->ignoreVersion) {
@@ -9010,6 +9297,8 @@ yyreduce:
     break;
 
   case 469:
+
+/* Line 1455 of yacc.c  */
 #line 3987 "lef.y"
     {
       if (lefData->ignoreVersion) {
@@ -9036,6 +9325,8 @@ yyreduce:
     break;
 
   case 470:
+
+/* Line 1455 of yacc.c  */
 #line 4010 "lef.y"
     {
       if (lefData->versionNum < 5.6) {  // 5.6 syntax
@@ -9057,6 +9348,8 @@ yyreduce:
     break;
 
   case 471:
+
+/* Line 1455 of yacc.c  */
 #line 4029 "lef.y"
     { 
       if (lefCallbacks->SiteCbk)
@@ -9065,11 +9358,15 @@ yyreduce:
     break;
 
   case 472:
+
+/* Line 1455 of yacc.c  */
 #line 4034 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 473:
+
+/* Line 1455 of yacc.c  */
 #line 4035 "lef.y"
     { 
       if (lefCallbacks->SiteCbk) lefData->lefrSite.setName((yyvsp[(3) - (3)].string));
@@ -9082,11 +9379,15 @@ yyreduce:
     break;
 
   case 474:
+
+/* Line 1455 of yacc.c  */
 #line 4044 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 475:
+
+/* Line 1455 of yacc.c  */
 #line 4045 "lef.y"
     {
       if (strcmp(lefData->siteName, (yyvsp[(3) - (3)].string)) != 0) {
@@ -9120,6 +9421,8 @@ yyreduce:
     break;
 
   case 478:
+
+/* Line 1455 of yacc.c  */
 #line 4082 "lef.y"
     {
 
@@ -9129,11 +9432,15 @@ yyreduce:
     break;
 
   case 479:
+
+/* Line 1455 of yacc.c  */
 #line 4088 "lef.y"
     { ;}
     break;
 
   case 480:
+
+/* Line 1455 of yacc.c  */
 #line 4090 "lef.y"
     { 
       if (lefCallbacks->SiteCbk) lefData->lefrSite.setClass((yyvsp[(1) - (1)].string));
@@ -9142,76 +9449,106 @@ yyreduce:
     break;
 
   case 481:
+
+/* Line 1455 of yacc.c  */
 #line 4095 "lef.y"
     { ;}
     break;
 
   case 482:
+
+/* Line 1455 of yacc.c  */
 #line 4098 "lef.y"
     {(yyval.string) = (char*)"PAD"; ;}
     break;
 
   case 483:
+
+/* Line 1455 of yacc.c  */
 #line 4099 "lef.y"
     {(yyval.string) = (char*)"CORE"; ;}
     break;
 
   case 484:
+
+/* Line 1455 of yacc.c  */
 #line 4100 "lef.y"
     {(yyval.string) = (char*)"VIRTUAL"; ;}
     break;
 
   case 485:
+
+/* Line 1455 of yacc.c  */
 #line 4103 "lef.y"
     { ;}
     break;
 
   case 488:
+
+/* Line 1455 of yacc.c  */
 #line 4112 "lef.y"
     { if (lefCallbacks->SiteCbk) lefData->lefrSite.setXSymmetry(); ;}
     break;
 
   case 489:
+
+/* Line 1455 of yacc.c  */
 #line 4114 "lef.y"
     { if (lefCallbacks->SiteCbk) lefData->lefrSite.setYSymmetry(); ;}
     break;
 
   case 490:
+
+/* Line 1455 of yacc.c  */
 #line 4116 "lef.y"
     { if (lefCallbacks->SiteCbk) lefData->lefrSite.set90Symmetry(); ;}
     break;
 
   case 491:
+
+/* Line 1455 of yacc.c  */
 #line 4118 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 492:
+
+/* Line 1455 of yacc.c  */
 #line 4120 "lef.y"
     { ;}
     break;
 
   case 495:
+
+/* Line 1455 of yacc.c  */
 #line 4127 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 496:
+
+/* Line 1455 of yacc.c  */
 #line 4128 "lef.y"
     { if (lefCallbacks->SiteCbk) lefData->lefrSite.addRowPattern((yyvsp[(1) - (3)].string), (yyvsp[(2) - (3)].integer)); ;}
     break;
 
   case 497:
+
+/* Line 1455 of yacc.c  */
 #line 4132 "lef.y"
     { (yyval.pt).x = (yyvsp[(1) - (2)].dval); (yyval.pt).y = (yyvsp[(2) - (2)].dval); ;}
     break;
 
   case 498:
+
+/* Line 1455 of yacc.c  */
 #line 4134 "lef.y"
     { (yyval.pt).x = (yyvsp[(2) - (4)].dval); (yyval.pt).y = (yyvsp[(3) - (4)].dval); ;}
     break;
 
   case 499:
+
+/* Line 1455 of yacc.c  */
 #line 4137 "lef.y"
     { 
       if (lefCallbacks->MacroCbk)
@@ -9221,11 +9558,15 @@ yyreduce:
     break;
 
   case 501:
+
+/* Line 1455 of yacc.c  */
 #line 4144 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 502:
+
+/* Line 1455 of yacc.c  */
 #line 4145 "lef.y"
     {
       lefData->siteDef = 0;
@@ -9246,11 +9587,15 @@ yyreduce:
     break;
 
   case 503:
+
+/* Line 1455 of yacc.c  */
 #line 4162 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 504:
+
+/* Line 1455 of yacc.c  */
 #line 4163 "lef.y"
     {
       if (strcmp(lefData->macroName, (yyvsp[(3) - (3)].string)) != 0) {
@@ -9275,82 +9620,114 @@ yyreduce:
     break;
 
   case 512:
+
+/* Line 1455 of yacc.c  */
 #line 4196 "lef.y"
     { ;}
     break;
 
   case 513:
+
+/* Line 1455 of yacc.c  */
 #line 4198 "lef.y"
     { ;}
     break;
 
   case 514:
+
+/* Line 1455 of yacc.c  */
 #line 4200 "lef.y"
     { ;}
     break;
 
   case 515:
+
+/* Line 1455 of yacc.c  */
 #line 4202 "lef.y"
     { ;}
     break;
 
   case 518:
+
+/* Line 1455 of yacc.c  */
 #line 4206 "lef.y"
     { ;}
     break;
 
   case 519:
+
+/* Line 1455 of yacc.c  */
 #line 4208 "lef.y"
     { ;}
     break;
 
   case 520:
+
+/* Line 1455 of yacc.c  */
 #line 4210 "lef.y"
     { ;}
     break;
 
   case 521:
+
+/* Line 1455 of yacc.c  */
 #line 4212 "lef.y"
     { if (lefCallbacks->MacroCbk) lefData->lefrMacro.setBuffer(); ;}
     break;
 
   case 522:
+
+/* Line 1455 of yacc.c  */
 #line 4214 "lef.y"
     { if (lefCallbacks->MacroCbk) lefData->lefrMacro.setInverter(); ;}
     break;
 
   case 523:
+
+/* Line 1455 of yacc.c  */
 #line 4216 "lef.y"
     { ;}
     break;
 
   case 524:
+
+/* Line 1455 of yacc.c  */
 #line 4218 "lef.y"
     { ;}
     break;
 
   case 525:
+
+/* Line 1455 of yacc.c  */
 #line 4220 "lef.y"
     { ;}
     break;
 
   case 526:
+
+/* Line 1455 of yacc.c  */
 #line 4222 "lef.y"
     { ;}
     break;
 
   case 527:
+
+/* Line 1455 of yacc.c  */
 #line 4223 "lef.y"
     {lefData->lefDumbMode = 1000000; ;}
     break;
 
   case 528:
+
+/* Line 1455 of yacc.c  */
 #line 4224 "lef.y"
     { lefData->lefDumbMode = 0;
       ;}
     break;
 
   case 531:
+
+/* Line 1455 of yacc.c  */
 #line 4233 "lef.y"
     {
       if (lefData->siteDef) { // SITE is defined before SYMMETRY 
@@ -9364,21 +9741,29 @@ yyreduce:
     break;
 
   case 534:
+
+/* Line 1455 of yacc.c  */
 #line 4250 "lef.y"
     { if (lefCallbacks->MacroCbk) lefData->lefrMacro.setXSymmetry(); ;}
     break;
 
   case 535:
+
+/* Line 1455 of yacc.c  */
 #line 4252 "lef.y"
     { if (lefCallbacks->MacroCbk) lefData->lefrMacro.setYSymmetry(); ;}
     break;
 
   case 536:
+
+/* Line 1455 of yacc.c  */
 #line 4254 "lef.y"
     { if (lefCallbacks->MacroCbk) lefData->lefrMacro.set90Symmetry(); ;}
     break;
 
   case 537:
+
+/* Line 1455 of yacc.c  */
 #line 4258 "lef.y"
     {
       char temp[32];
@@ -9392,6 +9777,8 @@ yyreduce:
     break;
 
   case 538:
+
+/* Line 1455 of yacc.c  */
 #line 4268 "lef.y"
     {
       if (lefCallbacks->MacroCbk) {
@@ -9403,6 +9790,8 @@ yyreduce:
     break;
 
   case 539:
+
+/* Line 1455 of yacc.c  */
 #line 4276 "lef.y"
     {
       if (lefCallbacks->MacroCbk) {
@@ -9414,6 +9803,8 @@ yyreduce:
     break;
 
   case 540:
+
+/* Line 1455 of yacc.c  */
 #line 4285 "lef.y"
     {
        if (lefCallbacks->MacroCbk) lefData->lefrMacro.setClass((yyvsp[(2) - (3)].string));
@@ -9423,11 +9814,15 @@ yyreduce:
     break;
 
   case 541:
+
+/* Line 1455 of yacc.c  */
 #line 4292 "lef.y"
     {(yyval.string) = (char*)"COVER"; ;}
     break;
 
   case 542:
+
+/* Line 1455 of yacc.c  */
 #line 4294 "lef.y"
     { (yyval.string) = (char*)"COVER BUMP";
       if (lefData->versionNum < 5.5) {
@@ -9450,16 +9845,22 @@ yyreduce:
     break;
 
   case 543:
+
+/* Line 1455 of yacc.c  */
 #line 4312 "lef.y"
     {(yyval.string) = (char*)"RING"; ;}
     break;
 
   case 544:
+
+/* Line 1455 of yacc.c  */
 #line 4313 "lef.y"
     {(yyval.string) = (char*)"BLOCK"; ;}
     break;
 
   case 545:
+
+/* Line 1455 of yacc.c  */
 #line 4315 "lef.y"
     { (yyval.string) = (char*)"BLOCK BLACKBOX";
       if (lefData->versionNum < 5.5) {
@@ -9482,6 +9883,8 @@ yyreduce:
     break;
 
   case 546:
+
+/* Line 1455 of yacc.c  */
 #line 4334 "lef.y"
     {
       if (lefData->ignoreVersion) {
@@ -9504,11 +9907,15 @@ yyreduce:
     break;
 
   case 547:
+
+/* Line 1455 of yacc.c  */
 #line 4352 "lef.y"
     {(yyval.string) = (char*)"NONE"; ;}
     break;
 
   case 548:
+
+/* Line 1455 of yacc.c  */
 #line 4354 "lef.y"
     {
         if (lefData->versionNum < 5.7) {
@@ -9524,16 +9931,22 @@ yyreduce:
     break;
 
   case 549:
+
+/* Line 1455 of yacc.c  */
 #line 4365 "lef.y"
     {(yyval.string) = (char*)"PAD"; ;}
     break;
 
   case 550:
+
+/* Line 1455 of yacc.c  */
 #line 4366 "lef.y"
     {(yyval.string) = (char*)"VIRTUAL"; ;}
     break;
 
   case 551:
+
+/* Line 1455 of yacc.c  */
 #line 4368 "lef.y"
     {  sprintf(lefData->temp_name, "PAD %s", (yyvsp[(2) - (2)].string));
         (yyval.string) = lefData->temp_name; 
@@ -9560,11 +9973,15 @@ yyreduce:
     break;
 
   case 552:
+
+/* Line 1455 of yacc.c  */
 #line 4390 "lef.y"
     {(yyval.string) = (char*)"CORE"; ;}
     break;
 
   case 553:
+
+/* Line 1455 of yacc.c  */
 #line 4392 "lef.y"
     {(yyval.string) = (char*)"CORNER";
       // This token is NOT in the spec but has shown up in 
@@ -9574,63 +9991,87 @@ yyreduce:
     break;
 
   case 554:
+
+/* Line 1455 of yacc.c  */
 #line 4398 "lef.y"
     {sprintf(lefData->temp_name, "CORE %s", (yyvsp[(2) - (2)].string));
       (yyval.string) = lefData->temp_name;;}
     break;
 
   case 555:
+
+/* Line 1455 of yacc.c  */
 #line 4401 "lef.y"
     {sprintf(lefData->temp_name, "ENDCAP %s", (yyvsp[(2) - (2)].string));
       (yyval.string) = lefData->temp_name;;}
     break;
 
   case 556:
+
+/* Line 1455 of yacc.c  */
 #line 4405 "lef.y"
     {(yyval.string) = (char*)"INPUT";;}
     break;
 
   case 557:
+
+/* Line 1455 of yacc.c  */
 #line 4406 "lef.y"
     {(yyval.string) = (char*)"OUTPUT";;}
     break;
 
   case 558:
+
+/* Line 1455 of yacc.c  */
 #line 4407 "lef.y"
     {(yyval.string) = (char*)"INOUT";;}
     break;
 
   case 559:
+
+/* Line 1455 of yacc.c  */
 #line 4408 "lef.y"
     {(yyval.string) = (char*)"POWER";;}
     break;
 
   case 560:
+
+/* Line 1455 of yacc.c  */
 #line 4409 "lef.y"
     {(yyval.string) = (char*)"SPACER";;}
     break;
 
   case 561:
+
+/* Line 1455 of yacc.c  */
 #line 4410 "lef.y"
     {(yyval.string) = (char*)"AREAIO";;}
     break;
 
   case 562:
+
+/* Line 1455 of yacc.c  */
 #line 4413 "lef.y"
     {(yyval.string) = (char*)"FEEDTHRU";;}
     break;
 
   case 563:
+
+/* Line 1455 of yacc.c  */
 #line 4414 "lef.y"
     {(yyval.string) = (char*)"TIEHIGH";;}
     break;
 
   case 564:
+
+/* Line 1455 of yacc.c  */
 #line 4415 "lef.y"
     {(yyval.string) = (char*)"TIELOW";;}
     break;
 
   case 565:
+
+/* Line 1455 of yacc.c  */
 #line 4417 "lef.y"
     { 
       if (lefData->ignoreVersion) {
@@ -9653,6 +10094,8 @@ yyreduce:
     break;
 
   case 566:
+
+/* Line 1455 of yacc.c  */
 #line 4436 "lef.y"
     { 
       if (lefData->ignoreVersion) {
@@ -9675,6 +10118,8 @@ yyreduce:
     break;
 
   case 567:
+
+/* Line 1455 of yacc.c  */
 #line 4455 "lef.y"
     { 
       if (lefData->ignoreVersion) {
@@ -9697,46 +10142,64 @@ yyreduce:
     break;
 
   case 568:
+
+/* Line 1455 of yacc.c  */
 #line 4475 "lef.y"
     {(yyval.string) = (char*)"PRE";;}
     break;
 
   case 569:
+
+/* Line 1455 of yacc.c  */
 #line 4476 "lef.y"
     {(yyval.string) = (char*)"POST";;}
     break;
 
   case 570:
+
+/* Line 1455 of yacc.c  */
 #line 4477 "lef.y"
     {(yyval.string) = (char*)"TOPLEFT";;}
     break;
 
   case 571:
+
+/* Line 1455 of yacc.c  */
 #line 4478 "lef.y"
     {(yyval.string) = (char*)"TOPRIGHT";;}
     break;
 
   case 572:
+
+/* Line 1455 of yacc.c  */
 #line 4479 "lef.y"
     {(yyval.string) = (char*)"BOTTOMLEFT";;}
     break;
 
   case 573:
+
+/* Line 1455 of yacc.c  */
 #line 4480 "lef.y"
     {(yyval.string) = (char*)"BOTTOMRIGHT";;}
     break;
 
   case 574:
+
+/* Line 1455 of yacc.c  */
 #line 4483 "lef.y"
     { if (lefCallbacks->MacroCbk) lefData->lefrMacro.setGenerator((yyvsp[(2) - (3)].string)); ;}
     break;
 
   case 575:
+
+/* Line 1455 of yacc.c  */
 #line 4486 "lef.y"
     { if (lefCallbacks->MacroCbk) lefData->lefrMacro.setGenerate((yyvsp[(2) - (4)].string), (yyvsp[(3) - (4)].string)); ;}
     break;
 
   case 576:
+
+/* Line 1455 of yacc.c  */
 #line 4490 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -9749,6 +10212,8 @@ yyreduce:
     break;
 
   case 577:
+
+/* Line 1455 of yacc.c  */
 #line 4499 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -9761,6 +10226,8 @@ yyreduce:
     break;
 
   case 578:
+
+/* Line 1455 of yacc.c  */
 #line 4508 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -9773,6 +10240,8 @@ yyreduce:
     break;
 
   case 579:
+
+/* Line 1455 of yacc.c  */
 #line 4518 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -9785,6 +10254,8 @@ yyreduce:
     break;
 
   case 580:
+
+/* Line 1455 of yacc.c  */
 #line 4528 "lef.y"
     { 
        if (lefData->origDef) { // Has multiple ORIGIN defined in a macro, stop parsing
@@ -9826,6 +10297,8 @@ yyreduce:
     break;
 
   case 581:
+
+/* Line 1455 of yacc.c  */
 #line 4568 "lef.y"
     { if (lefCallbacks->MacroCbk)
       lefData->lefrMacro.addForeign((yyvsp[(1) - (2)].string), 0, 0.0, 0.0, -1);
@@ -9833,6 +10306,8 @@ yyreduce:
     break;
 
   case 582:
+
+/* Line 1455 of yacc.c  */
 #line 4572 "lef.y"
     { if (lefCallbacks->MacroCbk)
       lefData->lefrMacro.addForeign((yyvsp[(1) - (3)].string), 1, (yyvsp[(2) - (3)].pt).x, (yyvsp[(2) - (3)].pt).y, -1);
@@ -9840,6 +10315,8 @@ yyreduce:
     break;
 
   case 583:
+
+/* Line 1455 of yacc.c  */
 #line 4576 "lef.y"
     { if (lefCallbacks->MacroCbk)
       lefData->lefrMacro.addForeign((yyvsp[(1) - (4)].string), 1, (yyvsp[(2) - (4)].pt).x, (yyvsp[(2) - (4)].pt).y, (yyvsp[(3) - (4)].integer));
@@ -9847,6 +10324,8 @@ yyreduce:
     break;
 
   case 584:
+
+/* Line 1455 of yacc.c  */
 #line 4580 "lef.y"
     { if (lefCallbacks->MacroCbk)
       lefData->lefrMacro.addForeign((yyvsp[(1) - (3)].string), 0, 0.0, 0.0, (yyvsp[(2) - (3)].integer));
@@ -9854,6 +10333,8 @@ yyreduce:
     break;
 
   case 585:
+
+/* Line 1455 of yacc.c  */
 #line 4586 "lef.y"
     {   
        if (lefCallbacks->MacroCbk && lefData->versionNum >= 5.8) {
@@ -9866,21 +10347,29 @@ yyreduce:
     break;
 
   case 586:
+
+/* Line 1455 of yacc.c  */
 #line 4595 "lef.y"
     { lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 587:
+
+/* Line 1455 of yacc.c  */
 #line 4596 "lef.y"
     { if (lefCallbacks->MacroCbk) lefData->lefrMacro.setEEQ((yyvsp[(3) - (4)].string)); ;}
     break;
 
   case 588:
+
+/* Line 1455 of yacc.c  */
 #line 4598 "lef.y"
     { lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 589:
+
+/* Line 1455 of yacc.c  */
 #line 4599 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -9893,6 +10382,8 @@ yyreduce:
     break;
 
   case 590:
+
+/* Line 1455 of yacc.c  */
 #line 4610 "lef.y"
     {
       if (lefCallbacks->MacroCbk) {
@@ -9902,6 +10393,8 @@ yyreduce:
     break;
 
   case 591:
+
+/* Line 1455 of yacc.c  */
 #line 4616 "lef.y"
     {
       if (lefCallbacks->MacroCbk) {
@@ -9914,17 +10407,23 @@ yyreduce:
     break;
 
   case 592:
+
+/* Line 1455 of yacc.c  */
 #line 4626 "lef.y"
     { lefData->lefDumbMode = 1; lefData->lefNoNum = 1; lefData->siteDef = 1;
         if (lefCallbacks->MacroCbk) lefData->lefrDoSite = 1; ;}
     break;
 
   case 593:
+
+/* Line 1455 of yacc.c  */
 #line 4630 "lef.y"
     { lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 594:
+
+/* Line 1455 of yacc.c  */
 #line 4633 "lef.y"
     { 
       if (lefData->siteDef) { // SITE is defined before SIZE 
@@ -9940,6 +10439,8 @@ yyreduce:
     break;
 
   case 595:
+
+/* Line 1455 of yacc.c  */
 #line 4649 "lef.y"
     { 
       if (lefCallbacks->PinCbk)
@@ -9949,11 +10450,15 @@ yyreduce:
     break;
 
   case 596:
+
+/* Line 1455 of yacc.c  */
 #line 4655 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1; lefData->pinDef = 1;;}
     break;
 
   case 597:
+
+/* Line 1455 of yacc.c  */
 #line 4656 "lef.y"
     { if (lefCallbacks->PinCbk) lefData->lefrPin.setName((yyvsp[(3) - (3)].string));
       //strcpy(lefData->pinName, $3);
@@ -9962,11 +10467,15 @@ yyreduce:
     break;
 
   case 598:
+
+/* Line 1455 of yacc.c  */
 #line 4661 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 599:
+
+/* Line 1455 of yacc.c  */
 #line 4662 "lef.y"
     {
       if (strcmp(lefData->pinName, (yyvsp[(3) - (3)].string)) != 0) {
@@ -9989,16 +10498,22 @@ yyreduce:
     break;
 
   case 600:
+
+/* Line 1455 of yacc.c  */
 #line 4683 "lef.y"
     { ;}
     break;
 
   case 601:
+
+/* Line 1455 of yacc.c  */
 #line 4685 "lef.y"
     { ;}
     break;
 
   case 602:
+
+/* Line 1455 of yacc.c  */
 #line 4689 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -10011,6 +10526,8 @@ yyreduce:
     break;
 
   case 603:
+
+/* Line 1455 of yacc.c  */
 #line 4698 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -10023,6 +10540,8 @@ yyreduce:
     break;
 
   case 604:
+
+/* Line 1455 of yacc.c  */
 #line 4707 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -10035,6 +10554,8 @@ yyreduce:
     break;
 
   case 605:
+
+/* Line 1455 of yacc.c  */
 #line 4716 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -10047,6 +10568,8 @@ yyreduce:
     break;
 
   case 606:
+
+/* Line 1455 of yacc.c  */
 #line 4725 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -10059,6 +10582,8 @@ yyreduce:
     break;
 
   case 607:
+
+/* Line 1455 of yacc.c  */
 #line 4734 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -10071,11 +10596,15 @@ yyreduce:
     break;
 
   case 608:
+
+/* Line 1455 of yacc.c  */
 #line 4742 "lef.y"
     { lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 609:
+
+/* Line 1455 of yacc.c  */
 #line 4743 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -10088,6 +10617,8 @@ yyreduce:
     break;
 
   case 610:
+
+/* Line 1455 of yacc.c  */
 #line 4752 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10100,21 +10631,29 @@ yyreduce:
     break;
 
   case 611:
+
+/* Line 1455 of yacc.c  */
 #line 4761 "lef.y"
     { if (lefCallbacks->PinCbk) lefData->lefrPin.setDirection((yyvsp[(1) - (1)].string)); ;}
     break;
 
   case 612:
+
+/* Line 1455 of yacc.c  */
 #line 4763 "lef.y"
     { if (lefCallbacks->PinCbk) lefData->lefrPin.setUse((yyvsp[(2) - (3)].string)); ;}
     break;
 
   case 613:
+
+/* Line 1455 of yacc.c  */
 #line 4765 "lef.y"
     { ;}
     break;
 
   case 614:
+
+/* Line 1455 of yacc.c  */
 #line 4767 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10127,6 +10666,8 @@ yyreduce:
     break;
 
   case 615:
+
+/* Line 1455 of yacc.c  */
 #line 4776 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10139,6 +10680,8 @@ yyreduce:
     break;
 
   case 616:
+
+/* Line 1455 of yacc.c  */
 #line 4785 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10151,6 +10694,8 @@ yyreduce:
     break;
 
   case 617:
+
+/* Line 1455 of yacc.c  */
 #line 4794 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10163,6 +10708,8 @@ yyreduce:
     break;
 
   case 618:
+
+/* Line 1455 of yacc.c  */
 #line 4803 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10175,6 +10722,8 @@ yyreduce:
     break;
 
   case 619:
+
+/* Line 1455 of yacc.c  */
 #line 4812 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10187,6 +10736,8 @@ yyreduce:
     break;
 
   case 620:
+
+/* Line 1455 of yacc.c  */
 #line 4821 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10199,6 +10750,8 @@ yyreduce:
     break;
 
   case 621:
+
+/* Line 1455 of yacc.c  */
 #line 4830 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10211,26 +10764,36 @@ yyreduce:
     break;
 
   case 622:
+
+/* Line 1455 of yacc.c  */
 #line 4839 "lef.y"
     { if (lefCallbacks->PinCbk) lefData->lefrPin.setShape((yyvsp[(2) - (3)].string)); ;}
     break;
 
   case 623:
+
+/* Line 1455 of yacc.c  */
 #line 4840 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 624:
+
+/* Line 1455 of yacc.c  */
 #line 4841 "lef.y"
     { if (lefCallbacks->PinCbk) lefData->lefrPin.setMustjoin((yyvsp[(3) - (4)].string)); ;}
     break;
 
   case 625:
+
+/* Line 1455 of yacc.c  */
 #line 4842 "lef.y"
     {lefData->lefDumbMode = 1;;}
     break;
 
   case 626:
+
+/* Line 1455 of yacc.c  */
 #line 4843 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10243,11 +10806,15 @@ yyreduce:
     break;
 
   case 627:
+
+/* Line 1455 of yacc.c  */
 #line 4851 "lef.y"
     {lefData->lefDumbMode = 1;;}
     break;
 
   case 628:
+
+/* Line 1455 of yacc.c  */
 #line 4852 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10260,11 +10827,15 @@ yyreduce:
     break;
 
   case 629:
+
+/* Line 1455 of yacc.c  */
 #line 4860 "lef.y"
     {lefData->lefDumbMode = 1;;}
     break;
 
   case 630:
+
+/* Line 1455 of yacc.c  */
 #line 4861 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10277,6 +10848,8 @@ yyreduce:
     break;
 
   case 631:
+
+/* Line 1455 of yacc.c  */
 #line 4870 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10289,16 +10862,22 @@ yyreduce:
     break;
 
   case 632:
+
+/* Line 1455 of yacc.c  */
 #line 4879 "lef.y"
     { if (lefCallbacks->PinCbk) lefData->lefrPin.setMaxdelay((yyvsp[(2) - (3)].dval)); ;}
     break;
 
   case 633:
+
+/* Line 1455 of yacc.c  */
 #line 4881 "lef.y"
     { if (lefCallbacks->PinCbk) lefData->lefrPin.setMaxload((yyvsp[(2) - (3)].dval)); ;}
     break;
 
   case 634:
+
+/* Line 1455 of yacc.c  */
 #line 4883 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10311,6 +10890,8 @@ yyreduce:
     break;
 
   case 635:
+
+/* Line 1455 of yacc.c  */
 #line 4892 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10323,6 +10904,8 @@ yyreduce:
     break;
 
   case 636:
+
+/* Line 1455 of yacc.c  */
 #line 4901 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10335,6 +10918,8 @@ yyreduce:
     break;
 
   case 637:
+
+/* Line 1455 of yacc.c  */
 #line 4910 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10347,6 +10932,8 @@ yyreduce:
     break;
 
   case 638:
+
+/* Line 1455 of yacc.c  */
 #line 4919 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10359,6 +10946,8 @@ yyreduce:
     break;
 
   case 639:
+
+/* Line 1455 of yacc.c  */
 #line 4928 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10371,6 +10960,8 @@ yyreduce:
     break;
 
   case 640:
+
+/* Line 1455 of yacc.c  */
 #line 4937 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -10383,22 +10974,30 @@ yyreduce:
     break;
 
   case 641:
+
+/* Line 1455 of yacc.c  */
 #line 4946 "lef.y"
     { if (lefCallbacks->PinCbk) lefData->lefrPin.setTaperRule((yyvsp[(2) - (3)].string)); ;}
     break;
 
   case 642:
+
+/* Line 1455 of yacc.c  */
 #line 4947 "lef.y"
     {lefData->lefDumbMode = 1000000; ;}
     break;
 
   case 643:
+
+/* Line 1455 of yacc.c  */
 #line 4948 "lef.y"
     { lefData->lefDumbMode = 0;
     ;}
     break;
 
   case 644:
+
+/* Line 1455 of yacc.c  */
 #line 4951 "lef.y"
     {
       lefData->lefDumbMode = 0;
@@ -10416,6 +11015,8 @@ yyreduce:
     break;
 
   case 645:
+
+/* Line 1455 of yacc.c  */
 #line 4965 "lef.y"
     {
       // Since in start_macro_port it has call the Init method, here
@@ -10431,6 +11032,8 @@ yyreduce:
     break;
 
   case 646:
+
+/* Line 1455 of yacc.c  */
 #line 4977 "lef.y"
     {  // a pre 5.4 syntax 
       lefData->use5_3 = 1;
@@ -10455,6 +11058,8 @@ yyreduce:
     break;
 
   case 647:
+
+/* Line 1455 of yacc.c  */
 #line 4998 "lef.y"
     {  // a pre 5.4 syntax 
       lefData->use5_3 = 1;
@@ -10479,6 +11084,8 @@ yyreduce:
     break;
 
   case 648:
+
+/* Line 1455 of yacc.c  */
 #line 5019 "lef.y"
     { // a pre 5.4 syntax  
       lefData->use5_3 = 1;
@@ -10503,16 +11110,22 @@ yyreduce:
     break;
 
   case 649:
+
+/* Line 1455 of yacc.c  */
 #line 5040 "lef.y"
     { if (lefCallbacks->PinCbk) lefData->lefrPin.setRiseSlewLimit((yyvsp[(2) - (3)].dval)); ;}
     break;
 
   case 650:
+
+/* Line 1455 of yacc.c  */
 #line 5042 "lef.y"
     { if (lefCallbacks->PinCbk) lefData->lefrPin.setFallSlewLimit((yyvsp[(2) - (3)].dval)); ;}
     break;
 
   case 651:
+
+/* Line 1455 of yacc.c  */
 #line 5044 "lef.y"
     { // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -10546,6 +11159,8 @@ yyreduce:
     break;
 
   case 652:
+
+/* Line 1455 of yacc.c  */
 #line 5074 "lef.y"
     { // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -10579,6 +11194,8 @@ yyreduce:
     break;
 
   case 653:
+
+/* Line 1455 of yacc.c  */
 #line 5104 "lef.y"
     { // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -10612,6 +11229,8 @@ yyreduce:
     break;
 
   case 654:
+
+/* Line 1455 of yacc.c  */
 #line 5134 "lef.y"
     { // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -10645,6 +11264,8 @@ yyreduce:
     break;
 
   case 655:
+
+/* Line 1455 of yacc.c  */
 #line 5164 "lef.y"
     { // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -10678,6 +11299,8 @@ yyreduce:
     break;
 
   case 656:
+
+/* Line 1455 of yacc.c  */
 #line 5194 "lef.y"
     { // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -10711,6 +11334,8 @@ yyreduce:
     break;
 
   case 657:
+
+/* Line 1455 of yacc.c  */
 #line 5224 "lef.y"
     { // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -10744,6 +11369,8 @@ yyreduce:
     break;
 
   case 658:
+
+/* Line 1455 of yacc.c  */
 #line 5254 "lef.y"
     { // 5.4 syntax 
       lefData->use5_4 = 1;
@@ -10777,6 +11404,8 @@ yyreduce:
     break;
 
   case 659:
+
+/* Line 1455 of yacc.c  */
 #line 5284 "lef.y"
     { // 5.5 syntax 
       lefData->use5_4 = 1;
@@ -10809,11 +11438,15 @@ yyreduce:
     break;
 
   case 661:
+
+/* Line 1455 of yacc.c  */
 #line 5313 "lef.y"
     {lefData->lefDumbMode = 2; lefData->lefNoNum = 2; ;}
     break;
 
   case 662:
+
+/* Line 1455 of yacc.c  */
 #line 5314 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -10833,11 +11466,15 @@ yyreduce:
     break;
 
   case 663:
+
+/* Line 1455 of yacc.c  */
 #line 5329 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 664:
+
+/* Line 1455 of yacc.c  */
 #line 5330 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -10857,11 +11494,15 @@ yyreduce:
     break;
 
   case 665:
+
+/* Line 1455 of yacc.c  */
 #line 5345 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 666:
+
+/* Line 1455 of yacc.c  */
 #line 5346 "lef.y"
     {
       if (lefData->versionNum < 5.6) {
@@ -10881,6 +11522,8 @@ yyreduce:
     break;
 
   case 667:
+
+/* Line 1455 of yacc.c  */
 #line 5364 "lef.y"
     {
     if (lefCallbacks->PinCbk)
@@ -10889,6 +11532,8 @@ yyreduce:
     break;
 
   case 668:
+
+/* Line 1455 of yacc.c  */
 #line 5369 "lef.y"
     {
     if (lefCallbacks->PinCbk)
@@ -10897,6 +11542,8 @@ yyreduce:
     break;
 
   case 669:
+
+/* Line 1455 of yacc.c  */
 #line 5374 "lef.y"
     {
     if (lefCallbacks->PinCbk)
@@ -10905,6 +11552,8 @@ yyreduce:
     break;
 
   case 670:
+
+/* Line 1455 of yacc.c  */
 #line 5379 "lef.y"
     {
     if (lefCallbacks->PinCbk)
@@ -10913,6 +11562,8 @@ yyreduce:
     break;
 
   case 673:
+
+/* Line 1455 of yacc.c  */
 #line 5391 "lef.y"
     { 
       char temp[32];
@@ -10926,6 +11577,8 @@ yyreduce:
     break;
 
   case 674:
+
+/* Line 1455 of yacc.c  */
 #line 5401 "lef.y"
     {
       if (lefCallbacks->PinCbk) {
@@ -10937,6 +11590,8 @@ yyreduce:
     break;
 
   case 675:
+
+/* Line 1455 of yacc.c  */
 #line 5409 "lef.y"
     {
       if (lefCallbacks->PinCbk) {
@@ -10948,31 +11603,43 @@ yyreduce:
     break;
 
   case 676:
+
+/* Line 1455 of yacc.c  */
 #line 5418 "lef.y"
     {(yyval.string) = (char*)"INPUT";;}
     break;
 
   case 677:
+
+/* Line 1455 of yacc.c  */
 #line 5419 "lef.y"
     {(yyval.string) = (char*)"OUTPUT";;}
     break;
 
   case 678:
+
+/* Line 1455 of yacc.c  */
 #line 5420 "lef.y"
     {(yyval.string) = (char*)"OUTPUT TRISTATE";;}
     break;
 
   case 679:
+
+/* Line 1455 of yacc.c  */
 #line 5421 "lef.y"
     {(yyval.string) = (char*)"INOUT";;}
     break;
 
   case 680:
+
+/* Line 1455 of yacc.c  */
 #line 5422 "lef.y"
     {(yyval.string) = (char*)"FEEDTHRU";;}
     break;
 
   case 681:
+
+/* Line 1455 of yacc.c  */
 #line 5425 "lef.y"
     {
       if (lefCallbacks->PinCbk) {
@@ -10987,87 +11654,121 @@ yyreduce:
     break;
 
   case 683:
+
+/* Line 1455 of yacc.c  */
 #line 5438 "lef.y"
     { if (lefData->lefrDoGeometries)
         lefData->lefrGeometriesPtr->addClass((yyvsp[(2) - (3)].string)); ;}
     break;
 
   case 684:
+
+/* Line 1455 of yacc.c  */
 #line 5442 "lef.y"
     {(yyval.string) = (char*)"SIGNAL";;}
     break;
 
   case 685:
+
+/* Line 1455 of yacc.c  */
 #line 5443 "lef.y"
     {(yyval.string) = (char*)"ANALOG";;}
     break;
 
   case 686:
+
+/* Line 1455 of yacc.c  */
 #line 5444 "lef.y"
     {(yyval.string) = (char*)"POWER";;}
     break;
 
   case 687:
+
+/* Line 1455 of yacc.c  */
 #line 5445 "lef.y"
     {(yyval.string) = (char*)"GROUND";;}
     break;
 
   case 688:
+
+/* Line 1455 of yacc.c  */
 #line 5446 "lef.y"
     {(yyval.string) = (char*)"CLOCK";;}
     break;
 
   case 689:
+
+/* Line 1455 of yacc.c  */
 #line 5447 "lef.y"
     {(yyval.string) = (char*)"DATA";;}
     break;
 
   case 690:
+
+/* Line 1455 of yacc.c  */
 #line 5450 "lef.y"
     {(yyval.string) = (char*)"INPUT";;}
     break;
 
   case 691:
+
+/* Line 1455 of yacc.c  */
 #line 5451 "lef.y"
     {(yyval.string) = (char*)"OUTPUT";;}
     break;
 
   case 692:
+
+/* Line 1455 of yacc.c  */
 #line 5452 "lef.y"
     {(yyval.string) = (char*)"START";;}
     break;
 
   case 693:
+
+/* Line 1455 of yacc.c  */
 #line 5453 "lef.y"
     {(yyval.string) = (char*)"STOP";;}
     break;
 
   case 694:
+
+/* Line 1455 of yacc.c  */
 #line 5456 "lef.y"
     {(yyval.string) = (char*)""; ;}
     break;
 
   case 695:
+
+/* Line 1455 of yacc.c  */
 #line 5457 "lef.y"
     {(yyval.string) = (char*)"ABUTMENT";;}
     break;
 
   case 696:
+
+/* Line 1455 of yacc.c  */
 #line 5458 "lef.y"
     {(yyval.string) = (char*)"RING";;}
     break;
 
   case 697:
+
+/* Line 1455 of yacc.c  */
 #line 5459 "lef.y"
     {(yyval.string) = (char*)"FEEDTHRU";;}
     break;
 
   case 699:
+
+/* Line 1455 of yacc.c  */
 #line 5464 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 700:
+
+/* Line 1455 of yacc.c  */
 #line 5465 "lef.y"
     {
       if ((lefData->needGeometry) && (lefData->needGeometry != 2)) // 1 LAYER follow after another
@@ -11086,6 +11787,8 @@ yyreduce:
     break;
 
   case 702:
+
+/* Line 1455 of yacc.c  */
 #line 5482 "lef.y"
     { 
       if (lefData->lefrDoGeometries) {
@@ -11101,6 +11804,8 @@ yyreduce:
     break;
 
   case 703:
+
+/* Line 1455 of yacc.c  */
 #line 5494 "lef.y"
     { if (lefData->lefrDoGeometries) {
         if (lefData->hasGeoLayer == 0) {   // LAYER statement is missing 
@@ -11125,6 +11830,8 @@ yyreduce:
     break;
 
   case 704:
+
+/* Line 1455 of yacc.c  */
 #line 5515 "lef.y"
     { if (lefData->lefrDoGeometries) {
         if (lefData->hasGeoLayer == 0) {   // LAYER statement is missing 
@@ -11149,6 +11856,8 @@ yyreduce:
     break;
 
   case 705:
+
+/* Line 1455 of yacc.c  */
 #line 5536 "lef.y"
     { if (lefData->lefrDoGeometries) {
         if (lefData->hasGeoLayer == 0) {   // LAYER statement is missing 
@@ -11172,6 +11881,8 @@ yyreduce:
     break;
 
   case 706:
+
+/* Line 1455 of yacc.c  */
 #line 5556 "lef.y"
     { if (lefData->lefrDoGeometries) {
         if (lefData->hasGeoLayer == 0) {   // LAYER statement is missing 
@@ -11195,6 +11906,8 @@ yyreduce:
     break;
 
   case 707:
+
+/* Line 1455 of yacc.c  */
 #line 5576 "lef.y"
     {
       if (lefData->lefrDoGeometries) {
@@ -11220,6 +11933,8 @@ yyreduce:
     break;
 
   case 708:
+
+/* Line 1455 of yacc.c  */
 #line 5598 "lef.y"
     { if (lefData->lefrDoGeometries) {
         if (lefData->hasGeoLayer == 0) {   // LAYER statement is missing 
@@ -11244,11 +11959,15 @@ yyreduce:
     break;
 
   case 709:
+
+/* Line 1455 of yacc.c  */
 #line 5619 "lef.y"
     { ;}
     break;
 
   case 713:
+
+/* Line 1455 of yacc.c  */
 #line 5626 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -11266,6 +11985,8 @@ yyreduce:
     break;
 
   case 715:
+
+/* Line 1455 of yacc.c  */
 #line 5642 "lef.y"
     { if (lefData->lefrDoGeometries) {
         if (zeroOrGt((yyvsp[(2) - (2)].dval)))
@@ -11283,6 +12004,8 @@ yyreduce:
     break;
 
   case 716:
+
+/* Line 1455 of yacc.c  */
 #line 5656 "lef.y"
     { if (lefData->lefrDoGeometries) {
         if (zeroOrGt((yyvsp[(2) - (2)].dval)))
@@ -11300,23 +12023,31 @@ yyreduce:
     break;
 
   case 717:
+
+/* Line 1455 of yacc.c  */
 #line 5671 "lef.y"
     { if (lefData->lefrDoGeometries)
         lefData->lefrGeometriesPtr->startList((yyvsp[(1) - (1)].pt).x, (yyvsp[(1) - (1)].pt).y); ;}
     break;
 
   case 718:
+
+/* Line 1455 of yacc.c  */
 #line 5675 "lef.y"
     { if (lefData->lefrDoGeometries)
         lefData->lefrGeometriesPtr->addToList((yyvsp[(1) - (1)].pt).x, (yyvsp[(1) - (1)].pt).y); ;}
     break;
 
   case 721:
+
+/* Line 1455 of yacc.c  */
 #line 5684 "lef.y"
     {lefData->lefDumbMode = 1;;}
     break;
 
   case 722:
+
+/* Line 1455 of yacc.c  */
 #line 5685 "lef.y"
     { 
         if (lefData->lefrDoGeometries){
@@ -11333,11 +12064,15 @@ yyreduce:
     break;
 
   case 723:
+
+/* Line 1455 of yacc.c  */
 #line 5697 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 724:
+
+/* Line 1455 of yacc.c  */
 #line 5699 "lef.y"
     { 
         if (lefData->lefrDoGeometries) {
@@ -11354,12 +12089,16 @@ yyreduce:
     break;
 
   case 725:
+
+/* Line 1455 of yacc.c  */
 #line 5713 "lef.y"
     { if (lefData->lefrDoGeometries)
          lefData->lefrGeometriesPtr->addStepPattern((yyvsp[(2) - (7)].dval), (yyvsp[(4) - (7)].dval), (yyvsp[(6) - (7)].dval), (yyvsp[(7) - (7)].dval)); ;}
     break;
 
   case 726:
+
+/* Line 1455 of yacc.c  */
 #line 5718 "lef.y"
     {
       if (lefData->lefrDoSite) {
@@ -11373,6 +12112,8 @@ yyreduce:
     break;
 
   case 727:
+
+/* Line 1455 of yacc.c  */
 #line 5728 "lef.y"
     {
       if (lefData->lefrDoSite) {
@@ -11386,6 +12127,8 @@ yyreduce:
     break;
 
   case 728:
+
+/* Line 1455 of yacc.c  */
 #line 5740 "lef.y"
     { 
       if (lefData->lefrDoTrack) {
@@ -11398,16 +12141,22 @@ yyreduce:
     break;
 
   case 729:
+
+/* Line 1455 of yacc.c  */
 #line 5748 "lef.y"
     {lefData->lefDumbMode = 1000000000;;}
     break;
 
   case 730:
+
+/* Line 1455 of yacc.c  */
 #line 5749 "lef.y"
     { lefData->lefDumbMode = 0;;}
     break;
 
   case 731:
+
+/* Line 1455 of yacc.c  */
 #line 5751 "lef.y"
     { 
       if (lefData->lefrDoTrack) {
@@ -11420,16 +12169,22 @@ yyreduce:
     break;
 
   case 732:
+
+/* Line 1455 of yacc.c  */
 #line 5759 "lef.y"
     {lefData->lefDumbMode = 1000000000;;}
     break;
 
   case 733:
+
+/* Line 1455 of yacc.c  */
 #line 5760 "lef.y"
     { lefData->lefDumbMode = 0;;}
     break;
 
   case 734:
+
+/* Line 1455 of yacc.c  */
 #line 5762 "lef.y"
     { 
       if (lefData->lefrDoTrack) {
@@ -11442,6 +12197,8 @@ yyreduce:
     break;
 
   case 735:
+
+/* Line 1455 of yacc.c  */
 #line 5771 "lef.y"
     { 
       if (lefData->lefrDoTrack) {
@@ -11454,11 +12211,15 @@ yyreduce:
     break;
 
   case 738:
+
+/* Line 1455 of yacc.c  */
 #line 5786 "lef.y"
     { if (lefData->lefrDoTrack) lefData->lefrTrackPatternPtr->addLayer((yyvsp[(1) - (1)].string)); ;}
     break;
 
   case 739:
+
+/* Line 1455 of yacc.c  */
 #line 5789 "lef.y"
     {
       if (lefData->lefrDoGcell) {
@@ -11471,6 +12232,8 @@ yyreduce:
     break;
 
   case 740:
+
+/* Line 1455 of yacc.c  */
 #line 5798 "lef.y"
     {
       if (lefData->lefrDoGcell) {
@@ -11483,6 +12246,8 @@ yyreduce:
     break;
 
   case 741:
+
+/* Line 1455 of yacc.c  */
 #line 5808 "lef.y"
     { 
       if (lefCallbacks->ObstructionCbk) {
@@ -11497,6 +12262,8 @@ yyreduce:
     break;
 
   case 742:
+
+/* Line 1455 of yacc.c  */
 #line 5819 "lef.y"
     {
        // The pointer has malloced in start, need to free manually 
@@ -11511,6 +12278,8 @@ yyreduce:
     break;
 
   case 743:
+
+/* Line 1455 of yacc.c  */
 #line 5831 "lef.y"
     {
       lefData->obsDef = 1;
@@ -11525,6 +12294,8 @@ yyreduce:
     break;
 
   case 744:
+
+/* Line 1455 of yacc.c  */
 #line 5843 "lef.y"
     { 
       if (lefData->versionNum < 5.6) {
@@ -11548,11 +12319,15 @@ yyreduce:
     break;
 
   case 747:
+
+/* Line 1455 of yacc.c  */
 #line 5867 "lef.y"
     { lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 748:
+
+/* Line 1455 of yacc.c  */
 #line 5868 "lef.y"
     {
       if (lefCallbacks->DensityCbk)
@@ -11561,6 +12336,8 @@ yyreduce:
     break;
 
   case 752:
+
+/* Line 1455 of yacc.c  */
 #line 5879 "lef.y"
     {
       if (lefCallbacks->DensityCbk)
@@ -11569,26 +12346,36 @@ yyreduce:
     break;
 
   case 753:
+
+/* Line 1455 of yacc.c  */
 #line 5884 "lef.y"
     { lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 754:
+
+/* Line 1455 of yacc.c  */
 #line 5885 "lef.y"
     { if (lefCallbacks->MacroCbk) lefData->lefrMacro.setClockType((yyvsp[(3) - (4)].string)); ;}
     break;
 
   case 755:
+
+/* Line 1455 of yacc.c  */
 #line 5888 "lef.y"
     { ;}
     break;
 
   case 756:
+
+/* Line 1455 of yacc.c  */
 #line 5891 "lef.y"
     { ;}
     break;
 
   case 757:
+
+/* Line 1455 of yacc.c  */
 #line 5894 "lef.y"
     {
     if (lefData->versionNum < 5.4) {
@@ -11605,6 +12392,8 @@ yyreduce:
     break;
 
   case 760:
+
+/* Line 1455 of yacc.c  */
 #line 5914 "lef.y"
     {
     if (lefData->versionNum < 5.4) {
@@ -11617,31 +12406,43 @@ yyreduce:
     break;
 
   case 761:
+
+/* Line 1455 of yacc.c  */
 #line 5923 "lef.y"
     { lefData->lefDumbMode = 0;;}
     break;
 
   case 762:
+
+/* Line 1455 of yacc.c  */
 #line 5924 "lef.y"
     {lefData->lefDumbMode = 1000000000;;}
     break;
 
   case 763:
+
+/* Line 1455 of yacc.c  */
 #line 5925 "lef.y"
     { lefData->lefDumbMode = 0;;}
     break;
 
   case 764:
+
+/* Line 1455 of yacc.c  */
 #line 5927 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.addRiseFall((yyvsp[(1) - (4)].string),(yyvsp[(3) - (4)].dval),(yyvsp[(4) - (4)].dval)); ;}
     break;
 
   case 765:
+
+/* Line 1455 of yacc.c  */
 #line 5929 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.addRiseFallVariable((yyvsp[(8) - (10)].dval),(yyvsp[(9) - (10)].dval)); ;}
     break;
 
   case 766:
+
+/* Line 1455 of yacc.c  */
 #line 5932 "lef.y"
     { if (lefCallbacks->TimingCbk) {
         if ((yyvsp[(2) - (9)].string)[0] == 'D' || (yyvsp[(2) - (9)].string)[0] == 'd') // delay 
@@ -11653,257 +12454,359 @@ yyreduce:
     break;
 
   case 767:
+
+/* Line 1455 of yacc.c  */
 #line 5940 "lef.y"
     { ;}
     break;
 
   case 768:
+
+/* Line 1455 of yacc.c  */
 #line 5942 "lef.y"
     { ;}
     break;
 
   case 769:
+
+/* Line 1455 of yacc.c  */
 #line 5944 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.setRiseRS((yyvsp[(2) - (4)].dval),(yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 770:
+
+/* Line 1455 of yacc.c  */
 #line 5946 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.setFallRS((yyvsp[(2) - (4)].dval),(yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 771:
+
+/* Line 1455 of yacc.c  */
 #line 5948 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.setRiseCS((yyvsp[(2) - (4)].dval),(yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 772:
+
+/* Line 1455 of yacc.c  */
 #line 5950 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.setFallCS((yyvsp[(2) - (4)].dval),(yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 773:
+
+/* Line 1455 of yacc.c  */
 #line 5952 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.setRiseAtt1((yyvsp[(2) - (4)].dval),(yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 774:
+
+/* Line 1455 of yacc.c  */
 #line 5954 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.setFallAtt1((yyvsp[(2) - (4)].dval),(yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 775:
+
+/* Line 1455 of yacc.c  */
 #line 5956 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.setRiseTo((yyvsp[(2) - (4)].dval),(yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 776:
+
+/* Line 1455 of yacc.c  */
 #line 5958 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.setFallTo((yyvsp[(2) - (4)].dval),(yyvsp[(3) - (4)].dval)); ;}
     break;
 
   case 777:
+
+/* Line 1455 of yacc.c  */
 #line 5960 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.addUnateness((yyvsp[(2) - (3)].string)); ;}
     break;
 
   case 778:
+
+/* Line 1455 of yacc.c  */
 #line 5962 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.setStable((yyvsp[(3) - (7)].dval),(yyvsp[(5) - (7)].dval),(yyvsp[(6) - (7)].string)); ;}
     break;
 
   case 779:
+
+/* Line 1455 of yacc.c  */
 #line 5964 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.addSDF2Pins((yyvsp[(1) - (8)].string),(yyvsp[(2) - (8)].string),(yyvsp[(3) - (8)].string),(yyvsp[(5) - (8)].dval),(yyvsp[(6) - (8)].dval),(yyvsp[(7) - (8)].dval)); ;}
     break;
 
   case 780:
+
+/* Line 1455 of yacc.c  */
 #line 5966 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.addSDF1Pin((yyvsp[(1) - (6)].string),(yyvsp[(3) - (6)].dval),(yyvsp[(4) - (6)].dval),(yyvsp[(4) - (6)].dval)); ;}
     break;
 
   case 781:
+
+/* Line 1455 of yacc.c  */
 #line 5968 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.setSDFcondStart((yyvsp[(2) - (3)].string)); ;}
     break;
 
   case 782:
+
+/* Line 1455 of yacc.c  */
 #line 5970 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.setSDFcondEnd((yyvsp[(2) - (3)].string)); ;}
     break;
 
   case 783:
+
+/* Line 1455 of yacc.c  */
 #line 5972 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.setSDFcond((yyvsp[(2) - (3)].string)); ;}
     break;
 
   case 784:
+
+/* Line 1455 of yacc.c  */
 #line 5974 "lef.y"
     { ;}
     break;
 
   case 785:
+
+/* Line 1455 of yacc.c  */
 #line 5978 "lef.y"
     { (yyval.string) = (char*)"MPWH";;}
     break;
 
   case 786:
+
+/* Line 1455 of yacc.c  */
 #line 5980 "lef.y"
     { (yyval.string) = (char*)"MPWL";;}
     break;
 
   case 787:
+
+/* Line 1455 of yacc.c  */
 #line 5982 "lef.y"
     { (yyval.string) = (char*)"PERIOD";;}
     break;
 
   case 788:
+
+/* Line 1455 of yacc.c  */
 #line 5986 "lef.y"
     { (yyval.string) = (char*)"SETUP";;}
     break;
 
   case 789:
+
+/* Line 1455 of yacc.c  */
 #line 5988 "lef.y"
     { (yyval.string) = (char*)"HOLD";;}
     break;
 
   case 790:
+
+/* Line 1455 of yacc.c  */
 #line 5990 "lef.y"
     { (yyval.string) = (char*)"RECOVERY";;}
     break;
 
   case 791:
+
+/* Line 1455 of yacc.c  */
 #line 5992 "lef.y"
     { (yyval.string) = (char*)"SKEW";;}
     break;
 
   case 792:
+
+/* Line 1455 of yacc.c  */
 #line 5996 "lef.y"
     { (yyval.string) = (char*)"ANYEDGE";;}
     break;
 
   case 793:
+
+/* Line 1455 of yacc.c  */
 #line 5998 "lef.y"
     { (yyval.string) = (char*)"POSEDGE";;}
     break;
 
   case 794:
+
+/* Line 1455 of yacc.c  */
 #line 6000 "lef.y"
     { (yyval.string) = (char*)"NEGEDGE";;}
     break;
 
   case 795:
+
+/* Line 1455 of yacc.c  */
 #line 6004 "lef.y"
     { (yyval.string) = (char*)"ANYEDGE";;}
     break;
 
   case 796:
+
+/* Line 1455 of yacc.c  */
 #line 6006 "lef.y"
     { (yyval.string) = (char*)"POSEDGE";;}
     break;
 
   case 797:
+
+/* Line 1455 of yacc.c  */
 #line 6008 "lef.y"
     { (yyval.string) = (char*)"NEGEDGE";;}
     break;
 
   case 798:
+
+/* Line 1455 of yacc.c  */
 #line 6012 "lef.y"
     { (yyval.string) = (char*)"DELAY"; ;}
     break;
 
   case 799:
+
+/* Line 1455 of yacc.c  */
 #line 6014 "lef.y"
     { (yyval.string) = (char*)"TRANSITION"; ;}
     break;
 
   case 800:
+
+/* Line 1455 of yacc.c  */
 #line 6018 "lef.y"
     { ;}
     break;
 
   case 801:
+
+/* Line 1455 of yacc.c  */
 #line 6020 "lef.y"
     { ;}
     break;
 
   case 802:
+
+/* Line 1455 of yacc.c  */
 #line 6023 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.addTableEntry((yyvsp[(2) - (5)].dval),(yyvsp[(3) - (5)].dval),(yyvsp[(4) - (5)].dval)); ;}
     break;
 
   case 803:
+
+/* Line 1455 of yacc.c  */
 #line 6027 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.addTableAxisNumber((yyvsp[(1) - (1)].dval)); ;}
     break;
 
   case 804:
+
+/* Line 1455 of yacc.c  */
 #line 6029 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.addTableAxisNumber((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 805:
+
+/* Line 1455 of yacc.c  */
 #line 6033 "lef.y"
     { ;}
     break;
 
   case 806:
+
+/* Line 1455 of yacc.c  */
 #line 6035 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.addRiseFallSlew((yyvsp[(1) - (4)].dval),(yyvsp[(2) - (4)].dval),(yyvsp[(3) - (4)].dval),(yyvsp[(4) - (4)].dval)); ;}
     break;
 
   case 807:
+
+/* Line 1455 of yacc.c  */
 #line 6037 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.addRiseFallSlew((yyvsp[(1) - (7)].dval),(yyvsp[(2) - (7)].dval),(yyvsp[(3) - (7)].dval),(yyvsp[(4) - (7)].dval));
       if (lefCallbacks->TimingCbk) lefData->lefrTiming.addRiseFallSlew2((yyvsp[(5) - (7)].dval),(yyvsp[(6) - (7)].dval),(yyvsp[(7) - (7)].dval)); ;}
     break;
 
   case 808:
+
+/* Line 1455 of yacc.c  */
 #line 6042 "lef.y"
     { (yyval.string) = (char*)"RISE"; ;}
     break;
 
   case 809:
+
+/* Line 1455 of yacc.c  */
 #line 6044 "lef.y"
     { (yyval.string) = (char*)"FALL"; ;}
     break;
 
   case 810:
+
+/* Line 1455 of yacc.c  */
 #line 6048 "lef.y"
     { (yyval.string) = (char*)"INVERT"; ;}
     break;
 
   case 811:
+
+/* Line 1455 of yacc.c  */
 #line 6050 "lef.y"
     { (yyval.string) = (char*)"NONINVERT"; ;}
     break;
 
   case 812:
+
+/* Line 1455 of yacc.c  */
 #line 6052 "lef.y"
     { (yyval.string) = (char*)"NONUNATE"; ;}
     break;
 
   case 813:
+
+/* Line 1455 of yacc.c  */
 #line 6056 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.addFromPin((yyvsp[(1) - (1)].string)); ;}
     break;
 
   case 814:
+
+/* Line 1455 of yacc.c  */
 #line 6058 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.addFromPin((yyvsp[(2) - (2)].string)); ;}
     break;
 
   case 815:
+
+/* Line 1455 of yacc.c  */
 #line 6062 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.addToPin((yyvsp[(1) - (1)].string)); ;}
     break;
 
   case 816:
+
+/* Line 1455 of yacc.c  */
 #line 6064 "lef.y"
     { if (lefCallbacks->TimingCbk) lefData->lefrTiming.addToPin((yyvsp[(2) - (2)].string)); ;}
     break;
 
   case 817:
+
+/* Line 1455 of yacc.c  */
 #line 6067 "lef.y"
     {
       if (lefCallbacks->ArrayCbk)
@@ -11915,11 +12818,15 @@ yyreduce:
     break;
 
   case 819:
+
+/* Line 1455 of yacc.c  */
 #line 6076 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 820:
+
+/* Line 1455 of yacc.c  */
 #line 6077 "lef.y"
     {
       if (lefCallbacks->ArrayCbk) {
@@ -11932,11 +12839,15 @@ yyreduce:
     break;
 
   case 821:
+
+/* Line 1455 of yacc.c  */
 #line 6086 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1;;}
     break;
 
   case 822:
+
+/* Line 1455 of yacc.c  */
 #line 6087 "lef.y"
     {
       if (lefCallbacks->ArrayCbk && lefCallbacks->ArrayEndCbk)
@@ -11961,21 +12872,29 @@ yyreduce:
     break;
 
   case 823:
+
+/* Line 1455 of yacc.c  */
 #line 6110 "lef.y"
     { ;}
     break;
 
   case 824:
+
+/* Line 1455 of yacc.c  */
 #line 6112 "lef.y"
     { ;}
     break;
 
   case 825:
+
+/* Line 1455 of yacc.c  */
 #line 6115 "lef.y"
     { if (lefCallbacks->ArrayCbk) lefData->lefrDoSite = 1; lefData->lefDumbMode = 1; ;}
     break;
 
   case 826:
+
+/* Line 1455 of yacc.c  */
 #line 6117 "lef.y"
     {
       if (lefCallbacks->ArrayCbk) {
@@ -11985,11 +12904,15 @@ yyreduce:
     break;
 
   case 827:
+
+/* Line 1455 of yacc.c  */
 #line 6122 "lef.y"
     {lefData->lefDumbMode = 1; if (lefCallbacks->ArrayCbk) lefData->lefrDoSite = 1; ;}
     break;
 
   case 828:
+
+/* Line 1455 of yacc.c  */
 #line 6124 "lef.y"
     {
       if (lefCallbacks->ArrayCbk) {
@@ -11999,11 +12922,15 @@ yyreduce:
     break;
 
   case 829:
+
+/* Line 1455 of yacc.c  */
 #line 6129 "lef.y"
     {lefData->lefDumbMode = 1; if (lefCallbacks->ArrayCbk) lefData->lefrDoSite = 1; ;}
     break;
 
   case 830:
+
+/* Line 1455 of yacc.c  */
 #line 6131 "lef.y"
     {
       if (lefCallbacks->ArrayCbk) {
@@ -12013,11 +12940,15 @@ yyreduce:
     break;
 
   case 831:
+
+/* Line 1455 of yacc.c  */
 #line 6136 "lef.y"
     { if (lefCallbacks->ArrayCbk) lefData->lefrDoTrack = 1; ;}
     break;
 
   case 832:
+
+/* Line 1455 of yacc.c  */
 #line 6137 "lef.y"
     {
       if (lefCallbacks->ArrayCbk) {
@@ -12027,17 +12958,23 @@ yyreduce:
     break;
 
   case 833:
+
+/* Line 1455 of yacc.c  */
 #line 6143 "lef.y"
     {
     ;}
     break;
 
   case 834:
+
+/* Line 1455 of yacc.c  */
 #line 6145 "lef.y"
     { if (lefCallbacks->ArrayCbk) lefData->lefrDoGcell = 1; ;}
     break;
 
   case 835:
+
+/* Line 1455 of yacc.c  */
 #line 6146 "lef.y"
     {
       if (lefCallbacks->ArrayCbk) {
@@ -12047,6 +12984,8 @@ yyreduce:
     break;
 
   case 836:
+
+/* Line 1455 of yacc.c  */
 #line 6152 "lef.y"
     {
       if (lefCallbacks->ArrayCbk) {
@@ -12056,31 +12995,43 @@ yyreduce:
     break;
 
   case 837:
+
+/* Line 1455 of yacc.c  */
 #line 6158 "lef.y"
     { ;}
     break;
 
   case 838:
+
+/* Line 1455 of yacc.c  */
 #line 6161 "lef.y"
     { if (lefCallbacks->ArrayCbk) lefData->lefrArray.addFloorPlan((yyvsp[(2) - (2)].string)); ;}
     break;
 
   case 839:
+
+/* Line 1455 of yacc.c  */
 #line 6165 "lef.y"
     { ;}
     break;
 
   case 840:
+
+/* Line 1455 of yacc.c  */
 #line 6167 "lef.y"
     { ;}
     break;
 
   case 841:
+
+/* Line 1455 of yacc.c  */
 #line 6170 "lef.y"
     { lefData->lefDumbMode = 1; if (lefCallbacks->ArrayCbk) lefData->lefrDoSite = 1; ;}
     break;
 
   case 842:
+
+/* Line 1455 of yacc.c  */
 #line 6172 "lef.y"
     {
       if (lefCallbacks->ArrayCbk)
@@ -12090,11 +13041,15 @@ yyreduce:
     break;
 
   case 843:
+
+/* Line 1455 of yacc.c  */
 #line 6177 "lef.y"
     { if (lefCallbacks->ArrayCbk) lefData->lefrDoSite = 1; lefData->lefDumbMode = 1; ;}
     break;
 
   case 844:
+
+/* Line 1455 of yacc.c  */
 #line 6179 "lef.y"
     {
       if (lefCallbacks->ArrayCbk)
@@ -12104,46 +13059,64 @@ yyreduce:
     break;
 
   case 845:
+
+/* Line 1455 of yacc.c  */
 #line 6187 "lef.y"
     { ;}
     break;
 
   case 846:
+
+/* Line 1455 of yacc.c  */
 #line 6189 "lef.y"
     { ;}
     break;
 
   case 847:
+
+/* Line 1455 of yacc.c  */
 #line 6192 "lef.y"
     { if (lefCallbacks->ArrayCbk) lefData->lefrArray.addDefaultCap((int)(yyvsp[(2) - (5)].dval), (yyvsp[(4) - (5)].dval)); ;}
     break;
 
   case 848:
+
+/* Line 1455 of yacc.c  */
 #line 6195 "lef.y"
     {lefData->lefDumbMode=1;lefData->lefNlToken=TRUE;;}
     break;
 
   case 849:
+
+/* Line 1455 of yacc.c  */
 #line 6196 "lef.y"
     {  ;}
     break;
 
   case 850:
+
+/* Line 1455 of yacc.c  */
 #line 6199 "lef.y"
     {lefData->lefDumbMode=1;lefData->lefNlToken=TRUE;;}
     break;
 
   case 851:
+
+/* Line 1455 of yacc.c  */
 #line 6200 "lef.y"
     { ;}
     break;
 
   case 852:
+
+/* Line 1455 of yacc.c  */
 #line 6203 "lef.y"
     {lefData->lefDumbMode=1;lefData->lefNlToken=TRUE;;}
     break;
 
   case 853:
+
+/* Line 1455 of yacc.c  */
 #line 6204 "lef.y"
     {
       if (lefData->versionNum < 5.6)
@@ -12156,11 +13129,15 @@ yyreduce:
     break;
 
   case 854:
+
+/* Line 1455 of yacc.c  */
 #line 6212 "lef.y"
     {lefData->lefDumbMode=1;lefData->lefNlToken=TRUE;;}
     break;
 
   case 855:
+
+/* Line 1455 of yacc.c  */
 #line 6213 "lef.y"
     {
       if (lefData->versionNum < 5.6)
@@ -12173,11 +13150,15 @@ yyreduce:
     break;
 
   case 856:
+
+/* Line 1455 of yacc.c  */
 #line 6221 "lef.y"
     {lefData->lefDumbMode=1;lefData->lefNlToken=TRUE;;}
     break;
 
   case 857:
+
+/* Line 1455 of yacc.c  */
 #line 6222 "lef.y"
     {
       if (lefData->versionNum < 5.6)
@@ -12190,131 +13171,183 @@ yyreduce:
     break;
 
   case 859:
+
+/* Line 1455 of yacc.c  */
 #line 6233 "lef.y"
     {lefData->lefNlToken = FALSE;;}
     break;
 
   case 860:
+
+/* Line 1455 of yacc.c  */
 #line 6234 "lef.y"
     {lefData->lefNlToken = FALSE;;}
     break;
 
   case 865:
+
+/* Line 1455 of yacc.c  */
 #line 6247 "lef.y"
     {(yyval.dval) = (yyvsp[(1) - (3)].dval) + (yyvsp[(3) - (3)].dval); ;}
     break;
 
   case 866:
+
+/* Line 1455 of yacc.c  */
 #line 6248 "lef.y"
     {(yyval.dval) = (yyvsp[(1) - (3)].dval) - (yyvsp[(3) - (3)].dval); ;}
     break;
 
   case 867:
+
+/* Line 1455 of yacc.c  */
 #line 6249 "lef.y"
     {(yyval.dval) = (yyvsp[(1) - (3)].dval) * (yyvsp[(3) - (3)].dval); ;}
     break;
 
   case 868:
+
+/* Line 1455 of yacc.c  */
 #line 6250 "lef.y"
     {(yyval.dval) = (yyvsp[(1) - (3)].dval) / (yyvsp[(3) - (3)].dval); ;}
     break;
 
   case 869:
+
+/* Line 1455 of yacc.c  */
 #line 6251 "lef.y"
     {(yyval.dval) = -(yyvsp[(2) - (2)].dval);;}
     break;
 
   case 870:
+
+/* Line 1455 of yacc.c  */
 #line 6252 "lef.y"
     {(yyval.dval) = (yyvsp[(2) - (3)].dval);;}
     break;
 
   case 871:
+
+/* Line 1455 of yacc.c  */
 #line 6254 "lef.y"
     {(yyval.dval) = ((yyvsp[(2) - (6)].integer) != 0) ? (yyvsp[(4) - (6)].dval) : (yyvsp[(6) - (6)].dval);;}
     break;
 
   case 872:
+
+/* Line 1455 of yacc.c  */
 #line 6255 "lef.y"
     {(yyval.dval) = (yyvsp[(1) - (1)].dval);;}
     break;
 
   case 873:
+
+/* Line 1455 of yacc.c  */
 #line 6258 "lef.y"
     {(yyval.integer) = comp_num((yyvsp[(1) - (3)].dval),(yyvsp[(2) - (3)].integer),(yyvsp[(3) - (3)].dval));;}
     break;
 
   case 874:
+
+/* Line 1455 of yacc.c  */
 #line 6259 "lef.y"
     {(yyval.integer) = (yyvsp[(1) - (3)].dval) != 0 && (yyvsp[(3) - (3)].dval) != 0;;}
     break;
 
   case 875:
+
+/* Line 1455 of yacc.c  */
 #line 6260 "lef.y"
     {(yyval.integer) = (yyvsp[(1) - (3)].dval) != 0 || (yyvsp[(3) - (3)].dval) != 0;;}
     break;
 
   case 876:
+
+/* Line 1455 of yacc.c  */
 #line 6261 "lef.y"
     {(yyval.integer) = comp_str((yyvsp[(1) - (3)].string),(yyvsp[(2) - (3)].integer),(yyvsp[(3) - (3)].string));;}
     break;
 
   case 877:
+
+/* Line 1455 of yacc.c  */
 #line 6262 "lef.y"
     {(yyval.integer) = (yyvsp[(1) - (3)].string)[0] != 0 && (yyvsp[(3) - (3)].string)[0] != 0;;}
     break;
 
   case 878:
+
+/* Line 1455 of yacc.c  */
 #line 6263 "lef.y"
     {(yyval.integer) = (yyvsp[(1) - (3)].string)[0] != 0 || (yyvsp[(3) - (3)].string)[0] != 0;;}
     break;
 
   case 879:
+
+/* Line 1455 of yacc.c  */
 #line 6264 "lef.y"
     {(yyval.integer) = (yyvsp[(1) - (3)].integer) == (yyvsp[(3) - (3)].integer);;}
     break;
 
   case 880:
+
+/* Line 1455 of yacc.c  */
 #line 6265 "lef.y"
     {(yyval.integer) = (yyvsp[(1) - (3)].integer) != (yyvsp[(3) - (3)].integer);;}
     break;
 
   case 881:
+
+/* Line 1455 of yacc.c  */
 #line 6266 "lef.y"
     {(yyval.integer) = (yyvsp[(1) - (3)].integer) && (yyvsp[(3) - (3)].integer);;}
     break;
 
   case 882:
+
+/* Line 1455 of yacc.c  */
 #line 6267 "lef.y"
     {(yyval.integer) = (yyvsp[(1) - (3)].integer) || (yyvsp[(3) - (3)].integer);;}
     break;
 
   case 883:
+
+/* Line 1455 of yacc.c  */
 #line 6268 "lef.y"
     {(yyval.integer) = !(yyval.integer);;}
     break;
 
   case 884:
+
+/* Line 1455 of yacc.c  */
 #line 6269 "lef.y"
     {(yyval.integer) = (yyvsp[(2) - (3)].integer);;}
     break;
 
   case 885:
+
+/* Line 1455 of yacc.c  */
 #line 6271 "lef.y"
     {(yyval.integer) = ((yyvsp[(2) - (6)].integer) != 0) ? (yyvsp[(4) - (6)].integer) : (yyvsp[(6) - (6)].integer);;}
     break;
 
   case 886:
+
+/* Line 1455 of yacc.c  */
 #line 6272 "lef.y"
     {(yyval.integer) = 1;;}
     break;
 
   case 887:
+
+/* Line 1455 of yacc.c  */
 #line 6273 "lef.y"
     {(yyval.integer) = 0;;}
     break;
 
   case 888:
+
+/* Line 1455 of yacc.c  */
 #line 6277 "lef.y"
     {
       (yyval.string) = (char*)lefMalloc(strlen((yyvsp[(1) - (3)].string))+strlen((yyvsp[(3) - (3)].string))+1);
@@ -12324,11 +13357,15 @@ yyreduce:
     break;
 
   case 889:
+
+/* Line 1455 of yacc.c  */
 #line 6283 "lef.y"
     { (yyval.string) = (yyvsp[(2) - (3)].string); ;}
     break;
 
   case 890:
+
+/* Line 1455 of yacc.c  */
 #line 6285 "lef.y"
     {
       lefData->lefDefIf = TRUE;
@@ -12341,56 +13378,78 @@ yyreduce:
     break;
 
   case 891:
+
+/* Line 1455 of yacc.c  */
 #line 6294 "lef.y"
     { (yyval.string) = (yyvsp[(1) - (1)].string); ;}
     break;
 
   case 892:
+
+/* Line 1455 of yacc.c  */
 #line 6297 "lef.y"
     {(yyval.integer) = C_LE;;}
     break;
 
   case 893:
+
+/* Line 1455 of yacc.c  */
 #line 6298 "lef.y"
     {(yyval.integer) = C_LT;;}
     break;
 
   case 894:
+
+/* Line 1455 of yacc.c  */
 #line 6299 "lef.y"
     {(yyval.integer) = C_GE;;}
     break;
 
   case 895:
+
+/* Line 1455 of yacc.c  */
 #line 6300 "lef.y"
     {(yyval.integer) = C_GT;;}
     break;
 
   case 896:
+
+/* Line 1455 of yacc.c  */
 #line 6301 "lef.y"
     {(yyval.integer) = C_EQ;;}
     break;
 
   case 897:
+
+/* Line 1455 of yacc.c  */
 #line 6302 "lef.y"
     {(yyval.integer) = C_NE;;}
     break;
 
   case 898:
+
+/* Line 1455 of yacc.c  */
 #line 6303 "lef.y"
     {(yyval.integer) = C_EQ;;}
     break;
 
   case 899:
+
+/* Line 1455 of yacc.c  */
 #line 6304 "lef.y"
     {(yyval.integer) = C_LT;;}
     break;
 
   case 900:
+
+/* Line 1455 of yacc.c  */
 #line 6305 "lef.y"
     {(yyval.integer) = C_GT;;}
     break;
 
   case 901:
+
+/* Line 1455 of yacc.c  */
 #line 6309 "lef.y"
     { 
       if (lefCallbacks->PropBeginCbk)
@@ -12399,6 +13458,8 @@ yyreduce:
     break;
 
   case 902:
+
+/* Line 1455 of yacc.c  */
 #line 6314 "lef.y"
     { 
       if (lefCallbacks->PropEndCbk)
@@ -12407,21 +13468,29 @@ yyreduce:
     break;
 
   case 903:
+
+/* Line 1455 of yacc.c  */
 #line 6321 "lef.y"
     { ;}
     break;
 
   case 904:
+
+/* Line 1455 of yacc.c  */
 #line 6323 "lef.y"
     { ;}
     break;
 
   case 905:
+
+/* Line 1455 of yacc.c  */
 #line 6326 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefrProp.clear(); ;}
     break;
 
   case 906:
+
+/* Line 1455 of yacc.c  */
 #line 6328 "lef.y"
     { 
       if (lefCallbacks->PropCbk) {
@@ -12433,11 +13502,15 @@ yyreduce:
     break;
 
   case 907:
+
+/* Line 1455 of yacc.c  */
 #line 6335 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefrProp.clear(); ;}
     break;
 
   case 908:
+
+/* Line 1455 of yacc.c  */
 #line 6337 "lef.y"
     { 
       if (lefCallbacks->PropCbk) {
@@ -12449,11 +13522,15 @@ yyreduce:
     break;
 
   case 909:
+
+/* Line 1455 of yacc.c  */
 #line 6344 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefrProp.clear(); ;}
     break;
 
   case 910:
+
+/* Line 1455 of yacc.c  */
 #line 6346 "lef.y"
     { 
       if (lefCallbacks->PropCbk) {
@@ -12466,11 +13543,15 @@ yyreduce:
     break;
 
   case 911:
+
+/* Line 1455 of yacc.c  */
 #line 6354 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefrProp.clear(); ;}
     break;
 
   case 912:
+
+/* Line 1455 of yacc.c  */
 #line 6356 "lef.y"
     { 
       if (lefCallbacks->PropCbk) {
@@ -12482,11 +13563,15 @@ yyreduce:
     break;
 
   case 913:
+
+/* Line 1455 of yacc.c  */
 #line 6363 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefrProp.clear(); ;}
     break;
 
   case 914:
+
+/* Line 1455 of yacc.c  */
 #line 6365 "lef.y"
     { 
       if (lefCallbacks->PropCbk) {
@@ -12498,11 +13583,15 @@ yyreduce:
     break;
 
   case 915:
+
+/* Line 1455 of yacc.c  */
 #line 6372 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefrProp.clear(); ;}
     break;
 
   case 916:
+
+/* Line 1455 of yacc.c  */
 #line 6374 "lef.y"
     { 
       if (lefCallbacks->PropCbk) {
@@ -12514,11 +13603,15 @@ yyreduce:
     break;
 
   case 917:
+
+/* Line 1455 of yacc.c  */
 #line 6381 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefrProp.clear(); ;}
     break;
 
   case 918:
+
+/* Line 1455 of yacc.c  */
 #line 6383 "lef.y"
     { 
       if (lefCallbacks->PropCbk) {
@@ -12530,11 +13623,15 @@ yyreduce:
     break;
 
   case 919:
+
+/* Line 1455 of yacc.c  */
 #line 6390 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefrProp.clear(); ;}
     break;
 
   case 920:
+
+/* Line 1455 of yacc.c  */
 #line 6392 "lef.y"
     { 
       if (lefCallbacks->PropCbk) {
@@ -12546,6 +13643,8 @@ yyreduce:
     break;
 
   case 921:
+
+/* Line 1455 of yacc.c  */
 #line 6402 "lef.y"
     { 
       if (lefCallbacks->PropCbk) lefData->lefrProp.setPropInteger();
@@ -12554,6 +13653,8 @@ yyreduce:
     break;
 
   case 922:
+
+/* Line 1455 of yacc.c  */
 #line 6407 "lef.y"
     { 
       if (lefCallbacks->PropCbk) lefData->lefrProp.setPropReal();
@@ -12562,6 +13663,8 @@ yyreduce:
     break;
 
   case 923:
+
+/* Line 1455 of yacc.c  */
 #line 6412 "lef.y"
     {
       if (lefCallbacks->PropCbk) lefData->lefrProp.setPropString();
@@ -12570,6 +13673,8 @@ yyreduce:
     break;
 
   case 924:
+
+/* Line 1455 of yacc.c  */
 #line 6417 "lef.y"
     {
       if (lefCallbacks->PropCbk) lefData->lefrProp.setPropQString((yyvsp[(2) - (2)].string));
@@ -12578,6 +13683,8 @@ yyreduce:
     break;
 
   case 925:
+
+/* Line 1455 of yacc.c  */
 #line 6422 "lef.y"
     {
       if (lefCallbacks->PropCbk) lefData->lefrProp.setPropNameMapString((yyvsp[(2) - (2)].string));
@@ -12586,11 +13693,15 @@ yyreduce:
     break;
 
   case 926:
+
+/* Line 1455 of yacc.c  */
 #line 6429 "lef.y"
     { ;}
     break;
 
   case 927:
+
+/* Line 1455 of yacc.c  */
 #line 6431 "lef.y"
     {
       if (lefCallbacks->LayerCbk)
@@ -12599,6 +13710,8 @@ yyreduce:
     break;
 
   case 928:
+
+/* Line 1455 of yacc.c  */
 #line 6436 "lef.y"
     {
       if (lefCallbacks->LayerCbk) {
@@ -12609,6 +13722,8 @@ yyreduce:
     break;
 
   case 929:
+
+/* Line 1455 of yacc.c  */
 #line 6443 "lef.y"
     {
       if (lefCallbacks->LayerCbk) {
@@ -12619,6 +13734,8 @@ yyreduce:
     break;
 
   case 930:
+
+/* Line 1455 of yacc.c  */
 #line 6450 "lef.y"
     {
       if (lefCallbacks->LayerCbk)
@@ -12627,11 +13744,15 @@ yyreduce:
     break;
 
   case 931:
+
+/* Line 1455 of yacc.c  */
 #line 6457 "lef.y"
     { ;}
     break;
 
   case 932:
+
+/* Line 1455 of yacc.c  */
 #line 6459 "lef.y"
     {
       if (lefCallbacks->LayerCbk)
@@ -12640,11 +13761,15 @@ yyreduce:
     break;
 
   case 934:
+
+/* Line 1455 of yacc.c  */
 #line 6467 "lef.y"
     { ;}
     break;
 
   case 935:
+
+/* Line 1455 of yacc.c  */
 #line 6469 "lef.y"
     {
       if (lefCallbacks->LayerCbk)
@@ -12653,11 +13778,15 @@ yyreduce:
     break;
 
   case 936:
+
+/* Line 1455 of yacc.c  */
 #line 6476 "lef.y"
     { ;}
     break;
 
   case 937:
+
+/* Line 1455 of yacc.c  */
 #line 6478 "lef.y"
     {
       if (lefCallbacks->LayerCbk)
@@ -12666,36 +13795,50 @@ yyreduce:
     break;
 
   case 938:
+
+/* Line 1455 of yacc.c  */
 #line 6485 "lef.y"
     { ;}
     break;
 
   case 939:
+
+/* Line 1455 of yacc.c  */
 #line 6487 "lef.y"
     {  if (lefCallbacks->PropCbk) lefData->lefrProp.setRange((yyvsp[(2) - (3)].dval), (yyvsp[(3) - (3)].dval)); ;}
     break;
 
   case 940:
+
+/* Line 1455 of yacc.c  */
 #line 6491 "lef.y"
     { ;}
     break;
 
   case 941:
+
+/* Line 1455 of yacc.c  */
 #line 6493 "lef.y"
     { if (lefCallbacks->PropCbk) lefData->lefrProp.setNumber((yyvsp[(1) - (1)].dval)); ;}
     break;
 
   case 942:
+
+/* Line 1455 of yacc.c  */
 #line 6497 "lef.y"
     { ;}
     break;
 
   case 943:
+
+/* Line 1455 of yacc.c  */
 #line 6499 "lef.y"
     { if (lefCallbacks->PropCbk) lefData->lefrProp.setNumber((yyvsp[(1) - (1)].dval)); ;}
     break;
 
   case 946:
+
+/* Line 1455 of yacc.c  */
 #line 6506 "lef.y"
     {
       if (lefCallbacks->LayerCbk) {
@@ -12723,6 +13866,8 @@ yyreduce:
     break;
 
   case 947:
+
+/* Line 1455 of yacc.c  */
 #line 6530 "lef.y"
     {
       if (lefCallbacks->LayerCbk) {
@@ -12740,6 +13885,8 @@ yyreduce:
     break;
 
   case 948:
+
+/* Line 1455 of yacc.c  */
 #line 6544 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -12754,6 +13901,8 @@ yyreduce:
     break;
 
   case 949:
+
+/* Line 1455 of yacc.c  */
 #line 6555 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -12780,11 +13929,15 @@ yyreduce:
     break;
 
   case 951:
+
+/* Line 1455 of yacc.c  */
 #line 6580 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 952:
+
+/* Line 1455 of yacc.c  */
 #line 6581 "lef.y"
     {
       if (lefCallbacks->LayerCbk)
@@ -12803,6 +13956,8 @@ yyreduce:
     break;
 
   case 954:
+
+/* Line 1455 of yacc.c  */
 #line 6597 "lef.y"
     {
       if (lefCallbacks->LayerCbk) {
@@ -12830,6 +13985,8 @@ yyreduce:
     break;
 
   case 956:
+
+/* Line 1455 of yacc.c  */
 #line 6622 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -12856,6 +14013,8 @@ yyreduce:
     break;
 
   case 957:
+
+/* Line 1455 of yacc.c  */
 #line 6645 "lef.y"
     {
       if (lefCallbacks->LayerCbk)
@@ -12864,6 +14023,8 @@ yyreduce:
     break;
 
   case 959:
+
+/* Line 1455 of yacc.c  */
 #line 6651 "lef.y"
     {
       if (lefCallbacks->LayerCbk) {
@@ -12873,6 +14034,8 @@ yyreduce:
     break;
 
   case 960:
+
+/* Line 1455 of yacc.c  */
 #line 6657 "lef.y"
     {
       if (lefCallbacks->LayerCbk) {
@@ -12883,6 +14046,8 @@ yyreduce:
     break;
 
   case 961:
+
+/* Line 1455 of yacc.c  */
 #line 6664 "lef.y"
     {
       if (lefCallbacks->LayerCbk)
@@ -12891,6 +14056,8 @@ yyreduce:
     break;
 
   case 962:
+
+/* Line 1455 of yacc.c  */
 #line 6669 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -12905,6 +14072,8 @@ yyreduce:
     break;
 
   case 963:
+
+/* Line 1455 of yacc.c  */
 #line 6680 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -12922,6 +14091,8 @@ yyreduce:
     break;
 
   case 964:
+
+/* Line 1455 of yacc.c  */
 #line 6694 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -12939,11 +14110,15 @@ yyreduce:
     break;
 
   case 965:
+
+/* Line 1455 of yacc.c  */
 #line 6710 "lef.y"
     {;}
     break;
 
   case 966:
+
+/* Line 1455 of yacc.c  */
 #line 6712 "lef.y"
     {
       if (lefCallbacks->LayerCbk)
@@ -12952,11 +14127,15 @@ yyreduce:
     break;
 
   case 967:
+
+/* Line 1455 of yacc.c  */
 #line 6719 "lef.y"
     {;}
     break;
 
   case 968:
+
+/* Line 1455 of yacc.c  */
 #line 6721 "lef.y"
     {
       if (lefData->versionNum < 5.7) {
@@ -12974,31 +14153,43 @@ yyreduce:
     break;
 
   case 969:
+
+/* Line 1455 of yacc.c  */
 #line 6737 "lef.y"
     { (yyval.string) = 0; ;}
     break;
 
   case 970:
+
+/* Line 1455 of yacc.c  */
 #line 6738 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 971:
+
+/* Line 1455 of yacc.c  */
 #line 6739 "lef.y"
     { (yyval.string) = (yyvsp[(3) - (3)].string); ;}
     break;
 
   case 972:
+
+/* Line 1455 of yacc.c  */
 #line 6743 "lef.y"
     {lefData->lefDumbMode = 1; lefData->lefNoNum = 1; ;}
     break;
 
   case 973:
+
+/* Line 1455 of yacc.c  */
 #line 6744 "lef.y"
     { (yyval.string) = (yyvsp[(3) - (3)].string); ;}
     break;
 
   case 974:
+
+/* Line 1455 of yacc.c  */
 #line 6748 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -13015,6 +14206,8 @@ yyreduce:
     break;
 
   case 975:
+
+/* Line 1455 of yacc.c  */
 #line 6762 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -13030,6 +14223,8 @@ yyreduce:
     break;
 
   case 976:
+
+/* Line 1455 of yacc.c  */
 #line 6775 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -13045,6 +14240,8 @@ yyreduce:
     break;
 
   case 977:
+
+/* Line 1455 of yacc.c  */
 #line 6788 "lef.y"
     {
       if (lefData->versionNum < 5.4) {
@@ -13060,16 +14257,22 @@ yyreduce:
     break;
 
   case 978:
+
+/* Line 1455 of yacc.c  */
 #line 6801 "lef.y"
     { if (lefCallbacks->NoiseTableCbk) lefData->lefrNoiseTable.setup((int)(yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 979:
+
+/* Line 1455 of yacc.c  */
 #line 6803 "lef.y"
     { ;}
     break;
 
   case 980:
+
+/* Line 1455 of yacc.c  */
 #line 6807 "lef.y"
     {
     if (lefData->versionNum < 5.4) {
@@ -13083,6 +14286,8 @@ yyreduce:
     break;
 
   case 983:
+
+/* Line 1455 of yacc.c  */
 #line 6825 "lef.y"
     { if (lefCallbacks->NoiseTableCbk)
          {
@@ -13093,62 +14298,84 @@ yyreduce:
     break;
 
   case 984:
+
+/* Line 1455 of yacc.c  */
 #line 6832 "lef.y"
     { ;}
     break;
 
   case 985:
+
+/* Line 1455 of yacc.c  */
 #line 6835 "lef.y"
     { if (lefCallbacks->NoiseTableCbk) lefData->lefrNoiseTable.addResistance(); ;}
     break;
 
   case 987:
+
+/* Line 1455 of yacc.c  */
 #line 6841 "lef.y"
     { if (lefCallbacks->NoiseTableCbk)
     lefData->lefrNoiseTable.addResistanceNumber((yyvsp[(1) - (1)].dval)); ;}
     break;
 
   case 988:
+
+/* Line 1455 of yacc.c  */
 #line 6844 "lef.y"
     { if (lefCallbacks->NoiseTableCbk)
     lefData->lefrNoiseTable.addResistanceNumber((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 991:
+
+/* Line 1455 of yacc.c  */
 #line 6853 "lef.y"
     { if (lefCallbacks->NoiseTableCbk)
         lefData->lefrNoiseTable.addVictimLength((yyvsp[(2) - (3)].dval)); ;}
     break;
 
   case 992:
+
+/* Line 1455 of yacc.c  */
 #line 6856 "lef.y"
     { ;}
     break;
 
   case 993:
+
+/* Line 1455 of yacc.c  */
 #line 6860 "lef.y"
     { if (lefCallbacks->NoiseTableCbk)
     lefData->lefrNoiseTable.addVictimNoise((yyvsp[(1) - (1)].dval)); ;}
     break;
 
   case 994:
+
+/* Line 1455 of yacc.c  */
 #line 6863 "lef.y"
     { if (lefCallbacks->NoiseTableCbk)
     lefData->lefrNoiseTable.addVictimNoise((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 995:
+
+/* Line 1455 of yacc.c  */
 #line 6867 "lef.y"
     { if (lefCallbacks->CorrectionTableCbk)
     lefData->lefrCorrectionTable.setup((int)(yyvsp[(2) - (3)].dval)); ;}
     break;
 
   case 996:
+
+/* Line 1455 of yacc.c  */
 #line 6870 "lef.y"
     { ;}
     break;
 
   case 997:
+
+/* Line 1455 of yacc.c  */
 #line 6874 "lef.y"
     {
     if (lefData->versionNum < 5.4) {
@@ -13163,6 +14390,8 @@ yyreduce:
     break;
 
   case 1000:
+
+/* Line 1455 of yacc.c  */
 #line 6892 "lef.y"
     { if (lefCallbacks->CorrectionTableCbk)
          {
@@ -13173,57 +14402,77 @@ yyreduce:
     break;
 
   case 1001:
+
+/* Line 1455 of yacc.c  */
 #line 6899 "lef.y"
     { ;}
     break;
 
   case 1002:
+
+/* Line 1455 of yacc.c  */
 #line 6902 "lef.y"
     { if (lefCallbacks->CorrectionTableCbk)
   lefData->lefrCorrectionTable.addResistance(); ;}
     break;
 
   case 1003:
+
+/* Line 1455 of yacc.c  */
 #line 6905 "lef.y"
     { ;}
     break;
 
   case 1004:
+
+/* Line 1455 of yacc.c  */
 #line 6909 "lef.y"
     { if (lefCallbacks->CorrectionTableCbk)
     lefData->lefrCorrectionTable.addResistanceNumber((yyvsp[(1) - (1)].dval)); ;}
     break;
 
   case 1005:
+
+/* Line 1455 of yacc.c  */
 #line 6912 "lef.y"
     { if (lefCallbacks->CorrectionTableCbk)
     lefData->lefrCorrectionTable.addResistanceNumber((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 1008:
+
+/* Line 1455 of yacc.c  */
 #line 6922 "lef.y"
     { if (lefCallbacks->CorrectionTableCbk)
      lefData->lefrCorrectionTable.addVictimLength((yyvsp[(2) - (3)].dval)); ;}
     break;
 
   case 1009:
+
+/* Line 1455 of yacc.c  */
 #line 6925 "lef.y"
     { ;}
     break;
 
   case 1010:
+
+/* Line 1455 of yacc.c  */
 #line 6929 "lef.y"
     { if (lefCallbacks->CorrectionTableCbk)
         lefData->lefrCorrectionTable.addVictimCorrection((yyvsp[(1) - (1)].dval)); ;}
     break;
 
   case 1011:
+
+/* Line 1455 of yacc.c  */
 #line 6932 "lef.y"
     { if (lefCallbacks->CorrectionTableCbk)
         lefData->lefrCorrectionTable.addVictimCorrection((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 1012:
+
+/* Line 1455 of yacc.c  */
 #line 6938 "lef.y"
     { // 5.3 syntax 
         lefData->use5_3 = 1;
@@ -13250,6 +14499,8 @@ yyreduce:
     break;
 
   case 1013:
+
+/* Line 1455 of yacc.c  */
 #line 6962 "lef.y"
     { // 5.3 syntax 
         lefData->use5_3 = 1;
@@ -13276,6 +14527,8 @@ yyreduce:
     break;
 
   case 1014:
+
+/* Line 1455 of yacc.c  */
 #line 6986 "lef.y"
     { // 5.3 syntax 
         lefData->use5_3 = 1;
@@ -13302,6 +14555,8 @@ yyreduce:
     break;
 
   case 1015:
+
+/* Line 1455 of yacc.c  */
 #line 7010 "lef.y"
     { // 5.4 syntax 
         // 11/12/2002 - this is obsolete in 5.5, suppose should be ingored 
@@ -13338,6 +14593,8 @@ yyreduce:
     break;
 
   case 1016:
+
+/* Line 1455 of yacc.c  */
 #line 7044 "lef.y"
     { // 5.4 syntax 
         // 11/12/2002 - this is obsolete in 5.5, & will be ignored 
@@ -13374,6 +14631,8 @@ yyreduce:
     break;
 
   case 1017:
+
+/* Line 1455 of yacc.c  */
 #line 7078 "lef.y"
     { // 5.4 syntax 
         // 11/12/2002 - this is obsolete in 5.5, & will be ignored 
@@ -13410,6 +14669,8 @@ yyreduce:
     break;
 
   case 1020:
+
+/* Line 1455 of yacc.c  */
 #line 7115 "lef.y"
     { 
         if (lefCallbacks->ExtensionCbk)
@@ -13420,8 +14681,9 @@ yyreduce:
     break;
 
 
-/* Line 1267 of yacc.c.  */
-#line 13425 "lef.tab.c"
+
+/* Line 1455 of yacc.c  */
+#line 14687 "lef.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -13431,7 +14693,6 @@ yyreduce:
   YY_STACK_PRINT (yyss, yyssp);
 
   *++yyvsp = yyval;
-
 
   /* Now `shift' the result of the reduction.  Determine what state
      that goes to, based on the state we popped back to and the rule
@@ -13497,7 +14758,7 @@ yyerrlab:
 
   if (yyerrstatus == 3)
     {
-      /* If just tried and failed to reuse look-ahead token after an
+      /* If just tried and failed to reuse lookahead token after an
 	 error, discard it.  */
 
       if (yychar <= YYEOF)
@@ -13514,7 +14775,7 @@ yyerrlab:
 	}
     }
 
-  /* Else will try to reuse look-ahead token after shifting the error
+  /* Else will try to reuse lookahead token after shifting the error
      token.  */
   goto yyerrlab1;
 
@@ -13571,9 +14832,6 @@ yyerrlab1:
       YY_STACK_PRINT (yyss, yyssp);
     }
 
-  if (yyn == YYFINAL)
-    YYACCEPT;
-
   *++yyvsp = yylval;
 
 
@@ -13598,7 +14856,7 @@ yyabortlab:
   yyresult = 1;
   goto yyreturn;
 
-#ifndef yyoverflow
+#if !defined(yyoverflow) || YYERROR_VERBOSE
 /*-------------------------------------------------.
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
@@ -13609,7 +14867,7 @@ yyexhaustedlab:
 #endif
 
 yyreturn:
-  if (yychar != YYEOF && yychar != YYEMPTY)
+  if (yychar != YYEMPTY)
      yydestruct ("Cleanup: discarding lookahead",
 		 yytoken, &yylval);
   /* Do not reclaim the symbols of the rule which action triggered
@@ -13635,6 +14893,8 @@ yyreturn:
 }
 
 
+
+/* Line 1675 of yacc.c  */
 #line 7122 "lef.y"
 
 

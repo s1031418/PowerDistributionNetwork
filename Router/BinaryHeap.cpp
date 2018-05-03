@@ -2,8 +2,6 @@
 //  BinaryHeap.cpp
 //  Priorty_Queue_BinaryHeap
 //
-//  Created by 吳峻陞 on 26/05/2017.
-//  Copyright © 2017 吳峻陞. All rights reserved.
 //
 
 #include "BinaryHeap.hpp"

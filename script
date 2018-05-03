@@ -1,0 +1,13 @@
+#!/bin/bash
+make run_case1 < /dev/null > time_case1 2>&1
+cp output_files case1_output_files
+make run_case2 < /dev/null > time_case2 2>&1
+cp output_files case2_output_files
+make run_case3 < /dev/null > time_case3 2>&1
+cp output_files case3_output_files
+make run_case4_1 < /dev/null > time_case4_1 2>&1
+cp output_files case4_1_output_files
+make run_case4_2 < /dev/null > time_case4_2 2>&1
+cp output_files case4_2_output_files
+make run_case4_3 < /dev/null > time_case4_3 2>&1
+cp output_files case4_3_output_files

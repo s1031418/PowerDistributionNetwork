@@ -42,7 +42,7 @@ run_case1:
 run_case2:
 	time -p ./$(OUTPUT_NAME) TestCase/2017/case2/case2.v TestCase/2017/case2/case2_input.def TestCase/2017/case2/tech.lef TestCase/2017/case2/blocks.lef TestCase/2017/case2/initial_files case2_output.def case2.sp output_files 
 run_case3:	
-	time -p ./$(OUTPUT_NAME) TestCase/2016/case3/case3.v TestCase/2016/case3/case3_input.def TestCase/2016/case3/tech.lef TestCase/2016/case3/blocks.lef TestCase/2016/case3/initial_files case3_output.def case3.sp output_files
+	time -p ./$(OUTPUT_NAME) TestCase/2016/case3/case3.v TestCase/2016/case3/case3_input.def TestCase/2016/case3/tech.lef TestCase/2016/case3/blocks.lef ./initial_files_I_3x__B6_I_2x.octet-stream case3_output.def case3.sp output_files
 run_case4_1:	
 	time -p ./$(OUTPUT_NAME) TestCase/2017/case4/case4.v TestCase/2017/case4/case4_input.def TestCase/2017/case4/tech.lef TestCase/2017/case4/blocks.lef TestCase/2017/case4/initial_files_1 case4_1_output.def case4_1.sp output_files
 run_case4_2:	

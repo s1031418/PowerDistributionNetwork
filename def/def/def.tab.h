@@ -1,24 +1,23 @@
-/* A Bison parser, made by GNU Bison 2.3.  */
+
+/* A Bison parser, made by GNU Bison 2.4.1.  */
 
 /* Skeleton interface for Bison's Yacc-like parsers in C
-
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   
+      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
-
-   This program is free software; you can redistribute it and/or modify
+   
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -29,9 +28,10 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-
+   
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
+
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -304,292 +304,33 @@
      K_ROUTEHALO = 520
    };
 #endif
-/* Tokens.  */
-#define QSTRING 258
-#define T_STRING 259
-#define SITE_PATTERN 260
-#define NUMBER 261
-#define K_HISTORY 262
-#define K_NAMESCASESENSITIVE 263
-#define K_DESIGN 264
-#define K_VIAS 265
-#define K_TECH 266
-#define K_UNITS 267
-#define K_ARRAY 268
-#define K_FLOORPLAN 269
-#define K_SITE 270
-#define K_CANPLACE 271
-#define K_CANNOTOCCUPY 272
-#define K_DIEAREA 273
-#define K_PINS 274
-#define K_DEFAULTCAP 275
-#define K_MINPINS 276
-#define K_WIRECAP 277
-#define K_TRACKS 278
-#define K_GCELLGRID 279
-#define K_DO 280
-#define K_BY 281
-#define K_STEP 282
-#define K_LAYER 283
-#define K_ROW 284
-#define K_RECT 285
-#define K_COMPS 286
-#define K_COMP_GEN 287
-#define K_SOURCE 288
-#define K_WEIGHT 289
-#define K_EEQMASTER 290
-#define K_FIXED 291
-#define K_COVER 292
-#define K_UNPLACED 293
-#define K_PLACED 294
-#define K_FOREIGN 295
-#define K_REGION 296
-#define K_REGIONS 297
-#define K_NETS 298
-#define K_START_NET 299
-#define K_MUSTJOIN 300
-#define K_ORIGINAL 301
-#define K_USE 302
-#define K_STYLE 303
-#define K_PATTERN 304
-#define K_PATTERNNAME 305
-#define K_ESTCAP 306
-#define K_ROUTED 307
-#define K_NEW 308
-#define K_SNETS 309
-#define K_SHAPE 310
-#define K_WIDTH 311
-#define K_VOLTAGE 312
-#define K_SPACING 313
-#define K_NONDEFAULTRULE 314
-#define K_NONDEFAULTRULES 315
-#define K_N 316
-#define K_S 317
-#define K_E 318
-#define K_W 319
-#define K_FN 320
-#define K_FE 321
-#define K_FS 322
-#define K_FW 323
-#define K_GROUPS 324
-#define K_GROUP 325
-#define K_SOFT 326
-#define K_MAXX 327
-#define K_MAXY 328
-#define K_MAXHALFPERIMETER 329
-#define K_CONSTRAINTS 330
-#define K_NET 331
-#define K_PATH 332
-#define K_SUM 333
-#define K_DIFF 334
-#define K_SCANCHAINS 335
-#define K_START 336
-#define K_FLOATING 337
-#define K_ORDERED 338
-#define K_STOP 339
-#define K_IN 340
-#define K_OUT 341
-#define K_RISEMIN 342
-#define K_RISEMAX 343
-#define K_FALLMIN 344
-#define K_FALLMAX 345
-#define K_WIREDLOGIC 346
-#define K_MAXDIST 347
-#define K_ASSERTIONS 348
-#define K_DISTANCE 349
-#define K_MICRONS 350
-#define K_END 351
-#define K_IOTIMINGS 352
-#define K_RISE 353
-#define K_FALL 354
-#define K_VARIABLE 355
-#define K_SLEWRATE 356
-#define K_CAPACITANCE 357
-#define K_DRIVECELL 358
-#define K_FROMPIN 359
-#define K_TOPIN 360
-#define K_PARALLEL 361
-#define K_TIMINGDISABLES 362
-#define K_THRUPIN 363
-#define K_MACRO 364
-#define K_PARTITIONS 365
-#define K_TURNOFF 366
-#define K_FROMCLOCKPIN 367
-#define K_FROMCOMPPIN 368
-#define K_FROMIOPIN 369
-#define K_TOCLOCKPIN 370
-#define K_TOCOMPPIN 371
-#define K_TOIOPIN 372
-#define K_SETUPRISE 373
-#define K_SETUPFALL 374
-#define K_HOLDRISE 375
-#define K_HOLDFALL 376
-#define K_VPIN 377
-#define K_SUBNET 378
-#define K_XTALK 379
-#define K_PIN 380
-#define K_SYNTHESIZED 381
-#define K_DEFINE 382
-#define K_DEFINES 383
-#define K_DEFINEB 384
-#define K_IF 385
-#define K_THEN 386
-#define K_ELSE 387
-#define K_FALSE 388
-#define K_TRUE 389
-#define K_EQ 390
-#define K_NE 391
-#define K_LE 392
-#define K_LT 393
-#define K_GE 394
-#define K_GT 395
-#define K_OR 396
-#define K_AND 397
-#define K_NOT 398
-#define K_SPECIAL 399
-#define K_DIRECTION 400
-#define K_RANGE 401
-#define K_FPC 402
-#define K_HORIZONTAL 403
-#define K_VERTICAL 404
-#define K_ALIGN 405
-#define K_MIN 406
-#define K_MAX 407
-#define K_EQUAL 408
-#define K_BOTTOMLEFT 409
-#define K_TOPRIGHT 410
-#define K_ROWS 411
-#define K_TAPER 412
-#define K_TAPERRULE 413
-#define K_VERSION 414
-#define K_DIVIDERCHAR 415
-#define K_BUSBITCHARS 416
-#define K_PROPERTYDEFINITIONS 417
-#define K_STRING 418
-#define K_REAL 419
-#define K_INTEGER 420
-#define K_PROPERTY 421
-#define K_BEGINEXT 422
-#define K_ENDEXT 423
-#define K_NAMEMAPSTRING 424
-#define K_ON 425
-#define K_OFF 426
-#define K_X 427
-#define K_Y 428
-#define K_COMPONENT 429
-#define K_MASK 430
-#define K_MASKSHIFT 431
-#define K_COMPSMASKSHIFT 432
-#define K_SAMEMASK 433
-#define K_PINPROPERTIES 434
-#define K_TEST 435
-#define K_COMMONSCANPINS 436
-#define K_SNET 437
-#define K_COMPONENTPIN 438
-#define K_REENTRANTPATHS 439
-#define K_SHIELD 440
-#define K_SHIELDNET 441
-#define K_NOSHIELD 442
-#define K_VIRTUAL 443
-#define K_ANTENNAPINPARTIALMETALAREA 444
-#define K_ANTENNAPINPARTIALMETALSIDEAREA 445
-#define K_ANTENNAPINGATEAREA 446
-#define K_ANTENNAPINDIFFAREA 447
-#define K_ANTENNAPINMAXAREACAR 448
-#define K_ANTENNAPINMAXSIDEAREACAR 449
-#define K_ANTENNAPINPARTIALCUTAREA 450
-#define K_ANTENNAPINMAXCUTCAR 451
-#define K_SIGNAL 452
-#define K_POWER 453
-#define K_GROUND 454
-#define K_CLOCK 455
-#define K_TIEOFF 456
-#define K_ANALOG 457
-#define K_SCAN 458
-#define K_RESET 459
-#define K_RING 460
-#define K_STRIPE 461
-#define K_FOLLOWPIN 462
-#define K_IOWIRE 463
-#define K_COREWIRE 464
-#define K_BLOCKWIRE 465
-#define K_FILLWIRE 466
-#define K_BLOCKAGEWIRE 467
-#define K_PADRING 468
-#define K_BLOCKRING 469
-#define K_BLOCKAGES 470
-#define K_PLACEMENT 471
-#define K_SLOTS 472
-#define K_FILLS 473
-#define K_PUSHDOWN 474
-#define K_NETLIST 475
-#define K_DIST 476
-#define K_USER 477
-#define K_TIMING 478
-#define K_BALANCED 479
-#define K_STEINER 480
-#define K_TRUNK 481
-#define K_FIXEDBUMP 482
-#define K_FENCE 483
-#define K_FREQUENCY 484
-#define K_GUIDE 485
-#define K_MAXBITS 486
-#define K_PARTITION 487
-#define K_TYPE 488
-#define K_ANTENNAMODEL 489
-#define K_DRCFILL 490
-#define K_OXIDE1 491
-#define K_OXIDE2 492
-#define K_OXIDE3 493
-#define K_OXIDE4 494
-#define K_CUTSIZE 495
-#define K_CUTSPACING 496
-#define K_DESIGNRULEWIDTH 497
-#define K_DIAGWIDTH 498
-#define K_ENCLOSURE 499
-#define K_HALO 500
-#define K_GROUNDSENSITIVITY 501
-#define K_HARDSPACING 502
-#define K_LAYERS 503
-#define K_MINCUTS 504
-#define K_NETEXPR 505
-#define K_OFFSET 506
-#define K_ORIGIN 507
-#define K_ROWCOL 508
-#define K_STYLES 509
-#define K_POLYGON 510
-#define K_PORT 511
-#define K_SUPPLYSENSITIVITY 512
-#define K_VIA 513
-#define K_VIARULE 514
-#define K_WIREEXT 515
-#define K_EXCEPTPGNET 516
-#define K_FILLWIREOPC 517
-#define K_OPC 518
-#define K_PARTIAL 519
-#define K_ROUTEHALO 520
-
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 227 "def.y"
 {
+
+/* Line 1676 of yacc.c  */
+#line 227 "def.y"
+
         double dval ;
         int    integer ;
         char * string ;
         int    keyword ;  // really just a nop 
         struct LefDefParser::defpoint pt;
         LefDefParser::defTOKEN *tk;
-}
-/* Line 1529 of yacc.c.  */
-#line 588 "def.tab.h"
-	YYSTYPE;
+
+
+
+/* Line 1676 of yacc.c  */
+#line 328 "def.tab.h"
+} YYSTYPE;
+# define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
-# define YYSTYPE_IS_TRIVIAL 1
 #endif
 
 extern YYSTYPE defyylval;
+
 

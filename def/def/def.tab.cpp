@@ -1,24 +1,23 @@
-/* A Bison parser, made by GNU Bison 2.3.  */
+
+/* A Bison parser, made by GNU Bison 2.4.1.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
-
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+   
+      Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
-
-   This program is free software; you can redistribute it and/or modify
+   
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -29,7 +28,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-
+   
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -47,7 +46,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.3"
+#define YYBISON_VERSION "2.4.1"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -55,17 +54,218 @@
 /* Pure parsers.  */
 #define YYPURE 0
 
+/* Push parsers.  */
+#define YYPUSH 0
+
+/* Pull parsers.  */
+#define YYPULL 1
+
 /* Using locations.  */
 #define YYLSP_NEEDED 0
 
 /* Substitute the variable and function names.  */
-#define yyparse defyyparse
-#define yylex   defyylex
-#define yyerror defyyerror
-#define yylval  defyylval
-#define yychar  defyychar
-#define yydebug defyydebug
-#define yynerrs defyynerrs
+#define yyparse         defyyparse
+#define yylex           defyylex
+#define yyerror         defyyerror
+#define yylval          defyylval
+#define yychar          defyychar
+#define yydebug         defyydebug
+#define yynerrs         defyynerrs
+
+
+/* Copy the first part of user declarations.  */
+
+/* Line 189 of yacc.c  */
+#line 58 "def.y"
+
+#include <stdlib.h>
+#include <string.h>
+#include "defrReader.hpp"
+#include "defiUser.hpp"
+#include "defrCallBacks.hpp"
+#include "lex.h"
+
+#define DEF_MAX_INT 2147483647
+#define YYDEBUG 1     // this is temp fix for pcr 755132 
+// TX_DIR:TRANSLATION ON
+
+
+#include "defrData.hpp"
+#include "defrSettings.hpp"
+#include "defrCallBacks.hpp"
+
+BEGIN_LEFDEF_PARSER_NAMESPACE
+
+extern int errors;        // from lex.cpph
+
+// From def_keywords.cpp 
+extern char* ringCopy(const char* string);
+
+extern void pathIsDone(int shield, int reset, int netOsnet, int *needCbk);
+
+// Macro to describe how we handle a callback.
+// If the function was set then call it.
+// If the function returns non zero then there was an error
+// so call the error routine and exit.
+//
+#define CALLBACK(func, typ, data) \
+    if (!defData->errors) {\
+      if (func) { \
+        if ((defData->defRetVal = (*func)(typ, data, defSettings->UserData)) == PARSE_OK) { \
+        } else if (defData->defRetVal == STOP_PARSE) { \
+          return defData->defRetVal; \
+        } else { \
+          defError(6010, "An error has been reported in callback."); \
+          return defData->defRetVal; \
+        } \
+      } \
+    }
+
+#define CHKERR() \
+    if (defData->errors > 20) {\
+      defError(6011, "Too many syntax defData->errors have been reported."); \
+      defData->errors = 0; \
+      return 1; \
+    }
+
+#define CHKPROPTYPE(propType, propName, name) \
+    if (propType == 'N') { \
+       defData->warningMsg = (char*)defMalloc(strlen(propName)+strlen(name)+40); \
+       sprintf(defData->warningMsg, "The PropName %s is not defined for %s.", \
+               propName, name); \
+       defWarning(7010, defData->warningMsg); \
+       defFree(defData->warningMsg); \
+    }
+
+int validateMaskInput(int input, int warningIndex, int getWarningsIndex) 
+{
+    if (defData->VersionNum < 5.8 && input > 0) {
+      if (warningIndex++ < getWarningsIndex) {
+          defData->defMsg = (char*)defMalloc(1000);
+          sprintf (defData->defMsg,
+             "The MASK statement is available in version 5.8 and later.\nHowever, your DEF file is defined with version %g", defData->VersionNum);
+          defError(7415, defData->defMsg);
+          defFree(defData->defMsg);
+          CHKERR();
+          
+          return 0;
+        }
+    }   
+    
+    return 1; 
+}
+
+double convert_defname2num(char *versionName)
+{
+    char majorNm[80];
+    char minorNm[80];
+    char *subMinorNm = NULL;
+    char *versionNm = strdup(versionName);
+
+    double major = 0, minor = 0, subMinor = 0;
+    double version;
+
+    sscanf(versionNm, "%[^.].%s", majorNm, minorNm);
+    
+    char *p1 = strchr(minorNm, '.');
+    if (p1) {
+       subMinorNm = p1+1;
+       *p1 = '\0';
+    }
+    major = atof(majorNm);
+    minor = atof(minorNm);
+    if (subMinorNm)
+       subMinor = atof(subMinorNm);
+
+    version = major;
+
+    if (minor > 0)
+       version = major + minor/10;
+
+    if (subMinor > 0)
+       version = version + subMinor/1000;
+
+    free(versionNm);
+    return version;
+}
+
+int numIsInt (char* volt) {
+    if (strchr(volt, '.'))  // a floating point
+       return 0;
+    else
+       return 1;
+}
+
+int defValidNum(int values) {
+    char *outMsg;
+    switch (values) {
+        case 100:
+        case 200:
+        case 1000:
+        case 2000:
+                return 1;
+        case 400:
+        case 800:
+        case 4000:
+        case 8000:
+        case 10000:
+        case 20000:
+             if (defData->VersionNum < 5.6) {
+                if (defCallbacks->UnitsCbk) {
+                  if (defData->unitsWarnings++ < defSettings->UnitsWarnings) {
+                    outMsg = (char*)defMalloc(1000);
+                    sprintf (outMsg,
+                    "An error has been found while processing the DEF file '%s'\nUnit %d is a 5.6 or later syntax. Define the DEF file as 5.6 and then try again.",
+                    defSettings->FileName, values);
+                    defError(6501, outMsg);
+                    defFree(outMsg);
+                  }
+                }
+                
+                return 0;
+             } else {
+                return 1;
+             }
+    }
+    if (defCallbacks->UnitsCbk) {
+      if (defData->unitsWarnings++ < defSettings->UnitsWarnings) {
+        outMsg = (char*)defMalloc(10000);
+        sprintf (outMsg,
+          "The value %d defined for DEF UNITS DISTANCE MICRON is invalid\n. The valid values are 100, 200, 400, 800, 1000, 2000, 4000, 8000, 10000, or 20000. Specify a valid value and then try again.", values);
+        defError(6502, outMsg);
+        defFree(outMsg);
+        CHKERR();
+      }
+    }
+    return 0;
+}
+
+#define FIXED 1
+#define COVER 2
+#define PLACED 3
+#define UNPLACED 4
+
+
+/* Line 189 of yacc.c  */
+#line 251 "def.tab.c"
+
+/* Enabling traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+
+/* Enabling verbose error messages.  */
+#ifdef YYERROR_VERBOSE
+# undef YYERROR_VERBOSE
+# define YYERROR_VERBOSE 1
+#else
+# define YYERROR_VERBOSE 0
+#endif
+
+/* Enabling the token table.  */
+#ifndef YYTOKEN_TABLE
+# define YYTOKEN_TABLE 0
+#endif
 
 
 /* Tokens.  */
@@ -339,489 +539,39 @@
      K_ROUTEHALO = 520
    };
 #endif
-/* Tokens.  */
-#define QSTRING 258
-#define T_STRING 259
-#define SITE_PATTERN 260
-#define NUMBER 261
-#define K_HISTORY 262
-#define K_NAMESCASESENSITIVE 263
-#define K_DESIGN 264
-#define K_VIAS 265
-#define K_TECH 266
-#define K_UNITS 267
-#define K_ARRAY 268
-#define K_FLOORPLAN 269
-#define K_SITE 270
-#define K_CANPLACE 271
-#define K_CANNOTOCCUPY 272
-#define K_DIEAREA 273
-#define K_PINS 274
-#define K_DEFAULTCAP 275
-#define K_MINPINS 276
-#define K_WIRECAP 277
-#define K_TRACKS 278
-#define K_GCELLGRID 279
-#define K_DO 280
-#define K_BY 281
-#define K_STEP 282
-#define K_LAYER 283
-#define K_ROW 284
-#define K_RECT 285
-#define K_COMPS 286
-#define K_COMP_GEN 287
-#define K_SOURCE 288
-#define K_WEIGHT 289
-#define K_EEQMASTER 290
-#define K_FIXED 291
-#define K_COVER 292
-#define K_UNPLACED 293
-#define K_PLACED 294
-#define K_FOREIGN 295
-#define K_REGION 296
-#define K_REGIONS 297
-#define K_NETS 298
-#define K_START_NET 299
-#define K_MUSTJOIN 300
-#define K_ORIGINAL 301
-#define K_USE 302
-#define K_STYLE 303
-#define K_PATTERN 304
-#define K_PATTERNNAME 305
-#define K_ESTCAP 306
-#define K_ROUTED 307
-#define K_NEW 308
-#define K_SNETS 309
-#define K_SHAPE 310
-#define K_WIDTH 311
-#define K_VOLTAGE 312
-#define K_SPACING 313
-#define K_NONDEFAULTRULE 314
-#define K_NONDEFAULTRULES 315
-#define K_N 316
-#define K_S 317
-#define K_E 318
-#define K_W 319
-#define K_FN 320
-#define K_FE 321
-#define K_FS 322
-#define K_FW 323
-#define K_GROUPS 324
-#define K_GROUP 325
-#define K_SOFT 326
-#define K_MAXX 327
-#define K_MAXY 328
-#define K_MAXHALFPERIMETER 329
-#define K_CONSTRAINTS 330
-#define K_NET 331
-#define K_PATH 332
-#define K_SUM 333
-#define K_DIFF 334
-#define K_SCANCHAINS 335
-#define K_START 336
-#define K_FLOATING 337
-#define K_ORDERED 338
-#define K_STOP 339
-#define K_IN 340
-#define K_OUT 341
-#define K_RISEMIN 342
-#define K_RISEMAX 343
-#define K_FALLMIN 344
-#define K_FALLMAX 345
-#define K_WIREDLOGIC 346
-#define K_MAXDIST 347
-#define K_ASSERTIONS 348
-#define K_DISTANCE 349
-#define K_MICRONS 350
-#define K_END 351
-#define K_IOTIMINGS 352
-#define K_RISE 353
-#define K_FALL 354
-#define K_VARIABLE 355
-#define K_SLEWRATE 356
-#define K_CAPACITANCE 357
-#define K_DRIVECELL 358
-#define K_FROMPIN 359
-#define K_TOPIN 360
-#define K_PARALLEL 361
-#define K_TIMINGDISABLES 362
-#define K_THRUPIN 363
-#define K_MACRO 364
-#define K_PARTITIONS 365
-#define K_TURNOFF 366
-#define K_FROMCLOCKPIN 367
-#define K_FROMCOMPPIN 368
-#define K_FROMIOPIN 369
-#define K_TOCLOCKPIN 370
-#define K_TOCOMPPIN 371
-#define K_TOIOPIN 372
-#define K_SETUPRISE 373
-#define K_SETUPFALL 374
-#define K_HOLDRISE 375
-#define K_HOLDFALL 376
-#define K_VPIN 377
-#define K_SUBNET 378
-#define K_XTALK 379
-#define K_PIN 380
-#define K_SYNTHESIZED 381
-#define K_DEFINE 382
-#define K_DEFINES 383
-#define K_DEFINEB 384
-#define K_IF 385
-#define K_THEN 386
-#define K_ELSE 387
-#define K_FALSE 388
-#define K_TRUE 389
-#define K_EQ 390
-#define K_NE 391
-#define K_LE 392
-#define K_LT 393
-#define K_GE 394
-#define K_GT 395
-#define K_OR 396
-#define K_AND 397
-#define K_NOT 398
-#define K_SPECIAL 399
-#define K_DIRECTION 400
-#define K_RANGE 401
-#define K_FPC 402
-#define K_HORIZONTAL 403
-#define K_VERTICAL 404
-#define K_ALIGN 405
-#define K_MIN 406
-#define K_MAX 407
-#define K_EQUAL 408
-#define K_BOTTOMLEFT 409
-#define K_TOPRIGHT 410
-#define K_ROWS 411
-#define K_TAPER 412
-#define K_TAPERRULE 413
-#define K_VERSION 414
-#define K_DIVIDERCHAR 415
-#define K_BUSBITCHARS 416
-#define K_PROPERTYDEFINITIONS 417
-#define K_STRING 418
-#define K_REAL 419
-#define K_INTEGER 420
-#define K_PROPERTY 421
-#define K_BEGINEXT 422
-#define K_ENDEXT 423
-#define K_NAMEMAPSTRING 424
-#define K_ON 425
-#define K_OFF 426
-#define K_X 427
-#define K_Y 428
-#define K_COMPONENT 429
-#define K_MASK 430
-#define K_MASKSHIFT 431
-#define K_COMPSMASKSHIFT 432
-#define K_SAMEMASK 433
-#define K_PINPROPERTIES 434
-#define K_TEST 435
-#define K_COMMONSCANPINS 436
-#define K_SNET 437
-#define K_COMPONENTPIN 438
-#define K_REENTRANTPATHS 439
-#define K_SHIELD 440
-#define K_SHIELDNET 441
-#define K_NOSHIELD 442
-#define K_VIRTUAL 443
-#define K_ANTENNAPINPARTIALMETALAREA 444
-#define K_ANTENNAPINPARTIALMETALSIDEAREA 445
-#define K_ANTENNAPINGATEAREA 446
-#define K_ANTENNAPINDIFFAREA 447
-#define K_ANTENNAPINMAXAREACAR 448
-#define K_ANTENNAPINMAXSIDEAREACAR 449
-#define K_ANTENNAPINPARTIALCUTAREA 450
-#define K_ANTENNAPINMAXCUTCAR 451
-#define K_SIGNAL 452
-#define K_POWER 453
-#define K_GROUND 454
-#define K_CLOCK 455
-#define K_TIEOFF 456
-#define K_ANALOG 457
-#define K_SCAN 458
-#define K_RESET 459
-#define K_RING 460
-#define K_STRIPE 461
-#define K_FOLLOWPIN 462
-#define K_IOWIRE 463
-#define K_COREWIRE 464
-#define K_BLOCKWIRE 465
-#define K_FILLWIRE 466
-#define K_BLOCKAGEWIRE 467
-#define K_PADRING 468
-#define K_BLOCKRING 469
-#define K_BLOCKAGES 470
-#define K_PLACEMENT 471
-#define K_SLOTS 472
-#define K_FILLS 473
-#define K_PUSHDOWN 474
-#define K_NETLIST 475
-#define K_DIST 476
-#define K_USER 477
-#define K_TIMING 478
-#define K_BALANCED 479
-#define K_STEINER 480
-#define K_TRUNK 481
-#define K_FIXEDBUMP 482
-#define K_FENCE 483
-#define K_FREQUENCY 484
-#define K_GUIDE 485
-#define K_MAXBITS 486
-#define K_PARTITION 487
-#define K_TYPE 488
-#define K_ANTENNAMODEL 489
-#define K_DRCFILL 490
-#define K_OXIDE1 491
-#define K_OXIDE2 492
-#define K_OXIDE3 493
-#define K_OXIDE4 494
-#define K_CUTSIZE 495
-#define K_CUTSPACING 496
-#define K_DESIGNRULEWIDTH 497
-#define K_DIAGWIDTH 498
-#define K_ENCLOSURE 499
-#define K_HALO 500
-#define K_GROUNDSENSITIVITY 501
-#define K_HARDSPACING 502
-#define K_LAYERS 503
-#define K_MINCUTS 504
-#define K_NETEXPR 505
-#define K_OFFSET 506
-#define K_ORIGIN 507
-#define K_ROWCOL 508
-#define K_STYLES 509
-#define K_POLYGON 510
-#define K_PORT 511
-#define K_SUPPLYSENSITIVITY 512
-#define K_VIA 513
-#define K_VIARULE 514
-#define K_WIREEXT 515
-#define K_EXCEPTPGNET 516
-#define K_FILLWIREOPC 517
-#define K_OPC 518
-#define K_PARTIAL 519
-#define K_ROUTEHALO 520
 
 
-
-
-/* Copy the first part of user declarations.  */
-#line 58 "def.y"
-
-#include <stdlib.h>
-#include <string.h>
-#include "defrReader.hpp"
-#include "defiUser.hpp"
-#include "defrCallBacks.hpp"
-#include "lex.h"
-
-#define DEF_MAX_INT 2147483647
-#define YYDEBUG 1     // this is temp fix for pcr 755132 
-// TX_DIR:TRANSLATION ON
-
-
-#include "defrData.hpp"
-#include "defrSettings.hpp"
-#include "defrCallBacks.hpp"
-
-BEGIN_LEFDEF_PARSER_NAMESPACE
-
-extern int errors;        // from lex.cpph
-
-// From def_keywords.cpp 
-extern char* ringCopy(const char* string);
-
-extern void pathIsDone(int shield, int reset, int netOsnet, int *needCbk);
-
-// Macro to describe how we handle a callback.
-// If the function was set then call it.
-// If the function returns non zero then there was an error
-// so call the error routine and exit.
-//
-#define CALLBACK(func, typ, data) \
-    if (!defData->errors) {\
-      if (func) { \
-        if ((defData->defRetVal = (*func)(typ, data, defSettings->UserData)) == PARSE_OK) { \
-        } else if (defData->defRetVal == STOP_PARSE) { \
-          return defData->defRetVal; \
-        } else { \
-          defError(6010, "An error has been reported in callback."); \
-          return defData->defRetVal; \
-        } \
-      } \
-    }
-
-#define CHKERR() \
-    if (defData->errors > 20) {\
-      defError(6011, "Too many syntax defData->errors have been reported."); \
-      defData->errors = 0; \
-      return 1; \
-    }
-
-#define CHKPROPTYPE(propType, propName, name) \
-    if (propType == 'N') { \
-       defData->warningMsg = (char*)defMalloc(strlen(propName)+strlen(name)+40); \
-       sprintf(defData->warningMsg, "The PropName %s is not defined for %s.", \
-               propName, name); \
-       defWarning(7010, defData->warningMsg); \
-       defFree(defData->warningMsg); \
-    }
-
-int validateMaskInput(int input, int warningIndex, int getWarningsIndex) 
-{
-    if (defData->VersionNum < 5.8 && input > 0) {
-      if (warningIndex++ < getWarningsIndex) {
-          defData->defMsg = (char*)defMalloc(1000);
-          sprintf (defData->defMsg,
-             "The MASK statement is available in version 5.8 and later.\nHowever, your DEF file is defined with version %g", defData->VersionNum);
-          defError(7415, defData->defMsg);
-          defFree(defData->defMsg);
-          CHKERR();
-          
-          return 0;
-        }
-    }   
-    
-    return 1; 
-}
-
-double convert_defname2num(char *versionName)
-{
-    char majorNm[80];
-    char minorNm[80];
-    char *subMinorNm = NULL;
-    char *versionNm = strdup(versionName);
-
-    double major = 0, minor = 0, subMinor = 0;
-    double version;
-
-    sscanf(versionNm, "%[^.].%s", majorNm, minorNm);
-    
-    char *p1 = strchr(minorNm, '.');
-    if (p1) {
-       subMinorNm = p1+1;
-       *p1 = '\0';
-    }
-    major = atof(majorNm);
-    minor = atof(minorNm);
-    if (subMinorNm)
-       subMinor = atof(subMinorNm);
-
-    version = major;
-
-    if (minor > 0)
-       version = major + minor/10;
-
-    if (subMinor > 0)
-       version = version + subMinor/1000;
-
-    free(versionNm);
-    return version;
-}
-
-int numIsInt (char* volt) {
-    if (strchr(volt, '.'))  // a floating point
-       return 0;
-    else
-       return 1;
-}
-
-int defValidNum(int values) {
-    char *outMsg;
-    switch (values) {
-        case 100:
-        case 200:
-        case 1000:
-        case 2000:
-                return 1;
-        case 400:
-        case 800:
-        case 4000:
-        case 8000:
-        case 10000:
-        case 20000:
-             if (defData->VersionNum < 5.6) {
-                if (defCallbacks->UnitsCbk) {
-                  if (defData->unitsWarnings++ < defSettings->UnitsWarnings) {
-                    outMsg = (char*)defMalloc(1000);
-                    sprintf (outMsg,
-                    "An error has been found while processing the DEF file '%s'\nUnit %d is a 5.6 or later syntax. Define the DEF file as 5.6 and then try again.",
-                    defSettings->FileName, values);
-                    defError(6501, outMsg);
-                    defFree(outMsg);
-                  }
-                }
-                
-                return 0;
-             } else {
-                return 1;
-             }
-    }
-    if (defCallbacks->UnitsCbk) {
-      if (defData->unitsWarnings++ < defSettings->UnitsWarnings) {
-        outMsg = (char*)defMalloc(10000);
-        sprintf (outMsg,
-          "The value %d defined for DEF UNITS DISTANCE MICRON is invalid\n. The valid values are 100, 200, 400, 800, 1000, 2000, 4000, 8000, 10000, or 20000. Specify a valid value and then try again.", values);
-        defError(6502, outMsg);
-        defFree(outMsg);
-        CHKERR();
-      }
-    }
-    return 0;
-}
-
-#define FIXED 1
-#define COVER 2
-#define PLACED 3
-#define UNPLACED 4
-
-
-/* Enabling traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
-
-/* Enabling verbose error messages.  */
-#ifdef YYERROR_VERBOSE
-# undef YYERROR_VERBOSE
-# define YYERROR_VERBOSE 1
-#else
-# define YYERROR_VERBOSE 0
-#endif
-
-/* Enabling the token table.  */
-#ifndef YYTOKEN_TABLE
-# define YYTOKEN_TABLE 0
-#endif
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 227 "def.y"
 {
+
+/* Line 214 of yacc.c  */
+#line 227 "def.y"
+
         double dval ;
         int    integer ;
         char * string ;
         int    keyword ;  // really just a nop 
         struct LefDefParser::defpoint pt;
         LefDefParser::defTOKEN *tk;
-}
-/* Line 193 of yacc.c.  */
-#line 812 "def.tab.c"
-	YYSTYPE;
+
+
+
+/* Line 214 of yacc.c  */
+#line 563 "def.tab.c"
+} YYSTYPE;
+# define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
-# define YYSTYPE_IS_TRIVIAL 1
 #endif
-
 
 
 /* Copy the second part of user declarations.  */
 
 
-/* Line 216 of yacc.c.  */
-#line 825 "def.tab.c"
+/* Line 264 of yacc.c  */
+#line 575 "def.tab.c"
 
 #ifdef short
 # undef short
@@ -871,7 +621,7 @@ typedef short int yytype_int16;
 #define YYSIZE_MAXIMUM ((YYSIZE_T) -1)
 
 #ifndef YY_
-# if defined YYENABLE_NLS && YYENABLE_NLS
+# if YYENABLE_NLS
 #  if ENABLE_NLS
 #   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
 #   define YY_(msgid) dgettext ("bison-runtime", msgid)
@@ -896,14 +646,14 @@ typedef short int yytype_int16;
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static int
-YYID (int i)
+YYID (int yyi)
 #else
 static int
-YYID (i)
-    int i;
+YYID (yyi)
+    int yyi;
 #endif
 {
-  return i;
+  return yyi;
 }
 #endif
 
@@ -984,9 +734,9 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
 {
-  yytype_int16 yyss;
-  YYSTYPE yyvs;
-  };
+  yytype_int16 yyss_alloc;
+  YYSTYPE yyvs_alloc;
+};
 
 /* The size of the maximum gap between one aligned stack and the next.  */
 # define YYSTACK_GAP_MAXIMUM (sizeof (union yyalloc) - 1)
@@ -1020,12 +770,12 @@ union yyalloc
    elements in the stack, and YYPTR gives the new location of the
    stack.  Advance YYPTR to a properly aligned location for the next
    stack.  */
-# define YYSTACK_RELOCATE(Stack)					\
+# define YYSTACK_RELOCATE(Stack_alloc, Stack)				\
     do									\
       {									\
 	YYSIZE_T yynewbytes;						\
-	YYCOPY (&yyptr->Stack, Stack, yysize);				\
-	Stack = &yyptr->Stack;						\
+	YYCOPY (&yyptr->Stack_alloc, Stack, yysize);			\
+	Stack = &yyptr->Stack_alloc;					\
 	yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
 	yyptr += yynewbytes / sizeof (*yyptr);				\
       }									\
@@ -1672,111 +1422,115 @@ static const char *const yytname[] =
   "K_PORT", "K_SUPPLYSENSITIVITY", "K_VIA", "K_VIARULE", "K_WIREEXT",
   "K_EXCEPTPGNET", "K_FILLWIREOPC", "K_OPC", "K_PARTIAL", "K_ROUTEHALO",
   "';'", "'-'", "'+'", "'('", "')'", "'*'", "','", "$accept", "def_file",
-  "version_stmt", "@1", "case_sens_stmt", "rules", "rule",
-  "design_section", "design_name", "@2", "end_design", "tech_name", "@3",
-  "array_name", "@4", "floorplan_name", "@5", "history",
-  "prop_def_section", "@6", "property_defs", "property_def", "@7", "@8",
-  "@9", "@10", "@11", "@12", "@13", "@14", "@15", "property_type_and_val",
-  "@16", "@17", "opt_num_val", "units", "divider_char", "bus_bit_chars",
-  "canplace", "@18", "cannotoccupy", "@19", "orient", "die_area", "@20",
-  "pin_cap_rule", "start_def_cap", "pin_caps", "pin_cap", "end_def_cap",
-  "pin_rule", "start_pins", "pins", "pin", "@21", "@22", "@23",
-  "pin_options", "pin_option", "@24", "@25", "@26", "@27", "@28", "@29",
-  "@30", "@31", "@32", "@33", "pin_layer_mask_opt", "pin_via_mask_opt",
-  "pin_poly_mask_opt", "pin_layer_spacing_opt", "pin_poly_spacing_opt",
-  "pin_oxide", "use_type", "pin_layer_opt", "@34", "end_pins", "row_rule",
-  "@35", "@36", "row_do_option", "row_step_option", "row_options",
-  "row_option", "@37", "row_prop_list", "row_prop", "tracks_rule", "@38",
-  "track_start", "track_type", "track_opts", "track_mask_statement",
-  "same_mask", "track_layer_statement", "@39", "track_layers",
-  "track_layer", "gcellgrid", "extension_section", "extension_stmt",
-  "via_section", "via", "via_declarations", "via_declaration", "@40",
-  "@41", "layer_stmts", "layer_stmt", "@42", "@43", "@44", "@45", "@46",
-  "@47", "layer_viarule_opts", "@48", "firstPt", "nextPt", "otherPts",
-  "pt", "mask", "via_end", "regions_section", "regions_start",
-  "regions_stmts", "regions_stmt", "@49", "@50", "rect_list",
-  "region_options", "region_option", "@51", "region_prop_list",
-  "region_prop", "region_type", "comps_maskShift_section", "comps_section",
-  "start_comps", "layer_statement", "maskLayer", "comps_rule", "comp",
-  "comp_start", "comp_id_and_name", "@52", "comp_net_list", "comp_options",
-  "comp_option", "comp_extension_stmt", "comp_eeq", "@53", "comp_generate",
-  "@54", "opt_pattern", "comp_source", "source_type", "comp_region",
-  "comp_pnt_list", "comp_halo", "@55", "halo_soft", "comp_routehalo",
-  "@56", "comp_property", "@57", "comp_prop_list", "comp_prop",
-  "comp_region_start", "comp_foreign", "@58", "opt_paren", "comp_type",
-  "maskShift", "placement_status", "weight", "end_comps", "nets_section",
-  "start_nets", "net_rules", "one_net", "net_and_connections", "net_start",
-  "@59", "net_name", "@60", "@61", "net_connections", "net_connection",
-  "@62", "@63", "@64", "conn_opt", "net_options", "net_option", "@65",
-  "@66", "@67", "@68", "@69", "@70", "@71", "@72", "@73", "@74", "@75",
-  "net_prop_list", "net_prop", "netsource_type", "vpin_stmt", "@76",
-  "vpin_begin", "@77", "vpin_layer_opt", "@78", "vpin_options",
-  "vpin_status", "net_type", "paths", "new_path", "@79", "path", "@80",
-  "@81", "virtual_statement", "rect_statement", "path_item_list",
-  "path_item", "@82", "@83", "path_pt", "virtual_pt", "rect_pts",
-  "opt_taper_style_s", "opt_taper_style", "opt_taper", "@84", "opt_style",
-  "opt_spaths", "opt_shape_style", "end_nets", "shape_type",
-  "snets_section", "snet_rules", "snet_rule", "snet_options",
-  "snet_option", "snet_other_option", "@85", "@86", "@87", "@88", "@89",
-  "@90", "@91", "@92", "@93", "@94", "orient_pt", "shield_layer", "@95",
-  "snet_width", "@96", "snet_voltage", "@97", "snet_spacing", "@98", "@99",
-  "snet_prop_list", "snet_prop", "opt_snet_range", "opt_range",
-  "pattern_type", "spaths", "snew_path", "@100", "spath", "@101", "@102",
-  "width", "start_snets", "end_snets", "groups_section", "groups_start",
-  "group_rules", "group_rule", "start_group", "@103", "group_members",
-  "group_member", "group_options", "group_option", "@104", "@105",
-  "group_region", "group_prop_list", "group_prop", "group_soft_options",
-  "group_soft_option", "groups_end", "assertions_section",
-  "constraint_section", "assertions_start", "constraints_start",
-  "constraint_rules", "constraint_rule", "operand_rule", "operand", "@106",
-  "@107", "operand_list", "wiredlogic_rule", "@108", "opt_plus",
-  "delay_specs", "delay_spec", "constraints_end", "assertions_end",
-  "scanchains_section", "scanchain_start", "scanchain_rules", "scan_rule",
-  "start_scan", "@109", "scan_members", "opt_pin", "scan_member", "@110",
-  "@111", "@112", "@113", "@114", "@115", "opt_common_pins",
-  "floating_inst_list", "one_floating_inst", "@116", "floating_pins",
-  "ordered_inst_list", "one_ordered_inst", "@117", "ordered_pins",
-  "partition_maxbits", "scanchain_end", "iotiming_section",
-  "iotiming_start", "iotiming_rules", "iotiming_rule", "start_iotiming",
-  "@118", "iotiming_members", "iotiming_member", "@119", "@120",
-  "iotiming_drivecell_opt", "@121", "@122", "iotiming_frompin", "@123",
-  "iotiming_parallel", "risefall", "iotiming_end",
-  "floorplan_contraints_section", "fp_start", "fp_stmts", "fp_stmt",
-  "@124", "@125", "h_or_v", "constraint_type", "constrain_what_list",
-  "constrain_what", "@126", "@127", "row_or_comp_list", "row_or_comp",
-  "@128", "@129", "timingdisables_section", "timingdisables_start",
-  "timingdisables_rules", "timingdisables_rule", "@130", "@131", "@132",
-  "@133", "td_macro_option", "@134", "@135", "@136", "timingdisables_end",
+  "version_stmt", "$@1", "case_sens_stmt", "rules", "rule",
+  "design_section", "design_name", "$@2", "end_design", "tech_name", "$@3",
+  "array_name", "$@4", "floorplan_name", "$@5", "history",
+  "prop_def_section", "$@6", "property_defs", "property_def", "$@7", "$@8",
+  "$@9", "$@10", "$@11", "$@12", "$@13", "$@14", "$@15",
+  "property_type_and_val", "$@16", "$@17", "opt_num_val", "units",
+  "divider_char", "bus_bit_chars", "canplace", "$@18", "cannotoccupy",
+  "$@19", "orient", "die_area", "$@20", "pin_cap_rule", "start_def_cap",
+  "pin_caps", "pin_cap", "end_def_cap", "pin_rule", "start_pins", "pins",
+  "pin", "$@21", "$@22", "$@23", "pin_options", "pin_option", "$@24",
+  "$@25", "$@26", "$@27", "$@28", "$@29", "$@30", "$@31", "$@32", "$@33",
+  "pin_layer_mask_opt", "pin_via_mask_opt", "pin_poly_mask_opt",
+  "pin_layer_spacing_opt", "pin_poly_spacing_opt", "pin_oxide", "use_type",
+  "pin_layer_opt", "$@34", "end_pins", "row_rule", "$@35", "$@36",
+  "row_do_option", "row_step_option", "row_options", "row_option", "$@37",
+  "row_prop_list", "row_prop", "tracks_rule", "$@38", "track_start",
+  "track_type", "track_opts", "track_mask_statement", "same_mask",
+  "track_layer_statement", "$@39", "track_layers", "track_layer",
+  "gcellgrid", "extension_section", "extension_stmt", "via_section", "via",
+  "via_declarations", "via_declaration", "$@40", "$@41", "layer_stmts",
+  "layer_stmt", "$@42", "$@43", "$@44", "$@45", "$@46", "$@47",
+  "layer_viarule_opts", "$@48", "firstPt", "nextPt", "otherPts", "pt",
+  "mask", "via_end", "regions_section", "regions_start", "regions_stmts",
+  "regions_stmt", "$@49", "$@50", "rect_list", "region_options",
+  "region_option", "$@51", "region_prop_list", "region_prop",
+  "region_type", "comps_maskShift_section", "comps_section", "start_comps",
+  "layer_statement", "maskLayer", "comps_rule", "comp", "comp_start",
+  "comp_id_and_name", "$@52", "comp_net_list", "comp_options",
+  "comp_option", "comp_extension_stmt", "comp_eeq", "$@53",
+  "comp_generate", "$@54", "opt_pattern", "comp_source", "source_type",
+  "comp_region", "comp_pnt_list", "comp_halo", "$@55", "halo_soft",
+  "comp_routehalo", "$@56", "comp_property", "$@57", "comp_prop_list",
+  "comp_prop", "comp_region_start", "comp_foreign", "$@58", "opt_paren",
+  "comp_type", "maskShift", "placement_status", "weight", "end_comps",
+  "nets_section", "start_nets", "net_rules", "one_net",
+  "net_and_connections", "net_start", "$@59", "net_name", "$@60", "$@61",
+  "net_connections", "net_connection", "$@62", "$@63", "$@64", "conn_opt",
+  "net_options", "net_option", "$@65", "$@66", "$@67", "$@68", "$@69",
+  "$@70", "$@71", "$@72", "$@73", "$@74", "$@75", "net_prop_list",
+  "net_prop", "netsource_type", "vpin_stmt", "$@76", "vpin_begin", "$@77",
+  "vpin_layer_opt", "$@78", "vpin_options", "vpin_status", "net_type",
+  "paths", "new_path", "$@79", "path", "$@80", "$@81", "virtual_statement",
+  "rect_statement", "path_item_list", "path_item", "$@82", "$@83",
+  "path_pt", "virtual_pt", "rect_pts", "opt_taper_style_s",
+  "opt_taper_style", "opt_taper", "$@84", "opt_style", "opt_spaths",
+  "opt_shape_style", "end_nets", "shape_type", "snets_section",
+  "snet_rules", "snet_rule", "snet_options", "snet_option",
+  "snet_other_option", "$@85", "$@86", "$@87", "$@88", "$@89", "$@90",
+  "$@91", "$@92", "$@93", "$@94", "orient_pt", "shield_layer", "$@95",
+  "snet_width", "$@96", "snet_voltage", "$@97", "snet_spacing", "$@98",
+  "$@99", "snet_prop_list", "snet_prop", "opt_snet_range", "opt_range",
+  "pattern_type", "spaths", "snew_path", "$@100", "spath", "$@101",
+  "$@102", "width", "start_snets", "end_snets", "groups_section",
+  "groups_start", "group_rules", "group_rule", "start_group", "$@103",
+  "group_members", "group_member", "group_options", "group_option",
+  "$@104", "$@105", "group_region", "group_prop_list", "group_prop",
+  "group_soft_options", "group_soft_option", "groups_end",
+  "assertions_section", "constraint_section", "assertions_start",
+  "constraints_start", "constraint_rules", "constraint_rule",
+  "operand_rule", "operand", "$@106", "$@107", "operand_list",
+  "wiredlogic_rule", "$@108", "opt_plus", "delay_specs", "delay_spec",
+  "constraints_end", "assertions_end", "scanchains_section",
+  "scanchain_start", "scanchain_rules", "scan_rule", "start_scan", "$@109",
+  "scan_members", "opt_pin", "scan_member", "$@110", "$@111", "$@112",
+  "$@113", "$@114", "$@115", "opt_common_pins", "floating_inst_list",
+  "one_floating_inst", "$@116", "floating_pins", "ordered_inst_list",
+  "one_ordered_inst", "$@117", "ordered_pins", "partition_maxbits",
+  "scanchain_end", "iotiming_section", "iotiming_start", "iotiming_rules",
+  "iotiming_rule", "start_iotiming", "$@118", "iotiming_members",
+  "iotiming_member", "$@119", "$@120", "iotiming_drivecell_opt", "$@121",
+  "$@122", "iotiming_frompin", "$@123", "iotiming_parallel", "risefall",
+  "iotiming_end", "floorplan_contraints_section", "fp_start", "fp_stmts",
+  "fp_stmt", "$@124", "$@125", "h_or_v", "constraint_type",
+  "constrain_what_list", "constrain_what", "$@126", "$@127",
+  "row_or_comp_list", "row_or_comp", "$@128", "$@129",
+  "timingdisables_section", "timingdisables_start", "timingdisables_rules",
+  "timingdisables_rule", "$@130", "$@131", "$@132", "$@133",
+  "td_macro_option", "$@134", "$@135", "$@136", "timingdisables_end",
   "partitions_section", "partitions_start", "partition_rules",
-  "partition_rule", "start_partition", "@137", "turnoff", "turnoff_setup",
-  "turnoff_hold", "partition_members", "partition_member", "@138", "@139",
-  "@140", "@141", "@142", "@143", "minmaxpins", "@144", "min_or_max_list",
-  "min_or_max_member", "pin_list", "risefallminmax1_list",
-  "risefallminmax1", "risefallminmax2_list", "risefallminmax2",
-  "partitions_end", "comp_names", "comp_name", "@145", "subnet_opt_syn",
-  "subnet_options", "subnet_option", "@146", "@147", "subnet_type",
-  "pin_props_section", "begin_pin_props", "opt_semi", "end_pin_props",
-  "pin_prop_list", "pin_prop_terminal", "@148", "@149", "pin_prop_options",
-  "pin_prop", "@150", "pin_prop_name_value_list", "pin_prop_name_value",
-  "blockage_section", "blockage_start", "blockage_end", "blockage_defs",
-  "blockage_def", "blockage_rule", "@151", "@152", "@153",
-  "layer_blockage_rules", "layer_blockage_rule", "mask_blockage_rule",
-  "comp_blockage_rule", "@154", "placement_comp_rules",
-  "placement_comp_rule", "@155", "rectPoly_blockage_rules",
-  "rectPoly_blockage", "@156", "slot_section", "slot_start", "slot_end",
-  "slot_defs", "slot_def", "slot_rule", "@157", "@158", "geom_slot_rules",
-  "geom_slot", "@159", "fill_section", "fill_start", "fill_end",
-  "fill_defs", "fill_def", "@160", "@161", "fill_rule", "@162", "@163",
-  "geom_fill_rules", "geom_fill", "@164", "fill_layer_mask_opc_opt",
-  "opt_mask_opc_l", "fill_layer_opc", "fill_via_pt",
-  "fill_via_mask_opc_opt", "opt_mask_opc", "fill_via_opc", "fill_mask",
-  "fill_viaMask", "nondefaultrule_section", "nondefault_start",
-  "nondefault_end", "nondefault_defs", "nondefault_def", "@165", "@166",
-  "nondefault_options", "nondefault_option", "@167", "@168", "@169",
-  "@170", "@171", "nondefault_layer_options", "nondefault_layer_option",
-  "nondefault_prop_opt", "@172", "nondefault_prop_list", "nondefault_prop",
-  "styles_section", "styles_start", "styles_end", "styles_rules",
-  "styles_rule", "@173", 0
+  "partition_rule", "start_partition", "$@137", "turnoff", "turnoff_setup",
+  "turnoff_hold", "partition_members", "partition_member", "$@138",
+  "$@139", "$@140", "$@141", "$@142", "$@143", "minmaxpins", "$@144",
+  "min_or_max_list", "min_or_max_member", "pin_list",
+  "risefallminmax1_list", "risefallminmax1", "risefallminmax2_list",
+  "risefallminmax2", "partitions_end", "comp_names", "comp_name", "$@145",
+  "subnet_opt_syn", "subnet_options", "subnet_option", "$@146", "$@147",
+  "subnet_type", "pin_props_section", "begin_pin_props", "opt_semi",
+  "end_pin_props", "pin_prop_list", "pin_prop_terminal", "$@148", "$@149",
+  "pin_prop_options", "pin_prop", "$@150", "pin_prop_name_value_list",
+  "pin_prop_name_value", "blockage_section", "blockage_start",
+  "blockage_end", "blockage_defs", "blockage_def", "blockage_rule",
+  "$@151", "$@152", "$@153", "layer_blockage_rules", "layer_blockage_rule",
+  "mask_blockage_rule", "comp_blockage_rule", "$@154",
+  "placement_comp_rules", "placement_comp_rule", "$@155",
+  "rectPoly_blockage_rules", "rectPoly_blockage", "$@156", "slot_section",
+  "slot_start", "slot_end", "slot_defs", "slot_def", "slot_rule", "$@157",
+  "$@158", "geom_slot_rules", "geom_slot", "$@159", "fill_section",
+  "fill_start", "fill_end", "fill_defs", "fill_def", "$@160", "$@161",
+  "fill_rule", "$@162", "$@163", "geom_fill_rules", "geom_fill", "$@164",
+  "fill_layer_mask_opc_opt", "opt_mask_opc_l", "fill_layer_opc",
+  "fill_via_pt", "fill_via_mask_opc_opt", "opt_mask_opc", "fill_via_opc",
+  "fill_mask", "fill_viaMask", "nondefaultrule_section",
+  "nondefault_start", "nondefault_end", "nondefault_defs",
+  "nondefault_def", "$@165", "$@166", "nondefault_options",
+  "nondefault_option", "$@167", "$@168", "$@169", "$@170", "$@171",
+  "nondefault_layer_options", "nondefault_layer_option",
+  "nondefault_prop_opt", "$@172", "nondefault_prop_list",
+  "nondefault_prop", "styles_section", "styles_start", "styles_end",
+  "styles_rules", "styles_rule", "$@173", 0
 };
 #endif
 
@@ -3037,7 +2791,7 @@ while (YYID (0))
    we won't break user code: when these are the locations we know.  */
 
 #ifndef YY_LOCATION_PRINT
-# if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
+# if YYLTYPE_IS_TRIVIAL
 #  define YY_LOCATION_PRINT(File, Loc)			\
      fprintf (File, "%d.%d-%d.%d",			\
 	      (Loc).first_line, (Loc).first_column,	\
@@ -3148,17 +2902,20 @@ yy_symbol_print (yyoutput, yytype, yyvaluep)
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 static void
-yy_stack_print (yytype_int16 *bottom, yytype_int16 *top)
+yy_stack_print (yytype_int16 *yybottom, yytype_int16 *yytop)
 #else
 static void
-yy_stack_print (bottom, top)
-    yytype_int16 *bottom;
-    yytype_int16 *top;
+yy_stack_print (yybottom, yytop)
+    yytype_int16 *yybottom;
+    yytype_int16 *yytop;
 #endif
 {
   YYFPRINTF (stderr, "Stack now");
-  for (; bottom <= top; ++bottom)
-    YYFPRINTF (stderr, " %d", *bottom);
+  for (; yybottom <= yytop; yybottom++)
+    {
+      int yybot = *yybottom;
+      YYFPRINTF (stderr, " %d", yybot);
+    }
   YYFPRINTF (stderr, "\n");
 }
 
@@ -3192,11 +2949,11 @@ yy_reduce_print (yyvsp, yyrule)
   /* The symbols being reduced.  */
   for (yyi = 0; yyi < yynrhs; yyi++)
     {
-      fprintf (stderr, "   $%d = ", yyi + 1);
+      YYFPRINTF (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr, yyrhs[yyprhs[yyrule] + yyi],
 		       &(yyvsp[(yyi + 1) - (yynrhs)])
 		       		       );
-      fprintf (stderr, "\n");
+      YYFPRINTF (stderr, "\n");
     }
 }
 
@@ -3476,10 +3233,8 @@ yydestruct (yymsg, yytype, yyvaluep)
 	break;
     }
 }
-
 
 /* Prevent warnings from -Wmissing-prototypes.  */
-
 #ifdef YYPARSE_PARAM
 #if defined __STDC__ || defined __cplusplus
 int yyparse (void *YYPARSE_PARAM);
@@ -3495,11 +3250,10 @@ int yyparse ();
 #endif /* ! YYPARSE_PARAM */
 
 
-
-/* The look-ahead symbol.  */
+/* The lookahead symbol.  */
 int yychar;
 
-/* The semantic value of the look-ahead symbol.  */
+/* The semantic value of the lookahead symbol.  */
 YYSTYPE yylval;
 
 /* Number of syntax errors so far.  */
@@ -3507,9 +3261,9 @@ int yynerrs;
 
 
 
-/*----------.
-| yyparse.  |
-`----------*/
+/*-------------------------.
+| yyparse or yypush_parse.  |
+`-------------------------*/
 
 #ifdef YYPARSE_PARAM
 #if (defined __STDC__ || defined __C99__FUNC__ \
@@ -3533,14 +3287,39 @@ yyparse ()
 #endif
 #endif
 {
-  
-  int yystate;
+
+
+    int yystate;
+    /* Number of tokens to shift before error messages enabled.  */
+    int yyerrstatus;
+
+    /* The stacks and their tools:
+       `yyss': related to states.
+       `yyvs': related to semantic values.
+
+       Refer to the stacks thru separate pointers, to allow yyoverflow
+       to reallocate them elsewhere.  */
+
+    /* The state stack.  */
+    yytype_int16 yyssa[YYINITDEPTH];
+    yytype_int16 *yyss;
+    yytype_int16 *yyssp;
+
+    /* The semantic value stack.  */
+    YYSTYPE yyvsa[YYINITDEPTH];
+    YYSTYPE *yyvs;
+    YYSTYPE *yyvsp;
+
+    YYSIZE_T yystacksize;
+
   int yyn;
   int yyresult;
-  /* Number of tokens to shift before error messages enabled.  */
-  int yyerrstatus;
-  /* Look-ahead token as an internal (translated) token number.  */
-  int yytoken = 0;
+  /* Lookahead token as an internal (translated) token number.  */
+  int yytoken;
+  /* The variables used to return semantic value and location from the
+     action routines.  */
+  YYSTYPE yyval;
+
 #if YYERROR_VERBOSE
   /* Buffer for error messages, and its allocated size.  */
   char yymsgbuf[128];
@@ -3548,51 +3327,28 @@ yyparse ()
   YYSIZE_T yymsg_alloc = sizeof yymsgbuf;
 #endif
 
-  /* Three stacks and their tools:
-     `yyss': related to states,
-     `yyvs': related to semantic values,
-     `yyls': related to locations.
-
-     Refer to the stacks thru separate pointers, to allow yyoverflow
-     to reallocate them elsewhere.  */
-
-  /* The state stack.  */
-  yytype_int16 yyssa[YYINITDEPTH];
-  yytype_int16 *yyss = yyssa;
-  yytype_int16 *yyssp;
-
-  /* The semantic value stack.  */
-  YYSTYPE yyvsa[YYINITDEPTH];
-  YYSTYPE *yyvs = yyvsa;
-  YYSTYPE *yyvsp;
-
-
-
 #define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
-
-  YYSIZE_T yystacksize = YYINITDEPTH;
-
-  /* The variables used to return semantic value and location from the
-     action routines.  */
-  YYSTYPE yyval;
-
 
   /* The number of symbols on the RHS of the reduced rule.
      Keep to zero when no symbol should be popped.  */
   int yylen = 0;
+
+  yytoken = 0;
+  yyss = yyssa;
+  yyvs = yyvsa;
+  yystacksize = YYINITDEPTH;
 
   YYDPRINTF ((stderr, "Starting parse\n"));
 
   yystate = 0;
   yyerrstatus = 0;
   yynerrs = 0;
-  yychar = YYEMPTY;		/* Cause a token to be read.  */
+  yychar = YYEMPTY; /* Cause a token to be read.  */
 
   /* Initialize stack pointers.
      Waste one element of value and location stack
      so that they stay on the same level as the state stack.
      The wasted elements are never initialized.  */
-
   yyssp = yyss;
   yyvsp = yyvs;
 
@@ -3622,7 +3378,6 @@ yyparse ()
 	YYSTYPE *yyvs1 = yyvs;
 	yytype_int16 *yyss1 = yyss;
 
-
 	/* Each stack pointer address is followed by the size of the
 	   data in use in that stack, in bytes.  This used to be a
 	   conditional around just the two extra args, but that might
@@ -3630,7 +3385,6 @@ yyparse ()
 	yyoverflow (YY_("memory exhausted"),
 		    &yyss1, yysize * sizeof (*yyssp),
 		    &yyvs1, yysize * sizeof (*yyvsp),
-
 		    &yystacksize);
 
 	yyss = yyss1;
@@ -3653,9 +3407,8 @@ yyparse ()
 	  (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
 	if (! yyptr)
 	  goto yyexhaustedlab;
-	YYSTACK_RELOCATE (yyss);
-	YYSTACK_RELOCATE (yyvs);
-
+	YYSTACK_RELOCATE (yyss_alloc, yyss);
+	YYSTACK_RELOCATE (yyvs_alloc, yyvs);
 #  undef YYSTACK_RELOCATE
 	if (yyss1 != yyssa)
 	  YYSTACK_FREE (yyss1);
@@ -3666,7 +3419,6 @@ yyparse ()
       yyssp = yyss + yysize - 1;
       yyvsp = yyvs + yysize - 1;
 
-
       YYDPRINTF ((stderr, "Stack size increased to %lu\n",
 		  (unsigned long int) yystacksize));
 
@@ -3676,6 +3428,9 @@ yyparse ()
 
   YYDPRINTF ((stderr, "Entering state %d\n", yystate));
 
+  if (yystate == YYFINAL)
+    YYACCEPT;
+
   goto yybackup;
 
 /*-----------.
@@ -3684,16 +3439,16 @@ yyparse ()
 yybackup:
 
   /* Do appropriate processing given the current state.  Read a
-     look-ahead token if we need one and don't already have one.  */
+     lookahead token if we need one and don't already have one.  */
 
-  /* First try to decide what to do without reference to look-ahead token.  */
+  /* First try to decide what to do without reference to lookahead token.  */
   yyn = yypact[yystate];
   if (yyn == YYPACT_NINF)
     goto yydefault;
 
-  /* Not known => get a look-ahead token if don't already have one.  */
+  /* Not known => get a lookahead token if don't already have one.  */
 
-  /* YYCHAR is either YYEMPTY or YYEOF or a valid look-ahead symbol.  */
+  /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
   if (yychar == YYEMPTY)
     {
       YYDPRINTF ((stderr, "Reading a token: "));
@@ -3725,20 +3480,16 @@ yybackup:
       goto yyreduce;
     }
 
-  if (yyn == YYFINAL)
-    YYACCEPT;
-
   /* Count tokens shifted since error; after three, turn off error
      status.  */
   if (yyerrstatus)
     yyerrstatus--;
 
-  /* Shift the look-ahead token.  */
+  /* Shift the lookahead token.  */
   YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
 
-  /* Discard the shifted token unless it is eof.  */
-  if (yychar != YYEOF)
-    yychar = YYEMPTY;
+  /* Discard the shifted token.  */
+  yychar = YYEMPTY;
 
   yystate = yyn;
   *++yyvsp = yylval;
@@ -3778,11 +3529,15 @@ yyreduce:
   switch (yyn)
     {
         case 4:
+
+/* Line 1455 of yacc.c  */
 #line 318 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 5:
+
+/* Line 1455 of yacc.c  */
 #line 319 "def.y"
     {
         defData->VersionNum = convert_defname2num((yyvsp[(3) - (4)].string));
@@ -3811,6 +3566,8 @@ yyreduce:
     break;
 
   case 7:
+
+/* Line 1455 of yacc.c  */
 #line 346 "def.y"
     {
         if (defData->VersionNum < 5.6) {
@@ -3827,6 +3584,8 @@ yyreduce:
     break;
 
   case 8:
+
+/* Line 1455 of yacc.c  */
 #line 359 "def.y"
     {
         if (defData->VersionNum < 5.6) {
@@ -3847,11 +3606,15 @@ yyreduce:
     break;
 
   case 51:
+
+/* Line 1455 of yacc.c  */
 #line 399 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 52:
+
+/* Line 1455 of yacc.c  */
 #line 400 "def.y"
     {
             if (defCallbacks->DesignCbk)
@@ -3861,6 +3624,8 @@ yyreduce:
     break;
 
   case 53:
+
+/* Line 1455 of yacc.c  */
 #line 407 "def.y"
     {
             defData->doneDesign = 1;
@@ -3888,11 +3653,15 @@ yyreduce:
     break;
 
   case 54:
+
+/* Line 1455 of yacc.c  */
 #line 431 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 55:
+
+/* Line 1455 of yacc.c  */
 #line 432 "def.y"
     { 
             if (defCallbacks->TechnologyCbk)
@@ -3901,11 +3670,15 @@ yyreduce:
     break;
 
   case 56:
+
+/* Line 1455 of yacc.c  */
 #line 437 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1;;}
     break;
 
   case 57:
+
+/* Line 1455 of yacc.c  */
 #line 438 "def.y"
     { 
             if (defCallbacks->ArrayNameCbk)
@@ -3914,11 +3687,15 @@ yyreduce:
     break;
 
   case 58:
+
+/* Line 1455 of yacc.c  */
 #line 443 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 59:
+
+/* Line 1455 of yacc.c  */
 #line 444 "def.y"
     { 
             if (defCallbacks->FloorPlanNameCbk)
@@ -3927,6 +3704,8 @@ yyreduce:
     break;
 
   case 60:
+
+/* Line 1455 of yacc.c  */
 #line 450 "def.y"
     { 
             if (defCallbacks->HistoryCbk)
@@ -3935,6 +3714,8 @@ yyreduce:
     break;
 
   case 61:
+
+/* Line 1455 of yacc.c  */
 #line 456 "def.y"
     {
             if (defCallbacks->PropDefStartCbk)
@@ -3943,6 +3724,8 @@ yyreduce:
     break;
 
   case 62:
+
+/* Line 1455 of yacc.c  */
 #line 461 "def.y"
     { 
             if (defCallbacks->PropDefEndCbk)
@@ -3952,16 +3735,22 @@ yyreduce:
     break;
 
   case 64:
+
+/* Line 1455 of yacc.c  */
 #line 469 "def.y"
     { ;}
     break;
 
   case 65:
+
+/* Line 1455 of yacc.c  */
 #line 471 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1; defData->Prop.clear(); ;}
     break;
 
   case 66:
+
+/* Line 1455 of yacc.c  */
 #line 473 "def.y"
     {
               if (defCallbacks->PropCbk) {
@@ -3973,11 +3762,15 @@ yyreduce:
     break;
 
   case 67:
+
+/* Line 1455 of yacc.c  */
 #line 480 "def.y"
     { defData->dumb_mode = 1 ; defData->no_num = 1; defData->Prop.clear(); ;}
     break;
 
   case 68:
+
+/* Line 1455 of yacc.c  */
 #line 482 "def.y"
     {
               if (defCallbacks->PropCbk) {
@@ -3989,11 +3782,15 @@ yyreduce:
     break;
 
   case 69:
+
+/* Line 1455 of yacc.c  */
 #line 489 "def.y"
     { defData->dumb_mode = 1 ; defData->no_num = 1; defData->Prop.clear(); ;}
     break;
 
   case 70:
+
+/* Line 1455 of yacc.c  */
 #line 491 "def.y"
     {
               if (defCallbacks->PropCbk) {
@@ -4005,11 +3802,15 @@ yyreduce:
     break;
 
   case 71:
+
+/* Line 1455 of yacc.c  */
 #line 498 "def.y"
     { defData->dumb_mode = 1 ; defData->no_num = 1; defData->Prop.clear(); ;}
     break;
 
   case 72:
+
+/* Line 1455 of yacc.c  */
 #line 500 "def.y"
     {
               if (defCallbacks->PropCbk) {
@@ -4021,11 +3822,15 @@ yyreduce:
     break;
 
   case 73:
+
+/* Line 1455 of yacc.c  */
 #line 507 "def.y"
     { defData->dumb_mode = 1 ; defData->no_num = 1; defData->Prop.clear(); ;}
     break;
 
   case 74:
+
+/* Line 1455 of yacc.c  */
 #line 509 "def.y"
     {
               if (defCallbacks->PropCbk) {
@@ -4037,11 +3842,15 @@ yyreduce:
     break;
 
   case 75:
+
+/* Line 1455 of yacc.c  */
 #line 516 "def.y"
     { defData->dumb_mode = 1 ; defData->no_num = 1; defData->Prop.clear(); ;}
     break;
 
   case 76:
+
+/* Line 1455 of yacc.c  */
 #line 518 "def.y"
     {
               if (defCallbacks->PropCbk) {
@@ -4053,11 +3862,15 @@ yyreduce:
     break;
 
   case 77:
+
+/* Line 1455 of yacc.c  */
 #line 525 "def.y"
     { defData->dumb_mode = 1 ; defData->no_num = 1; defData->Prop.clear(); ;}
     break;
 
   case 78:
+
+/* Line 1455 of yacc.c  */
 #line 527 "def.y"
     {
               if (defCallbacks->PropCbk) {
@@ -4069,11 +3882,15 @@ yyreduce:
     break;
 
   case 79:
+
+/* Line 1455 of yacc.c  */
 #line 536 "def.y"
     { defData->dumb_mode = 1 ; defData->no_num = 1; defData->Prop.clear(); ;}
     break;
 
   case 80:
+
+/* Line 1455 of yacc.c  */
 #line 538 "def.y"
     {
               if (defCallbacks->PropCbk) {
@@ -4085,11 +3902,15 @@ yyreduce:
     break;
 
   case 81:
+
+/* Line 1455 of yacc.c  */
 #line 546 "def.y"
     { defData->dumb_mode = 1 ; defData->no_num = 1; defData->Prop.clear(); ;}
     break;
 
   case 82:
+
+/* Line 1455 of yacc.c  */
 #line 548 "def.y"
     {
               if (defData->VersionNum < 5.6) {
@@ -4112,16 +3933,22 @@ yyreduce:
     break;
 
   case 83:
+
+/* Line 1455 of yacc.c  */
 #line 566 "def.y"
     { yyerrok; yyclearin;;}
     break;
 
   case 84:
+
+/* Line 1455 of yacc.c  */
 #line 568 "def.y"
     { defData->real_num = 0 ;}
     break;
 
   case 85:
+
+/* Line 1455 of yacc.c  */
 #line 569 "def.y"
     {
               if (defCallbacks->PropCbk) defData->Prop.setPropInteger();
@@ -4130,11 +3957,15 @@ yyreduce:
     break;
 
   case 86:
+
+/* Line 1455 of yacc.c  */
 #line 573 "def.y"
     { defData->real_num = 1 ;}
     break;
 
   case 87:
+
+/* Line 1455 of yacc.c  */
 #line 574 "def.y"
     {
               if (defCallbacks->PropCbk) defData->Prop.setPropReal();
@@ -4144,6 +3975,8 @@ yyreduce:
     break;
 
   case 88:
+
+/* Line 1455 of yacc.c  */
 #line 580 "def.y"
     {
               if (defCallbacks->PropCbk) defData->Prop.setPropString();
@@ -4152,6 +3985,8 @@ yyreduce:
     break;
 
   case 89:
+
+/* Line 1455 of yacc.c  */
 #line 585 "def.y"
     {
               if (defCallbacks->PropCbk) defData->Prop.setPropQString((yyvsp[(2) - (2)].string));
@@ -4160,6 +3995,8 @@ yyreduce:
     break;
 
   case 90:
+
+/* Line 1455 of yacc.c  */
 #line 590 "def.y"
     {
               if (defCallbacks->PropCbk) defData->Prop.setPropNameMapString((yyvsp[(2) - (2)].string));
@@ -4168,11 +4005,15 @@ yyreduce:
     break;
 
   case 92:
+
+/* Line 1455 of yacc.c  */
 #line 597 "def.y"
     { if (defCallbacks->PropCbk) defData->Prop.setNumber((yyvsp[(1) - (1)].dval)); ;}
     break;
 
   case 93:
+
+/* Line 1455 of yacc.c  */
 #line 600 "def.y"
     {
             if (defCallbacks->UnitsCbk) {
@@ -4183,6 +4024,8 @@ yyreduce:
     break;
 
   case 94:
+
+/* Line 1455 of yacc.c  */
 #line 608 "def.y"
     {
             if (defCallbacks->DividerCbk)
@@ -4192,6 +4035,8 @@ yyreduce:
     break;
 
   case 95:
+
+/* Line 1455 of yacc.c  */
 #line 615 "def.y"
     { 
             if (defCallbacks->BusBitCbk)
@@ -4201,11 +4046,15 @@ yyreduce:
     break;
 
   case 96:
+
+/* Line 1455 of yacc.c  */
 #line 621 "def.y"
     {defData->dumb_mode = 1;defData->no_num = 1; ;}
     break;
 
   case 97:
+
+/* Line 1455 of yacc.c  */
 #line 623 "def.y"
     {
               if (defCallbacks->CanplaceCbk) {
@@ -4220,11 +4069,15 @@ yyreduce:
     break;
 
   case 98:
+
+/* Line 1455 of yacc.c  */
 #line 633 "def.y"
     {defData->dumb_mode = 1;defData->no_num = 1; ;}
     break;
 
   case 99:
+
+/* Line 1455 of yacc.c  */
 #line 635 "def.y"
     {
               if (defCallbacks->CannotOccupyCbk) {
@@ -4239,46 +4092,64 @@ yyreduce:
     break;
 
   case 100:
+
+/* Line 1455 of yacc.c  */
 #line 646 "def.y"
     {(yyval.integer) = 0;;}
     break;
 
   case 101:
+
+/* Line 1455 of yacc.c  */
 #line 647 "def.y"
     {(yyval.integer) = 1;;}
     break;
 
   case 102:
+
+/* Line 1455 of yacc.c  */
 #line 648 "def.y"
     {(yyval.integer) = 2;;}
     break;
 
   case 103:
+
+/* Line 1455 of yacc.c  */
 #line 649 "def.y"
     {(yyval.integer) = 3;;}
     break;
 
   case 104:
+
+/* Line 1455 of yacc.c  */
 #line 650 "def.y"
     {(yyval.integer) = 4;;}
     break;
 
   case 105:
+
+/* Line 1455 of yacc.c  */
 #line 651 "def.y"
     {(yyval.integer) = 5;;}
     break;
 
   case 106:
+
+/* Line 1455 of yacc.c  */
 #line 652 "def.y"
     {(yyval.integer) = 6;;}
     break;
 
   case 107:
+
+/* Line 1455 of yacc.c  */
 #line 653 "def.y"
     {(yyval.integer) = 7;;}
     break;
 
   case 108:
+
+/* Line 1455 of yacc.c  */
 #line 656 "def.y"
     {
             defData->Geometries.Reset();
@@ -4286,6 +4157,8 @@ yyreduce:
     break;
 
   case 109:
+
+/* Line 1455 of yacc.c  */
 #line 660 "def.y"
     {
             if (defCallbacks->DieAreaCbk) {
@@ -4296,11 +4169,15 @@ yyreduce:
     break;
 
   case 110:
+
+/* Line 1455 of yacc.c  */
 #line 669 "def.y"
     { ;}
     break;
 
   case 111:
+
+/* Line 1455 of yacc.c  */
 #line 672 "def.y"
     {
           if (defData->VersionNum < 5.4) {
@@ -4315,6 +4192,8 @@ yyreduce:
     break;
 
   case 114:
+
+/* Line 1455 of yacc.c  */
 #line 688 "def.y"
     {
             if (defData->VersionNum < 5.4) {
@@ -4328,16 +4207,22 @@ yyreduce:
     break;
 
   case 115:
+
+/* Line 1455 of yacc.c  */
 #line 699 "def.y"
     { ;}
     break;
 
   case 116:
+
+/* Line 1455 of yacc.c  */
 #line 702 "def.y"
     { ;}
     break;
 
   case 117:
+
+/* Line 1455 of yacc.c  */
 #line 705 "def.y"
     { 
             if (defCallbacks->StartPinsCbk)
@@ -4346,16 +4231,22 @@ yyreduce:
     break;
 
   case 120:
+
+/* Line 1455 of yacc.c  */
 #line 714 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 121:
+
+/* Line 1455 of yacc.c  */
 #line 715 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 122:
+
+/* Line 1455 of yacc.c  */
 #line 716 "def.y"
     {
             if (defCallbacks->PinCbk || defCallbacks->PinExtCbk) {
@@ -4366,6 +4257,8 @@ yyreduce:
     break;
 
   case 123:
+
+/* Line 1455 of yacc.c  */
 #line 723 "def.y"
     { 
             if (defCallbacks->PinCbk)
@@ -4374,6 +4267,8 @@ yyreduce:
     break;
 
   case 126:
+
+/* Line 1455 of yacc.c  */
 #line 732 "def.y"
     {
             if (defCallbacks->PinCbk)
@@ -4382,6 +4277,8 @@ yyreduce:
     break;
 
   case 127:
+
+/* Line 1455 of yacc.c  */
 #line 738 "def.y"
     { 
             if (defCallbacks->PinExtCbk)
@@ -4390,6 +4287,8 @@ yyreduce:
     break;
 
   case 128:
+
+/* Line 1455 of yacc.c  */
 #line 744 "def.y"
     {
             if (defCallbacks->PinCbk || defCallbacks->PinExtCbk)
@@ -4398,6 +4297,8 @@ yyreduce:
     break;
 
   case 129:
+
+/* Line 1455 of yacc.c  */
 #line 750 "def.y"
     {
             if (defData->VersionNum < 5.6) {
@@ -4421,11 +4322,15 @@ yyreduce:
     break;
 
   case 130:
+
+/* Line 1455 of yacc.c  */
 #line 770 "def.y"
     { defData->dumb_mode = 1; ;}
     break;
 
   case 131:
+
+/* Line 1455 of yacc.c  */
 #line 771 "def.y"
     {
             if (defData->VersionNum < 5.6) {
@@ -4448,11 +4353,15 @@ yyreduce:
     break;
 
   case 132:
+
+/* Line 1455 of yacc.c  */
 #line 790 "def.y"
     { defData->dumb_mode = 1; ;}
     break;
 
   case 133:
+
+/* Line 1455 of yacc.c  */
 #line 791 "def.y"
     {
             if (defData->VersionNum < 5.6) {
@@ -4475,6 +4384,8 @@ yyreduce:
     break;
 
   case 134:
+
+/* Line 1455 of yacc.c  */
 #line 811 "def.y"
     {
             if (defCallbacks->PinCbk || defCallbacks->PinExtCbk) defData->Pin.setUse((yyvsp[(3) - (3)].string));
@@ -4482,6 +4393,8 @@ yyreduce:
     break;
 
   case 135:
+
+/* Line 1455 of yacc.c  */
 #line 815 "def.y"
     {
             if (defData->VersionNum < 5.7) {
@@ -4505,11 +4418,15 @@ yyreduce:
     break;
 
   case 136:
+
+/* Line 1455 of yacc.c  */
 #line 835 "def.y"
     { defData->dumb_mode = 1; ;}
     break;
 
   case 137:
+
+/* Line 1455 of yacc.c  */
 #line 836 "def.y"
     {
             if (defCallbacks->PinCbk || defCallbacks->PinExtCbk) {
@@ -4522,6 +4439,8 @@ yyreduce:
     break;
 
   case 138:
+
+/* Line 1455 of yacc.c  */
 #line 845 "def.y"
     {
             if (defCallbacks->PinCbk || defCallbacks->PinExtCbk) {
@@ -4534,11 +4453,15 @@ yyreduce:
     break;
 
   case 139:
+
+/* Line 1455 of yacc.c  */
 #line 854 "def.y"
     { defData->dumb_mode = 1; ;}
     break;
 
   case 140:
+
+/* Line 1455 of yacc.c  */
 #line 855 "def.y"
     {
             if (defData->VersionNum < 5.6) {
@@ -4567,6 +4490,8 @@ yyreduce:
     break;
 
   case 141:
+
+/* Line 1455 of yacc.c  */
 #line 880 "def.y"
     {
             if (defData->VersionNum >= 5.6) {  // only add if 5.6 or beyond
@@ -4581,11 +4506,15 @@ yyreduce:
     break;
 
   case 142:
+
+/* Line 1455 of yacc.c  */
 #line 890 "def.y"
     { defData->dumb_mode = 1; ;}
     break;
 
   case 143:
+
+/* Line 1455 of yacc.c  */
 #line 891 "def.y"
     {
             if (defData->VersionNum < 5.7) {
@@ -4614,6 +4543,8 @@ yyreduce:
     break;
 
   case 144:
+
+/* Line 1455 of yacc.c  */
 #line 917 "def.y"
     {
             if (defCallbacks->PinCbk || defCallbacks->PinExtCbk) {
@@ -4626,6 +4557,8 @@ yyreduce:
     break;
 
   case 145:
+
+/* Line 1455 of yacc.c  */
 #line 928 "def.y"
     {
             if (defData->VersionNum <= 5.3) {
@@ -4647,6 +4580,8 @@ yyreduce:
     break;
 
   case 146:
+
+/* Line 1455 of yacc.c  */
 #line 946 "def.y"
     {
             if (defData->VersionNum <= 5.3) {
@@ -4668,6 +4603,8 @@ yyreduce:
     break;
 
   case 147:
+
+/* Line 1455 of yacc.c  */
 #line 964 "def.y"
     {
             if (defData->VersionNum <= 5.3) {
@@ -4689,6 +4626,8 @@ yyreduce:
     break;
 
   case 148:
+
+/* Line 1455 of yacc.c  */
 #line 982 "def.y"
     {
             if (defData->VersionNum <= 5.3) {
@@ -4710,11 +4649,15 @@ yyreduce:
     break;
 
   case 149:
+
+/* Line 1455 of yacc.c  */
 #line 999 "def.y"
     {defData->dumb_mode=1;;}
     break;
 
   case 150:
+
+/* Line 1455 of yacc.c  */
 #line 1000 "def.y"
     {
             if (defData->VersionNum <= 5.3) {
@@ -4736,11 +4679,15 @@ yyreduce:
     break;
 
   case 151:
+
+/* Line 1455 of yacc.c  */
 #line 1017 "def.y"
     {defData->dumb_mode=1;;}
     break;
 
   case 152:
+
+/* Line 1455 of yacc.c  */
 #line 1019 "def.y"
     {
             if (defData->VersionNum <= 5.3) {
@@ -4762,6 +4709,8 @@ yyreduce:
     break;
 
   case 153:
+
+/* Line 1455 of yacc.c  */
 #line 1037 "def.y"
     {
             if (defData->VersionNum <= 5.3) {
@@ -4783,11 +4732,15 @@ yyreduce:
     break;
 
   case 154:
+
+/* Line 1455 of yacc.c  */
 #line 1054 "def.y"
     {defData->dumb_mode=1;;}
     break;
 
   case 155:
+
+/* Line 1455 of yacc.c  */
 #line 1055 "def.y"
     {
             if (defData->VersionNum <= 5.3) {
@@ -4809,6 +4762,8 @@ yyreduce:
     break;
 
   case 156:
+
+/* Line 1455 of yacc.c  */
 #line 1073 "def.y"
     {  // 5.5 syntax 
             if (defData->VersionNum < 5.5) {
@@ -4828,6 +4783,8 @@ yyreduce:
     break;
 
   case 158:
+
+/* Line 1455 of yacc.c  */
 #line 1091 "def.y"
     { 
            if (validateMaskInput((int)(yyvsp[(2) - (2)].dval), defData->pinWarnings, defSettings->PinWarnings)) {
@@ -4842,11 +4799,15 @@ yyreduce:
     break;
 
   case 159:
+
+/* Line 1455 of yacc.c  */
 #line 1104 "def.y"
     { (yyval.integer) = 0; ;}
     break;
 
   case 160:
+
+/* Line 1455 of yacc.c  */
 #line 1106 "def.y"
     { 
            if (validateMaskInput((int)(yyvsp[(2) - (2)].dval), defData->pinWarnings, defSettings->PinWarnings)) {
@@ -4856,6 +4817,8 @@ yyreduce:
     break;
 
   case 162:
+
+/* Line 1455 of yacc.c  */
 #line 1114 "def.y"
     { 
            if (validateMaskInput((int)(yyvsp[(2) - (2)].dval), defData->pinWarnings, defSettings->PinWarnings)) {
@@ -4870,6 +4833,8 @@ yyreduce:
     break;
 
   case 164:
+
+/* Line 1455 of yacc.c  */
 #line 1128 "def.y"
     {
             if (defData->VersionNum < 5.6) {
@@ -4896,6 +4861,8 @@ yyreduce:
     break;
 
   case 165:
+
+/* Line 1455 of yacc.c  */
 #line 1151 "def.y"
     {
             if (defData->VersionNum < 5.6) {
@@ -4922,6 +4889,8 @@ yyreduce:
     break;
 
   case 167:
+
+/* Line 1455 of yacc.c  */
 #line 1176 "def.y"
     {
             if (defData->VersionNum < 5.6) {
@@ -4948,6 +4917,8 @@ yyreduce:
     break;
 
   case 168:
+
+/* Line 1455 of yacc.c  */
 #line 1199 "def.y"
     {
             if (defData->VersionNum < 5.6) {
@@ -4974,6 +4945,8 @@ yyreduce:
     break;
 
   case 169:
+
+/* Line 1455 of yacc.c  */
 #line 1223 "def.y"
     { defData->aOxide = 1;
             if (defCallbacks->PinCbk || defCallbacks->PinExtCbk)
@@ -4982,6 +4955,8 @@ yyreduce:
     break;
 
   case 170:
+
+/* Line 1455 of yacc.c  */
 #line 1228 "def.y"
     { defData->aOxide = 2;
             if (defCallbacks->PinCbk || defCallbacks->PinExtCbk)
@@ -4990,6 +4965,8 @@ yyreduce:
     break;
 
   case 171:
+
+/* Line 1455 of yacc.c  */
 #line 1233 "def.y"
     { defData->aOxide = 3;
             if (defCallbacks->PinCbk || defCallbacks->PinExtCbk)
@@ -4998,6 +4975,8 @@ yyreduce:
     break;
 
   case 172:
+
+/* Line 1455 of yacc.c  */
 #line 1238 "def.y"
     { defData->aOxide = 4;
             if (defCallbacks->PinCbk || defCallbacks->PinExtCbk)
@@ -5006,61 +4985,85 @@ yyreduce:
     break;
 
   case 173:
+
+/* Line 1455 of yacc.c  */
 #line 1244 "def.y"
     { (yyval.string) = (char*)"SIGNAL"; ;}
     break;
 
   case 174:
+
+/* Line 1455 of yacc.c  */
 #line 1246 "def.y"
     { (yyval.string) = (char*)"POWER"; ;}
     break;
 
   case 175:
+
+/* Line 1455 of yacc.c  */
 #line 1248 "def.y"
     { (yyval.string) = (char*)"GROUND"; ;}
     break;
 
   case 176:
+
+/* Line 1455 of yacc.c  */
 #line 1250 "def.y"
     { (yyval.string) = (char*)"CLOCK"; ;}
     break;
 
   case 177:
+
+/* Line 1455 of yacc.c  */
 #line 1252 "def.y"
     { (yyval.string) = (char*)"TIEOFF"; ;}
     break;
 
   case 178:
+
+/* Line 1455 of yacc.c  */
 #line 1254 "def.y"
     { (yyval.string) = (char*)"ANALOG"; ;}
     break;
 
   case 179:
+
+/* Line 1455 of yacc.c  */
 #line 1256 "def.y"
     { (yyval.string) = (char*)"SCAN"; ;}
     break;
 
   case 180:
+
+/* Line 1455 of yacc.c  */
 #line 1258 "def.y"
     { (yyval.string) = (char*)"RESET"; ;}
     break;
 
   case 181:
+
+/* Line 1455 of yacc.c  */
 #line 1262 "def.y"
     { (yyval.string) = (char*)""; ;}
     break;
 
   case 182:
+
+/* Line 1455 of yacc.c  */
 #line 1263 "def.y"
     {defData->dumb_mode=1;;}
     break;
 
   case 183:
+
+/* Line 1455 of yacc.c  */
 #line 1264 "def.y"
     { (yyval.string) = (yyvsp[(3) - (3)].string); ;}
     break;
 
   case 184:
+
+/* Line 1455 of yacc.c  */
 #line 1267 "def.y"
     { 
           if (defCallbacks->PinEndCbk)
@@ -5069,11 +5072,15 @@ yyreduce:
     break;
 
   case 185:
+
+/* Line 1455 of yacc.c  */
 #line 1272 "def.y"
     {defData->dumb_mode = 2; defData->no_num = 2; ;}
     break;
 
   case 186:
+
+/* Line 1455 of yacc.c  */
 #line 1274 "def.y"
     {
           if (defCallbacks->RowCbk) {
@@ -5084,6 +5091,8 @@ yyreduce:
     break;
 
   case 187:
+
+/* Line 1455 of yacc.c  */
 #line 1282 "def.y"
     {
           if (defCallbacks->RowCbk) 
@@ -5092,6 +5101,8 @@ yyreduce:
     break;
 
   case 188:
+
+/* Line 1455 of yacc.c  */
 #line 1288 "def.y"
     {
           if (defData->VersionNum < 5.6) {
@@ -5106,6 +5117,8 @@ yyreduce:
     break;
 
   case 189:
+
+/* Line 1455 of yacc.c  */
 #line 1299 "def.y"
     {
           // 06/05/2002 - pcr 448455 
@@ -5145,6 +5158,8 @@ yyreduce:
     break;
 
   case 190:
+
+/* Line 1455 of yacc.c  */
 #line 1336 "def.y"
     {
           defData->hasDoStep = 0;
@@ -5152,6 +5167,8 @@ yyreduce:
     break;
 
   case 191:
+
+/* Line 1455 of yacc.c  */
 #line 1340 "def.y"
     {
           defData->hasDoStep = 1;
@@ -5162,16 +5179,22 @@ yyreduce:
     break;
 
   case 194:
+
+/* Line 1455 of yacc.c  */
 #line 1351 "def.y"
     {defData->dumb_mode = DEF_MAX_INT; ;}
     break;
 
   case 195:
+
+/* Line 1455 of yacc.c  */
 #line 1353 "def.y"
     { defData->dumb_mode = 0; ;}
     break;
 
   case 198:
+
+/* Line 1455 of yacc.c  */
 #line 1360 "def.y"
     {
           if (defCallbacks->RowCbk) {
@@ -5187,6 +5210,8 @@ yyreduce:
     break;
 
   case 199:
+
+/* Line 1455 of yacc.c  */
 #line 1372 "def.y"
     {
           if (defCallbacks->RowCbk) {
@@ -5199,6 +5224,8 @@ yyreduce:
     break;
 
   case 200:
+
+/* Line 1455 of yacc.c  */
 #line 1381 "def.y"
     {
           if (defCallbacks->RowCbk) {
@@ -5211,6 +5238,8 @@ yyreduce:
     break;
 
   case 201:
+
+/* Line 1455 of yacc.c  */
 #line 1391 "def.y"
     {
           if (defCallbacks->TrackCbk) {
@@ -5220,6 +5249,8 @@ yyreduce:
     break;
 
   case 202:
+
+/* Line 1455 of yacc.c  */
 #line 1397 "def.y"
     {
           if (((yyvsp[(5) - (9)].dval) <= 0) && (defData->VersionNum >= 5.4)) {
@@ -5250,6 +5281,8 @@ yyreduce:
     break;
 
   case 203:
+
+/* Line 1455 of yacc.c  */
 #line 1425 "def.y"
     {
           (yyval.string) = (yyvsp[(2) - (2)].string);
@@ -5257,16 +5290,22 @@ yyreduce:
     break;
 
   case 204:
+
+/* Line 1455 of yacc.c  */
 #line 1430 "def.y"
     { (yyval.string) = (char*)"X";;}
     break;
 
   case 205:
+
+/* Line 1455 of yacc.c  */
 #line 1432 "def.y"
     { (yyval.string) = (char*)"Y";;}
     break;
 
   case 208:
+
+/* Line 1455 of yacc.c  */
 #line 1438 "def.y"
     { 
               if (validateMaskInput((int)(yyvsp[(2) - (3)].dval), defData->trackWarnings, defSettings->TrackWarnings)) {
@@ -5278,26 +5317,36 @@ yyreduce:
     break;
 
   case 209:
+
+/* Line 1455 of yacc.c  */
 #line 1448 "def.y"
     { (yyval.integer) = 0; ;}
     break;
 
   case 210:
+
+/* Line 1455 of yacc.c  */
 #line 1450 "def.y"
     { (yyval.integer) = 1; ;}
     break;
 
   case 212:
+
+/* Line 1455 of yacc.c  */
 #line 1453 "def.y"
     { defData->dumb_mode = 1000; ;}
     break;
 
   case 213:
+
+/* Line 1455 of yacc.c  */
 #line 1454 "def.y"
     { defData->dumb_mode = 0; ;}
     break;
 
   case 216:
+
+/* Line 1455 of yacc.c  */
 #line 1461 "def.y"
     {
           if (defCallbacks->TrackCbk)
@@ -5306,6 +5355,8 @@ yyreduce:
     break;
 
   case 217:
+
+/* Line 1455 of yacc.c  */
 #line 1468 "def.y"
     {
           if ((yyvsp[(5) - (8)].dval) <= 0) {
@@ -5336,6 +5387,8 @@ yyreduce:
     break;
 
   case 218:
+
+/* Line 1455 of yacc.c  */
 #line 1496 "def.y"
     {
           if (defCallbacks->ExtensionCbk)
@@ -5344,11 +5397,15 @@ yyreduce:
     break;
 
   case 219:
+
+/* Line 1455 of yacc.c  */
 #line 1502 "def.y"
     { ;}
     break;
 
   case 221:
+
+/* Line 1455 of yacc.c  */
 #line 1508 "def.y"
     {
           if (defCallbacks->ViaStartCbk)
@@ -5357,11 +5414,15 @@ yyreduce:
     break;
 
   case 224:
+
+/* Line 1455 of yacc.c  */
 #line 1517 "def.y"
     {defData->dumb_mode = 1;defData->no_num = 1; ;}
     break;
 
   case 225:
+
+/* Line 1455 of yacc.c  */
 #line 1518 "def.y"
     {
               if (defCallbacks->ViaCbk) defData->Via.setup((yyvsp[(3) - (3)].string));
@@ -5370,6 +5431,8 @@ yyreduce:
     break;
 
   case 226:
+
+/* Line 1455 of yacc.c  */
 #line 1523 "def.y"
     {
               if (defCallbacks->ViaCbk)
@@ -5379,11 +5442,15 @@ yyreduce:
     break;
 
   case 229:
+
+/* Line 1455 of yacc.c  */
 #line 1533 "def.y"
     {defData->dumb_mode = 1;defData->no_num = 1; ;}
     break;
 
   case 230:
+
+/* Line 1455 of yacc.c  */
 #line 1534 "def.y"
     { 
               if (defCallbacks->ViaCbk)
@@ -5394,11 +5461,15 @@ yyreduce:
     break;
 
   case 231:
+
+/* Line 1455 of yacc.c  */
 #line 1540 "def.y"
     { defData->dumb_mode = 1; ;}
     break;
 
   case 232:
+
+/* Line 1455 of yacc.c  */
 #line 1541 "def.y"
     {
               if (defData->VersionNum < 5.6) {
@@ -5420,6 +5491,8 @@ yyreduce:
     break;
 
   case 233:
+
+/* Line 1455 of yacc.c  */
 #line 1559 "def.y"
     {
               if (defData->VersionNum >= 5.6) {  // only add if 5.6 or beyond
@@ -5432,11 +5505,15 @@ yyreduce:
     break;
 
   case 234:
+
+/* Line 1455 of yacc.c  */
 #line 1567 "def.y"
     {defData->dumb_mode = 1;defData->no_num = 1; ;}
     break;
 
   case 235:
+
+/* Line 1455 of yacc.c  */
 #line 1568 "def.y"
     {
               if (defData->VersionNum < 5.6) {
@@ -5450,16 +5527,22 @@ yyreduce:
     break;
 
   case 236:
+
+/* Line 1455 of yacc.c  */
 #line 1577 "def.y"
     {defData->dumb_mode = 1;defData->no_num = 1; ;}
     break;
 
   case 237:
+
+/* Line 1455 of yacc.c  */
 #line 1579 "def.y"
     {defData->dumb_mode = 3;defData->no_num = 1; ;}
     break;
 
   case 238:
+
+/* Line 1455 of yacc.c  */
 #line 1582 "def.y"
     {
                defData->viaRule = 1;
@@ -5484,6 +5567,8 @@ yyreduce:
     break;
 
   case 240:
+
+/* Line 1455 of yacc.c  */
 #line 1604 "def.y"
     { 
             if (defCallbacks->ViaExtCbk)
@@ -5492,6 +5577,8 @@ yyreduce:
     break;
 
   case 241:
+
+/* Line 1455 of yacc.c  */
 #line 1610 "def.y"
     {
               if (!defData->viaRule) {
@@ -5507,6 +5594,8 @@ yyreduce:
     break;
 
   case 242:
+
+/* Line 1455 of yacc.c  */
 #line 1622 "def.y"
     {
               if (!defData->viaRule) {
@@ -5522,6 +5611,8 @@ yyreduce:
     break;
 
   case 243:
+
+/* Line 1455 of yacc.c  */
 #line 1634 "def.y"
     {
               if (!defData->viaRule) {
@@ -5537,11 +5628,15 @@ yyreduce:
     break;
 
   case 244:
+
+/* Line 1455 of yacc.c  */
 #line 1645 "def.y"
     {defData->dumb_mode = 1;defData->no_num = 1; ;}
     break;
 
   case 245:
+
+/* Line 1455 of yacc.c  */
 #line 1646 "def.y"
     {
               if (!defData->viaRule) {
@@ -5557,16 +5652,22 @@ yyreduce:
     break;
 
   case 246:
+
+/* Line 1455 of yacc.c  */
 #line 1659 "def.y"
     { defData->Geometries.startList((yyvsp[(1) - (1)].pt).x, (yyvsp[(1) - (1)].pt).y); ;}
     break;
 
   case 247:
+
+/* Line 1455 of yacc.c  */
 #line 1662 "def.y"
     { defData->Geometries.addToList((yyvsp[(1) - (1)].pt).x, (yyvsp[(1) - (1)].pt).y); ;}
     break;
 
   case 250:
+
+/* Line 1455 of yacc.c  */
 #line 1669 "def.y"
     {
             defData->save_x = (yyvsp[(2) - (4)].dval);
@@ -5577,6 +5678,8 @@ yyreduce:
     break;
 
   case 251:
+
+/* Line 1455 of yacc.c  */
 #line 1676 "def.y"
     {
             defData->save_y = (yyvsp[(3) - (4)].dval);
@@ -5586,6 +5689,8 @@ yyreduce:
     break;
 
   case 252:
+
+/* Line 1455 of yacc.c  */
 #line 1682 "def.y"
     {
             defData->save_x = (yyvsp[(2) - (4)].dval);
@@ -5595,6 +5700,8 @@ yyreduce:
     break;
 
   case 253:
+
+/* Line 1455 of yacc.c  */
 #line 1688 "def.y"
     {
             (yyval.pt).x = ROUND(defData->save_x);
@@ -5603,16 +5710,22 @@ yyreduce:
     break;
 
   case 254:
+
+/* Line 1455 of yacc.c  */
 #line 1694 "def.y"
     { (yyval.integer) = 0; ;}
     break;
 
   case 255:
+
+/* Line 1455 of yacc.c  */
 #line 1696 "def.y"
     { (yyval.integer) = (yyvsp[(3) - (3)].dval); ;}
     break;
 
   case 256:
+
+/* Line 1455 of yacc.c  */
 #line 1699 "def.y"
     { 
           if (defCallbacks->ViaEndCbk)
@@ -5621,6 +5734,8 @@ yyreduce:
     break;
 
   case 257:
+
+/* Line 1455 of yacc.c  */
 #line 1705 "def.y"
     {
           if (defCallbacks->RegionEndCbk)
@@ -5629,6 +5744,8 @@ yyreduce:
     break;
 
   case 258:
+
+/* Line 1455 of yacc.c  */
 #line 1711 "def.y"
     {
           if (defCallbacks->RegionStartCbk)
@@ -5637,16 +5754,22 @@ yyreduce:
     break;
 
   case 260:
+
+/* Line 1455 of yacc.c  */
 #line 1718 "def.y"
     {;}
     break;
 
   case 261:
+
+/* Line 1455 of yacc.c  */
 #line 1720 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 262:
+
+/* Line 1455 of yacc.c  */
 #line 1721 "def.y"
     {
           if (defCallbacks->RegionCbk)
@@ -5656,33 +5779,45 @@ yyreduce:
     break;
 
   case 263:
+
+/* Line 1455 of yacc.c  */
 #line 1727 "def.y"
     { CALLBACK(defCallbacks->RegionCbk, defrRegionCbkType, &defData->Region); ;}
     break;
 
   case 264:
+
+/* Line 1455 of yacc.c  */
 #line 1731 "def.y"
     { if (defCallbacks->RegionCbk)
           defData->Region.addRect((yyvsp[(1) - (2)].pt).x, (yyvsp[(1) - (2)].pt).y, (yyvsp[(2) - (2)].pt).x, (yyvsp[(2) - (2)].pt).y); ;}
     break;
 
   case 265:
+
+/* Line 1455 of yacc.c  */
 #line 1734 "def.y"
     { if (defCallbacks->RegionCbk)
           defData->Region.addRect((yyvsp[(2) - (3)].pt).x, (yyvsp[(2) - (3)].pt).y, (yyvsp[(3) - (3)].pt).x, (yyvsp[(3) - (3)].pt).y); ;}
     break;
 
   case 268:
+
+/* Line 1455 of yacc.c  */
 #line 1742 "def.y"
     {defData->dumb_mode = DEF_MAX_INT; ;}
     break;
 
   case 269:
+
+/* Line 1455 of yacc.c  */
 #line 1744 "def.y"
     { defData->dumb_mode = 0; ;}
     break;
 
   case 270:
+
+/* Line 1455 of yacc.c  */
 #line 1746 "def.y"
     {
            if (defData->regTypeDef) {
@@ -5699,6 +5834,8 @@ yyreduce:
     break;
 
   case 273:
+
+/* Line 1455 of yacc.c  */
 #line 1765 "def.y"
     {
           if (defCallbacks->RegionCbk) {
@@ -5717,6 +5854,8 @@ yyreduce:
     break;
 
   case 274:
+
+/* Line 1455 of yacc.c  */
 #line 1780 "def.y"
     {
           if (defCallbacks->RegionCbk) {
@@ -5729,6 +5868,8 @@ yyreduce:
     break;
 
   case 275:
+
+/* Line 1455 of yacc.c  */
 #line 1789 "def.y"
     {
           if (defCallbacks->RegionCbk) {
@@ -5741,16 +5882,22 @@ yyreduce:
     break;
 
   case 276:
+
+/* Line 1455 of yacc.c  */
 #line 1799 "def.y"
     { (yyval.string) = (char*)"FENCE"; ;}
     break;
 
   case 277:
+
+/* Line 1455 of yacc.c  */
 #line 1801 "def.y"
     { (yyval.string) = (char*)"GUIDE"; ;}
     break;
 
   case 278:
+
+/* Line 1455 of yacc.c  */
 #line 1804 "def.y"
     {
            if (defData->VersionNum < 5.8) {
@@ -5770,6 +5917,8 @@ yyreduce:
     break;
 
   case 280:
+
+/* Line 1455 of yacc.c  */
 #line 1824 "def.y"
     { 
             if (defCallbacks->ComponentStartCbk)
@@ -5779,6 +5928,8 @@ yyreduce:
     break;
 
   case 283:
+
+/* Line 1455 of yacc.c  */
 #line 1835 "def.y"
     {
             if (defCallbacks->ComponentMaskShiftLayerCbk) {
@@ -5788,6 +5939,8 @@ yyreduce:
     break;
 
   case 286:
+
+/* Line 1455 of yacc.c  */
 #line 1846 "def.y"
     {
             if (defCallbacks->ComponentCbk)
@@ -5796,6 +5949,8 @@ yyreduce:
     break;
 
   case 287:
+
+/* Line 1455 of yacc.c  */
 #line 1852 "def.y"
     {
             defData->dumb_mode = 0;
@@ -5804,11 +5959,15 @@ yyreduce:
     break;
 
   case 288:
+
+/* Line 1455 of yacc.c  */
 #line 1857 "def.y"
     {defData->dumb_mode = DEF_MAX_INT; defData->no_num = DEF_MAX_INT; ;}
     break;
 
   case 289:
+
+/* Line 1455 of yacc.c  */
 #line 1859 "def.y"
     {
             if (defCallbacks->ComponentCbk)
@@ -5817,11 +5976,15 @@ yyreduce:
     break;
 
   case 290:
+
+/* Line 1455 of yacc.c  */
 #line 1865 "def.y"
     { ;}
     break;
 
   case 291:
+
+/* Line 1455 of yacc.c  */
 #line 1867 "def.y"
     {
               if (defCallbacks->ComponentCbk)
@@ -5830,6 +5993,8 @@ yyreduce:
     break;
 
   case 292:
+
+/* Line 1455 of yacc.c  */
 #line 1872 "def.y"
     {
               if (defCallbacks->ComponentCbk)
@@ -5838,6 +6003,8 @@ yyreduce:
     break;
 
   case 307:
+
+/* Line 1455 of yacc.c  */
 #line 1887 "def.y"
     {
           if (defCallbacks->ComponentCbk)
@@ -5847,11 +6014,15 @@ yyreduce:
     break;
 
   case 308:
+
+/* Line 1455 of yacc.c  */
 #line 1893 "def.y"
     {defData->dumb_mode=1; defData->no_num = 1; ;}
     break;
 
   case 309:
+
+/* Line 1455 of yacc.c  */
 #line 1894 "def.y"
     {
           if (defCallbacks->ComponentCbk)
@@ -5860,11 +6031,15 @@ yyreduce:
     break;
 
   case 310:
+
+/* Line 1455 of yacc.c  */
 #line 1899 "def.y"
     { defData->dumb_mode = 2;  defData->no_num = 2; ;}
     break;
 
   case 311:
+
+/* Line 1455 of yacc.c  */
 #line 1901 "def.y"
     {
           if (defCallbacks->ComponentCbk)
@@ -5873,16 +6048,22 @@ yyreduce:
     break;
 
   case 312:
+
+/* Line 1455 of yacc.c  */
 #line 1907 "def.y"
     { (yyval.string) = (char*)""; ;}
     break;
 
   case 313:
+
+/* Line 1455 of yacc.c  */
 #line 1909 "def.y"
     { (yyval.string) = (yyvsp[(1) - (1)].string); ;}
     break;
 
   case 314:
+
+/* Line 1455 of yacc.c  */
 #line 1912 "def.y"
     {
           if (defCallbacks->ComponentCbk)
@@ -5891,31 +6072,43 @@ yyreduce:
     break;
 
   case 315:
+
+/* Line 1455 of yacc.c  */
 #line 1918 "def.y"
     { (yyval.string) = (char*)"NETLIST"; ;}
     break;
 
   case 316:
+
+/* Line 1455 of yacc.c  */
 #line 1920 "def.y"
     { (yyval.string) = (char*)"DIST"; ;}
     break;
 
   case 317:
+
+/* Line 1455 of yacc.c  */
 #line 1922 "def.y"
     { (yyval.string) = (char*)"USER"; ;}
     break;
 
   case 318:
+
+/* Line 1455 of yacc.c  */
 #line 1924 "def.y"
     { (yyval.string) = (char*)"TIMING"; ;}
     break;
 
   case 319:
+
+/* Line 1455 of yacc.c  */
 #line 1929 "def.y"
     { ;}
     break;
 
   case 320:
+
+/* Line 1455 of yacc.c  */
 #line 1931 "def.y"
     {
           if (defCallbacks->ComponentCbk)
@@ -5924,6 +6117,8 @@ yyreduce:
     break;
 
   case 321:
+
+/* Line 1455 of yacc.c  */
 #line 1937 "def.y"
     { 
           // 11/12/2002 - this is obsolete in 5.5, & will be ignored 
@@ -5938,6 +6133,8 @@ yyreduce:
     break;
 
   case 322:
+
+/* Line 1455 of yacc.c  */
 #line 1948 "def.y"
     { 
           // 11/12/2002 - this is obsolete in 5.5, & will be ignored 
@@ -5952,6 +6149,8 @@ yyreduce:
     break;
 
   case 323:
+
+/* Line 1455 of yacc.c  */
 #line 1960 "def.y"
     {
           if (defData->VersionNum < 5.6) {
@@ -5970,6 +6169,8 @@ yyreduce:
     break;
 
   case 324:
+
+/* Line 1455 of yacc.c  */
 #line 1975 "def.y"
     {
           if (defCallbacks->ComponentCbk)
@@ -5979,6 +6180,8 @@ yyreduce:
     break;
 
   case 326:
+
+/* Line 1455 of yacc.c  */
 #line 1983 "def.y"
     {
         if (defData->VersionNum < 5.7) {
@@ -6000,11 +6203,15 @@ yyreduce:
     break;
 
   case 327:
+
+/* Line 1455 of yacc.c  */
 #line 2002 "def.y"
     { defData->dumb_mode = 2; defData->no_num = 2; ;}
     break;
 
   case 328:
+
+/* Line 1455 of yacc.c  */
 #line 2003 "def.y"
     {
         if (defData->VersionNum < 5.7) {
@@ -6027,16 +6234,22 @@ yyreduce:
     break;
 
   case 329:
+
+/* Line 1455 of yacc.c  */
 #line 2022 "def.y"
     { defData->dumb_mode = DEF_MAX_INT; ;}
     break;
 
   case 330:
+
+/* Line 1455 of yacc.c  */
 #line 2024 "def.y"
     { defData->dumb_mode = 0; ;}
     break;
 
   case 333:
+
+/* Line 1455 of yacc.c  */
 #line 2031 "def.y"
     {
           if (defCallbacks->ComponentCbk) {
@@ -6051,6 +6264,8 @@ yyreduce:
     break;
 
   case 334:
+
+/* Line 1455 of yacc.c  */
 #line 2042 "def.y"
     {
           if (defCallbacks->ComponentCbk) {
@@ -6063,6 +6278,8 @@ yyreduce:
     break;
 
   case 335:
+
+/* Line 1455 of yacc.c  */
 #line 2051 "def.y"
     {
           if (defCallbacks->ComponentCbk) {
@@ -6075,16 +6292,22 @@ yyreduce:
     break;
 
   case 336:
+
+/* Line 1455 of yacc.c  */
 #line 2061 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 337:
+
+/* Line 1455 of yacc.c  */
 #line 2063 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 338:
+
+/* Line 1455 of yacc.c  */
 #line 2065 "def.y"
     { 
           if (defData->VersionNum < 5.6) {
@@ -6100,16 +6323,22 @@ yyreduce:
     break;
 
   case 339:
+
+/* Line 1455 of yacc.c  */
 #line 2079 "def.y"
     { (yyval.pt) = (yyvsp[(1) - (1)].pt); ;}
     break;
 
   case 340:
+
+/* Line 1455 of yacc.c  */
 #line 2081 "def.y"
     { (yyval.pt).x = ROUND((yyvsp[(1) - (2)].dval)); (yyval.pt).y = ROUND((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 341:
+
+/* Line 1455 of yacc.c  */
 #line 2084 "def.y"
     {
           if (defCallbacks->ComponentCbk) {
@@ -6120,6 +6349,8 @@ yyreduce:
     break;
 
   case 342:
+
+/* Line 1455 of yacc.c  */
 #line 2091 "def.y"
     {
           if (defCallbacks->ComponentCbk)
@@ -6130,6 +6361,8 @@ yyreduce:
     break;
 
   case 343:
+
+/* Line 1455 of yacc.c  */
 #line 2098 "def.y"
     {
           if (defData->VersionNum < 5.4) {   // PCR 495463 
@@ -6146,6 +6379,8 @@ yyreduce:
     break;
 
   case 344:
+
+/* Line 1455 of yacc.c  */
 #line 2112 "def.y"
     {  
           if (defCallbacks->ComponentCbk) {
@@ -6157,21 +6392,29 @@ yyreduce:
     break;
 
   case 345:
+
+/* Line 1455 of yacc.c  */
 #line 2121 "def.y"
     { (yyval.integer) = DEFI_COMPONENT_FIXED; ;}
     break;
 
   case 346:
+
+/* Line 1455 of yacc.c  */
 #line 2123 "def.y"
     { (yyval.integer) = DEFI_COMPONENT_COVER; ;}
     break;
 
   case 347:
+
+/* Line 1455 of yacc.c  */
 #line 2125 "def.y"
     { (yyval.integer) = DEFI_COMPONENT_PLACED; ;}
     break;
 
   case 348:
+
+/* Line 1455 of yacc.c  */
 #line 2128 "def.y"
     {
           if (defCallbacks->ComponentCbk)
@@ -6180,6 +6423,8 @@ yyreduce:
     break;
 
   case 349:
+
+/* Line 1455 of yacc.c  */
 #line 2134 "def.y"
     { 
           if (defCallbacks->ComponentCbk)
@@ -6188,6 +6433,8 @@ yyreduce:
     break;
 
   case 351:
+
+/* Line 1455 of yacc.c  */
 #line 2143 "def.y"
     { 
           if (defCallbacks->NetStartCbk)
@@ -6197,6 +6444,8 @@ yyreduce:
     break;
 
   case 354:
+
+/* Line 1455 of yacc.c  */
 #line 2154 "def.y"
     { 
           if (defCallbacks->NetCbk)
@@ -6205,16 +6454,22 @@ yyreduce:
     break;
 
   case 355:
+
+/* Line 1455 of yacc.c  */
 #line 2165 "def.y"
     {defData->dumb_mode = 0; defData->no_num = 0; ;}
     break;
 
   case 356:
+
+/* Line 1455 of yacc.c  */
 #line 2168 "def.y"
     {defData->dumb_mode = DEF_MAX_INT; defData->no_num = DEF_MAX_INT; defData->nondef_is_keyword = TRUE; defData->mustjoin_is_keyword = TRUE;;}
     break;
 
   case 358:
+
+/* Line 1455 of yacc.c  */
 #line 2171 "def.y"
     {
           // 9/22/1999 
@@ -6227,11 +6482,15 @@ yyreduce:
     break;
 
   case 360:
+
+/* Line 1455 of yacc.c  */
 #line 2179 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1;;}
     break;
 
   case 361:
+
+/* Line 1455 of yacc.c  */
 #line 2180 "def.y"
     {
           if ((defCallbacks->NetCbk && (defData->netOsnet==1)) || (defCallbacks->SNetCbk && (defData->netOsnet==2)))
@@ -6242,11 +6501,15 @@ yyreduce:
     break;
 
   case 364:
+
+/* Line 1455 of yacc.c  */
 #line 2191 "def.y"
     {defData->dumb_mode = DEF_MAX_INT; defData->no_num = DEF_MAX_INT;;}
     break;
 
   case 365:
+
+/* Line 1455 of yacc.c  */
 #line 2193 "def.y"
     {
           // 9/22/1999 
@@ -6263,11 +6526,15 @@ yyreduce:
     break;
 
   case 366:
+
+/* Line 1455 of yacc.c  */
 #line 2205 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1;;}
     break;
 
   case 367:
+
+/* Line 1455 of yacc.c  */
 #line 2206 "def.y"
     {
           if ((defCallbacks->NetCbk && (defData->netOsnet==1)) || (defCallbacks->SNetCbk && (defData->netOsnet==2)))
@@ -6278,11 +6545,15 @@ yyreduce:
     break;
 
   case 368:
+
+/* Line 1455 of yacc.c  */
 #line 2212 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1;;}
     break;
 
   case 369:
+
+/* Line 1455 of yacc.c  */
 #line 2213 "def.y"
     {
           if ((defCallbacks->NetCbk && (defData->netOsnet==1)) || (defCallbacks->SNetCbk && (defData->netOsnet==2)))
@@ -6293,11 +6564,15 @@ yyreduce:
     break;
 
   case 370:
+
+/* Line 1455 of yacc.c  */
 #line 2221 "def.y"
     { (yyval.integer) = 0; ;}
     break;
 
   case 371:
+
+/* Line 1455 of yacc.c  */
 #line 2223 "def.y"
     {
           if (defCallbacks->NetConnectionExtCbk)
@@ -6308,11 +6583,15 @@ yyreduce:
     break;
 
   case 372:
+
+/* Line 1455 of yacc.c  */
 #line 2230 "def.y"
     { (yyval.integer) = 1; ;}
     break;
 
   case 375:
+
+/* Line 1455 of yacc.c  */
 #line 2239 "def.y"
     {  
           if (defCallbacks->NetCbk) defData->Net.addWire((yyvsp[(2) - (2)].string), NULL);
@@ -6320,6 +6599,8 @@ yyreduce:
     break;
 
   case 376:
+
+/* Line 1455 of yacc.c  */
 #line 2243 "def.y"
     {
           defData->by_is_keyword = FALSE;
@@ -6337,11 +6618,15 @@ yyreduce:
     break;
 
   case 377:
+
+/* Line 1455 of yacc.c  */
 #line 2258 "def.y"
     { if (defCallbacks->NetCbk) defData->Net.setSource((yyvsp[(3) - (3)].string)); ;}
     break;
 
   case 378:
+
+/* Line 1455 of yacc.c  */
 #line 2261 "def.y"
     {
           if (defData->VersionNum < 5.5) {
@@ -6361,11 +6646,15 @@ yyreduce:
     break;
 
   case 379:
+
+/* Line 1455 of yacc.c  */
 #line 2277 "def.y"
     { defData->real_num = 1; ;}
     break;
 
   case 380:
+
+/* Line 1455 of yacc.c  */
 #line 2278 "def.y"
     {
           if (defData->VersionNum < 5.5) {
@@ -6386,51 +6675,71 @@ yyreduce:
     break;
 
   case 381:
+
+/* Line 1455 of yacc.c  */
 #line 2295 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1;;}
     break;
 
   case 382:
+
+/* Line 1455 of yacc.c  */
 #line 2296 "def.y"
     { if (defCallbacks->NetCbk) defData->Net.setOriginal((yyvsp[(4) - (4)].string)); ;}
     break;
 
   case 383:
+
+/* Line 1455 of yacc.c  */
 #line 2299 "def.y"
     { if (defCallbacks->NetCbk) defData->Net.setPattern((yyvsp[(3) - (3)].string)); ;}
     break;
 
   case 384:
+
+/* Line 1455 of yacc.c  */
 #line 2302 "def.y"
     { if (defCallbacks->NetCbk) defData->Net.setWeight(ROUND((yyvsp[(3) - (3)].dval))); ;}
     break;
 
   case 385:
+
+/* Line 1455 of yacc.c  */
 #line 2305 "def.y"
     { if (defCallbacks->NetCbk) defData->Net.setXTalk(ROUND((yyvsp[(3) - (3)].dval))); ;}
     break;
 
   case 386:
+
+/* Line 1455 of yacc.c  */
 #line 2308 "def.y"
     { if (defCallbacks->NetCbk) defData->Net.setCap((yyvsp[(3) - (3)].dval)); ;}
     break;
 
   case 387:
+
+/* Line 1455 of yacc.c  */
 #line 2311 "def.y"
     { if (defCallbacks->NetCbk) defData->Net.setUse((yyvsp[(3) - (3)].string)); ;}
     break;
 
   case 388:
+
+/* Line 1455 of yacc.c  */
 #line 2314 "def.y"
     { if (defCallbacks->NetCbk) defData->Net.setStyle((int)(yyvsp[(3) - (3)].dval)); ;}
     break;
 
   case 389:
+
+/* Line 1455 of yacc.c  */
 #line 2316 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 390:
+
+/* Line 1455 of yacc.c  */
 #line 2317 "def.y"
     { 
           if (defCallbacks->NetCbk && defCallbacks->NetNonDefaultRuleCbk) {
@@ -6444,21 +6753,29 @@ yyreduce:
     break;
 
   case 392:
+
+/* Line 1455 of yacc.c  */
 #line 2329 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 393:
+
+/* Line 1455 of yacc.c  */
 #line 2330 "def.y"
     { if (defCallbacks->NetCbk) defData->Net.addShieldNet((yyvsp[(4) - (4)].string)); ;}
     break;
 
   case 394:
+
+/* Line 1455 of yacc.c  */
 #line 2332 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 395:
+
+/* Line 1455 of yacc.c  */
 #line 2333 "def.y"
     { // since the parser still support 5.3 and earlier, can't 
           // move NOSHIELD in net_type 
@@ -6479,6 +6796,8 @@ yyreduce:
     break;
 
   case 396:
+
+/* Line 1455 of yacc.c  */
 #line 2350 "def.y"
     {
           if (defData->VersionNum < 5.4) {   // PCR 445209 
@@ -6510,6 +6829,8 @@ yyreduce:
     break;
 
   case 397:
+
+/* Line 1455 of yacc.c  */
 #line 2379 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1;
           if (defCallbacks->NetCbk) {
@@ -6520,6 +6841,8 @@ yyreduce:
     break;
 
   case 398:
+
+/* Line 1455 of yacc.c  */
 #line 2385 "def.y"
     {
           if (defCallbacks->NetCbk && defCallbacks->NetSubnetNameCbk) {
@@ -6534,6 +6857,8 @@ yyreduce:
     break;
 
   case 399:
+
+/* Line 1455 of yacc.c  */
 #line 2395 "def.y"
     {
           defData->routed_is_keyword = TRUE;
@@ -6543,6 +6868,8 @@ yyreduce:
     break;
 
   case 400:
+
+/* Line 1455 of yacc.c  */
 #line 2399 "def.y"
     {
           if (defCallbacks->NetCbk) {
@@ -6556,16 +6883,22 @@ yyreduce:
     break;
 
   case 401:
+
+/* Line 1455 of yacc.c  */
 #line 2409 "def.y"
     {defData->dumb_mode = DEF_MAX_INT; ;}
     break;
 
   case 402:
+
+/* Line 1455 of yacc.c  */
 #line 2411 "def.y"
     { defData->dumb_mode = 0; ;}
     break;
 
   case 403:
+
+/* Line 1455 of yacc.c  */
 #line 2414 "def.y"
     { 
           if (defCallbacks->NetExtCbk)
@@ -6574,6 +6907,8 @@ yyreduce:
     break;
 
   case 406:
+
+/* Line 1455 of yacc.c  */
 #line 2424 "def.y"
     {
           if (defCallbacks->NetCbk) {
@@ -6588,6 +6923,8 @@ yyreduce:
     break;
 
   case 407:
+
+/* Line 1455 of yacc.c  */
 #line 2435 "def.y"
     {
           if (defCallbacks->NetCbk) {
@@ -6600,6 +6937,8 @@ yyreduce:
     break;
 
   case 408:
+
+/* Line 1455 of yacc.c  */
 #line 2444 "def.y"
     {
           if (defCallbacks->NetCbk) {
@@ -6612,31 +6951,43 @@ yyreduce:
     break;
 
   case 409:
+
+/* Line 1455 of yacc.c  */
 #line 2454 "def.y"
     { (yyval.string) = (char*)"NETLIST"; ;}
     break;
 
   case 410:
+
+/* Line 1455 of yacc.c  */
 #line 2456 "def.y"
     { (yyval.string) = (char*)"DIST"; ;}
     break;
 
   case 411:
+
+/* Line 1455 of yacc.c  */
 #line 2458 "def.y"
     { (yyval.string) = (char*)"USER"; ;}
     break;
 
   case 412:
+
+/* Line 1455 of yacc.c  */
 #line 2460 "def.y"
     { (yyval.string) = (char*)"TIMING"; ;}
     break;
 
   case 413:
+
+/* Line 1455 of yacc.c  */
 #line 2462 "def.y"
     { (yyval.string) = (char*)"TEST"; ;}
     break;
 
   case 414:
+
+/* Line 1455 of yacc.c  */
 #line 2465 "def.y"
     {
           // vpin_options may have to deal with orient 
@@ -6645,6 +6996,8 @@ yyreduce:
     break;
 
   case 415:
+
+/* Line 1455 of yacc.c  */
 #line 2470 "def.y"
     { if (defCallbacks->NetCbk)
             defData->Net.addVpinBounds((yyvsp[(3) - (6)].pt).x, (yyvsp[(3) - (6)].pt).y, (yyvsp[(4) - (6)].pt).x, (yyvsp[(4) - (6)].pt).y);
@@ -6653,61 +7006,85 @@ yyreduce:
     break;
 
   case 416:
+
+/* Line 1455 of yacc.c  */
 #line 2475 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1;;}
     break;
 
   case 417:
+
+/* Line 1455 of yacc.c  */
 #line 2476 "def.y"
     { if (defCallbacks->NetCbk) defData->Net.addVpin((yyvsp[(4) - (4)].string)); ;}
     break;
 
   case 419:
+
+/* Line 1455 of yacc.c  */
 #line 2479 "def.y"
     {defData->dumb_mode=1;;}
     break;
 
   case 420:
+
+/* Line 1455 of yacc.c  */
 #line 2480 "def.y"
     { if (defCallbacks->NetCbk) defData->Net.addVpinLayer((yyvsp[(3) - (3)].string)); ;}
     break;
 
   case 422:
+
+/* Line 1455 of yacc.c  */
 #line 2484 "def.y"
     { if (defCallbacks->NetCbk) defData->Net.addVpinLoc((yyvsp[(1) - (3)].string), (yyvsp[(2) - (3)].pt).x, (yyvsp[(2) - (3)].pt).y, (yyvsp[(3) - (3)].integer)); ;}
     break;
 
   case 423:
+
+/* Line 1455 of yacc.c  */
 #line 2487 "def.y"
     { (yyval.string) = (char*)"PLACED"; ;}
     break;
 
   case 424:
+
+/* Line 1455 of yacc.c  */
 #line 2489 "def.y"
     { (yyval.string) = (char*)"FIXED"; ;}
     break;
 
   case 425:
+
+/* Line 1455 of yacc.c  */
 #line 2491 "def.y"
     { (yyval.string) = (char*)"COVER"; ;}
     break;
 
   case 426:
+
+/* Line 1455 of yacc.c  */
 #line 2494 "def.y"
     { (yyval.string) = (char*)"FIXED"; defData->dumb_mode = 1; ;}
     break;
 
   case 427:
+
+/* Line 1455 of yacc.c  */
 #line 2496 "def.y"
     { (yyval.string) = (char*)"COVER"; defData->dumb_mode = 1; ;}
     break;
 
   case 428:
+
+/* Line 1455 of yacc.c  */
 #line 2498 "def.y"
     { (yyval.string) = (char*)"ROUTED"; defData->dumb_mode = 1; ;}
     break;
 
   case 429:
+
+/* Line 1455 of yacc.c  */
 #line 2502 "def.y"
     { if (defData->NeedPathData && defCallbacks->NetCbk)
           pathIsDone(defData->shield, 0, defData->netOsnet, &defData->needNPCbk);
@@ -6715,16 +7092,22 @@ yyreduce:
     break;
 
   case 430:
+
+/* Line 1455 of yacc.c  */
 #line 2506 "def.y"
     { ;}
     break;
 
   case 431:
+
+/* Line 1455 of yacc.c  */
 #line 2508 "def.y"
     { defData->dumb_mode = 1; ;}
     break;
 
   case 432:
+
+/* Line 1455 of yacc.c  */
 #line 2509 "def.y"
     { if (defData->NeedPathData && defCallbacks->NetCbk)
           pathIsDone(defData->shield, 0, defData->netOsnet, &defData->needNPCbk);
@@ -6732,6 +7115,8 @@ yyreduce:
     break;
 
   case 433:
+
+/* Line 1455 of yacc.c  */
 #line 2514 "def.y"
     {
         if ((strcmp((yyvsp[(1) - (1)].string), "TAPER") == 0) || (strcmp((yyvsp[(1) - (1)].string), "TAPERRULE") == 0)) {
@@ -6754,6 +7139,8 @@ yyreduce:
     break;
 
   case 434:
+
+/* Line 1455 of yacc.c  */
 #line 2533 "def.y"
     { defData->dumb_mode = DEF_MAX_INT; defData->by_is_keyword = TRUE; defData->do_is_keyword = TRUE;
 /*
@@ -6765,12 +7152,16 @@ yyreduce:
     break;
 
   case 435:
+
+/* Line 1455 of yacc.c  */
 #line 2543 "def.y"
     { defData->dumb_mode = 0;   defData->virtual_is_keyword = FALSE; defData->mask_is_keyword = FALSE,
        defData->rect_is_keyword = FALSE; ;}
     break;
 
   case 436:
+
+/* Line 1455 of yacc.c  */
 #line 2548 "def.y"
     {
       if (defData->VersionNum < 5.8) {
@@ -6789,6 +7180,8 @@ yyreduce:
     break;
 
   case 437:
+
+/* Line 1455 of yacc.c  */
 #line 2565 "def.y"
     {
       if (defData->VersionNum < 5.8) {
@@ -6807,6 +7200,8 @@ yyreduce:
     break;
 
   case 440:
+
+/* Line 1455 of yacc.c  */
 #line 2588 "def.y"
     {
         if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
@@ -6821,6 +7216,8 @@ yyreduce:
     break;
 
   case 441:
+
+/* Line 1455 of yacc.c  */
 #line 2599 "def.y"
     {
         if (validateMaskInput((int)(yyvsp[(2) - (3)].dval), defData->sNetWarnings, defSettings->SNetWarnings)) {
@@ -6838,6 +7235,8 @@ yyreduce:
     break;
 
   case 442:
+
+/* Line 1455 of yacc.c  */
 #line 2613 "def.y"
     { if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
             (defCallbacks->SNetCbk && (defData->netOsnet==2)))) {
@@ -6848,6 +7247,8 @@ yyreduce:
     break;
 
   case 443:
+
+/* Line 1455 of yacc.c  */
 #line 2620 "def.y"
     { 
         if (validateMaskInput((int)(yyvsp[(2) - (4)].dval), defData->sNetWarnings, defSettings->SNetWarnings)) {
@@ -6862,6 +7263,8 @@ yyreduce:
     break;
 
   case 444:
+
+/* Line 1455 of yacc.c  */
 #line 2631 "def.y"
     {
         if (validateMaskInput((int)(yyvsp[(2) - (10)].dval), defData->sNetWarnings, defSettings->SNetWarnings)) {      
@@ -6889,6 +7292,8 @@ yyreduce:
     break;
 
   case 445:
+
+/* Line 1455 of yacc.c  */
 #line 2655 "def.y"
     {
         if (defData->VersionNum < 5.5) {
@@ -6926,6 +7331,8 @@ yyreduce:
     break;
 
   case 446:
+
+/* Line 1455 of yacc.c  */
 #line 2689 "def.y"
     {
         if (defData->VersionNum < 5.5) {
@@ -6963,6 +7370,8 @@ yyreduce:
     break;
 
   case 447:
+
+/* Line 1455 of yacc.c  */
 #line 2723 "def.y"
     {
         if (validateMaskInput((int)(yyvsp[(2) - (11)].dval), defData->sNetWarnings, defSettings->SNetWarnings)) {
@@ -6991,11 +7400,15 @@ yyreduce:
     break;
 
   case 450:
+
+/* Line 1455 of yacc.c  */
 #line 2749 "def.y"
     { defData->dumb_mode = 6; ;}
     break;
 
   case 451:
+
+/* Line 1455 of yacc.c  */
 #line 2750 "def.y"
     {
       if (validateMaskInput((int)(yyvsp[(2) - (10)].dval), defData->sNetWarnings, defSettings->SNetWarnings)) {
@@ -7009,6 +7422,8 @@ yyreduce:
     break;
 
   case 452:
+
+/* Line 1455 of yacc.c  */
 #line 2760 "def.y"
     {
        if (validateMaskInput((int)(yyvsp[(2) - (2)].dval), defData->sNetWarnings, defSettings->SNetWarnings)) {
@@ -7021,6 +7436,8 @@ yyreduce:
     break;
 
   case 454:
+
+/* Line 1455 of yacc.c  */
 #line 2770 "def.y"
     {
        // reset defData->dumb_mode to 1 just incase the next token is a via of the path
@@ -7032,6 +7449,8 @@ yyreduce:
     break;
 
   case 455:
+
+/* Line 1455 of yacc.c  */
 #line 2781 "def.y"
     {
         if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
@@ -7043,6 +7462,8 @@ yyreduce:
     break;
 
   case 456:
+
+/* Line 1455 of yacc.c  */
 #line 2789 "def.y"
     {
         if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
@@ -7053,6 +7474,8 @@ yyreduce:
     break;
 
   case 457:
+
+/* Line 1455 of yacc.c  */
 #line 2796 "def.y"
     {
         if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
@@ -7063,6 +7486,8 @@ yyreduce:
     break;
 
   case 458:
+
+/* Line 1455 of yacc.c  */
 #line 2803 "def.y"
     {
         if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
@@ -7072,6 +7497,8 @@ yyreduce:
     break;
 
   case 459:
+
+/* Line 1455 of yacc.c  */
 #line 2809 "def.y"
     {
         if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
@@ -7083,6 +7510,8 @@ yyreduce:
     break;
 
   case 460:
+
+/* Line 1455 of yacc.c  */
 #line 2817 "def.y"
     {
         if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
@@ -7094,6 +7523,8 @@ yyreduce:
     break;
 
   case 461:
+
+/* Line 1455 of yacc.c  */
 #line 2825 "def.y"
     {
         if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
@@ -7105,6 +7536,8 @@ yyreduce:
     break;
 
   case 462:
+
+/* Line 1455 of yacc.c  */
 #line 2833 "def.y"
     {
         if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
@@ -7115,6 +7548,8 @@ yyreduce:
     break;
 
   case 463:
+
+/* Line 1455 of yacc.c  */
 #line 2842 "def.y"
     {
         if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
@@ -7126,6 +7561,8 @@ yyreduce:
     break;
 
   case 464:
+
+/* Line 1455 of yacc.c  */
 #line 2850 "def.y"
     {
         if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
@@ -7136,6 +7573,8 @@ yyreduce:
     break;
 
   case 465:
+
+/* Line 1455 of yacc.c  */
 #line 2857 "def.y"
     {
         if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
@@ -7146,6 +7585,8 @@ yyreduce:
     break;
 
   case 466:
+
+/* Line 1455 of yacc.c  */
 #line 2864 "def.y"
     {
         if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
@@ -7155,6 +7596,8 @@ yyreduce:
     break;
 
   case 467:
+
+/* Line 1455 of yacc.c  */
 #line 2872 "def.y"
     {
         if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
@@ -7165,6 +7608,8 @@ yyreduce:
     break;
 
   case 472:
+
+/* Line 1455 of yacc.c  */
 #line 2888 "def.y"
     { if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
           (defCallbacks->SNetCbk && (defData->netOsnet==2))))
@@ -7172,11 +7617,15 @@ yyreduce:
     break;
 
   case 473:
+
+/* Line 1455 of yacc.c  */
 #line 2891 "def.y"
     { defData->dumb_mode = 1; ;}
     break;
 
   case 474:
+
+/* Line 1455 of yacc.c  */
 #line 2892 "def.y"
     { if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
           (defCallbacks->SNetCbk && (defData->netOsnet==2))))
@@ -7184,6 +7633,8 @@ yyreduce:
     break;
 
   case 475:
+
+/* Line 1455 of yacc.c  */
 #line 2897 "def.y"
     { 
         if (defData->VersionNum < 5.6) {
@@ -7206,6 +7657,8 @@ yyreduce:
     break;
 
   case 478:
+
+/* Line 1455 of yacc.c  */
 #line 2922 "def.y"
     { if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
           (defCallbacks->SNetCbk && (defData->netOsnet==2))))
@@ -7213,6 +7666,8 @@ yyreduce:
     break;
 
   case 479:
+
+/* Line 1455 of yacc.c  */
 #line 2926 "def.y"
     { if (defData->VersionNum < 5.6) {
           if (defData->NeedPathData && ((defCallbacks->NetCbk && (defData->netOsnet==1)) ||
@@ -7235,6 +7690,8 @@ yyreduce:
     break;
 
   case 480:
+
+/* Line 1455 of yacc.c  */
 #line 2946 "def.y"
     { 
             CALLBACK(defCallbacks->NetEndCbk, defrNetEndCbkType, 0);
@@ -7243,41 +7700,57 @@ yyreduce:
     break;
 
   case 481:
+
+/* Line 1455 of yacc.c  */
 #line 2952 "def.y"
     { (yyval.string) = (char*)"RING"; ;}
     break;
 
   case 482:
+
+/* Line 1455 of yacc.c  */
 #line 2954 "def.y"
     { (yyval.string) = (char*)"STRIPE"; ;}
     break;
 
   case 483:
+
+/* Line 1455 of yacc.c  */
 #line 2956 "def.y"
     { (yyval.string) = (char*)"FOLLOWPIN"; ;}
     break;
 
   case 484:
+
+/* Line 1455 of yacc.c  */
 #line 2958 "def.y"
     { (yyval.string) = (char*)"IOWIRE"; ;}
     break;
 
   case 485:
+
+/* Line 1455 of yacc.c  */
 #line 2960 "def.y"
     { (yyval.string) = (char*)"COREWIRE"; ;}
     break;
 
   case 486:
+
+/* Line 1455 of yacc.c  */
 #line 2962 "def.y"
     { (yyval.string) = (char*)"BLOCKWIRE"; ;}
     break;
 
   case 487:
+
+/* Line 1455 of yacc.c  */
 #line 2964 "def.y"
     { (yyval.string) = (char*)"FILLWIRE"; ;}
     break;
 
   case 488:
+
+/* Line 1455 of yacc.c  */
 #line 2966 "def.y"
     {
               if (defData->VersionNum < 5.7) {
@@ -7297,31 +7770,43 @@ yyreduce:
     break;
 
   case 489:
+
+/* Line 1455 of yacc.c  */
 #line 2982 "def.y"
     { (yyval.string) = (char*)"DRCFILL"; ;}
     break;
 
   case 490:
+
+/* Line 1455 of yacc.c  */
 #line 2984 "def.y"
     { (yyval.string) = (char*)"BLOCKAGEWIRE"; ;}
     break;
 
   case 491:
+
+/* Line 1455 of yacc.c  */
 #line 2986 "def.y"
     { (yyval.string) = (char*)"PADRING"; ;}
     break;
 
   case 492:
+
+/* Line 1455 of yacc.c  */
 #line 2988 "def.y"
     { (yyval.string) = (char*)"BLOCKRING"; ;}
     break;
 
   case 496:
+
+/* Line 1455 of yacc.c  */
 #line 2998 "def.y"
     { CALLBACK(defCallbacks->SNetCbk, defrSNetCbkType, &defData->Net); ;}
     break;
 
   case 503:
+
+/* Line 1455 of yacc.c  */
 #line 3009 "def.y"
     {
              if (defData->VersionNum >= 5.8) {
@@ -7338,6 +7823,8 @@ yyreduce:
     break;
 
   case 504:
+
+/* Line 1455 of yacc.c  */
 #line 3022 "def.y"
     {
             if (defCallbacks->SNetCbk) defData->Net.addWire((yyvsp[(2) - (2)].string), NULL);
@@ -7345,6 +7832,8 @@ yyreduce:
     break;
 
   case 505:
+
+/* Line 1455 of yacc.c  */
 #line 3026 "def.y"
     {
             // 7/17/2003 - Fix for pcr 604848, add a callback for each wire
@@ -7365,11 +7854,15 @@ yyreduce:
     break;
 
   case 506:
+
+/* Line 1455 of yacc.c  */
 #line 3043 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 507:
+
+/* Line 1455 of yacc.c  */
 #line 3044 "def.y"
     { defData->shieldName = (yyvsp[(4) - (4)].string); 
               defData->specialWire_routeStatus = (char*)"SHIELD";
@@ -7378,6 +7871,8 @@ yyreduce:
     break;
 
   case 509:
+
+/* Line 1455 of yacc.c  */
 #line 3051 "def.y"
     {  
             defData->specialWire_shapeType = (yyvsp[(3) - (3)].string);
@@ -7385,6 +7880,8 @@ yyreduce:
     break;
 
   case 510:
+
+/* Line 1455 of yacc.c  */
 #line 3055 "def.y"
     {
             if (validateMaskInput((int)(yyvsp[(3) - (3)].dval), defData->sNetWarnings, defSettings->SNetWarnings)) {
@@ -7394,11 +7891,15 @@ yyreduce:
     break;
 
   case 511:
+
+/* Line 1455 of yacc.c  */
 #line 3060 "def.y"
     { defData->dumb_mode = 1; ;}
     break;
 
   case 512:
+
+/* Line 1455 of yacc.c  */
 #line 3061 "def.y"
     {
             if (defData->VersionNum < 5.6) {
@@ -7419,6 +7920,8 @@ yyreduce:
     break;
 
   case 513:
+
+/* Line 1455 of yacc.c  */
 #line 3078 "def.y"
     {
             if (defData->VersionNum >= 5.6) {  // only add if 5.6 or beyond
@@ -7445,11 +7948,15 @@ yyreduce:
     break;
 
   case 514:
+
+/* Line 1455 of yacc.c  */
 #line 3101 "def.y"
     { defData->dumb_mode = 1; ;}
     break;
 
   case 515:
+
+/* Line 1455 of yacc.c  */
 #line 3102 "def.y"
     {
             if (defData->VersionNum < 5.6) {
@@ -7486,11 +7993,15 @@ yyreduce:
     break;
 
   case 516:
+
+/* Line 1455 of yacc.c  */
 #line 3134 "def.y"
     { defData->dumb_mode = 1; ;}
     break;
 
   case 517:
+
+/* Line 1455 of yacc.c  */
 #line 3135 "def.y"
     {
           if (defData->VersionNum < 5.8) {
@@ -7509,6 +8020,8 @@ yyreduce:
     break;
 
   case 518:
+
+/* Line 1455 of yacc.c  */
 #line 3150 "def.y"
     {
           if (defData->VersionNum >= 5.8 && defCallbacks->SNetCbk) {
@@ -7529,41 +8042,57 @@ yyreduce:
     break;
 
   case 519:
+
+/* Line 1455 of yacc.c  */
 #line 3168 "def.y"
     { if (defCallbacks->SNetCbk) defData->Net.setSource((yyvsp[(3) - (3)].string)); ;}
     break;
 
   case 520:
+
+/* Line 1455 of yacc.c  */
 #line 3171 "def.y"
     { if (defCallbacks->SNetCbk) defData->Net.setFixedbump(); ;}
     break;
 
   case 521:
+
+/* Line 1455 of yacc.c  */
 #line 3174 "def.y"
     { if (defCallbacks->SNetCbk) defData->Net.setFrequency((yyvsp[(3) - (3)].dval)); ;}
     break;
 
   case 522:
+
+/* Line 1455 of yacc.c  */
 #line 3176 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1;;}
     break;
 
   case 523:
+
+/* Line 1455 of yacc.c  */
 #line 3177 "def.y"
     { if (defCallbacks->SNetCbk) defData->Net.setOriginal((yyvsp[(4) - (4)].string)); ;}
     break;
 
   case 524:
+
+/* Line 1455 of yacc.c  */
 #line 3180 "def.y"
     { if (defCallbacks->SNetCbk) defData->Net.setPattern((yyvsp[(3) - (3)].string)); ;}
     break;
 
   case 525:
+
+/* Line 1455 of yacc.c  */
 #line 3183 "def.y"
     { if (defCallbacks->SNetCbk) defData->Net.setWeight(ROUND((yyvsp[(3) - (3)].dval))); ;}
     break;
 
   case 526:
+
+/* Line 1455 of yacc.c  */
 #line 3186 "def.y"
     { 
               // 11/12/2002 - this is obsolete in 5.5, & will be ignored 
@@ -7575,76 +8104,106 @@ yyreduce:
     break;
 
   case 527:
+
+/* Line 1455 of yacc.c  */
 #line 3195 "def.y"
     { if (defCallbacks->SNetCbk) defData->Net.setUse((yyvsp[(3) - (3)].string)); ;}
     break;
 
   case 528:
+
+/* Line 1455 of yacc.c  */
 #line 3198 "def.y"
     { if (defCallbacks->SNetCbk) defData->Net.setStyle((int)(yyvsp[(3) - (3)].dval)); ;}
     break;
 
   case 529:
+
+/* Line 1455 of yacc.c  */
 #line 3200 "def.y"
     {defData->dumb_mode = DEF_MAX_INT; ;}
     break;
 
   case 530:
+
+/* Line 1455 of yacc.c  */
 #line 3202 "def.y"
     { defData->dumb_mode = 0; ;}
     break;
 
   case 531:
+
+/* Line 1455 of yacc.c  */
 #line 3205 "def.y"
     { CALLBACK(defCallbacks->NetExtCbk, defrNetExtCbkType, &defData->History_text[0]); ;}
     break;
 
   case 532:
+
+/* Line 1455 of yacc.c  */
 #line 3208 "def.y"
     { (yyval.integer) = 0; ;}
     break;
 
   case 533:
+
+/* Line 1455 of yacc.c  */
 #line 3209 "def.y"
     {(yyval.integer) = 0;;}
     break;
 
   case 534:
+
+/* Line 1455 of yacc.c  */
 #line 3210 "def.y"
     {(yyval.integer) = 1;;}
     break;
 
   case 535:
+
+/* Line 1455 of yacc.c  */
 #line 3211 "def.y"
     {(yyval.integer) = 2;;}
     break;
 
   case 536:
+
+/* Line 1455 of yacc.c  */
 #line 3212 "def.y"
     {(yyval.integer) = 3;;}
     break;
 
   case 537:
+
+/* Line 1455 of yacc.c  */
 #line 3213 "def.y"
     {(yyval.integer) = 4;;}
     break;
 
   case 538:
+
+/* Line 1455 of yacc.c  */
 #line 3214 "def.y"
     {(yyval.integer) = 5;;}
     break;
 
   case 539:
+
+/* Line 1455 of yacc.c  */
 #line 3215 "def.y"
     {(yyval.integer) = 6;;}
     break;
 
   case 540:
+
+/* Line 1455 of yacc.c  */
 #line 3216 "def.y"
     {(yyval.integer) = 7;;}
     break;
 
   case 541:
+
+/* Line 1455 of yacc.c  */
 #line 3219 "def.y"
     {
                 if (defCallbacks->SNetCbk) {
@@ -7662,6 +8221,8 @@ yyreduce:
     break;
 
   case 542:
+
+/* Line 1455 of yacc.c  */
 #line 3233 "def.y"
     { // since the parser still supports 5.3 and earlier, 
               // can't just move SHIELD in net_type 
@@ -7686,6 +8247,8 @@ yyreduce:
     break;
 
   case 543:
+
+/* Line 1455 of yacc.c  */
 #line 3254 "def.y"
     {
               // 7/17/2003 - Fix for pcr 604848, add a callback for each wire
@@ -7723,11 +8286,15 @@ yyreduce:
     break;
 
   case 544:
+
+/* Line 1455 of yacc.c  */
 #line 3288 "def.y"
     { defData->dumb_mode = 1; ;}
     break;
 
   case 545:
+
+/* Line 1455 of yacc.c  */
 #line 3289 "def.y"
     {
               // 11/12/2002 - this is obsolete in 5.5, & will be ignored 
@@ -7739,11 +8306,15 @@ yyreduce:
     break;
 
   case 546:
+
+/* Line 1455 of yacc.c  */
 #line 3297 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 547:
+
+/* Line 1455 of yacc.c  */
 #line 3298 "def.y"
     {
               if (numIsInt((yyvsp[(4) - (4)].string))) {
@@ -7764,11 +8335,15 @@ yyreduce:
     break;
 
   case 548:
+
+/* Line 1455 of yacc.c  */
 #line 3315 "def.y"
     { defData->dumb_mode = 1; ;}
     break;
 
   case 549:
+
+/* Line 1455 of yacc.c  */
 #line 3316 "def.y"
     {
               if (defCallbacks->SNetCbk) defData->Net.setSpacing((yyvsp[(4) - (5)].string),(yyvsp[(5) - (5)].dval));
@@ -7776,12 +8351,16 @@ yyreduce:
     break;
 
   case 550:
+
+/* Line 1455 of yacc.c  */
 #line 3320 "def.y"
     {
             ;}
     break;
 
   case 553:
+
+/* Line 1455 of yacc.c  */
 #line 3328 "def.y"
     {
               if (defCallbacks->SNetCbk) {
@@ -7797,6 +8376,8 @@ yyreduce:
     break;
 
   case 554:
+
+/* Line 1455 of yacc.c  */
 #line 3340 "def.y"
     {
               if (defCallbacks->SNetCbk) {
@@ -7809,6 +8390,8 @@ yyreduce:
     break;
 
   case 555:
+
+/* Line 1455 of yacc.c  */
 #line 3349 "def.y"
     {
               if (defCallbacks->SNetCbk) {
@@ -7821,6 +8404,8 @@ yyreduce:
     break;
 
   case 557:
+
+/* Line 1455 of yacc.c  */
 #line 3360 "def.y"
     {
               if (defCallbacks->SNetCbk) defData->Net.setRange((yyvsp[(2) - (3)].dval),(yyvsp[(3) - (3)].dval));
@@ -7828,31 +8413,43 @@ yyreduce:
     break;
 
   case 559:
+
+/* Line 1455 of yacc.c  */
 #line 3366 "def.y"
     { defData->Prop.setRange((yyvsp[(2) - (3)].dval), (yyvsp[(3) - (3)].dval)); ;}
     break;
 
   case 560:
+
+/* Line 1455 of yacc.c  */
 #line 3369 "def.y"
     { (yyval.string) = (char*)"BALANCED"; ;}
     break;
 
   case 561:
+
+/* Line 1455 of yacc.c  */
 #line 3371 "def.y"
     { (yyval.string) = (char*)"STEINER"; ;}
     break;
 
   case 562:
+
+/* Line 1455 of yacc.c  */
 #line 3373 "def.y"
     { (yyval.string) = (char*)"TRUNK"; ;}
     break;
 
   case 563:
+
+/* Line 1455 of yacc.c  */
 #line 3375 "def.y"
     { (yyval.string) = (char*)"WIREDLOGIC"; ;}
     break;
 
   case 564:
+
+/* Line 1455 of yacc.c  */
 #line 3379 "def.y"
     { 
         if (defData->NeedPathData && defCallbacks->SNetCbk) {
@@ -7873,16 +8470,22 @@ yyreduce:
     break;
 
   case 565:
+
+/* Line 1455 of yacc.c  */
 #line 3396 "def.y"
     { ;}
     break;
 
   case 566:
+
+/* Line 1455 of yacc.c  */
 #line 3398 "def.y"
     { defData->dumb_mode = 1; ;}
     break;
 
   case 567:
+
+/* Line 1455 of yacc.c  */
 #line 3399 "def.y"
     { if (defData->NeedPathData && defCallbacks->SNetCbk) {
            if (defData->needSNPCbk && defCallbacks->SNetPartialPathCbk) {
@@ -7903,6 +8506,8 @@ yyreduce:
     break;
 
   case 568:
+
+/* Line 1455 of yacc.c  */
 #line 3417 "def.y"
     { if (defData->NeedPathData && defCallbacks->SNetCbk)
            defData->PathObj.addLayer((yyvsp[(1) - (1)].string));
@@ -7911,6 +8516,8 @@ yyreduce:
     break;
 
   case 569:
+
+/* Line 1455 of yacc.c  */
 #line 3425 "def.y"
     { defData->dumb_mode = DEF_MAX_INT; defData->by_is_keyword = TRUE; defData->do_is_keyword = TRUE;
         defData->new_is_keyword = TRUE; defData->step_is_keyword = TRUE;
@@ -7919,11 +8526,15 @@ yyreduce:
     break;
 
   case 570:
+
+/* Line 1455 of yacc.c  */
 #line 3431 "def.y"
     { defData->dumb_mode = 0; defData->rect_is_keyword = FALSE, defData->mask_is_keyword = FALSE, defData->virtual_is_keyword = FALSE; ;}
     break;
 
   case 571:
+
+/* Line 1455 of yacc.c  */
 #line 3434 "def.y"
     { if (defData->NeedPathData && defCallbacks->SNetCbk)
           defData->PathObj.addWidth(ROUND((yyvsp[(1) - (1)].dval)));
@@ -7931,6 +8542,8 @@ yyreduce:
     break;
 
   case 572:
+
+/* Line 1455 of yacc.c  */
 #line 3439 "def.y"
     { 
         if (defCallbacks->SNetStartCbk)
@@ -7940,6 +8553,8 @@ yyreduce:
     break;
 
   case 573:
+
+/* Line 1455 of yacc.c  */
 #line 3446 "def.y"
     { 
         if (defCallbacks->SNetEndCbk)
@@ -7949,6 +8564,8 @@ yyreduce:
     break;
 
   case 575:
+
+/* Line 1455 of yacc.c  */
 #line 3456 "def.y"
     {
         if (defCallbacks->GroupsStartCbk)
@@ -7957,6 +8574,8 @@ yyreduce:
     break;
 
   case 578:
+
+/* Line 1455 of yacc.c  */
 #line 3466 "def.y"
     {
         if (defCallbacks->GroupCbk)
@@ -7965,11 +8584,15 @@ yyreduce:
     break;
 
   case 579:
+
+/* Line 1455 of yacc.c  */
 #line 3471 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 580:
+
+/* Line 1455 of yacc.c  */
 #line 3472 "def.y"
     {
         defData->dumb_mode = DEF_MAX_INT;
@@ -7983,11 +8606,15 @@ yyreduce:
     break;
 
   case 582:
+
+/* Line 1455 of yacc.c  */
 #line 3484 "def.y"
     {  ;}
     break;
 
   case 583:
+
+/* Line 1455 of yacc.c  */
 #line 3487 "def.y"
     {
         // if (defCallbacks->GroupCbk) defData->Group.addMember($1); 
@@ -7997,31 +8624,43 @@ yyreduce:
     break;
 
   case 586:
+
+/* Line 1455 of yacc.c  */
 #line 3498 "def.y"
     { ;}
     break;
 
   case 587:
+
+/* Line 1455 of yacc.c  */
 #line 3499 "def.y"
     { defData->dumb_mode = DEF_MAX_INT; ;}
     break;
 
   case 588:
+
+/* Line 1455 of yacc.c  */
 #line 3501 "def.y"
     { defData->dumb_mode = 0; ;}
     break;
 
   case 589:
+
+/* Line 1455 of yacc.c  */
 #line 3502 "def.y"
     { defData->dumb_mode = 1;  defData->no_num = 1; ;}
     break;
 
   case 590:
+
+/* Line 1455 of yacc.c  */
 #line 3503 "def.y"
     { ;}
     break;
 
   case 591:
+
+/* Line 1455 of yacc.c  */
 #line 3505 "def.y"
     { 
         if (defCallbacks->GroupMemberCbk)
@@ -8030,6 +8669,8 @@ yyreduce:
     break;
 
   case 592:
+
+/* Line 1455 of yacc.c  */
 #line 3511 "def.y"
     {
         // 11/12/2002 - this is obsolete in 5.5, & will be ignored 
@@ -8043,6 +8684,8 @@ yyreduce:
     break;
 
   case 593:
+
+/* Line 1455 of yacc.c  */
 #line 3521 "def.y"
     { if (defCallbacks->GroupCbk)
           defData->Group.setRegionName((yyvsp[(1) - (1)].string));
@@ -8050,6 +8693,8 @@ yyreduce:
     break;
 
   case 596:
+
+/* Line 1455 of yacc.c  */
 #line 3530 "def.y"
     {
         if (defCallbacks->GroupCbk) {
@@ -8064,6 +8709,8 @@ yyreduce:
     break;
 
   case 597:
+
+/* Line 1455 of yacc.c  */
 #line 3541 "def.y"
     {
         if (defCallbacks->GroupCbk) {
@@ -8076,6 +8723,8 @@ yyreduce:
     break;
 
   case 598:
+
+/* Line 1455 of yacc.c  */
 #line 3550 "def.y"
     {
         if (defCallbacks->GroupCbk) {
@@ -8088,11 +8737,15 @@ yyreduce:
     break;
 
   case 600:
+
+/* Line 1455 of yacc.c  */
 #line 3561 "def.y"
     { ;}
     break;
 
   case 601:
+
+/* Line 1455 of yacc.c  */
 #line 3564 "def.y"
     {
         // 11/12/2002 - this is obsolete in 5.5, & will be ignored 
@@ -8104,6 +8757,8 @@ yyreduce:
     break;
 
   case 602:
+
+/* Line 1455 of yacc.c  */
 #line 3572 "def.y"
     { 
         // 11/12/2002 - this is obsolete in 5.5, & will be ignored 
@@ -8115,6 +8770,8 @@ yyreduce:
     break;
 
   case 603:
+
+/* Line 1455 of yacc.c  */
 #line 3580 "def.y"
     { 
         // 11/12/2002 - this is obsolete in 5.5, & will be ignored 
@@ -8126,6 +8783,8 @@ yyreduce:
     break;
 
   case 604:
+
+/* Line 1455 of yacc.c  */
 #line 3589 "def.y"
     { 
         if (defCallbacks->GroupsEndCbk)
@@ -8134,6 +8793,8 @@ yyreduce:
     break;
 
   case 607:
+
+/* Line 1455 of yacc.c  */
 #line 3603 "def.y"
     {
         if ((defData->VersionNum < 5.4) && (defCallbacks->AssertionsStartCbk)) {
@@ -8150,6 +8811,8 @@ yyreduce:
     break;
 
   case 608:
+
+/* Line 1455 of yacc.c  */
 #line 3617 "def.y"
     {
         if ((defData->VersionNum < 5.4) && (defCallbacks->ConstraintsStartCbk)) {
@@ -8166,6 +8829,8 @@ yyreduce:
     break;
 
   case 612:
+
+/* Line 1455 of yacc.c  */
 #line 3636 "def.y"
     {
         if ((defData->VersionNum < 5.4) && (defCallbacks->ConstraintCbk || defCallbacks->AssertionCbk)) {
@@ -8178,6 +8843,8 @@ yyreduce:
     break;
 
   case 613:
+
+/* Line 1455 of yacc.c  */
 #line 3646 "def.y"
     { 
         if ((defData->VersionNum < 5.4) && (defCallbacks->ConstraintCbk || defCallbacks->AssertionCbk)) {
@@ -8193,11 +8860,15 @@ yyreduce:
     break;
 
   case 614:
+
+/* Line 1455 of yacc.c  */
 #line 3658 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 615:
+
+/* Line 1455 of yacc.c  */
 #line 3659 "def.y"
     {
          if (defCallbacks->ConstraintCbk || defCallbacks->AssertionCbk)
@@ -8206,11 +8877,15 @@ yyreduce:
     break;
 
   case 616:
+
+/* Line 1455 of yacc.c  */
 #line 3663 "def.y"
     {defData->dumb_mode = 4; defData->no_num = 4;;}
     break;
 
   case 617:
+
+/* Line 1455 of yacc.c  */
 #line 3664 "def.y"
     {
          if (defCallbacks->ConstraintCbk || defCallbacks->AssertionCbk)
@@ -8219,6 +8894,8 @@ yyreduce:
     break;
 
   case 618:
+
+/* Line 1455 of yacc.c  */
 #line 3669 "def.y"
     {
         if (defCallbacks->ConstraintCbk || defCallbacks->AssertionCbk)
@@ -8227,6 +8904,8 @@ yyreduce:
     break;
 
   case 619:
+
+/* Line 1455 of yacc.c  */
 #line 3674 "def.y"
     {
         if (defCallbacks->ConstraintCbk || defCallbacks->AssertionCbk)
@@ -8235,16 +8914,22 @@ yyreduce:
     break;
 
   case 621:
+
+/* Line 1455 of yacc.c  */
 #line 3681 "def.y"
     { ;}
     break;
 
   case 623:
+
+/* Line 1455 of yacc.c  */
 #line 3684 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 624:
+
+/* Line 1455 of yacc.c  */
 #line 3686 "def.y"
     {
         if (defCallbacks->ConstraintCbk || defCallbacks->AssertionCbk)
@@ -8253,16 +8938,22 @@ yyreduce:
     break;
 
   case 625:
+
+/* Line 1455 of yacc.c  */
 #line 3693 "def.y"
     { (yyval.string) = (char*)""; ;}
     break;
 
   case 626:
+
+/* Line 1455 of yacc.c  */
 #line 3695 "def.y"
     { (yyval.string) = (char*)"+"; ;}
     break;
 
   case 629:
+
+/* Line 1455 of yacc.c  */
 #line 3702 "def.y"
     {
         if (defCallbacks->ConstraintCbk || defCallbacks->AssertionCbk)
@@ -8271,6 +8962,8 @@ yyreduce:
     break;
 
   case 630:
+
+/* Line 1455 of yacc.c  */
 #line 3707 "def.y"
     {
         if (defCallbacks->ConstraintCbk || defCallbacks->AssertionCbk)
@@ -8279,6 +8972,8 @@ yyreduce:
     break;
 
   case 631:
+
+/* Line 1455 of yacc.c  */
 #line 3712 "def.y"
     {
         if (defCallbacks->ConstraintCbk || defCallbacks->AssertionCbk)
@@ -8287,6 +8982,8 @@ yyreduce:
     break;
 
   case 632:
+
+/* Line 1455 of yacc.c  */
 #line 3717 "def.y"
     {
         if (defCallbacks->ConstraintCbk || defCallbacks->AssertionCbk)
@@ -8295,6 +8992,8 @@ yyreduce:
     break;
 
   case 633:
+
+/* Line 1455 of yacc.c  */
 #line 3723 "def.y"
     { if ((defData->VersionNum < 5.4) && defCallbacks->ConstraintsEndCbk) {
           CALLBACK(defCallbacks->ConstraintsEndCbk, defrConstraintsEndCbkType, 0);
@@ -8308,6 +9007,8 @@ yyreduce:
     break;
 
   case 634:
+
+/* Line 1455 of yacc.c  */
 #line 3734 "def.y"
     { if ((defData->VersionNum < 5.4) && defCallbacks->AssertionsEndCbk) {
           CALLBACK(defCallbacks->AssertionsEndCbk, defrAssertionsEndCbkType, 0);
@@ -8321,6 +9022,8 @@ yyreduce:
     break;
 
   case 636:
+
+/* Line 1455 of yacc.c  */
 #line 3748 "def.y"
     { if (defCallbacks->ScanchainsStartCbk)
           CALLBACK(defCallbacks->ScanchainsStartCbk, defrScanchainsStartCbkType,
@@ -8329,11 +9032,15 @@ yyreduce:
     break;
 
   case 638:
+
+/* Line 1455 of yacc.c  */
 #line 3755 "def.y"
     {;}
     break;
 
   case 639:
+
+/* Line 1455 of yacc.c  */
 #line 3758 "def.y"
     { 
         if (defCallbacks->ScanchainCbk)
@@ -8342,11 +9049,15 @@ yyreduce:
     break;
 
   case 640:
+
+/* Line 1455 of yacc.c  */
 #line 3763 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1;;}
     break;
 
   case 641:
+
+/* Line 1455 of yacc.c  */
 #line 3764 "def.y"
     {
         if (defCallbacks->ScanchainCbk)
@@ -8356,21 +9067,29 @@ yyreduce:
     break;
 
   case 644:
+
+/* Line 1455 of yacc.c  */
 #line 3776 "def.y"
     { (yyval.string) = (char*)""; ;}
     break;
 
   case 645:
+
+/* Line 1455 of yacc.c  */
 #line 3778 "def.y"
     { (yyval.string) = (yyvsp[(1) - (1)].string); ;}
     break;
 
   case 646:
+
+/* Line 1455 of yacc.c  */
 #line 3780 "def.y"
     {defData->dumb_mode = 2; defData->no_num = 2;;}
     break;
 
   case 647:
+
+/* Line 1455 of yacc.c  */
 #line 3781 "def.y"
     { if (defCallbacks->ScanchainCbk)
           defData->Scanchain.setStart((yyvsp[(4) - (5)].string), (yyvsp[(5) - (5)].string));
@@ -8378,16 +9097,22 @@ yyreduce:
     break;
 
   case 648:
+
+/* Line 1455 of yacc.c  */
 #line 3784 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 649:
+
+/* Line 1455 of yacc.c  */
 #line 3785 "def.y"
     { defData->dumb_mode = 0; defData->no_num = 0; ;}
     break;
 
   case 650:
+
+/* Line 1455 of yacc.c  */
 #line 3787 "def.y"
     {
          defData->dumb_mode = 1;
@@ -8398,16 +9123,22 @@ yyreduce:
     break;
 
   case 651:
+
+/* Line 1455 of yacc.c  */
 #line 3794 "def.y"
     { defData->dumb_mode = 0; defData->no_num = 0; ;}
     break;
 
   case 652:
+
+/* Line 1455 of yacc.c  */
 #line 3795 "def.y"
     {defData->dumb_mode = 2; defData->no_num = 2; ;}
     break;
 
   case 653:
+
+/* Line 1455 of yacc.c  */
 #line 3796 "def.y"
     { if (defCallbacks->ScanchainCbk)
           defData->Scanchain.setStop((yyvsp[(4) - (5)].string), (yyvsp[(5) - (5)].string));
@@ -8415,21 +9146,29 @@ yyreduce:
     break;
 
   case 654:
+
+/* Line 1455 of yacc.c  */
 #line 3799 "def.y"
     { defData->dumb_mode = 10; defData->no_num = 10; ;}
     break;
 
   case 655:
+
+/* Line 1455 of yacc.c  */
 #line 3800 "def.y"
     { defData->dumb_mode = 0;  defData->no_num = 0; ;}
     break;
 
   case 656:
+
+/* Line 1455 of yacc.c  */
 #line 3801 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 657:
+
+/* Line 1455 of yacc.c  */
 #line 3803 "def.y"
     {
         if (defData->VersionNum < 5.5) {
@@ -8450,6 +9189,8 @@ yyreduce:
     break;
 
   case 658:
+
+/* Line 1455 of yacc.c  */
 #line 3820 "def.y"
     {
         if (defCallbacks->ScanChainExtCbk)
@@ -8458,11 +9199,15 @@ yyreduce:
     break;
 
   case 659:
+
+/* Line 1455 of yacc.c  */
 #line 3826 "def.y"
     { ;}
     break;
 
   case 660:
+
+/* Line 1455 of yacc.c  */
 #line 3828 "def.y"
     {
         if (defCallbacks->ScanchainCbk) {
@@ -8475,6 +9220,8 @@ yyreduce:
     break;
 
   case 661:
+
+/* Line 1455 of yacc.c  */
 #line 3837 "def.y"
     {
         if (defCallbacks->ScanchainCbk) {
@@ -8491,6 +9238,8 @@ yyreduce:
     break;
 
   case 664:
+
+/* Line 1455 of yacc.c  */
 #line 3855 "def.y"
     {
         defData->dumb_mode = 1000;
@@ -8501,16 +9250,22 @@ yyreduce:
     break;
 
   case 665:
+
+/* Line 1455 of yacc.c  */
 #line 3862 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 666:
+
+/* Line 1455 of yacc.c  */
 #line 3865 "def.y"
     { ;}
     break;
 
   case 667:
+
+/* Line 1455 of yacc.c  */
 #line 3867 "def.y"
     {
         if (defCallbacks->ScanchainCbk) {
@@ -8527,6 +9282,8 @@ yyreduce:
     break;
 
   case 668:
+
+/* Line 1455 of yacc.c  */
 #line 3880 "def.y"
     {
         if (defCallbacks->ScanchainCbk) {
@@ -8551,6 +9308,8 @@ yyreduce:
     break;
 
   case 669:
+
+/* Line 1455 of yacc.c  */
 #line 3902 "def.y"
     {
         if (defCallbacks->ScanchainCbk) {
@@ -8583,6 +9342,8 @@ yyreduce:
     break;
 
   case 672:
+
+/* Line 1455 of yacc.c  */
 #line 3936 "def.y"
     { defData->dumb_mode = 1000; defData->no_num = 1000; 
         if (defCallbacks->ScanchainCbk)
@@ -8591,16 +9352,22 @@ yyreduce:
     break;
 
   case 673:
+
+/* Line 1455 of yacc.c  */
 #line 3941 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 674:
+
+/* Line 1455 of yacc.c  */
 #line 3944 "def.y"
     { ;}
     break;
 
   case 675:
+
+/* Line 1455 of yacc.c  */
 #line 3946 "def.y"
     {
         if (defCallbacks->ScanchainCbk) {
@@ -8617,6 +9384,8 @@ yyreduce:
     break;
 
   case 676:
+
+/* Line 1455 of yacc.c  */
 #line 3959 "def.y"
     {
         if (defCallbacks->ScanchainCbk) {
@@ -8641,6 +9410,8 @@ yyreduce:
     break;
 
   case 677:
+
+/* Line 1455 of yacc.c  */
 #line 3981 "def.y"
     {
         if (defCallbacks->ScanchainCbk) {
@@ -8673,16 +9444,22 @@ yyreduce:
     break;
 
   case 678:
+
+/* Line 1455 of yacc.c  */
 #line 4011 "def.y"
     { (yyval.integer) = -1; ;}
     break;
 
   case 679:
+
+/* Line 1455 of yacc.c  */
 #line 4013 "def.y"
     { (yyval.integer) = ROUND((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 680:
+
+/* Line 1455 of yacc.c  */
 #line 4016 "def.y"
     { 
         if (defCallbacks->ScanchainsEndCbk)
@@ -8693,6 +9470,8 @@ yyreduce:
     break;
 
   case 682:
+
+/* Line 1455 of yacc.c  */
 #line 4028 "def.y"
     {
         if (defData->VersionNum < 5.4 && defCallbacks->IOTimingsStartCbk) {
@@ -8706,11 +9485,15 @@ yyreduce:
     break;
 
   case 684:
+
+/* Line 1455 of yacc.c  */
 #line 4040 "def.y"
     { ;}
     break;
 
   case 685:
+
+/* Line 1455 of yacc.c  */
 #line 4043 "def.y"
     { 
         if (defData->VersionNum < 5.4 && defCallbacks->IOTimingCbk)
@@ -8719,11 +9502,15 @@ yyreduce:
     break;
 
   case 686:
+
+/* Line 1455 of yacc.c  */
 #line 4048 "def.y"
     {defData->dumb_mode = 2; defData->no_num = 2; ;}
     break;
 
   case 687:
+
+/* Line 1455 of yacc.c  */
 #line 4049 "def.y"
     {
         if (defCallbacks->IOTimingCbk)
@@ -8732,6 +9519,8 @@ yyreduce:
     break;
 
   case 690:
+
+/* Line 1455 of yacc.c  */
 #line 4060 "def.y"
     {
         if (defCallbacks->IOTimingCbk) 
@@ -8740,6 +9529,8 @@ yyreduce:
     break;
 
   case 691:
+
+/* Line 1455 of yacc.c  */
 #line 4065 "def.y"
     {
         if (defCallbacks->IOTimingCbk) 
@@ -8748,6 +9539,8 @@ yyreduce:
     break;
 
   case 692:
+
+/* Line 1455 of yacc.c  */
 #line 4070 "def.y"
     {
         if (defCallbacks->IOTimingCbk) 
@@ -8756,11 +9549,15 @@ yyreduce:
     break;
 
   case 693:
+
+/* Line 1455 of yacc.c  */
 #line 4074 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 694:
+
+/* Line 1455 of yacc.c  */
 #line 4075 "def.y"
     {
         if (defCallbacks->IOTimingCbk) 
@@ -8769,6 +9566,8 @@ yyreduce:
     break;
 
   case 696:
+
+/* Line 1455 of yacc.c  */
 #line 4084 "def.y"
     {
         if (defData->VersionNum < 5.4 && defCallbacks->IoTimingsExtCbk)
@@ -8777,11 +9576,15 @@ yyreduce:
     break;
 
   case 697:
+
+/* Line 1455 of yacc.c  */
 #line 4090 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 698:
+
+/* Line 1455 of yacc.c  */
 #line 4091 "def.y"
     {
         if (defCallbacks->IOTimingCbk) 
@@ -8790,11 +9593,15 @@ yyreduce:
     break;
 
   case 701:
+
+/* Line 1455 of yacc.c  */
 #line 4098 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 702:
+
+/* Line 1455 of yacc.c  */
 #line 4099 "def.y"
     {
         if (defCallbacks->IOTimingCbk)
@@ -8803,6 +9610,8 @@ yyreduce:
     break;
 
   case 704:
+
+/* Line 1455 of yacc.c  */
 #line 4106 "def.y"
     {
         if (defCallbacks->IOTimingCbk)
@@ -8811,16 +9620,22 @@ yyreduce:
     break;
 
   case 705:
+
+/* Line 1455 of yacc.c  */
 #line 4111 "def.y"
     { (yyval.string) = (char*)"RISE"; ;}
     break;
 
   case 706:
+
+/* Line 1455 of yacc.c  */
 #line 4111 "def.y"
     { (yyval.string) = (char*)"FALL"; ;}
     break;
 
   case 707:
+
+/* Line 1455 of yacc.c  */
 #line 4114 "def.y"
     {
         if (defData->VersionNum < 5.4 && defCallbacks->IOTimingsEndCbk)
@@ -8829,6 +9644,8 @@ yyreduce:
     break;
 
   case 708:
+
+/* Line 1455 of yacc.c  */
 #line 4120 "def.y"
     { 
         if (defCallbacks->FPCEndCbk)
@@ -8837,6 +9654,8 @@ yyreduce:
     break;
 
   case 709:
+
+/* Line 1455 of yacc.c  */
 #line 4126 "def.y"
     {
         if (defCallbacks->FPCStartCbk)
@@ -8845,86 +9664,120 @@ yyreduce:
     break;
 
   case 711:
+
+/* Line 1455 of yacc.c  */
 #line 4133 "def.y"
     {;}
     break;
 
   case 712:
+
+/* Line 1455 of yacc.c  */
 #line 4135 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1;  ;}
     break;
 
   case 713:
+
+/* Line 1455 of yacc.c  */
 #line 4136 "def.y"
     { if (defCallbacks->FPCCbk) defData->FPC.setName((yyvsp[(3) - (4)].string), (yyvsp[(4) - (4)].string)); ;}
     break;
 
   case 714:
+
+/* Line 1455 of yacc.c  */
 #line 4138 "def.y"
     { if (defCallbacks->FPCCbk) CALLBACK(defCallbacks->FPCCbk, defrFPCCbkType, &defData->FPC); ;}
     break;
 
   case 715:
+
+/* Line 1455 of yacc.c  */
 #line 4141 "def.y"
     { (yyval.string) = (char*)"HORIZONTAL"; ;}
     break;
 
   case 716:
+
+/* Line 1455 of yacc.c  */
 #line 4143 "def.y"
     { (yyval.string) = (char*)"VERTICAL"; ;}
     break;
 
   case 717:
+
+/* Line 1455 of yacc.c  */
 #line 4146 "def.y"
     { if (defCallbacks->FPCCbk) defData->FPC.setAlign(); ;}
     break;
 
   case 718:
+
+/* Line 1455 of yacc.c  */
 #line 4148 "def.y"
     { if (defCallbacks->FPCCbk) defData->FPC.setMax((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 719:
+
+/* Line 1455 of yacc.c  */
 #line 4150 "def.y"
     { if (defCallbacks->FPCCbk) defData->FPC.setMin((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 720:
+
+/* Line 1455 of yacc.c  */
 #line 4152 "def.y"
     { if (defCallbacks->FPCCbk) defData->FPC.setEqual((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 723:
+
+/* Line 1455 of yacc.c  */
 #line 4159 "def.y"
     { if (defCallbacks->FPCCbk) defData->FPC.setDoingBottomLeft(); ;}
     break;
 
   case 725:
+
+/* Line 1455 of yacc.c  */
 #line 4162 "def.y"
     { if (defCallbacks->FPCCbk) defData->FPC.setDoingTopRight(); ;}
     break;
 
   case 729:
+
+/* Line 1455 of yacc.c  */
 #line 4169 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 730:
+
+/* Line 1455 of yacc.c  */
 #line 4170 "def.y"
     { if (defCallbacks->FPCCbk) defData->FPC.addRow((yyvsp[(4) - (5)].string)); ;}
     break;
 
   case 731:
+
+/* Line 1455 of yacc.c  */
 #line 4171 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 732:
+
+/* Line 1455 of yacc.c  */
 #line 4172 "def.y"
     { if (defCallbacks->FPCCbk) defData->FPC.addComps((yyvsp[(4) - (5)].string)); ;}
     break;
 
   case 734:
+
+/* Line 1455 of yacc.c  */
 #line 4179 "def.y"
     { 
         if (defCallbacks->TimingDisablesStartCbk)
@@ -8934,21 +9787,29 @@ yyreduce:
     break;
 
   case 736:
+
+/* Line 1455 of yacc.c  */
 #line 4187 "def.y"
     {;}
     break;
 
   case 737:
+
+/* Line 1455 of yacc.c  */
 #line 4189 "def.y"
     { defData->dumb_mode = 2; defData->no_num = 2;  ;}
     break;
 
   case 738:
+
+/* Line 1455 of yacc.c  */
 #line 4190 "def.y"
     { defData->dumb_mode = 2; defData->no_num = 2;  ;}
     break;
 
   case 739:
+
+/* Line 1455 of yacc.c  */
 #line 4191 "def.y"
     {
         if (defCallbacks->TimingDisableCbk) {
@@ -8960,11 +9821,15 @@ yyreduce:
     break;
 
   case 740:
+
+/* Line 1455 of yacc.c  */
 #line 4198 "def.y"
     {defData->dumb_mode = 2; defData->no_num = 2; ;}
     break;
 
   case 741:
+
+/* Line 1455 of yacc.c  */
 #line 4199 "def.y"
     {
         if (defCallbacks->TimingDisableCbk) {
@@ -8976,11 +9841,15 @@ yyreduce:
     break;
 
   case 742:
+
+/* Line 1455 of yacc.c  */
 #line 4206 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1;;}
     break;
 
   case 743:
+
+/* Line 1455 of yacc.c  */
 #line 4207 "def.y"
     {
         if (defCallbacks->TimingDisableCbk) {
@@ -8992,6 +9861,8 @@ yyreduce:
     break;
 
   case 744:
+
+/* Line 1455 of yacc.c  */
 #line 4215 "def.y"
     { if (defCallbacks->TimingDisableCbk)
           defData->TimingDisable.setReentrantPathsFlag();
@@ -8999,16 +9870,22 @@ yyreduce:
     break;
 
   case 745:
+
+/* Line 1455 of yacc.c  */
 #line 4220 "def.y"
     {defData->dumb_mode = 1; defData->no_num = 1;;}
     break;
 
   case 746:
+
+/* Line 1455 of yacc.c  */
 #line 4221 "def.y"
     {defData->dumb_mode=1; defData->no_num = 1;;}
     break;
 
   case 747:
+
+/* Line 1455 of yacc.c  */
 #line 4222 "def.y"
     {
         if (defCallbacks->TimingDisableCbk)
@@ -9017,11 +9894,15 @@ yyreduce:
     break;
 
   case 748:
+
+/* Line 1455 of yacc.c  */
 #line 4226 "def.y"
     {defData->dumb_mode=1; defData->no_num = 1;;}
     break;
 
   case 749:
+
+/* Line 1455 of yacc.c  */
 #line 4227 "def.y"
     {
         if (defCallbacks->TimingDisableCbk)
@@ -9030,6 +9911,8 @@ yyreduce:
     break;
 
   case 750:
+
+/* Line 1455 of yacc.c  */
 #line 4233 "def.y"
     { 
         if (defCallbacks->TimingDisablesEndCbk)
@@ -9038,6 +9921,8 @@ yyreduce:
     break;
 
   case 752:
+
+/* Line 1455 of yacc.c  */
 #line 4243 "def.y"
     {
         if (defCallbacks->PartitionsStartCbk)
@@ -9047,11 +9932,15 @@ yyreduce:
     break;
 
   case 754:
+
+/* Line 1455 of yacc.c  */
 #line 4251 "def.y"
     { ;}
     break;
 
   case 755:
+
+/* Line 1455 of yacc.c  */
 #line 4254 "def.y"
     { 
         if (defCallbacks->PartitionCbk)
@@ -9060,11 +9949,15 @@ yyreduce:
     break;
 
   case 756:
+
+/* Line 1455 of yacc.c  */
 #line 4259 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 757:
+
+/* Line 1455 of yacc.c  */
 #line 4260 "def.y"
     {
         if (defCallbacks->PartitionCbk)
@@ -9073,6 +9966,8 @@ yyreduce:
     break;
 
   case 759:
+
+/* Line 1455 of yacc.c  */
 #line 4267 "def.y"
     {
         if (defCallbacks->PartitionCbk)
@@ -9081,41 +9976,57 @@ yyreduce:
     break;
 
   case 760:
+
+/* Line 1455 of yacc.c  */
 #line 4273 "def.y"
     { (yyval.string) = (char*)" "; ;}
     break;
 
   case 761:
+
+/* Line 1455 of yacc.c  */
 #line 4275 "def.y"
     { (yyval.string) = (char*)"R"; ;}
     break;
 
   case 762:
+
+/* Line 1455 of yacc.c  */
 #line 4277 "def.y"
     { (yyval.string) = (char*)"F"; ;}
     break;
 
   case 763:
+
+/* Line 1455 of yacc.c  */
 #line 4280 "def.y"
     { (yyval.string) = (char*)" "; ;}
     break;
 
   case 764:
+
+/* Line 1455 of yacc.c  */
 #line 4282 "def.y"
     { (yyval.string) = (char*)"R"; ;}
     break;
 
   case 765:
+
+/* Line 1455 of yacc.c  */
 #line 4284 "def.y"
     { (yyval.string) = (char*)"F"; ;}
     break;
 
   case 768:
+
+/* Line 1455 of yacc.c  */
 #line 4290 "def.y"
     {defData->dumb_mode=2; defData->no_num = 2;;}
     break;
 
   case 769:
+
+/* Line 1455 of yacc.c  */
 #line 4292 "def.y"
     {
         if (defCallbacks->PartitionCbk)
@@ -9124,11 +10035,15 @@ yyreduce:
     break;
 
   case 770:
+
+/* Line 1455 of yacc.c  */
 #line 4296 "def.y"
     {defData->dumb_mode=2; defData->no_num = 2; ;}
     break;
 
   case 771:
+
+/* Line 1455 of yacc.c  */
 #line 4298 "def.y"
     {
         if (defCallbacks->PartitionCbk)
@@ -9137,11 +10052,15 @@ yyreduce:
     break;
 
   case 772:
+
+/* Line 1455 of yacc.c  */
 #line 4302 "def.y"
     {defData->dumb_mode=1; defData->no_num = 1; ;}
     break;
 
   case 773:
+
+/* Line 1455 of yacc.c  */
 #line 4304 "def.y"
     {
         if (defCallbacks->PartitionCbk)
@@ -9150,11 +10069,15 @@ yyreduce:
     break;
 
   case 774:
+
+/* Line 1455 of yacc.c  */
 #line 4308 "def.y"
     {defData->dumb_mode=2; defData->no_num = 2; ;}
     break;
 
   case 775:
+
+/* Line 1455 of yacc.c  */
 #line 4310 "def.y"
     {
         if (defCallbacks->PartitionCbk)
@@ -9163,11 +10086,15 @@ yyreduce:
     break;
 
   case 776:
+
+/* Line 1455 of yacc.c  */
 #line 4314 "def.y"
     {defData->dumb_mode=2; defData->no_num = 2; ;}
     break;
 
   case 777:
+
+/* Line 1455 of yacc.c  */
 #line 4316 "def.y"
     {
         if (defCallbacks->PartitionCbk)
@@ -9176,11 +10103,15 @@ yyreduce:
     break;
 
   case 778:
+
+/* Line 1455 of yacc.c  */
 #line 4320 "def.y"
     {defData->dumb_mode=1; defData->no_num = 2; ;}
     break;
 
   case 779:
+
+/* Line 1455 of yacc.c  */
 #line 4321 "def.y"
     {
         if (defCallbacks->PartitionCbk)
@@ -9189,6 +10120,8 @@ yyreduce:
     break;
 
   case 780:
+
+/* Line 1455 of yacc.c  */
 #line 4326 "def.y"
     { 
         if (defCallbacks->PartitionsExtCbk)
@@ -9198,21 +10131,29 @@ yyreduce:
     break;
 
   case 781:
+
+/* Line 1455 of yacc.c  */
 #line 4333 "def.y"
     { defData->dumb_mode = DEF_MAX_INT; defData->no_num = DEF_MAX_INT; ;}
     break;
 
   case 782:
+
+/* Line 1455 of yacc.c  */
 #line 4334 "def.y"
     { defData->dumb_mode = 0; defData->no_num = 0; ;}
     break;
 
   case 784:
+
+/* Line 1455 of yacc.c  */
 #line 4338 "def.y"
     { ;}
     break;
 
   case 785:
+
+/* Line 1455 of yacc.c  */
 #line 4341 "def.y"
     {
         if (defCallbacks->PartitionCbk)
@@ -9221,6 +10162,8 @@ yyreduce:
     break;
 
   case 786:
+
+/* Line 1455 of yacc.c  */
 #line 4346 "def.y"
     {
         if (defCallbacks->PartitionCbk)
@@ -9229,71 +10172,97 @@ yyreduce:
     break;
 
   case 788:
+
+/* Line 1455 of yacc.c  */
 #line 4353 "def.y"
     { if (defCallbacks->PartitionCbk) defData->Partition.addPin((yyvsp[(2) - (2)].string)); ;}
     break;
 
   case 791:
+
+/* Line 1455 of yacc.c  */
 #line 4359 "def.y"
     { if (defCallbacks->PartitionCbk) defData->Partition.addRiseMin((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 792:
+
+/* Line 1455 of yacc.c  */
 #line 4361 "def.y"
     { if (defCallbacks->PartitionCbk) defData->Partition.addFallMin((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 793:
+
+/* Line 1455 of yacc.c  */
 #line 4363 "def.y"
     { if (defCallbacks->PartitionCbk) defData->Partition.addRiseMax((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 794:
+
+/* Line 1455 of yacc.c  */
 #line 4365 "def.y"
     { if (defCallbacks->PartitionCbk) defData->Partition.addFallMax((yyvsp[(2) - (2)].dval)); ;}
     break;
 
   case 797:
+
+/* Line 1455 of yacc.c  */
 #line 4373 "def.y"
     { if (defCallbacks->PartitionCbk)
           defData->Partition.addRiseMinRange((yyvsp[(2) - (3)].dval), (yyvsp[(3) - (3)].dval)); ;}
     break;
 
   case 798:
+
+/* Line 1455 of yacc.c  */
 #line 4376 "def.y"
     { if (defCallbacks->PartitionCbk)
           defData->Partition.addFallMinRange((yyvsp[(2) - (3)].dval), (yyvsp[(3) - (3)].dval)); ;}
     break;
 
   case 799:
+
+/* Line 1455 of yacc.c  */
 #line 4379 "def.y"
     { if (defCallbacks->PartitionCbk)
           defData->Partition.addRiseMaxRange((yyvsp[(2) - (3)].dval), (yyvsp[(3) - (3)].dval)); ;}
     break;
 
   case 800:
+
+/* Line 1455 of yacc.c  */
 #line 4382 "def.y"
     { if (defCallbacks->PartitionCbk)
           defData->Partition.addFallMaxRange((yyvsp[(2) - (3)].dval), (yyvsp[(3) - (3)].dval)); ;}
     break;
 
   case 801:
+
+/* Line 1455 of yacc.c  */
 #line 4386 "def.y"
     { if (defCallbacks->PartitionsEndCbk)
           CALLBACK(defCallbacks->PartitionsEndCbk, defrPartitionsEndCbkType, 0); ;}
     break;
 
   case 803:
+
+/* Line 1455 of yacc.c  */
 #line 4391 "def.y"
     { ;}
     break;
 
   case 804:
+
+/* Line 1455 of yacc.c  */
 #line 4393 "def.y"
     {defData->dumb_mode=2; defData->no_num = 2; ;}
     break;
 
   case 805:
+
+/* Line 1455 of yacc.c  */
 #line 4395 "def.y"
     {
         // note that the defData->first T_STRING could be the keyword VPIN 
@@ -9303,16 +10272,22 @@ yyreduce:
     break;
 
   case 806:
+
+/* Line 1455 of yacc.c  */
 #line 4402 "def.y"
     { (yyval.integer) = 0; ;}
     break;
 
   case 807:
+
+/* Line 1455 of yacc.c  */
 #line 4404 "def.y"
     { (yyval.integer) = 1; ;}
     break;
 
   case 810:
+
+/* Line 1455 of yacc.c  */
 #line 4410 "def.y"
     {  
         if (defCallbacks->NetCbk) defData->Subnet->addWire((yyvsp[(1) - (1)].string));
@@ -9320,6 +10295,8 @@ yyreduce:
     break;
 
   case 811:
+
+/* Line 1455 of yacc.c  */
 #line 4414 "def.y"
     {  
         defData->by_is_keyword = FALSE;
@@ -9332,68 +10309,94 @@ yyreduce:
     break;
 
   case 812:
+
+/* Line 1455 of yacc.c  */
 #line 4422 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 813:
+
+/* Line 1455 of yacc.c  */
 #line 4423 "def.y"
     { if (defCallbacks->NetCbk) defData->Subnet->setNonDefault((yyvsp[(3) - (3)].string)); ;}
     break;
 
   case 814:
+
+/* Line 1455 of yacc.c  */
 #line 4426 "def.y"
     { (yyval.string) = (char*)"FIXED"; defData->dumb_mode = 1; ;}
     break;
 
   case 815:
+
+/* Line 1455 of yacc.c  */
 #line 4428 "def.y"
     { (yyval.string) = (char*)"COVER"; defData->dumb_mode = 1; ;}
     break;
 
   case 816:
+
+/* Line 1455 of yacc.c  */
 #line 4430 "def.y"
     { (yyval.string) = (char*)"ROUTED"; defData->dumb_mode = 1; ;}
     break;
 
   case 817:
+
+/* Line 1455 of yacc.c  */
 #line 4432 "def.y"
     { (yyval.string) = (char*)"NOSHIELD"; defData->dumb_mode = 1; ;}
     break;
 
   case 819:
+
+/* Line 1455 of yacc.c  */
 #line 4437 "def.y"
     { if (defCallbacks->PinPropStartCbk)
           CALLBACK(defCallbacks->PinPropStartCbk, defrPinPropStartCbkType, ROUND((yyvsp[(2) - (3)].dval))); ;}
     break;
 
   case 820:
+
+/* Line 1455 of yacc.c  */
 #line 4442 "def.y"
     { ;}
     break;
 
   case 821:
+
+/* Line 1455 of yacc.c  */
 #line 4444 "def.y"
     { ;}
     break;
 
   case 822:
+
+/* Line 1455 of yacc.c  */
 #line 4447 "def.y"
     { if (defCallbacks->PinPropEndCbk)
           CALLBACK(defCallbacks->PinPropEndCbk, defrPinPropEndCbkType, 0); ;}
     break;
 
   case 825:
+
+/* Line 1455 of yacc.c  */
 #line 4454 "def.y"
     { defData->dumb_mode = 2; defData->no_num = 2; ;}
     break;
 
   case 826:
+
+/* Line 1455 of yacc.c  */
 #line 4455 "def.y"
     { if (defCallbacks->PinPropCbk) defData->PinProp.setName((yyvsp[(3) - (4)].string), (yyvsp[(4) - (4)].string)); ;}
     break;
 
   case 827:
+
+/* Line 1455 of yacc.c  */
 #line 4457 "def.y"
     { if (defCallbacks->PinPropCbk) {
           CALLBACK(defCallbacks->PinPropCbk, defrPinPropCbkType, &defData->PinProp);
@@ -9404,16 +10407,22 @@ yyreduce:
     break;
 
   case 830:
+
+/* Line 1455 of yacc.c  */
 #line 4467 "def.y"
     { defData->dumb_mode = DEF_MAX_INT; ;}
     break;
 
   case 831:
+
+/* Line 1455 of yacc.c  */
 #line 4469 "def.y"
     { defData->dumb_mode = 0; ;}
     break;
 
   case 834:
+
+/* Line 1455 of yacc.c  */
 #line 4476 "def.y"
     {
         if (defCallbacks->PinPropCbk) {
@@ -9428,6 +10437,8 @@ yyreduce:
     break;
 
   case 835:
+
+/* Line 1455 of yacc.c  */
 #line 4487 "def.y"
     {
         if (defCallbacks->PinPropCbk) {
@@ -9440,6 +10451,8 @@ yyreduce:
     break;
 
   case 836:
+
+/* Line 1455 of yacc.c  */
 #line 4496 "def.y"
     {
         if (defCallbacks->PinPropCbk) {
@@ -9452,18 +10465,24 @@ yyreduce:
     break;
 
   case 838:
+
+/* Line 1455 of yacc.c  */
 #line 4508 "def.y"
     { if (defCallbacks->BlockageStartCbk)
           CALLBACK(defCallbacks->BlockageStartCbk, defrBlockageStartCbkType, ROUND((yyvsp[(2) - (3)].dval))); ;}
     break;
 
   case 839:
+
+/* Line 1455 of yacc.c  */
 #line 4512 "def.y"
     { if (defCallbacks->BlockageEndCbk)
           CALLBACK(defCallbacks->BlockageEndCbk, defrBlockageEndCbkType, 0); ;}
     break;
 
   case 842:
+
+/* Line 1455 of yacc.c  */
 #line 4521 "def.y"
     {
         if (defCallbacks->BlockageCbk) {
@@ -9474,11 +10493,15 @@ yyreduce:
     break;
 
   case 843:
+
+/* Line 1455 of yacc.c  */
 #line 4528 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 844:
+
+/* Line 1455 of yacc.c  */
 #line 4529 "def.y"
     {
         if (defCallbacks->BlockageCbk) {
@@ -9498,6 +10521,8 @@ yyreduce:
     break;
 
   case 846:
+
+/* Line 1455 of yacc.c  */
 #line 4548 "def.y"
     {
         if (defCallbacks->BlockageCbk) {
@@ -9516,6 +10541,8 @@ yyreduce:
     break;
 
   case 850:
+
+/* Line 1455 of yacc.c  */
 #line 4569 "def.y"
     {
         if (defData->VersionNum < 5.6) {
@@ -9545,6 +10572,8 @@ yyreduce:
     break;
 
   case 851:
+
+/* Line 1455 of yacc.c  */
 #line 4595 "def.y"
     {
         if (defData->VersionNum < 5.6) {
@@ -9570,6 +10599,8 @@ yyreduce:
     break;
 
   case 854:
+
+/* Line 1455 of yacc.c  */
 #line 4621 "def.y"
     {      
         if (validateMaskInput((int)(yyvsp[(3) - (3)].dval), defData->blockageWarnings, defSettings->BlockageWarnings)) {
@@ -9579,11 +10610,15 @@ yyreduce:
     break;
 
   case 855:
+
+/* Line 1455 of yacc.c  */
 #line 4629 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 856:
+
+/* Line 1455 of yacc.c  */
 #line 4630 "def.y"
     {
         if (defData->hasBlkLayerComp) {
@@ -9605,6 +10640,8 @@ yyreduce:
     break;
 
   case 857:
+
+/* Line 1455 of yacc.c  */
 #line 4649 "def.y"
     {
         if (defData->hasBlkLayerComp || defData->hasBlkLayerTypeComp) {
@@ -9629,6 +10666,8 @@ yyreduce:
     break;
 
   case 858:
+
+/* Line 1455 of yacc.c  */
 #line 4670 "def.y"
     {
         if (defData->hasBlkLayerComp || defData->hasBlkLayerTypeComp) {
@@ -9653,6 +10692,8 @@ yyreduce:
     break;
 
   case 859:
+
+/* Line 1455 of yacc.c  */
 #line 4691 "def.y"
     {
         if (defData->hasBlkLayerComp) {
@@ -9674,6 +10715,8 @@ yyreduce:
     break;
 
   case 860:
+
+/* Line 1455 of yacc.c  */
 #line 4709 "def.y"
     {
         if (defData->VersionNum < 5.7) {
@@ -9708,11 +10751,15 @@ yyreduce:
     break;
 
   case 863:
+
+/* Line 1455 of yacc.c  */
 #line 4746 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 864:
+
+/* Line 1455 of yacc.c  */
 #line 4747 "def.y"
     {
         if (defData->hasBlkPlaceComp) {
@@ -9734,6 +10781,8 @@ yyreduce:
     break;
 
   case 865:
+
+/* Line 1455 of yacc.c  */
 #line 4765 "def.y"
     {
         if (defData->hasBlkPlaceComp) {
@@ -9755,6 +10804,8 @@ yyreduce:
     break;
 
   case 866:
+
+/* Line 1455 of yacc.c  */
 #line 4783 "def.y"
     {
         if (defData->VersionNum < 5.7) {
@@ -9792,6 +10843,8 @@ yyreduce:
     break;
 
   case 867:
+
+/* Line 1455 of yacc.c  */
 #line 4817 "def.y"
     {
         if (defData->VersionNum < 5.7) {
@@ -9829,6 +10882,8 @@ yyreduce:
     break;
 
   case 870:
+
+/* Line 1455 of yacc.c  */
 #line 4857 "def.y"
     {
         if (defCallbacks->BlockageCbk)
@@ -9837,6 +10892,8 @@ yyreduce:
     break;
 
   case 871:
+
+/* Line 1455 of yacc.c  */
 #line 4862 "def.y"
     {
         if (defCallbacks->BlockageCbk) {
@@ -9846,6 +10903,8 @@ yyreduce:
     break;
 
   case 872:
+
+/* Line 1455 of yacc.c  */
 #line 4868 "def.y"
     {
         if (defCallbacks->BlockageCbk) {
@@ -9867,18 +10926,24 @@ yyreduce:
     break;
 
   case 874:
+
+/* Line 1455 of yacc.c  */
 #line 4890 "def.y"
     { if (defCallbacks->SlotStartCbk)
           CALLBACK(defCallbacks->SlotStartCbk, defrSlotStartCbkType, ROUND((yyvsp[(2) - (3)].dval))); ;}
     break;
 
   case 875:
+
+/* Line 1455 of yacc.c  */
 #line 4894 "def.y"
     { if (defCallbacks->SlotEndCbk)
           CALLBACK(defCallbacks->SlotEndCbk, defrSlotEndCbkType, 0); ;}
     break;
 
   case 878:
+
+/* Line 1455 of yacc.c  */
 #line 4902 "def.y"
     {
         if (defCallbacks->SlotCbk) {
@@ -9889,11 +10954,15 @@ yyreduce:
     break;
 
   case 879:
+
+/* Line 1455 of yacc.c  */
 #line 4909 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 880:
+
+/* Line 1455 of yacc.c  */
 #line 4910 "def.y"
     {
         if (defCallbacks->SlotCbk) {
@@ -9904,6 +10973,8 @@ yyreduce:
     break;
 
   case 884:
+
+/* Line 1455 of yacc.c  */
 #line 4922 "def.y"
     {
         if (defCallbacks->SlotCbk)
@@ -9912,6 +10983,8 @@ yyreduce:
     break;
 
   case 885:
+
+/* Line 1455 of yacc.c  */
 #line 4927 "def.y"
     {
           defData->Geometries.Reset();
@@ -9919,6 +10992,8 @@ yyreduce:
     break;
 
   case 886:
+
+/* Line 1455 of yacc.c  */
 #line 4931 "def.y"
     {
         if (defData->VersionNum >= 5.6) {  // only 5.6 and beyond
@@ -9929,18 +11004,24 @@ yyreduce:
     break;
 
   case 888:
+
+/* Line 1455 of yacc.c  */
 #line 4942 "def.y"
     { if (defCallbacks->FillStartCbk)
           CALLBACK(defCallbacks->FillStartCbk, defrFillStartCbkType, ROUND((yyvsp[(2) - (3)].dval))); ;}
     break;
 
   case 889:
+
+/* Line 1455 of yacc.c  */
 #line 4946 "def.y"
     { if (defCallbacks->FillEndCbk)
           CALLBACK(defCallbacks->FillEndCbk, defrFillEndCbkType, 0); ;}
     break;
 
   case 892:
+
+/* Line 1455 of yacc.c  */
 #line 4954 "def.y"
     {
         if (defCallbacks->FillCbk) {
@@ -9951,11 +11032,15 @@ yyreduce:
     break;
 
   case 893:
+
+/* Line 1455 of yacc.c  */
 #line 4960 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 894:
+
+/* Line 1455 of yacc.c  */
 #line 4961 "def.y"
     {
         if (defCallbacks->FillCbk) {
@@ -9967,11 +11052,15 @@ yyreduce:
     break;
 
   case 896:
+
+/* Line 1455 of yacc.c  */
 #line 4970 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 897:
+
+/* Line 1455 of yacc.c  */
 #line 4971 "def.y"
     {
         if (defCallbacks->FillCbk) {
@@ -9982,6 +11071,8 @@ yyreduce:
     break;
 
   case 901:
+
+/* Line 1455 of yacc.c  */
 #line 4984 "def.y"
     {
         if (defCallbacks->FillCbk)
@@ -9990,6 +11081,8 @@ yyreduce:
     break;
 
   case 902:
+
+/* Line 1455 of yacc.c  */
 #line 4989 "def.y"
     {
         defData->Geometries.Reset();
@@ -9997,6 +11090,8 @@ yyreduce:
     break;
 
   case 903:
+
+/* Line 1455 of yacc.c  */
 #line 4993 "def.y"
     {
         if (defData->VersionNum >= 5.6) {  // only 5.6 and beyond
@@ -10014,6 +11109,8 @@ yyreduce:
     break;
 
   case 908:
+
+/* Line 1455 of yacc.c  */
 #line 5017 "def.y"
     {
         if (defData->VersionNum < 5.7) {
@@ -10035,6 +11132,8 @@ yyreduce:
     break;
 
   case 909:
+
+/* Line 1455 of yacc.c  */
 #line 5036 "def.y"
     {
         if (defCallbacks->FillCbk) {
@@ -10046,6 +11145,8 @@ yyreduce:
     break;
 
   case 914:
+
+/* Line 1455 of yacc.c  */
 #line 5055 "def.y"
     {
         if (defData->VersionNum < 5.7) {
@@ -10067,6 +11168,8 @@ yyreduce:
     break;
 
   case 915:
+
+/* Line 1455 of yacc.c  */
 #line 5075 "def.y"
     { 
         if (validateMaskInput((int)(yyvsp[(3) - (3)].dval), defData->fillWarnings, defSettings->FillWarnings)) {
@@ -10078,6 +11181,8 @@ yyreduce:
     break;
 
   case 916:
+
+/* Line 1455 of yacc.c  */
 #line 5085 "def.y"
     { 
         if (validateMaskInput((int)(yyvsp[(3) - (3)].dval), defData->fillWarnings, defSettings->FillWarnings)) {
@@ -10089,6 +11194,8 @@ yyreduce:
     break;
 
   case 918:
+
+/* Line 1455 of yacc.c  */
 #line 5098 "def.y"
     { 
         if (defData->VersionNum < 5.6) {
@@ -10109,17 +11216,23 @@ yyreduce:
     break;
 
   case 919:
+
+/* Line 1455 of yacc.c  */
 #line 5116 "def.y"
     { if (defCallbacks->NonDefaultEndCbk)
           CALLBACK(defCallbacks->NonDefaultEndCbk, defrNonDefaultEndCbkType, 0); ;}
     break;
 
   case 922:
+
+/* Line 1455 of yacc.c  */
 #line 5123 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 923:
+
+/* Line 1455 of yacc.c  */
 #line 5124 "def.y"
     {
         if (defCallbacks->NonDefaultCbk) {
@@ -10130,12 +11243,16 @@ yyreduce:
     break;
 
   case 924:
+
+/* Line 1455 of yacc.c  */
 #line 5131 "def.y"
     { if (defCallbacks->NonDefaultCbk)
           CALLBACK(defCallbacks->NonDefaultCbk, defrNonDefaultCbkType, &defData->NonDefault); ;}
     break;
 
   case 927:
+
+/* Line 1455 of yacc.c  */
 #line 5139 "def.y"
     {
         if (defCallbacks->NonDefaultCbk)
@@ -10144,11 +11261,15 @@ yyreduce:
     break;
 
   case 928:
+
+/* Line 1455 of yacc.c  */
 #line 5143 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 929:
+
+/* Line 1455 of yacc.c  */
 #line 5145 "def.y"
     {
         if (defCallbacks->NonDefaultCbk) {
@@ -10159,11 +11280,15 @@ yyreduce:
     break;
 
   case 931:
+
+/* Line 1455 of yacc.c  */
 #line 5152 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 932:
+
+/* Line 1455 of yacc.c  */
 #line 5153 "def.y"
     {
         if (defCallbacks->NonDefaultCbk) {
@@ -10173,11 +11298,15 @@ yyreduce:
     break;
 
   case 933:
+
+/* Line 1455 of yacc.c  */
 #line 5158 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 934:
+
+/* Line 1455 of yacc.c  */
 #line 5159 "def.y"
     {
         if (defCallbacks->NonDefaultCbk) {
@@ -10187,11 +11316,15 @@ yyreduce:
     break;
 
   case 935:
+
+/* Line 1455 of yacc.c  */
 #line 5164 "def.y"
     { defData->dumb_mode = 1; defData->no_num = 1; ;}
     break;
 
   case 936:
+
+/* Line 1455 of yacc.c  */
 #line 5165 "def.y"
     {
         if (defCallbacks->NonDefaultCbk) {
@@ -10201,6 +11334,8 @@ yyreduce:
     break;
 
   case 940:
+
+/* Line 1455 of yacc.c  */
 #line 5178 "def.y"
     {
         if (defCallbacks->NonDefaultCbk) {
@@ -10210,6 +11345,8 @@ yyreduce:
     break;
 
   case 941:
+
+/* Line 1455 of yacc.c  */
 #line 5184 "def.y"
     {
         if (defCallbacks->NonDefaultCbk) {
@@ -10219,6 +11356,8 @@ yyreduce:
     break;
 
   case 942:
+
+/* Line 1455 of yacc.c  */
 #line 5190 "def.y"
     {
         if (defCallbacks->NonDefaultCbk) {
@@ -10228,16 +11367,22 @@ yyreduce:
     break;
 
   case 943:
+
+/* Line 1455 of yacc.c  */
 #line 5197 "def.y"
     { defData->dumb_mode = DEF_MAX_INT;  ;}
     break;
 
   case 944:
+
+/* Line 1455 of yacc.c  */
 #line 5199 "def.y"
     { defData->dumb_mode = 0; ;}
     break;
 
   case 947:
+
+/* Line 1455 of yacc.c  */
 #line 5206 "def.y"
     {
         if (defCallbacks->NonDefaultCbk) {
@@ -10252,6 +11397,8 @@ yyreduce:
     break;
 
   case 948:
+
+/* Line 1455 of yacc.c  */
 #line 5217 "def.y"
     {
         if (defCallbacks->NonDefaultCbk) {
@@ -10264,6 +11411,8 @@ yyreduce:
     break;
 
   case 949:
+
+/* Line 1455 of yacc.c  */
 #line 5226 "def.y"
     {
         if (defCallbacks->NonDefaultCbk) {
@@ -10276,6 +11425,8 @@ yyreduce:
     break;
 
   case 951:
+
+/* Line 1455 of yacc.c  */
 #line 5239 "def.y"
     {
         if (defData->VersionNum < 5.6) {
@@ -10295,12 +11446,16 @@ yyreduce:
     break;
 
   case 952:
+
+/* Line 1455 of yacc.c  */
 #line 5256 "def.y"
     { if (defCallbacks->StylesEndCbk)
           CALLBACK(defCallbacks->StylesEndCbk, defrStylesEndCbkType, 0); ;}
     break;
 
   case 955:
+
+/* Line 1455 of yacc.c  */
 #line 5264 "def.y"
     {
         if (defCallbacks->StylesCbk) defData->Styles.setStyle((int)(yyvsp[(3) - (3)].dval));
@@ -10309,6 +11464,8 @@ yyreduce:
     break;
 
   case 956:
+
+/* Line 1455 of yacc.c  */
 #line 5269 "def.y"
     {
         if (defData->VersionNum >= 5.6) {  // only 5.6 and beyond will call the callback
@@ -10321,8 +11478,9 @@ yyreduce:
     break;
 
 
-/* Line 1267 of yacc.c.  */
-#line 10326 "def.tab.c"
+
+/* Line 1455 of yacc.c  */
+#line 11484 "def.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -10332,7 +11490,6 @@ yyreduce:
   YY_STACK_PRINT (yyss, yyssp);
 
   *++yyvsp = yyval;
-
 
   /* Now `shift' the result of the reduction.  Determine what state
      that goes to, based on the state we popped back to and the rule
@@ -10398,7 +11555,7 @@ yyerrlab:
 
   if (yyerrstatus == 3)
     {
-      /* If just tried and failed to reuse look-ahead token after an
+      /* If just tried and failed to reuse lookahead token after an
 	 error, discard it.  */
 
       if (yychar <= YYEOF)
@@ -10415,7 +11572,7 @@ yyerrlab:
 	}
     }
 
-  /* Else will try to reuse look-ahead token after shifting the error
+  /* Else will try to reuse lookahead token after shifting the error
      token.  */
   goto yyerrlab1;
 
@@ -10472,9 +11629,6 @@ yyerrlab1:
       YY_STACK_PRINT (yyss, yyssp);
     }
 
-  if (yyn == YYFINAL)
-    YYACCEPT;
-
   *++yyvsp = yylval;
 
 
@@ -10499,7 +11653,7 @@ yyabortlab:
   yyresult = 1;
   goto yyreturn;
 
-#ifndef yyoverflow
+#if !defined(yyoverflow) || YYERROR_VERBOSE
 /*-------------------------------------------------.
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
@@ -10510,7 +11664,7 @@ yyexhaustedlab:
 #endif
 
 yyreturn:
-  if (yychar != YYEOF && yychar != YYEMPTY)
+  if (yychar != YYEMPTY)
      yydestruct ("Cleanup: discarding lookahead",
 		 yytoken, &yylval);
   /* Do not reclaim the symbols of the rule which action triggered
@@ -10536,6 +11690,8 @@ yyreturn:
 }
 
 
+
+/* Line 1675 of yacc.c  */
 #line 5279 "def.y"
 
 

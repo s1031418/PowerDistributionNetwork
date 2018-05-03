@@ -1,0 +1,4 @@
+time ./cadb152 TestCase/2016/case3/case3.v TestCase/2016/case3/case3_input.def TestCase/2016/case3/tech.lef TestCase/2016/case3/blocks.lef TestCase/2016/case3/initial_files case3_output.def case3.sp output_files
+Begin determine Net Ordering ...
+Net Ordering cost 10.79(s)
+make: *** [run_case3] Hangup

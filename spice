@@ -1,0 +1,8 @@
+#Comments
+V_a_1 ww gnd 10.2
+R_a_1 i r 10.2
+R_a_2 r e 10.3
+I_a_1 m gnd 0.002
+
+.tran 1ns 1ns
+.end
